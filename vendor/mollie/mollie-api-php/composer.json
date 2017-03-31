@@ -1,0 +1,34 @@
+{
+    "name": "mollie/mollie-api-php",
+    "description": "Mollie API client library for PHP",
+    "homepage": "https://github.com/mollie/mollie-api-php",
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "Mollie B.V.",
+            "email": "info@mollie.com"
+        }
+    ],
+    "keywords": [
+      "mollie", "payment", "service", "ideal", "creditcard", "mistercash", "bancontact", "sofort", "sofortbanking",
+      "sepa", "bitcoin", "paypal", "paysafecard", "podiumcadeaukaart", "banktransfer", "direct debit", "belfius",
+      "belfius direct net", "refunds", "api", "payments", "gateway", "subscriptions", "recurring", "charges", "kbc",
+      "cbc"
+    ],
+    "require" : {
+        "php": ">=5.2",
+        "ext-curl": "*",
+        "ext-openssl": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^3.7 || ^4.8 || ^5.4"
+    },
+    "autoload": {
+        "psr-0": {
+            "Mollie": "src/"
+        }
+    },
+    "suggest": {
+        "mollie/oauth2-mollie-php": "Use OAuth to authenticate with the Mollie API. This is needed for some endpoints. Visit https://mollie.com/en/docs for more information."
+    }
+}

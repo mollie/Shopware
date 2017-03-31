@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/plugin.xsd">
+
+    <label lang="en">Mollie</label>
+    <label lang="de">Mollie</label>
+
+    <version>1.0.0</version>
+    <copyright>(c) Mollie B.V.</copyright>
+    <author>Sition Internet Services</author>
+
+    <compatibility minVersion="5.2.13"/>
+
+    <changelog version="1.0.0">
+        <changes lang="de">Erste Version</changes>
+        <changes lang="en">First version</changes>
+    </changelog>
+</plugin>
