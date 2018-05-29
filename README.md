@@ -1,1 +1,0 @@
-# Shopware Mollie plugin
