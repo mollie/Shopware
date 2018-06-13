@@ -244,7 +244,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * 2. There should always be an order at this point. If there isn't
          *    we have an unconnected payment which should never happen
          *
+         * 3. The mechanism we use for finding the order should also be used
+         *    in the direct callback from Mollie. We should never allow any
+         *    discrepancy between the two actions (notify and return).
+         *
          * */
+        
         $logger->write('status: ' . $status);
 
         if (!empty($transaction->getOrderNumber())) {
