@@ -29,8 +29,12 @@
             </div>
             <div class="alert--content">
 
-                Deze betaalmethode is tijdelijk niet beschikbaar. <br />
-                Meer details: <strong>{$sMollieError}</strong>
+
+                {s name="PluginsIdealUnavailable" namespace="frontend/mollie/plugins"}This payment method is temporarily unavailable{/s}
+                <br />
+                {s name="PluginsIdealUnavailableDetails" namespace="frontend/mollie/plugins"}More details{/s}:
+
+                <strong>{$sMollieError}</strong>
 
             </div>
         </div>

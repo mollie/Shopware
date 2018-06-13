@@ -106,6 +106,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ],
         ];
 
+
+
+
         if (Helpers::stringContains($this->getPaymentShortName(), 'ideal')) {
             $paymentOptions['issuer'] = $this->getIdealIssuer();
         }
@@ -146,8 +149,17 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $this->getTransactionRepo()
             ->save($transaction);
 
+
+        $checkoutUrl = $molliePayment->getCheckoutUrl();
+
+
+        echo $checkoutUrl . '<br />';
+        echo $webhookUrl . '<br />';
+        die();
+
+
         // redirect customer to Mollie
-        $this->redirect($molliePayment->getCheckoutUrl());
+        $this->redirect($checkoutUrl);
 
     }
 
@@ -173,13 +185,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
              * Retrieve the payment's current state.
              */
             $paymentId = $this->Request()->getParam('id', null);
-            $logger->write('PaymentId: ' . $paymentId);
 
-            if (empty($paymentId)) {
+            $mollie_transaction_id = null;
+            if ($transaction = $this->getTransactionRepo()->getByID($paymentId)){
+                $mollie_transaction_id = $transaction->getTransactionId();
+            }
+
+
+
+            if (empty($paymentId) || empty($mollie_transaction_id)) {
+                $this->Front()->Plugins()->ViewRenderer()->setNoRender();
                 return $this->sendResponse([ 'message' => 'No paymentid given', 'success' => false ], 400);
             }
 
-            $molliePayment = $mollie->payments->get($paymentId);
+            $logger->write('PaymentId: ' . $mollie_transaction_id);
+
+            $molliePayment = $mollie->payments->get($mollie_transaction_id);
             $token = $molliePayment->metadata->token;
             $quoteNumber = $molliePayment->metadata->quoteNumber;
             $logger->write('token: ' . $token);
@@ -207,6 +228,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->savePaymentStatus($paymentId, $token, $status, $config->sendStatusMail());
 
             } else if (!$this->hasSession()) {
+                $this->Front()->Plugins()->ViewRenderer()->setNoRender();
                 $logger->write('Has no order yet. But no session to create it.');
                 return $this->sendResponse([ 'message' => "Couldn't create order. No session available", 'success' => false ], 500);
 
@@ -214,6 +236,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $logger->write('Has no order yet.');
 
                 if (!in_array($status, [ PaymentStatus::OPEN, PaymentStatus::PAID ])) {
+                    $this->Front()->Plugins()->ViewRenderer()->setNoRender();
                     $logger->write("With the current paymentstatus an order won't be created!");
                     return $this->sendResponse([ 'message' => "No action needed. Order not created.", 'success' => true ], 200);
                 }
