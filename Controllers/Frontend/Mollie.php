@@ -248,8 +248,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          *    in the direct callback from Mollie. We should never allow any
          *    discrepancy between the two actions (notify and return).
          *
+         * 4. Create a service provider for this piece of code.
+         *
          * */
-        
+
         $logger->write('status: ' . $status);
 
         if (!empty($transaction->getOrderNumber())) {
