@@ -393,4 +393,12 @@ class Transaction
         return $this->getId() . '.' . chunk_split(substr(sha1($local_key . $this->getId() . '!yqHa9W!3Hm$6UL$b2hXARr=Ux%SN^L!G7%BRqCaXGYrnEZL&m#Bqg%P+W85cExQa-ZEKXj4P_WRv45aCzHYrYkkbqCDRmHSHa2upJvSAZVGzfEKc*eJCkr8qu2DHgu&zU$PK9hdCx$gmt#vNz9se*sLmLwf$&Wn@^a-e$xGnb*tL4BgZ6CE2Y-EPG!=_@FtEXxeaL3S*qxwBaC%WGXGh9&nSysaE67tH#=%26wnD%tW7F6Hap3uFLFzqVy$zx*7'), 0, 12), 4, '-');
 
     }
+
+    public function getOrder()
+    {
+
+
+
+    }
+
 }

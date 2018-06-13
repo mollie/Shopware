@@ -174,102 +174,137 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function notifyAction()
     {
+
+        $config = $this->container->get('mollie_shopware.config');
+        $mollie = $this->container->get('mollie_shopware.api');
+
         $logger = new RequestLogger('notify');
         $transaction = null;
 
-        try {
-            $config = $this->container->get('mollie_shopware.config');
-            $mollie = $this->container->get('mollie_shopware.api');
+        // Collect local payment information
+        $localPaymentID = $this->Request()->getParam('id', null);
+        if ($localPaymentID){
 
-            /*
-             * Retrieve the payment's current state.
-             */
-            $paymentId = $this->Request()->getParam('id', null);
+            if ($transaction = $this->getTransactionRepo()->getByID($localPaymentID)){
 
-            $mollie_transaction_id = null;
-            if ($transaction = $this->getTransactionRepo()->getByID($paymentId)){
-                $mollie_transaction_id = $transaction->getTransactionId();
-            }
-
-
-
-            if (empty($paymentId) || empty($mollie_transaction_id)) {
-                $this->Front()->Plugins()->ViewRenderer()->setNoRender();
-                return $this->sendResponse([ 'message' => 'No paymentid given', 'success' => false ], 400);
-            }
-
-            $logger->write('PaymentId: ' . $mollie_transaction_id);
-
-            $molliePayment = $mollie->payments->get($mollie_transaction_id);
-            $token = $molliePayment->metadata->token;
-            $quoteNumber = $molliePayment->metadata->quoteNumber;
-            $logger->write('token: ' . $token);
-            $logger->write('quoteNumber: ' . $quoteNumber);
-
-            $transaction = $this->getTransactionRepo()
-                ->getByQuoteNumber($quoteNumber);
-            $logger->write('transaction id: ' . $transaction->getId());
-
-            if (strtolower($molliePayment->status) === 'refunded') {
-                $status = PaymentStatus::REFUNDED;
-            } else if ($molliePayment->isPaid()) {
-                $status = PaymentStatus::PAID;
-            } else if ($molliePayment->isOpen()) {
-                $status = PaymentStatus::OPEN;
-            } else {
-                $status = PaymentStatus::CANCELLED;
-            }
-
-            $logger->write('status: ' . $status);
-            $this->getTransactionRepo()->updateStatus($transaction, $status);
-
-            if (!empty($transaction->getOrderNumber())) {
-                $logger->write('Has order.');
-                $this->savePaymentStatus($paymentId, $token, $status, $config->sendStatusMail());
-
-            } else if (!$this->hasSession()) {
-                $this->Front()->Plugins()->ViewRenderer()->setNoRender();
-                $logger->write('Has no order yet. But no session to create it.');
-                return $this->sendResponse([ 'message' => "Couldn't create order. No session available", 'success' => false ], 500);
-
-            } else {
-                $logger->write('Has no order yet.');
-
-                if (!in_array($status, [ PaymentStatus::OPEN, PaymentStatus::PAID ])) {
-                    $this->Front()->Plugins()->ViewRenderer()->setNoRender();
-                    $logger->write("With the current paymentstatus an order won't be created!");
-                    return $this->sendResponse([ 'message' => "No action needed. Order not created.", 'success' => true ], 200);
+                if ($transaction->getChecksum() === $this->Request()->getParam('cs', null)){
+                    $remotePaymentID = $transaction->getTransactionId();
+                }
+                else{
+                    return $this->notifyException('Local checksum error');
                 }
 
-                $signature = $molliePayment->metadata->signature;
-
-                if (!$this->checkSignature($signature)) {
-                    $logger->write("Signature invalid");
-                    return $this->sendResponse([ 'message' => "Signature invalid", 'success' => true ], 200);
-                }
-
-                $orderNumber = $this->saveOrder($paymentId, $token, $status, false);
-
-                $logger->write('orderNumber: ' . $orderNumber);
-                $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
+            }
+            else{
+                return $this->notifyException('No local payment found');
             }
 
-            $logger->write('Success');
-            return $this->sendResponse([ 'message' => 'Succesfully updated status', 'success' => true ]);
-        } catch (Exception $ex) {
-            $logger->write('Exception message: ' . $ex->getMessage());
-            $logger->write('Exception trace: ' . $ex->getTraceAsString());
-
-            if (!empty($transaction)) {
-                $this->getTransactionRepo()->addException($transaction, $ex);
-            }
-
-            $logger->write("Failed");
-            return $this->sendResponse([ 'message' => "Exception: {$ex->getMessage()}", 'success' => false], 500);
+        }
+        else{
+            return $this->notifyException('No local payment ID given');
         }
 
-        $logger->write("Fall through. This shouldn't happen");
-        return $this->sendResponse([ 'message' => "Something went wrong!", 'success' => false ], 500);
+
+        // Collect remote payment information
+        try{
+            $molliePayment = $mollie->payments->get($remotePaymentID);
+        }
+        catch(Exception $e){
+            return $this->notifyException('An unexpected error occurred (' . get_class($e) . ')');
+        }
+
+        $token = $molliePayment->metadata->token;
+        $quoteNumber = $molliePayment->metadata->quoteNumber;
+
+        $transaction = $this->getTransactionRepo()
+            ->getByQuoteNumber($quoteNumber);
+
+        if (strtolower($molliePayment->status) === 'refunded') {
+            $status = PaymentStatus::REFUNDED;
+        } else if ($molliePayment->isPaid()) {
+            $status = PaymentStatus::PAID;
+        } else if ($molliePayment->isOpen()) {
+            $status = PaymentStatus::OPEN;
+        } else {
+            $status = PaymentStatus::CANCELLED;
+        }
+
+        $this->getTransactionRepo()->updateStatus($transaction, $status);
+
+
+        // @todo: refactor from here
+
+        /*
+         * Refactoring guidelines:
+         *
+         * 1. At this point no one should have a session as this is a callback
+         *    mechanism from Mollie (which is called separate from the active
+         *    user's session.
+         *
+         * 2. There should always be an order at this point. If there isn't
+         *    we have an unconnected payment which should never happen
+         *
+         * */
+        $logger->write('status: ' . $status);
+
+        if (!empty($transaction->getOrderNumber())) {
+            $logger->write('Has order.');
+            $this->savePaymentStatus($localPaymentID, $token, $status, $config->sendStatusMail());
+
+        }
+        else if (!$this->hasSession()) {
+
+            $logger->write('Has no order yet. But no session to create it.');
+            return $this->notifyException('Cannot create order. No session available');
+
+        }
+        else {
+
+            $logger->write('Has no order yet.');
+
+            if (!in_array($status, [ PaymentStatus::OPEN, PaymentStatus::PAID ])) {
+                $logger->write("With the current paymentstatus an order won't be created!");
+                return $this->notifyException('No action needed. Order not created');
+            }
+
+            $signature = $molliePayment->metadata->signature;
+
+            if (!$this->checkSignature($signature)) {
+                $logger->write("Signature invalid");
+                return $this->notifyException('Invalid signature');
+            }
+
+            $orderNumber = $this->saveOrder($localPaymentID, $token, $status, false);
+
+            $logger->write('orderNumber: ' . $orderNumber);
+            $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
+
+        }
+
+        // @todo: refactor to here
+
+        $logger->write('Success');
+        return $this->notifyOK('Succesfully updated status');
+
+
+    }
+
+    private function notifyException($error){
+
+        header('HTTP/1.0 500 Server Error');
+        header('Content-Type: text/json');
+        echo json_encode(['success'=>false, 'message'=>$error], JSON_PRETTY_PRINT);
+        die();
+
+    }
+
+    private function notifyOK($msg){
+
+        header('HTTP/1.0 200 Ok');
+        header('Content-Type: text/json');
+        echo json_encode(['success'=>true, 'message'=>$msg], JSON_PRETTY_PRINT);
+        die();
+
     }
 
     /**

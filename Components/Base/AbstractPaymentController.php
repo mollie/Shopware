@@ -157,6 +157,7 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
         $this->Response()->setHttpResponseCode($httpCode);
         $this->Response()->setHeader('Content-type', 'application/json', true);
         $this->Response()->setBody(json_encode($data, JSON_PRETTY_PRINT));
+
     }
 
     /**
