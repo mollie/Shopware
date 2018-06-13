@@ -28,15 +28,169 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function indexAction()
     {
-        // only handle if it is a Mollie payment
-        if (!Helpers::stringContains($this->getPaymentShortName(), 'mollie_')) {
-            throw new Exception('Wrong payment controller. Payment is not a Mollie payment.');
-        }
+        $session = Shopware()->container()->get('session');
 
-        $this->redirect([ 'action' => 'direct', 'forceSecure' => true ]);
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        // save current basket and return order ID
+        $order_id = $order_service->persistCurrentBasket($this);
+
+        // send to redirect action (@todo: this is a bit redundant?)
+        $this->redirect([
+
+            'action'        => 'direct',
+            'forceSecure'   => true,
+
+            'order_id'      => $order_id,
+            'checksum'      => $order_service->checksum($order_id, get_called_class()),
+
+        ]);
+
     }
 
     public function directAction()
+    {
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+        $order_id = $this->request()->getParam('order_id');
+        $checksum = $this->request()->getParam('checksum');
+
+        $payment_id = $payment_service->createPaymentEntry($order_id, $this)->getID();
+
+
+        if ($order_service->checksum($order_id, get_called_class()) === $checksum){
+
+            $webhookUrl = $this->Front()->Router()->assemble([
+
+                'controller' => 'Mollie',
+                'action' => 'notify',
+                'forceSecure' => true,
+
+                'order_id'      => $order_id,
+                'payment_id'    => $payment_id,
+                'checksum'      => $order_service->checksum($order_id, $payment_id, get_called_class()),
+
+            ]);
+
+            $returnUrl  = $this->Front()->Router()->assemble([
+
+                'controller' => 'Mollie',
+                'action' => 'return',
+                'forceSecure' => true,
+
+                'order_id'      => $order_id,
+                'payment_id'    => $payment_id,
+                'checksum'      => $order_service->checksum($order_id, $payment_id, get_called_class()),
+
+            ]);
+
+
+            if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+                $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
+                $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
+            }
+
+
+            // create new Mollie transaction and store transaction ID in database
+            $transaction = $payment_service->startTransaction($order_id, $returnUrl, $webhookUrl, $payment_id);
+
+            $checkoutUrl = $transaction->getCheckoutUrl();
+
+            echo $webhookUrl . '<br />';
+            echo $checkoutUrl;
+            die();
+
+            $this->redirect($checkoutUrl);
+
+        }
+        else{
+            throw new \Exception('Bad checksum');
+        }
+
+    }
+
+    public function returnAction()
+    {
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+        $order_id = $this->request()->getParam('order_id');
+        $payment_id = $this->request()->getParam('payment_id');
+        $checksum = $this->request()->getParam('checksum');
+
+        if ($order_service->checksum($order_id, $payment_id, get_called_class()) === $checksum){
+
+
+            // restore basket in session (because we may have returned
+            // in another browser).
+
+
+            $payment_service->reloginUser($order_id);
+
+
+
+
+            if ($payment_service->getPaymentStatus($order_id, $payment_id)){
+
+                // payment succeeded. Send to confirmation screen
+                return $this->redirectToFinish();
+
+            }
+            else{
+
+                // payment failed. Give user another chance
+                return $this->redirectBack();
+
+            }
+
+
+        }
+
+    }
+
+    public function notifyAction()
+    {
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+        $order_id = $this->request()->getParam('order_id');
+        $payment_id = $this->request()->getParam('payment_id');
+        $checksum = $this->request()->getParam('checksum');
+
+        if ($order_service->checksum($order_id, $payment_id, get_called_class()) === $checksum){
+
+            $paid = $payment_service->getPaymentStatus($order_id, $payment_id);
+
+            header('HTTP/1.0 200 Ok');
+            header('Content-Type: text/json');
+
+            echo json_encode(['success'=>true, 'message'=>'Information accepted', 'paid'=>$paid], JSON_PRETTY_PRINT);
+            die();
+
+        }
+
+        header('HTTP/1.0 500 Internal Server Erro');
+        header('Content-Type: text/json');
+        echo json_encode(['success'=>false, 'message'=>'Error'], JSON_PRETTY_PRINT);
+        die();
+
+    }
+
+    public function oldDirectAction()
     {
 
         $session = Shopware()->container()->get('session');
@@ -95,7 +249,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     $currency
             ],
             'description'  => $this->getPaymentShortName(), // TODO: give decent description
-            'redirectUrl'  => $returnUrl,
+            'redirectUrl'  => $redirectUrl,
             'webhookUrl'   => $webhookUrl,
             'method'       => str_replace('mollie_', '', $this->getPaymentShortName()),
             'metadata'     => [
@@ -172,7 +326,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * But don't call $this->Front()->Plugins()->ViewRenderer()->setNoRender();
      * This wrecks the current session!!!
      */
-    public function notifyAction()
+    public function oldNotifyAction()
     {
 
         $config = $this->container->get('mollie_shopware.config');
@@ -319,7 +473,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      *
      * Called when customer returns to the shop
      */
-    public function returnAction()
+    public function oldReturnAction()
     {
 
         $session = Shopware()->Container()
@@ -424,6 +578,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
 
         if ($status === PaymentStatus::PAID) {
+
+
 
             $orderNumber = $this->saveOrder($molliePayment->id, $molliePayment->metadata->token, $status, false);
             $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);

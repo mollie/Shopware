@@ -22,21 +22,23 @@ class TransactionRepository extends ModelRepository
      * @param  string $signature
      * @return Transaction
      */
-    public function createNew($userId, $quoteNumber, $paymentId, $amount, $currency, $token, $signature)
+    public function createNew($orderId)
     {
         $now = new DateTime;
 
         $transaction = new Transaction;
 
-        $transaction->setSessionId(session_id());
-        $transaction->setPaymentId($paymentId);
-        $transaction->setUserId($userId);
+        $transaction->setSessionId($orderId);
+        $transaction->setUserId(0);
+        $transaction->setPaymentId(0);
 
-        $transaction->setQuoteNumber($quoteNumber);
-        $transaction->setAmount($amount);
-        $transaction->setCurrency($currency);
-        $transaction->setToken($token);
-        $transaction->setSignature($signature);
+//        $transaction->setSessionId(session_id());
+//
+//        $transaction->setQuoteNumber($quoteNumber);
+//        $transaction->setAmount($amount);
+//        $transaction->setCurrency($currency);
+//        $transaction->setToken($token);
+//        $transaction->setSignature($signature);
 
         $transaction->setCreatedAt($now);
         $transaction->setUpdatedAt($now);
