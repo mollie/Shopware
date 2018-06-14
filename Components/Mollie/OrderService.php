@@ -24,6 +24,11 @@
 
         }
 
+        public function getOrderFromDatabase($order_id)
+        {
+
+        }
+
         public function checksum($order_id, $hash)
         {
 

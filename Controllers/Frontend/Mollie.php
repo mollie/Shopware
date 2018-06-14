@@ -28,8 +28,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function indexAction()
     {
-        $session = Shopware()->container()->get('session');
-
 
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
@@ -92,20 +90,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ]);
 
 
-            if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+            //if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
                 $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
                 $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
-            }
+            //}
 
 
             // create new Mollie transaction and store transaction ID in database
             $transaction = $payment_service->startTransaction($order_id, $returnUrl, $webhookUrl, $payment_id);
 
             $checkoutUrl = $transaction->getCheckoutUrl();
-
-            echo $webhookUrl . '<br />';
-            echo $checkoutUrl;
-            die();
 
             $this->redirect($checkoutUrl);
 
@@ -131,15 +125,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($order_service->checksum($order_id, $payment_id, get_called_class()) === $checksum){
 
-
-            // restore basket in session (because we may have returned
-            // in another browser).
-
-
-            $payment_service->reloginUser($order_id);
-
-
-
+            $payment_service->restoreSession($order_id, $payment_id);
 
             if ($payment_service->getPaymentStatus($order_id, $payment_id)){
 
@@ -149,11 +135,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
             else{
 
+
                 // payment failed. Give user another chance
                 return $this->redirectBack();
 
             }
-
 
         }
 

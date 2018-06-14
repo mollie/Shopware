@@ -29,7 +29,9 @@
         {
 
             $transaction = $sOrder->getTransactionRepo()->createNew(
-                $order_id
+                $order_id,
+                // temporarily store session in database
+                base64_encode(serialize($_SESSION))
             );
 
 
@@ -105,17 +107,21 @@
 
         }
 
-        public function reloginUser($order_id)
+        public function restoreSession($order_id, $transaction_id)
         {
 
             $order_repository = Shopware()->Models()->getRepository(Order::class);
             $order = $order_repository->findOneBy(['number' => $order_id]);
-            $user = $order->getCustomer();
 
-            $this->session->offsetSet('sUserMail', $user->getEmail());
-            $this->session->offsetSet('sUserPassword', $user->getPassword());
-            $this->session->offsetSet('sUserId', $user->getID());
+            $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
+            $transaction = $transaction_repository->getByID($transaction_id);
 
+            if (isset($_SESSION['Shopware']) && isset($_SESSION['Shopware']['sBasketAmount'])){
+                return;
+            }
+
+            $session = unserialize(base64_decode($transaction->getSerializedSession()));
+            $_SESSION = $session;
 
         }
 

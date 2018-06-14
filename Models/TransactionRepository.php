@@ -14,6 +14,7 @@ class TransactionRepository extends ModelRepository
 {
     /**
      * Initialize a new Transaction
+     * @todo: update documentation
      *
      * @param  string $quoteNumber
      * @param  float  $amount
@@ -22,7 +23,7 @@ class TransactionRepository extends ModelRepository
      * @param  string $signature
      * @return Transaction
      */
-    public function createNew($orderId)
+    public function createNew($orderId, $serialized_session)
     {
         $now = new DateTime;
 
@@ -31,6 +32,8 @@ class TransactionRepository extends ModelRepository
         $transaction->setSessionId($orderId);
         $transaction->setUserId(0);
         $transaction->setPaymentId(0);
+        $transaction->setSerializedSession($serialized_session);
+
 
 //        $transaction->setSessionId(session_id());
 //

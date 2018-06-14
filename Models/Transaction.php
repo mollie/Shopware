@@ -120,6 +120,13 @@ class Transaction
     private $exceptions;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="session", type="text", nullable=true)
+     */
+    private $session = '';
+
+    /**
      * @return int
      */
     public function getId()
@@ -364,6 +371,16 @@ class Transaction
         $this->exceptions = $exceptions;
     }
 
+
+    public function setSerializedSession($session)
+    {
+        $this->session = $session;
+    }
+
+    public function getSerializedSession($default = '')
+    {
+        return empty($this->session) ? $default : $this->session;
+    }
 
     public function getQueryString()
     {
