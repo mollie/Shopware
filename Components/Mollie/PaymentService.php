@@ -25,13 +25,11 @@
 
         }
 
-        public function createPaymentEntry($order_id, $sOrder)
+        public function createPaymentEntry($controller, $order_id)
         {
 
-            $transaction = $sOrder->getTransactionRepo()->createNew(
-                $order_id,
-                // temporarily store session in database
-                base64_encode(serialize($_SESSION))
+            $transaction = $controller->getTransactionRepo()->createNew(
+                $order_id
             );
 
 
@@ -39,30 +37,31 @@
         }
 
 
-        public function startTransaction($order_id, $returnUrl, $webhookUrl, $payment_id)
+        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id)
         {
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
 
-            $order_repository = Shopware()->Models()->getRepository(Order::class);
-            $order = $order_repository->findOneBy(['number' => $order_id]);
-            $payment_method = $order->getPayment();
+            // we don't have a stored order here.
+//            $order_repository = Shopware()->Models()->getRepository(Order::class);
+//            $order = $order_repository->findOneBy(['signature' => $signature]);
+//            $payment_method = $order->getPayment();
+
+            // @todo: find order amount and currency
 
 
             $paymentOptions = [
                 'amount' => [
-                    'value' => number_format($order->getInvoiceAmount(), 2, '.', ''),
-                    'currency' => $order->getCurrency()
+                    'value' => number_format(100, 2, '.', ''),
+                    'currency' => 'EUR',
                 ],
-                'description' => 'Order #'.$order_id,
+                'description' => 'Order #' . $payment_id,
                 'redirectUrl' => $returnUrl,
                 'webhookUrl' => $webhookUrl,
-                'method' => str_replace('mollie_', '', $payment_method->getName()),
+                //'method' => str_replace('mollie_', '', $payment_method->getName()),
+                'method' => 'ideal',
                 'issuer' => $this->getIdealIssuer(),
                 'metadata' => [
-
-                    'order_id' => $order_id,
-
                 ],
             ];
 
@@ -77,7 +76,7 @@
 
         }
 
-        public function getPaymentStatus($order_id, $payment_id)
+        public function getPaymentStatus($controller, $signature, $payment_id)
         {
 
             $paid = false;
@@ -85,8 +84,6 @@
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
             $transaction = $transaction_repository->getByID($payment_id);
 
-            $order_repository = Shopware()->Models()->getRepository(Order::class);
-            $order = $order_repository->findOneBy(['number' => $order_id]);
 
             // get Mollie ID
             $remote_transaction_id = $transaction->getTransactionID();
@@ -97,9 +94,14 @@
             if ($status == 'paid') {
                 $paid = true;
 
-                if ($order->getPaymentStatus()->getId() !== PaymentStatus::PAID) {
-                    Shopware()->Modules()->Order()->setPaymentStatus($order->getID(), PaymentStatus::PAID, true);
-                }
+                // store basket
+                $controller->persistBasket();
+
+                $status = PaymentStatus::PAID;
+                $controller->getTransactionRepo()->updateStatus($transaction, $status);
+
+
+
             }
 
             // return either true or false
@@ -107,21 +109,38 @@
 
         }
 
-        public function restoreSession($order_id, $transaction_id)
+        public function restoreSession($signature)
         {
 
-            $order_repository = Shopware()->Models()->getRepository(Order::class);
-            $order = $order_repository->findOneBy(['number' => $order_id]);
+            $newSessionId = Shopware()->Session()->offsetGet('sessionId');
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
-            $transaction = $transaction_repository->getByID($transaction_id);
+            $transaction = $transaction_repository->findOneBy(['signature' => $signature]);
 
-            if (isset($_SESSION['Shopware']) && isset($_SESSION['Shopware']['sBasketAmount'])){
-                return;
+            $session = json_decode($transaction->getSerializedSession(), 1);
+            foreach($session as $k=>$v){
+
+                if ($k === 'sessionId'){
+                    continue;
+                }
+                Shopware()->Session()->offsetSet($k, $v);
+
             }
 
-            $session = unserialize(base64_decode($transaction->getSerializedSession()));
-            $_SESSION = $session;
+
+            $db = shopware()->container()->get('db');
+            $q = $db->prepare('
+              UPDATE 
+                s_order_basket 
+              SET sessionID=? 
+              WHERE sessionID=?
+            ');
+
+            $q->execute([
+                $newSessionId,
+                $session['sessionId'],
+            ]);
+
 
         }
 

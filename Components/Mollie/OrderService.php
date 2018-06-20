@@ -10,33 +10,45 @@
             
         }
 
-        public function persistCurrentBasket($sOrder)
-        {
-
-            // persist order
-            // temporarily turn off sending emails
-
-            $config = Shopware()->Container()->get('config');
-            $config->sendOrderMail = false;
-
-
-            return $sOrder->saveOrder('12', 'ab' . rand(0,9999), null, false);
-
-        }
+//        public function persistCurrentBasket($sOrder)
+//        {
+//
+//            // persist order
+//            // temporarily turn off sending emails
+//
+//            $config = Shopware()->Container()->get('config');
+//            $config->sendOrderMail = false;
+//
+//
+//            return $sOrder->persistBasket();
+//
+//        }
 
         public function getOrderFromDatabase($order_id)
         {
 
         }
 
-        public function checksum($order_id, $hash)
+        public function checksum()
         {
 
-            return sha1($order_id . $hash);
+            $hash = '';
+            foreach(func_get_args() as $argument){
+                $hash .= $argument;
+            }
+
+            return sha1($hash);
 
         }
 
+        public function getOrderIdBySignature($signature)
+        {
 
+
+
+
+
+        }
 
 
 

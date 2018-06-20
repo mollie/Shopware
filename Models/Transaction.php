@@ -322,7 +322,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -330,7 +330,7 @@ class Transaction
     }
 
     /**
-     * @param int $createdAt
+     * @param \DateTime $createdAt
      */
     public function setCreatedAt($createdAt)
     {
@@ -339,7 +339,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
@@ -347,7 +347,7 @@ class Transaction
     }
 
     /**
-     * @param int $updatedAt
+     * @param \DateTime $updatedAt
      */
     public function setUpdatedAt($updatedAt)
     {

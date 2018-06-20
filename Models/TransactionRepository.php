@@ -23,28 +23,38 @@ class TransactionRepository extends ModelRepository
      * @param  string $signature
      * @return Transaction
      */
-    public function createNew($orderId, $serialized_session)
+    public function createNew($signature)
     {
         $now = new DateTime;
 
         $transaction = new Transaction;
 
-        $transaction->setSessionId($orderId);
+        $session = [];
+        foreach($_SESSION as $namespace=>$namespace_session){
+
+            foreach($namespace_session as $k=>$v){
+
+                if (in_array($k, ['sOrderVariables'])){
+                    continue;
+                }
+                $session[$k] = $v;
+
+            }
+
+        }
+
+
+
+
+        $transaction->setSignature($signature);
+        $transaction->setUserId(0);
         $transaction->setUserId(0);
         $transaction->setPaymentId(0);
-        $transaction->setSerializedSession($serialized_session);
-
-
-//        $transaction->setSessionId(session_id());
-//
-//        $transaction->setQuoteNumber($quoteNumber);
-//        $transaction->setAmount($amount);
-//        $transaction->setCurrency($currency);
-//        $transaction->setToken($token);
-//        $transaction->setSignature($signature);
+        $transaction->setSessionId(0);
 
         $transaction->setCreatedAt($now);
         $transaction->setUpdatedAt($now);
+        $transaction->setSerializedSession(json_encode($session, 128));
 
         $this->save($transaction);
 

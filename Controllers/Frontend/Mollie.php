@@ -29,20 +29,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function indexAction()
     {
 
-        $order_service = Shopware()->Container()
-            ->get('mollie_shopware.order_service');
-
-        // save current basket and return order ID
-        $order_id = $order_service->persistCurrentBasket($this);
-
-        // send to redirect action (@todo: this is a bit redundant?)
         $this->redirect([
 
             'action'        => 'direct',
             'forceSecure'   => true,
-
-            'order_id'      => $order_id,
-            'checksum'      => $order_service->checksum($order_id, get_called_class()),
 
         ]);
 
@@ -54,59 +44,55 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
+
+        $signature = $this->persistBasket();
+
+
         $payment_service = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        $order_id = $this->request()->getParam('order_id');
-        $checksum = $this->request()->getParam('checksum');
 
-        $payment_id = $payment_service->createPaymentEntry($order_id, $this)->getID();
+        $payment_id = $payment_service->createPaymentEntry($this, $signature)
+            ->getID();
 
+        $webhookUrl = $this->Front()->Router()->assemble([
 
-        if ($order_service->checksum($order_id, get_called_class()) === $checksum){
+            'controller' => 'Mollie',
+            'action' => 'notify',
+            'forceSecure' => true,
 
-            $webhookUrl = $this->Front()->Router()->assemble([
+            'payment_id'    => $payment_id,
+            'signature'     => $signature,
+            'checksum'      => $order_service->checksum($signature, $payment_id, get_called_class()),
 
-                'controller' => 'Mollie',
-                'action' => 'notify',
-                'forceSecure' => true,
+        ]);
 
-                'order_id'      => $order_id,
-                'payment_id'    => $payment_id,
-                'checksum'      => $order_service->checksum($order_id, $payment_id, get_called_class()),
+        $returnUrl  = $this->Front()->Router()->assemble([
 
-            ]);
+            'controller'    => 'Mollie',
+            'action'        => 'return',
+            'forceSecure'   => true,
 
-            $returnUrl  = $this->Front()->Router()->assemble([
+            'payment_id'    => $payment_id,
+            'signature'     => $signature,
+            'checksum'      => $order_service->checksum($signature, $payment_id, get_called_class()),
 
-                'controller' => 'Mollie',
-                'action' => 'return',
-                'forceSecure' => true,
-
-                'order_id'      => $order_id,
-                'payment_id'    => $payment_id,
-                'checksum'      => $order_service->checksum($order_id, $payment_id, get_called_class()),
-
-            ]);
+        ]);
 
 
-            //if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
-                $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
-                $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
-            //}
+        //if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+            $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
+            $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
+        //}
 
 
-            // create new Mollie transaction and store transaction ID in database
-            $transaction = $payment_service->startTransaction($order_id, $returnUrl, $webhookUrl, $payment_id);
+        // create new Mollie transaction and store transaction ID in database
+        $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id);
 
-            $checkoutUrl = $transaction->getCheckoutUrl();
+        $checkoutUrl = $transaction->getCheckoutUrl();
 
-            $this->redirect($checkoutUrl);
+        $this->redirect($checkoutUrl);
 
-        }
-        else{
-            throw new \Exception('Bad checksum');
-        }
 
     }
 
@@ -119,15 +105,28 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $payment_service = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        $order_id = $this->request()->getParam('order_id');
-        $payment_id = $this->request()->getParam('payment_id');
+
+        $signature = $this->request()->getParam('signature');
         $checksum = $this->request()->getParam('checksum');
+        $payment_id = $this->request()->getParam('payment_id');
 
-        if ($order_service->checksum($order_id, $payment_id, get_called_class()) === $checksum){
 
-            $payment_service->restoreSession($order_id, $payment_id);
 
-            if ($payment_service->getPaymentStatus($order_id, $payment_id)){
+        if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
+
+            $payment_service->restoreSession($signature);
+
+            try {
+                $this->loadBasketFromSignature($signature);
+            }
+            catch(Exception $e){
+
+                // cannot restore basket
+                return $this->redirectBack();
+            }
+
+
+            if ($payment_service->getPaymentStatus($this, $signature, $payment_id)){
 
                 // payment succeeded. Send to confirmation screen
                 return $this->redirectToFinish();
@@ -135,13 +134,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
             else{
 
-
                 // payment failed. Give user another chance
-                return $this->redirectBack();
+                return $this->redirectBack('Payment failed');
 
             }
 
         }
+
+        return $this->redirectBack('No session');
 
     }
 
@@ -410,14 +410,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $logger->write('Has no order yet.');
 
             if (!in_array($status, [ PaymentStatus::OPEN, PaymentStatus::PAID ])) {
-                $logger->write("With the current paymentstatus an order won't be created!");
+                $logger->write('With the current paymentstatus an order won\'t be created!');
                 return $this->notifyException('No action needed. Order not created');
             }
 
             $signature = $molliePayment->metadata->signature;
 
             if (!$this->checkSignature($signature)) {
-                $logger->write("Signature invalid");
+                $logger->write('Signature invalid');
                 return $this->notifyException('Invalid signature');
             }
 
@@ -659,4 +659,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         return $basket ? $basket['sCurrencyName'] : $default;
     }
+
+    protected function loadBasketFromSignature($signature)
+    {
+        return parent::loadBasketFromSignature($signature);
+    }
+
 }
