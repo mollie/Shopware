@@ -37,17 +37,15 @@
         }
 
 
-        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id)
+        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency)
         {
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
 
-            // we don't have a stored order here.
-//            $order_repository = Shopware()->Models()->getRepository(Order::class);
-//            $order = $order_repository->findOneBy(['signature' => $signature]);
-//            $payment_method = $order->getPayment();
 
-            // @todo: find order amount and currency
+            $amount = $amount;
+            $currency = $currency;
+
 
 
             $paymentOptions = [

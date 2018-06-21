@@ -52,7 +52,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ->get('mollie_shopware.payment_service');
 
 
-        $payment_id = $payment_service->createPaymentEntry($this, $signature)
+        $currency = method_exists($this, 'getCurrencyISO') ? $this->getCurrencyISO('EUR') : 'EUR';
+
+        $payment_id = $payment_service->createPaymentEntry($this, $signature, $this->getAmount(), $currency)
             ->getID();
 
         $webhookUrl = $this->Front()->Router()->assemble([
@@ -147,32 +149,52 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
     public function notifyAction()
     {
+
+
+
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
         $payment_service = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        $order_id = $this->request()->getParam('order_id');
-        $payment_id = $this->request()->getParam('payment_id');
+
+        $signature = $this->request()->getParam('signature');
         $checksum = $this->request()->getParam('checksum');
+        $payment_id = $this->request()->getParam('payment_id');
 
-        if ($order_service->checksum($order_id, $payment_id, get_called_class()) === $checksum){
 
-            $paid = $payment_service->getPaymentStatus($order_id, $payment_id);
 
-            header('HTTP/1.0 200 Ok');
-            header('Content-Type: text/json');
+        if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
 
-            echo json_encode(['success'=>true, 'message'=>'Information accepted', 'paid'=>$paid], JSON_PRETTY_PRINT);
-            die();
+            $payment_service->restoreSession($signature);
+
+            try {
+                $this->loadBasketFromSignature($signature);
+            }
+            catch(Exception $e){
+
+                // cannot restore basket
+                $this->notifyException('Cannot restore basket');
+            }
+
+
+            if ($payment_service->getPaymentStatus($this, $signature, $payment_id)){
+
+                // payment succeeded. Send to confirmation screen
+                $this->notifyOK('Thank you');
+
+            }
+            else{
+
+                // payment failed. Give user another chance
+                $this->notifyOK('Error registered properly');
+
+            }
 
         }
 
-        header('HTTP/1.0 500 Internal Server Erro');
-        header('Content-Type: text/json');
-        echo json_encode(['success'=>false, 'message'=>'Error'], JSON_PRETTY_PRINT);
-        die();
+        $this->notifyException('Checksum error');
 
     }
 
