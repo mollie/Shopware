@@ -54,7 +54,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         $currency = method_exists($this, 'getCurrencyISO') ? $this->getCurrencyISO('EUR') : 'EUR';
 
-        $payment_id = $payment_service->createPaymentEntry($this, $signature, $this->getAmount(), $currency)
+        $payment_id = $payment_service->createPaymentEntry($this, $signature)
             ->getID();
 
         $webhookUrl = $this->Front()->Router()->assemble([
@@ -89,7 +89,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
 
         // create new Mollie transaction and store transaction ID in database
-        $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id);
+        $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency);
 
         $checkoutUrl = $transaction->getCheckoutUrl();
 

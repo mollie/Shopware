@@ -43,15 +43,10 @@
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
 
 
-            $amount = $amount;
-            $currency = $currency;
-
-
-
             $paymentOptions = [
                 'amount' => [
-                    'value' => number_format(100, 2, '.', ''),
-                    'currency' => 'EUR',
+                    'value' => number_format($amount, 2, '.', ''),
+                    'currency' => $currency,
                 ],
                 'description' => 'Order #' . $payment_id,
                 'redirectUrl' => $returnUrl,
