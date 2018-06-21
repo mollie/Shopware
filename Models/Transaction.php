@@ -371,7 +371,9 @@ class Transaction
         $this->exceptions = $exceptions;
     }
 
-
+    /**
+     * @param string $session
+     */
     public function setSerializedSession($session)
     {
         $this->session = $session;
