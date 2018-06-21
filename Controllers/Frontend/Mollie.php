@@ -82,10 +82,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         ]);
 
 
-        //if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+        if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
             $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
             $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
-        //}
+        }
 
 
         // create new Mollie transaction and store transaction ID in database
