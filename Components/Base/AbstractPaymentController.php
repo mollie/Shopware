@@ -163,8 +163,11 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     /**
      * Redirect back to the checkout
      */
-    protected function redirectBack()
+    protected function redirectBack($error_message = null)
     {
+        if ($error_message !== null){
+            Shopware()->Session()->mollieError = $error_message;
+        }
         $this->redirect([ 'controller' => 'checkout', 'action' => 'confirm' ]);
     }
 
