@@ -88,7 +88,7 @@
                 $paid = true;
 
                 // store basket
-                $controller->persistBasket();
+                $controller->doPersistBasket();
 
                 $status = PaymentStatus::PAID;
                 $controller->getTransactionRepo()->updateStatus($transaction, $status);

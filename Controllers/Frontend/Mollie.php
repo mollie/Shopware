@@ -45,7 +45,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ->get('mollie_shopware.order_service');
 
 
-        $signature = $this->persistBasket();
+        $signature = $this->doPersistBasket();
 
 
         $payment_service = Shopware()->Container()
@@ -698,4 +698,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return parent::loadBasketFromSignature($signature);
     }
 
+    /*
+     * Wrapper function for persistbasket, which is declared protected
+     * and cannot be called from outside
+     *
+     * @todo: there must be a more elegant way to do this!
+     * */
+    public function doPersistBasket()
+    {
+        return $this->persistBasket();
+    }
 }
