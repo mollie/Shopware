@@ -154,6 +154,7 @@ class TransactionRepository extends ModelRepository
         $this->getEntityManager()->persist($transaction);
         $this->getEntityManager()->flush();
 
+
         return $transaction;
     }
 }

@@ -93,12 +93,10 @@
                 $status = PaymentStatus::PAID;
                 $controller->getTransactionRepo()->updateStatus($transaction, $status);
 
-
-
             }
 
             // return either true or false
-            return $paid;
+            return $paid ? $transaction : false;
 
         }
 
@@ -119,7 +117,6 @@
                 Shopware()->Session()->offsetSet($k, $v);
 
             }
-
 
             $db = shopware()->container()->get('db');
             $q = $db->prepare('
@@ -146,6 +143,11 @@
             return $ideal->getSelectedIssuer();
         }
 
+
+        public function hasSession()
+        {
+            return !Shopware()->Session()->offsetGet('userId');
+        }
 
 
 

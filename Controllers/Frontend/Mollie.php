@@ -121,31 +121,37 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
 
-            $payment_service->restoreSession($signature);
+            if (!$payment_service->hasSession()){
 
-            try {
-                $this->loadBasketFromSignature($signature);
+                $payment_service->restoreSession($signature);
+
+                try {
+
+                    $this->loadBasketFromSignature($signature);
+
+                } catch (Exception $e) {
+
+                    // cannot restore basket
+                    return $this->redirectBack();
+                }
+
             }
-            catch(Exception $e){
 
-                // cannot restore basket
-                return $this->redirectBack();
-            }
+            if ($transaction = $payment_service->getPaymentStatus($this, $signature, $payment_id)) {
 
+                $orderNumber = $this->saveOrder($payment_id, $signature, PaymentStatus::PAID, true);
 
-            if ($payment_service->getPaymentStatus($this, $signature, $payment_id)){
+                $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
 
                 // payment succeeded. Send to confirmation screen
                 return $this->redirectToFinish();
 
-            }
-            else{
+            } else {
 
                 // payment failed. Give user another chance
                 return $this->redirectBack('Payment failed');
 
             }
-
         }
 
         return $this->redirectBack('No session');
