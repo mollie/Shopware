@@ -28,15 +28,188 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function indexAction()
     {
-        // only handle if it is a Mollie payment
-        if (!Helpers::stringContains($this->getPaymentShortName(), 'mollie_')) {
-            throw new Exception('Wrong payment controller. Payment is not a Mollie payment.');
-        }
 
-        $this->redirect([ 'action' => 'direct', 'forceSecure' => true ]);
+        $this->redirect([
+
+            'action'        => 'direct',
+            'forceSecure'   => true,
+
+        ]);
+
     }
 
     public function directAction()
+    {
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+
+        $signature = $this->doPersistBasket();
+
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+
+        $currency = method_exists($this, 'getCurrencyISO') ? $this->getCurrencyISO('EUR') : 'EUR';
+
+        $payment_id = $payment_service->createPaymentEntry($this, $signature)
+            ->getID();
+
+        $webhookUrl = $this->Front()->Router()->assemble([
+
+            'controller' => 'Mollie',
+            'action' => 'notify',
+            'forceSecure' => true,
+
+            'payment_id'    => $payment_id,
+            'signature'     => $signature,
+            'checksum'      => $order_service->checksum($signature, $payment_id, get_called_class()),
+
+        ]);
+
+        $returnUrl  = $this->Front()->Router()->assemble([
+
+            'controller'    => 'Mollie',
+            'action'        => 'return',
+            'forceSecure'   => true,
+
+            'payment_id'    => $payment_id,
+            'signature'     => $signature,
+            'checksum'      => $order_service->checksum($signature, $payment_id, get_called_class()),
+
+        ]);
+
+
+        if (defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+            $returnUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($returnUrl);
+            $webhookUrl = 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($webhookUrl);
+        }
+
+
+        // create new Mollie transaction and store transaction ID in database
+        try{
+            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency);
+        }
+        catch (\Exception $e){
+            return $this->redirectBack($e->getMessage());
+        }
+
+        $checkoutUrl = $transaction->getCheckoutUrl();
+
+        $this->redirect($checkoutUrl);
+
+
+    }
+
+    public function returnAction()
+    {
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+
+        $signature = $this->request()->getParam('signature');
+        $checksum = $this->request()->getParam('checksum');
+        $payment_id = $this->request()->getParam('payment_id');
+
+
+
+        if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
+
+            if (!$payment_service->hasSession()){
+
+                $payment_service->restoreSession($signature);
+
+                try {
+
+                    $this->loadBasketFromSignature($signature);
+
+                } catch (Exception $e) {
+
+                    // cannot restore basket
+                    return $this->redirectBack();
+                }
+
+            }
+
+            if ($transaction = $payment_service->getPaymentStatus($this, $signature, $payment_id)) {
+
+                $orderNumber = $this->saveOrder($payment_id, $signature, PaymentStatus::PAID, true);
+
+                $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
+
+                // payment succeeded. Send to confirmation screen
+                return $this->redirectToFinish();
+
+            } else {
+
+                // payment failed. Give user another chance
+                return $this->redirectBack('Payment failed');
+
+            }
+        }
+
+        return $this->redirectBack('No session');
+
+    }
+
+    public function notifyAction()
+    {
+
+
+
+        $order_service = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        $payment_service = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+
+        $signature = $this->request()->getParam('signature');
+        $checksum = $this->request()->getParam('checksum');
+        $payment_id = $this->request()->getParam('payment_id');
+
+
+
+        if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
+
+            $payment_service->restoreSession($signature);
+
+            try {
+                $this->loadBasketFromSignature($signature);
+            }
+            catch(Exception $e){
+
+                // cannot restore basket
+                $this->notifyException('Cannot restore basket');
+            }
+
+
+            if ($payment_service->getPaymentStatus($this, $signature, $payment_id)){
+
+                // payment succeeded. Send to confirmation screen
+                $this->notifyOK('Thank you');
+
+            }
+            else{
+
+                // payment failed. Give user another chance
+                $this->notifyOK('Error registered properly');
+
+            }
+
+        }
+
+        $this->notifyException('Checksum error');
+
+    }
+
+    public function oldDirectAction()
     {
 
         $session = Shopware()->container()->get('session');
@@ -95,7 +268,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     $currency
             ],
             'description'  => $this->getPaymentShortName(), // TODO: give decent description
-            'redirectUrl'  => $returnUrl,
+            'redirectUrl'  => $redirectUrl,
             'webhookUrl'   => $webhookUrl,
             'method'       => str_replace('mollie_', '', $this->getPaymentShortName()),
             'metadata'     => [
@@ -172,7 +345,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * But don't call $this->Front()->Plugins()->ViewRenderer()->setNoRender();
      * This wrecks the current session!!!
      */
-    public function notifyAction()
+    public function oldNotifyAction()
     {
 
         $config = $this->container->get('mollie_shopware.config');
@@ -270,14 +443,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $logger->write('Has no order yet.');
 
             if (!in_array($status, [ PaymentStatus::OPEN, PaymentStatus::PAID ])) {
-                $logger->write("With the current paymentstatus an order won't be created!");
+                $logger->write('With the current paymentstatus an order won\'t be created!');
                 return $this->notifyException('No action needed. Order not created');
             }
 
             $signature = $molliePayment->metadata->signature;
 
             if (!$this->checkSignature($signature)) {
-                $logger->write("Signature invalid");
+                $logger->write('Signature invalid');
                 return $this->notifyException('Invalid signature');
             }
 
@@ -319,7 +492,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      *
      * Called when customer returns to the shop
      */
-    public function returnAction()
+    public function oldReturnAction()
     {
 
         $session = Shopware()->Container()
@@ -425,6 +598,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($status === PaymentStatus::PAID) {
 
+
+
             $orderNumber = $this->saveOrder($molliePayment->id, $molliePayment->metadata->token, $status, false);
             $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
 
@@ -516,5 +691,21 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $basket = $this->getBasket();
 
         return $basket ? $basket['sCurrencyName'] : $default;
+    }
+
+    protected function loadBasketFromSignature($signature)
+    {
+        return parent::loadBasketFromSignature($signature);
+    }
+
+    /*
+     * Wrapper function for persistbasket, which is declared protected
+     * and cannot be called from outside
+     *
+     * @todo: there must be a more elegant way to do this!
+     * */
+    public function doPersistBasket()
+    {
+        return $this->persistBasket();
     }
 }

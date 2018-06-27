@@ -120,6 +120,13 @@ class Transaction
     private $exceptions;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="session", type="text", nullable=true)
+     */
+    private $session = '';
+
+    /**
      * @return int
      */
     public function getId()
@@ -315,7 +322,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -323,7 +330,7 @@ class Transaction
     }
 
     /**
-     * @param int $createdAt
+     * @param \DateTime $createdAt
      */
     public function setCreatedAt($createdAt)
     {
@@ -332,7 +339,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
@@ -340,7 +347,7 @@ class Transaction
     }
 
     /**
-     * @param int $updatedAt
+     * @param \DateTime $updatedAt
      */
     public function setUpdatedAt($updatedAt)
     {
@@ -364,6 +371,18 @@ class Transaction
         $this->exceptions = $exceptions;
     }
 
+    /**
+     * @param string $session
+     */
+    public function setSerializedSession($session)
+    {
+        $this->session = $session;
+    }
+
+    public function getSerializedSession($default = '')
+    {
+        return empty($this->session) ? $default : $this->session;
+    }
 
     public function getQueryString()
     {
