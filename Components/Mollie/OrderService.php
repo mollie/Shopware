@@ -1,6 +1,8 @@
 <?php
 
-    namespace MollieShopware\Components\Mollie;
+	// Mollie Shopware Plugin Version: 1.2
+
+namespace MollieShopware\Components\Mollie;
 
     class OrderService{
 
