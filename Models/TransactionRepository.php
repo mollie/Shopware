@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.1.0.4
+	// Mollie Shopware Plugin Version: 1.2
 
 namespace MollieShopware\Models;
 
@@ -14,6 +14,7 @@ class TransactionRepository extends ModelRepository
 {
     /**
      * Initialize a new Transaction
+     * @todo: update documentation
      *
      * @param  string $quoteNumber
      * @param  float  $amount
@@ -22,24 +23,38 @@ class TransactionRepository extends ModelRepository
      * @param  string $signature
      * @return Transaction
      */
-    public function createNew($userId, $quoteNumber, $paymentId, $amount, $currency, $token, $signature)
+    public function createNew($signature)
     {
         $now = new DateTime;
 
         $transaction = new Transaction;
 
-        $transaction->setSessionId(session_id());
-        $transaction->setPaymentId($paymentId);
-        $transaction->setUserId($userId);
+        $session = [];
+        foreach($_SESSION as $namespace=>$namespace_session){
 
-        $transaction->setQuoteNumber($quoteNumber);
-        $transaction->setAmount($amount);
-        $transaction->setCurrency($currency);
-        $transaction->setToken($token);
+            foreach($namespace_session as $k=>$v){
+
+                if (in_array($k, ['sOrderVariables'])){
+                    continue;
+                }
+                $session[$k] = $v;
+
+            }
+
+        }
+
+
+
+
         $transaction->setSignature($signature);
+        $transaction->setUserId(0);
+        $transaction->setUserId(0);
+        $transaction->setPaymentId(0);
+        $transaction->setSessionId(0);
 
         $transaction->setCreatedAt($now);
         $transaction->setUpdatedAt($now);
+        $transaction->setSerializedSession(json_encode($session, 128));
 
         $this->save($transaction);
 
@@ -138,6 +153,7 @@ class TransactionRepository extends ModelRepository
         
         $this->getEntityManager()->persist($transaction);
         $this->getEntityManager()->flush();
+
 
         return $transaction;
     }

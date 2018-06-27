@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.1.0.4
+	// Mollie Shopware Plugin Version: 1.2
 
 namespace MollieShopware\Models;
 
@@ -118,6 +118,13 @@ class Transaction
      * @ORM\Column(name="exceptions", type="json_array", nullable=true)
      */
     private $exceptions;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="session", type="text", nullable=true)
+     */
+    private $session = '';
 
     /**
      * @return int
@@ -315,7 +322,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -323,7 +330,7 @@ class Transaction
     }
 
     /**
-     * @param int $createdAt
+     * @param \DateTime $createdAt
      */
     public function setCreatedAt($createdAt)
     {
@@ -332,7 +339,7 @@ class Transaction
     }
 
     /**
-     * @return int
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
@@ -340,7 +347,7 @@ class Transaction
     }
 
     /**
-     * @param int $updatedAt
+     * @param \DateTime $updatedAt
      */
     public function setUpdatedAt($updatedAt)
     {
@@ -364,6 +371,18 @@ class Transaction
         $this->exceptions = $exceptions;
     }
 
+    /**
+     * @param string $session
+     */
+    public function setSerializedSession($session)
+    {
+        $this->session = $session;
+    }
+
+    public function getSerializedSession($default = '')
+    {
+        return empty($this->session) ? $default : $this->session;
+    }
 
     public function getQueryString()
     {
@@ -393,4 +412,12 @@ class Transaction
         return $this->getId() . '.' . chunk_split(substr(sha1($local_key . $this->getId() . '!yqHa9W!3Hm$6UL$b2hXARr=Ux%SN^L!G7%BRqCaXGYrnEZL&m#Bqg%P+W85cExQa-ZEKXj4P_WRv45aCzHYrYkkbqCDRmHSHa2upJvSAZVGzfEKc*eJCkr8qu2DHgu&zU$PK9hdCx$gmt#vNz9se*sLmLwf$&Wn@^a-e$xGnb*tL4BgZ6CE2Y-EPG!=_@FtEXxeaL3S*qxwBaC%WGXGh9&nSysaE67tH#=%26wnD%tW7F6Hap3uFLFzqVy$zx*7'), 0, 12), 4, '-');
 
     }
+
+    public function getOrder()
+    {
+
+
+
+    }
+
 }

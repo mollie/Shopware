@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.1.0.4
+	// Mollie Shopware Plugin Version: 1.2
 
 namespace MollieShopware\Subscriber;
 
@@ -8,6 +8,7 @@ use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_Controller_Front;
 use Enlight_Controller_ActionEventArgs;
+use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\PaymentMethods\Ideal;
 
 class IdealIssuersSubscriber implements SubscriberInterface
@@ -39,10 +40,20 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $controller = $args->getSubject();
         $view = $controller->View();
 
-        $idealIssuers = $this->ideal->getIssuers();
+        try {
+            $idealIssuers = $this->ideal->getIssuers();
 
-        $view->assign('mollieIdealIssuers', $idealIssuers);
-
+            $view->assign('mollieIdealIssuers', $idealIssuers);
+            $view->assign('mollieIssues', false);
+        }
+        catch(ApiException $e){
+            // API authentication issues
+            $view->assign('mollieIssues', true);
+        }
+        catch(\Exception $e){
+            // Some other issue with ideal
+            $view->assign('mollieIssues', true);
+        }
         $view->addTemplateDir(__DIR__ . '/Views');
     }
 

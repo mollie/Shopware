@@ -29,8 +29,30 @@
             </div>
             <div class="alert--content">
 
-                Deze betaalmethode is tijdelijk niet beschikbaar. <br />
-                Meer details: <strong>{$sMollieError}</strong>
+
+
+                {if $sMollieError == 'Payment failed'}
+
+                    {s name="YourPaymentHasBeenCancelled" namespace="frontend/mollie/plugins"}Your payment has been cancelled. Please try again.{/s}
+
+                {elseif $sMollieError == 'No session'}
+
+                    {s name="YourBasketCouldNotBeRestoredFromSession" namespace="frontend/mollie/plugins"}Your basket could not be restored from session.{/s}
+                    {s name="PleaseCheckYourBankStatementsAndContactSupport" namespace="frontend/mollie/plugins"}Please check your bank statements and contact support if you feel this is in error.{/s}
+
+                {else}
+
+                    {s name="PluginsIdealUnavailable" namespace="frontend/mollie/plugins"}This payment method is temporarily unavailable{/s}
+                    <br />
+                    {s name="PluginsIdealUnavailableDetails" namespace="frontend/mollie/plugins"}More details{/s}:
+
+                    {$sMollieError}
+                    {s name="PleaseCheckYourBankStatementsAndContactSupport" namespace="frontend/mollie/plugins"}Please check your bank statements and contact support if you feel this is in error.{/s}
+
+                {/if}
+
+
+
 
             </div>
         </div>

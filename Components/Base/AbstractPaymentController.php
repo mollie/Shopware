@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.1.0.4
+	// Mollie Shopware Plugin Version: 1.2
 
 namespace MollieShopware\Components\Base;
 
@@ -157,13 +157,17 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
         $this->Response()->setHttpResponseCode($httpCode);
         $this->Response()->setHeader('Content-type', 'application/json', true);
         $this->Response()->setBody(json_encode($data, JSON_PRETTY_PRINT));
+
     }
 
     /**
      * Redirect back to the checkout
      */
-    protected function redirectBack()
+    protected function redirectBack($error_message = null)
     {
+        if ($error_message !== null){
+            Shopware()->Session()->mollieError = $error_message;
+        }
         $this->redirect([ 'controller' => 'checkout', 'action' => 'confirm' ]);
     }
 
