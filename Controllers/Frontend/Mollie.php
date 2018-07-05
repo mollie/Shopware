@@ -706,6 +706,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * */
     public function doPersistBasket()
     {
-        return $this->persistBasket();
+        return parent::persistBasket();
     }
 }
