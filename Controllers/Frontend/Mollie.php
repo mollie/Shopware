@@ -706,6 +706,25 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * */
     public function doPersistBasket()
     {
-        return parent::persistBasket();
+        /** @var Enlight_Components_Session_Namespace $session */
+        $session = $this->get('session');
+        $basket = $session->offsetGet('sOrderVariables')->getArrayCopy();
+        $customerId = $session->offsetGet('sUserId');
+
+
+        $signature_service = Shopware()->Container()
+            ->get('mollie_shopware.signature_service');
+
+        $signature = $signature_service->generateSignature(
+            $basket['sBasket'],
+            $customerId
+        );
+
+        $basket_persist_service =  Shopware()->Container()
+            ->get('mollie_shopware.basket_persist_service');
+
+        $basket_persist_service->persist($signature, $basket);
+
+        return $signature;
     }
 }
