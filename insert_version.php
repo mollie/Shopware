@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2
+	// Mollie Shopware Plugin Version: 1.2.2
 
 function handle_dir($directory, $exclude = [], $version){
 
