@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2
+	// Mollie Shopware Plugin Version: 1.2.2
 
 use MollieShopware\Components\Base\AbstractPaymentController;
 use MollieShopware\Components\RequestLogger;
@@ -88,9 +88,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
 
+        $payment_method = $this->getPaymentShortName();
+
         // create new Mollie transaction and store transaction ID in database
         try{
-            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency);
+            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency, $payment_method);
         }
         catch (\Exception $e){
             return $this->redirectBack($e->getMessage());
@@ -698,12 +700,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return parent::loadBasketFromSignature($signature);
     }
 
-    /*
+
+    /**
      * Wrapper function for persistbasket, which is declared protected
      * and cannot be called from outside
-     *
-     * @todo: there must be a more elegant way to do this!
-     * */
+
+     * @return void?
+     */
     public function doPersistBasket()
     {
         return parent::persistBasket();
