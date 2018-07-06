@@ -16,13 +16,6 @@
         <service id="mollie_shopware.order_service" class="MollieShopware\Components\Mollie\OrderService">
         </service>
 
-        <service id="mollie_shopware.signature_service" class="MollieShopware\Components\Mollie\SignatureService">
-        </service>
-
-        <service id="mollie_shopware.basket_persist_service" class="MollieShopware\Components\Mollie\BasketPersistService">
-
-        </service>
-
 
 
         <service id="mollie_shopware.schema" class="MollieShopware\Components\Schema">
