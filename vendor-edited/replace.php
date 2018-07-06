@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2
+	// Mollie Shopware Plugin Version: 1.2.2
 
 function replace_in_dir($dirname, $find, $replace, $depth = 0)
     {
