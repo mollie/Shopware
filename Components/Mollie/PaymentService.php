@@ -39,7 +39,7 @@ namespace MollieShopware\Components\Mollie;
         }
 
 
-        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency)
+        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency, $payment_method)
         {
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
@@ -54,7 +54,7 @@ namespace MollieShopware\Components\Mollie;
                 'redirectUrl' => $returnUrl,
                 'webhookUrl' => $webhookUrl,
                 //'method' => str_replace('mollie_', '', $payment_method->getName()),
-                'method' => 'ideal',
+                'method' => str_replace('mollie_', '', $payment_method),
                 'issuer' => $this->getIdealIssuer(),
                 'metadata' => [
                 ],
@@ -148,7 +148,7 @@ namespace MollieShopware\Components\Mollie;
 
         public function hasSession()
         {
-            return !Shopware()->Session()->offsetGet('userId');
+            return !!Shopware()->Session()->offsetGet('userId');
         }
 
 

@@ -57,6 +57,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $payment_id = $payment_service->createPaymentEntry($this, $signature)
             ->getID();
 
+
         $webhookUrl = $this->Front()->Router()->assemble([
 
             'controller' => 'Mollie',
@@ -88,9 +89,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
 
+
         // create new Mollie transaction and store transaction ID in database
         try{
-            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency);
+            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency, $this->getPaymentShortName());
         }
         catch (\Exception $e){
             return $this->redirectBack($e->getMessage());
@@ -106,6 +108,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function returnAction()
     {
 
+
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
@@ -119,10 +122,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
 
 
+
         if ($order_service->checksum($signature, $payment_id, get_called_class()) === $checksum){
 
-            if (!$payment_service->hasSession()){
 
+
+            if (!$payment_service->hasSession()){
+                /*die('restore session');
                 $payment_service->restoreSession($signature);
 
                 try {
@@ -130,30 +136,29 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     $this->loadBasketFromSignature($signature);
 
                 } catch (Exception $e) {
-
                     // cannot restore basket
                     return $this->redirectBack();
-                }
+                }*/
 
             }
 
+
+
             if ($transaction = $payment_service->getPaymentStatus($this, $signature, $payment_id)) {
+
 
                 $orderNumber = $this->saveOrder($payment_id, $signature, PaymentStatus::PAID, true);
 
                 $this->getTransactionRepo()->updateOrderNumber($transaction, $orderNumber);
-
                 // payment succeeded. Send to confirmation screen
                 return $this->redirectToFinish();
 
             } else {
-
                 // payment failed. Give user another chance
                 return $this->redirectBack('Payment failed');
 
             }
         }
-
         return $this->redirectBack('No session');
 
     }
@@ -161,8 +166,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function notifyAction()
     {
 
-
-
+return;
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
