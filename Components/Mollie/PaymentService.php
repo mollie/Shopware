@@ -39,7 +39,19 @@ namespace MollieShopware\Components\Mollie;
         }
 
 
-        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency)
+        /**
+         * Start a Mollie transaction and return Mollie payment object
+         *
+         * @param string $signature The signature for this order
+         * @param string $returnUrl The return url the user is sent to when the payment has been made or canceled
+         * @param string $webhookUrl The url the callback from Mollie is performed on
+         * @param string $payment_id The payment ID
+         * @param float $amount The amount to charge
+         * @param string $currency The currency ISO code to be used
+         * @param string $payment_method The payment method name to be used
+         * @return object The Mollie payment object (as described in the API docs)
+         */
+        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency, $payment_method)
         {
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
@@ -53,12 +65,14 @@ namespace MollieShopware\Components\Mollie;
                 'description' => 'Order #' . $payment_id,
                 'redirectUrl' => $returnUrl,
                 'webhookUrl' => $webhookUrl,
-                //'method' => str_replace('mollie_', '', $payment_method->getName()),
-                'method' => 'ideal',
-                'issuer' => $this->getIdealIssuer(),
+                'method' => str_replace('mollie_', '', $payment_method),
                 'metadata' => [
                 ],
             ];
+
+            if (strtolower(str_replace('mollie_', '', $payment_method)) === 'ideal'){
+                $paymentOptions['issuer'] = $this->getIdealIssuer();
+            }
 
             $remotePayment = $this->api->payments->create($paymentOptions);
 
@@ -146,9 +160,13 @@ namespace MollieShopware\Components\Mollie;
         }
 
 
+        /**
+         * Checks if current user has a session with the webshop
+         * @return bool
+         */
         public function hasSession()
         {
-            return !Shopware()->Session()->offsetGet('userId');
+            return true && Shopware()->Session()->offsetGet('userId');
         }
 
 

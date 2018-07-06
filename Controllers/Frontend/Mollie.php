@@ -88,9 +88,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
 
+        $payment_method = $this->getPaymentShortName();
+
         // create new Mollie transaction and store transaction ID in database
         try{
-            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency);
+            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency, $payment_method);
         }
         catch (\Exception $e){
             return $this->redirectBack($e->getMessage());
