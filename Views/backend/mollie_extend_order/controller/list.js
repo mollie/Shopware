@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
 
         me.control({
             'order-list-main-window order-list': {
-                refundOrder: me.onRefundOrder,
+                refundOrder: me.onRefundOrder
             }
         });
 
@@ -16,6 +16,15 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
     },
 
     onRefundOrder: function(record) {
+
+        alert('x');
+        var w = Ext.create('My.new.Window');
+        w.show();
+
+
+        return;
+
+
         var me = this;
         var store = me.subApplication.getStore('Order');
         var message = ((me.snippets.refundOrderConfirm && me.snippets.refundOrderConfirm.message) || 'Are you sure you want to refund order' ) + ' ' + record.get('number');

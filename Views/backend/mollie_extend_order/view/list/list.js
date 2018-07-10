@@ -1,5 +1,6 @@
 //{block name="backend/order/view/list/list"}
 // {$smarty.block.parent}
+
 Ext.define('Shopware.apps.Mollie.view.list.List', {
     override: 'Shopware.apps.Order.view.list.List',
 
@@ -124,4 +125,115 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
     },
 
 });
+
+var win = Ext.create('widget.window', {
+    title: 'Mollie order refund',
+    closable: true,
+    closeAction: 'destroy',
+    width: 400,
+    minWidth: 420,
+    height: 350,
+    layout: {
+        type: 'vbox',
+        align: 'left',
+    },
+    items: [
+        {
+            'xtype': 'image',
+            'src': 'https://www.invoiceninja.com/wp-content/uploads/2015/05/Mollie-Payments-1.png',
+            'flex': 4
+        },
+        {
+            'bodyPadding': 15,
+            'width': '100%',
+            'xname': 'panel',
+            'html': 'You have selected to refund this order. Please enter the amount to refund to continue.',
+            'border': false,
+            'flex': 2
+        },
+        {
+            'xtype': 'panel',
+            'bodyPadding': 11,
+            'border': false,
+            'flex': 6,
+            'items': [
+                {
+                    'layout': {
+                        'type': 'table',
+                        'columns': 2,
+                    },
+                    style: 'border: none',
+                    defaults: {
+                        // applied to each contained panel
+                        bodyStyle: 'padding:4px; border: none;'
+                    },
+                    'border': false,
+                    'items':[
+                        {
+                            'html': 'Customer name:',
+                            'width': 180,
+                            style: 'border: none',
+                        },
+                        {
+                            'html': 'Josse Zwols',
+                            'flex': 1,
+                            'width': 220
+                        },
+                        {
+                            'html': 'Order number:'
+                        },
+                        {
+                            'html': '2018.2039'
+                        },
+                        {
+                            'html': 'Total order amount:'
+                        },
+                        {
+                            'html': 'EUR 20,30'
+                        },
+                        {
+                            'html': 'Amount to refund:'
+                        },
+                        {
+                            'xtype': 'textfield',
+                            'width': 140,
+                            'value': '20,30'
+                        },
+
+                    ]
+                }
+            ]
+        },
+        {
+            'xtype': 'panel',
+            'width': 400,
+            'bodyPadding': 15,
+            'border': false,
+            layout: {
+                type: 'hbox',
+                pack: 'end',
+            },
+            'items':
+            [
+                {
+                    'xtype': 'button',
+                    'text': 'Cancel',
+                    'cancel': true
+                }
+                ,
+                {
+                    'xtype': 'button',
+                    'text': 'Refund now',
+                    'default': true
+                }
+
+            ],
+            'flex': 2
+        }
+    ]
+});
+
+win.show();
+
+
 //{/block}
