@@ -1,1 +1,1 @@
-<img src="{$method->image->size2x}"/>
+<img src="{$method->image->size1x}"/>
