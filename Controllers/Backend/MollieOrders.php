@@ -12,6 +12,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
     public function refundAction()
     {
+
+
         $transaction = null;
 
         try {
@@ -19,10 +21,42 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $em = $this->container->get('models');
             $config = $this->container->get('mollie_shopware.config');
 
+            $currency = $request->getParam('currency');
+
+            $amount = $request->getParam('amount');
+            $amount = preg_replace('/[^\,\.0-9]+/', '', $amount);
+
+            $items = preg_split('/[^0-9]/', $amount);
+            if (count($items) == 1){
+                $amount = $items[0] * 1;
+            }
+            else{
+                $amount = '';
+                foreach($items as $index=>$item){
+
+                    if ($index === count($items) - 1){
+                        if (strlen($item) === 3){
+                            // separator was a thousand separator
+                            $amount .= $item;
+                        }
+                        else{
+                            // separator was a decimal separator
+                            $amount .= '.' . $item;
+                        }
+                    }
+                    else{
+                        $amount .= $item;
+                    }
+
+                }
+            }
+
+
+            $orderNumber = $request->getParam('orderNumber');
             $orderId = $request->getParam('orderId');
 
             $transactionRepo = $em->getRepository(Transaction::class);
-            $transaction = $transactionRepo->getByOrderNumber($orderId);
+            $transaction = $transactionRepo->getByOrderNumber($orderNumber);
 
             $order = $em->find('Shopware\Models\Order\Order', $orderId);
 
@@ -35,18 +69,21 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $paymentMethod = $order->getPayment();
 
+            // get Mollie payment ID from the order
+            $paymentId = $transaction->getTransactionId();
+
+
             // check if order is a Mollie order
             // Mollie payment ids begin with 'tr_'
             // Mollie payment methods are prefixed with 'mollie_' in Shopware
-            if (substr($order->getTransactionId(), 0, 3) !== 'tr_' || stripos($paymentMethod->getName(), 'mollie_') === false) {
+            if (substr($paymentId, 0, 3) !== 'tr_' || stripos($paymentMethod->getName(), 'mollie_') === false) {
                 $this->returnJson([
                     'success' => false,
                     'message' => 'Order is not a Mollie order',
                 ]);
             }
 
-            // get Mollie payment ID from the order
-            $paymentId = $order->getTransactionId();
+
 
             // get an instance of the Mollie api
             $mollie = $this->container->get('mollie_shopware.api');
@@ -64,8 +101,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 ]);
             }
 
+
             // Refund the payment.
-            $refund = $mollie->payments->refund($payment);
+            $refund = $mollie->payments->refund($payment, ['amount'=>['value'=>number_format($amount, 2, '.', ''), 'currency'=>$currency]]);
 
             // get refund status model
             $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);

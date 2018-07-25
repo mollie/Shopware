@@ -129,10 +129,10 @@ class MollieShopware extends Plugin
         }
 
         if ($request->getActionName() == 'load') {
+            $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
-  //          $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
 
-//            $view->extendsTemplate('backend/mollie_extend_order/view/window/window.js');
+            $view->extendsTemplate('backend/mollie_extend_order/view/window/window.js');
         }
     }
 

@@ -1,5 +1,7 @@
 //{block name="backend/order/controller/list"}
 // {$smarty.block.parent}
+
+
 Ext.define('Shopware.apps.Mollie.controller.List', {
     override: 'Shopware.apps.Order.controller.List',
 
@@ -8,22 +10,24 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
 
         me.control({
             'order-list-main-window order-list': {
-                refundOrder: me.onRefundOrder
+                refundOrder: me.onShowRefundOrderModal
             }
         });
 
         me.callParent(arguments);
     },
 
-    onRefundOrder: function(record) {
+    onShowRefundOrderModal: function(record){
 
-        alert('x');
-        var w = Ext.create('My.new.Window');
-        w.show();
+        var wnd = Ext.create('Mollie.RefundWindow');
+        wnd.show();
+        wnd.setController(this);
+        wnd.setData(record);
 
 
-        return;
+    },
 
+    onRefundOrder: function(record, amount) {
 
         var me = this;
         var store = me.subApplication.getStore('Order');
@@ -38,40 +42,38 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
             );
         }
 
-        Ext.MessageBox.confirm(title, message, function(answer) {
-            if ( answer !== 'yes' ) return;
+        Ext.Ajax.request({
+            url: '{url action="refund" controller=MollieOrders}',
+            params: {
+                orderId: record.get('id'),
+                orderNumber: record.get('number'),
+                amount: amount,
+                currency: record.get('currency')
+            },
+            success: function(res) {
+                try {
+                    var result = JSON.parse(res.responseText);
+                    if( !result.success ) throw new Error(result.message);
 
-            Ext.Ajax.request({
-                url: '{url action="refund" controller=MollieOrders}',
-                params: {
-                    orderId: record.get('id'),
-                    orderNumber: record.get('number')
-                },
-                success: function(res) {
-                    try {
-                        var result = JSON.parse(res.responseText);
-                        if( !result.success ) throw new Error(result.message);
+                    // update status on record
+                    record.set('cleared', 20);
 
-                        // update status on record
-                        record.set('cleared', 20);
+                    Shopware.Notification.createGrowlMessage(
+                        me.snippets.successTitle,
+                        me.snippets.changeStatus.successMessage,
+                        me.snippets.growlMessage
+                    );
 
-                        Shopware.Notification.createGrowlMessage(
-                            me.snippets.successTitle,
-                            me.snippets.changeStatus.successMessage,
-                            me.snippets.growlMessage
-                        );
-
-                        // refresh order screen
-                        me.doRefresh();
-                    } catch(e) {
-                        Shopware.Notification.createGrowlMessage(
-                            me.snippets.failureTitle,
-                            me.snippets.changeStatus.failureMessage + '<br> ' + e.message,
-                            me.snippets.growlMessage
-                        );
-                    }
+                    // refresh order screen
+                    me.doRefresh();
+                } catch(e) {
+                    Shopware.Notification.createGrowlMessage(
+                        me.snippets.failureTitle,
+                        me.snippets.changeStatus.failureMessage + '<br> ' + e.message,
+                        me.snippets.growlMessage
+                    );
                 }
-            });
+            }
         });
     },
 
