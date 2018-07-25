@@ -38,7 +38,7 @@ Ext.define('Mollie.RefundWindow', {
             'bodyPadding': 15,
             'width': '100%',
             'xname': 'panel',
-            'html': 'You have selected to refund this order. Please enter the amount to refund to continue.',
+            'html': '{s name="please_enter_amount_to_refund" namespace="backend/mollie/plugins"}You have selected to refund this order. Please enter the amount to refund to continue.{/s}',
             'border': false,
             'flex': 2
         },
@@ -61,12 +61,12 @@ Ext.define('Mollie.RefundWindow', {
                     'border': false,
                     'items':[
                         {
-                            'html': 'Customer name:',
+                            'html': '{s name="customer_name" namespace="backend/mollie/plugins"}Customer name:{/s}',
                             'width': 180,
                             'style': 'border: none'
                         },
                         {
-                            'html': 'Josse Zwols',
+                            'html': '...',
                             'flex': 1,
                             'width': 220,
                             'id': 'customer_name'
@@ -74,26 +74,26 @@ Ext.define('Mollie.RefundWindow', {
 
                         },
                         {
-                            'html': 'Order number:'
+                            'html': '{s name="order_number" namespace="backend/mollie/plugins"}Order number:{/s}'
                         },
                         {
-                            'html': '2018.2039',
+                            'html': '...',
                             'id': 'order_number'
                         },
                         {
-                            'html': 'Total order amount:'
+                            'html': '{s name="total_order_value" namespace="backend/mollie/plugins"}Total order value:{/s}'
                         },
                         {
-                            'html': 'EUR 20,30',
+                            'html': '...',
                             'id': 'order_amount'
                         },
                         {
-                            'html': 'Amount to refund:'
+                            'html': '{s name="amount_to_refund" namespace="backend/mollie/plugins"}Amount to refund:{/s}'
                         },
                         {
                             'xtype': 'textfield',
                             'width': 140,
-                            'value': '20,30',
+                            'value': '0,00',
                             'id':'order_amount_input'
                         }
 
@@ -137,7 +137,7 @@ Ext.define('Mollie.RefundWindow', {
 
                                 var scope = this;
 
-                                Ext.MessageBox.confirm('Perform refund', 'Are you sure you want to refund this amount?', function(btn){
+                                Ext.MessageBox.confirm('Perform refund', '{s name="are_you_sure_to_refund" namespace="backend/mollie/plugins"}Are you sure you want to refund this amount?{/s}', function(btn){
                                     if(btn === 'yes'){
                                         //some code
 
