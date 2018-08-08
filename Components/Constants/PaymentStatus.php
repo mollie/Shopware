@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.2
+	// Mollie Shopware Plugin Version: 1.2.3
 
 namespace MollieShopware\Components\Constants;
 
