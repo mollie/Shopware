@@ -14,7 +14,7 @@ use Shopware\Components\Model\ModelManager;
 class Schema
 {
     /**
-     * @var Shopware\Components\Model\ModelManager
+     * @var \Shopware\Components\Model\ModelManager
      */
     protected $em;
 

@@ -12,25 +12,6 @@ namespace MollieShopware\Components\Mollie;
             
         }
 
-//        public function persistCurrentBasket($sOrder)
-//        {
-//
-//            // persist order
-//            // temporarily turn off sending emails
-//
-//            $config = Shopware()->Container()->get('config');
-//            $config->sendOrderMail = false;
-//
-//
-//            return $sOrder->persistBasket();
-//
-//        }
-
-        public function getOrderFromDatabase($order_id)
-        {
-
-        }
-
         public function checksum()
         {
 
@@ -43,14 +24,7 @@ namespace MollieShopware\Components\Mollie;
 
         }
 
-        public function getOrderIdBySignature($signature)
-        {
 
-
-
-
-
-        }
 
 
 
