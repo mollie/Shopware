@@ -309,7 +309,9 @@ class MollieShopware extends Plugin
     {
         require_once $this->getPath() . '/vendor/autoload.php';
 
-        $config = new Config($this->container->get('shopware.plugin.cached_config_reader'));
+        $render= $this->container->get('shopware.plugin.cached_config_reader');
+
+        $config = new Config($render);
         $factory = new MollieApiFactory($config);
         return $factory->create();
     }

@@ -166,7 +166,7 @@ namespace MollieShopware\Components\Mollie;
          */
         public function hasSession()
         {
-            return true && Shopware()->Session()->offsetGet('userId');
+            return Shopware()->Session()->offsetGet('userId');
         }
 
 
