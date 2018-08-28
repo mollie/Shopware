@@ -48,7 +48,7 @@ function replace_in_dir($dirname, $find, $replace, $depth = 0)
     }
 
 
-    replace_in_dir(realpath(__DIR__ . '/..') . '/', 'GuzzleHttpV6', 'GuzzleHttpV6V6');
+    replace_in_dir(realpath(__DIR__ . '/..') . '/', 'GuzzleHttp', 'GuzzleHttpV6');
 
 
 ?>
