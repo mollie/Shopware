@@ -2,6 +2,15 @@
 
 	// Mollie Shopware Plugin Version: 1.2.3
 
+/*
+ *
+ * Remove GIT files from vendor folder (to prevent submodule creation)
+ *
+ * find vendor -type d -name \.git -exec rm -rf \{\} \;
+ *
+ *
+ * */
+
 function replace_in_dir($dirname, $find, $replace, $depth = 0)
     {
 
