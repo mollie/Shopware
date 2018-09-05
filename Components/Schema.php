@@ -21,7 +21,7 @@ class Schema
     public function __construct(ModelManager $models)
     {
         $this->em = $models;
-        $this->schemaTool = $schemaTool;
+//        $this->schemaTool = $schemaTool;
     }
 
     public function create($className)
