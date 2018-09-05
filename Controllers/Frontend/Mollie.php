@@ -57,6 +57,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $payment_id = $payment_service->createPaymentEntry($this, $signature)
             ->getID();
 
+
+        /*
+         * Save our current order in the database. This returns an order
+         * number which we can use in our payment description.
+         *
+         * We do NOT send a thank you email at this point. Payment status
+         * remains OPEN for now.
+         * */
+        $orderNumber = $this->saveOrder($payment_id, $signature, PaymentStatus::OPEN, false);
+
         $webhookUrl = $this->Front()->Router()->assemble([
 
             'controller' => 'Mollie',
