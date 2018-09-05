@@ -51,7 +51,7 @@ namespace MollieShopware\Components\Mollie;
          * @param string $payment_method The payment method name to be used
          * @return object The Mollie payment object (as described in the API docs)
          */
-        public function startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency, $payment_method)
+        public function startTransaction($order_number, $signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency, $payment_method)
         {
 
             $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
@@ -62,7 +62,7 @@ namespace MollieShopware\Components\Mollie;
                     'value' => number_format($amount, 2, '.', ''),
                     'currency' => $currency,
                 ],
-                'description' => 'Order #' . $payment_id,
+                'description' => 'Order #' . $order_number,
                 'redirectUrl' => $returnUrl,
                 'webhookUrl' => $webhookUrl,
                 'method' => str_replace('mollie_', '', $payment_method),

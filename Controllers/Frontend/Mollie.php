@@ -41,6 +41,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function directAction()
     {
 
+        /**
+         *
+         * @var \MollieShopware\Components\Mollie\OrderService $order_service
+         * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
+         *
+         */
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
@@ -65,7 +71,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * We do NOT send a thank you email at this point. Payment status
          * remains OPEN for now.
          * */
-        $orderNumber = $this->saveOrder($payment_id, $signature, PaymentStatus::OPEN, false);
+        $order_number = $this->saveOrder($payment_id, $signature, PaymentStatus::OPEN, false);
 
         $webhookUrl = $this->Front()->Router()->assemble([
 
@@ -102,7 +108,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // create new Mollie transaction and store transaction ID in database
         try{
-            $transaction = $payment_service->startTransaction($signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency, $payment_method);
+            $transaction = $payment_service->startTransaction($order_number, $signature, $returnUrl, $webhookUrl, $payment_id, $this->getAmount(), $currency, $payment_method);
         }
         catch (\Exception $e){
             return $this->redirectBack($e->getMessage());
@@ -117,6 +123,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
     public function returnAction()
     {
+
+        return $this->redirectBack('Payment failed');
+
+        /**
+         *
+         * @var \MollieShopware\Components\Mollie\OrderService $order_service
+         * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
+         *
+         */
 
         $order_service = Shopware()->Container()
             ->get('mollie_shopware.order_service');
