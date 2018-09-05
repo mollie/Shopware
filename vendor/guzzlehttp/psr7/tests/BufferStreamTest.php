@@ -3,7 +3,7 @@ namespace GuzzleHttpV6\Tests\Psr7;
 
 use GuzzleHttpV6\Psr7\BufferStream;
 
-class BufferStreamTest extends \PHPUnit_Framework_TestCase
+class BufferStreamTest extends BaseTest
 {
     public function testHasMetadata()
     {

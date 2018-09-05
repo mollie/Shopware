@@ -8,10 +8,18 @@ use GuzzleHttpV6\Exception\GuzzleException;
 use GuzzleHttpV6\Psr7\Request;
 use Mollie\Api\Endpoints\CustomerEndpoint;
 use Mollie\Api\Endpoints\CustomerPaymentsEndpoint;
+use Mollie\Api\Endpoints\InvoiceEndpoint;
 use Mollie\Api\Endpoints\MandateEndpoint;
 use Mollie\Api\Endpoints\MethodEndpoint;
+use Mollie\Api\Endpoints\OrderEndpoint;
+use Mollie\Api\Endpoints\OrderLineEndpoint;
+use Mollie\Api\Endpoints\OrderRefundEndpoint;
 use Mollie\Api\Endpoints\PaymentEndpoint;
+use Mollie\Api\Endpoints\PaymentRefundEndpoint;
+use Mollie\Api\Endpoints\ProfileEndpoint;
+use Mollie\Api\Endpoints\RefundEndpoint;
 use Mollie\Api\Endpoints\SettlementsEndpoint;
+use Mollie\Api\Endpoints\ShipmentEndpoint;
 use Mollie\Api\Endpoints\SubscriptionEndpoint;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
@@ -23,7 +31,7 @@ class MollieApiClient
     /**
      * Version of our client.
      */
-    const CLIENT_VERSION = "2.0.0";
+    const CLIENT_VERSION = "2.0.11";
 
     /**
      * Endpoint of the remote API.
@@ -41,6 +49,12 @@ class MollieApiClient
     const HTTP_GET = "GET";
     const HTTP_POST = "POST";
     const HTTP_DELETE = "DELETE";
+    const HTTP_PATCH = "PATCH";
+
+    /**
+     * HTTP status codes
+     */
+    const HTTP_NO_CONTENT = 204;
 
     /**
      * @var ClientInterface
@@ -100,6 +114,60 @@ class MollieApiClient
     public $mandates;
 
     /**
+     * @var ProfileEndpoint
+     */
+    public $profiles;
+
+    /**
+     * RESTful Invoice resource.
+     *
+     * @var InvoiceEndpoint
+     */
+    public $invoices;
+
+    /**
+     * RESTful Order resource.
+     *
+     * @var OrderEndpoint
+     */
+    public $orders;
+
+    /**
+     * RESTful OrderLine resource.
+     *
+     * @var OrderLineEndpoint
+     */
+    public $orderLines;
+
+    /**
+     * RESTful Shipment resource.
+     *
+     * @var ShipmentEndpoint
+     */
+    public $shipments;
+
+    /**
+     * RESTful Refunds resource.
+     *
+     * @var RefundEndpoint
+     */
+    public $refunds;
+
+    /**
+     * RESTful Payment Refunds resource.
+     *
+     * @var PaymentRefundEndpoint
+     */
+    public $paymentRefunds;
+
+    /**
+     * RESTful Order Refunds resource.
+     *
+     * @var OrderRefundEndpoint
+     */
+    public $orderRefunds;
+
+    /**
      * @var string
      */
     protected $apiKey;
@@ -128,7 +196,11 @@ class MollieApiClient
      */
     public function __construct(ClientInterface $httpClient = null)
     {
-        $this->httpClient = $httpClient ? $httpClient : new Client();
+        $this->httpClient = $httpClient ?
+            $httpClient :
+            new Client([
+                \GuzzleHttpV6\RequestOptions::VERIFY => \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+            ]);
 
         $compatibilityChecker = new CompatibilityChecker();
         $compatibilityChecker->checkCompatibility();
@@ -149,14 +221,25 @@ class MollieApiClient
         $this->subscriptions = new SubscriptionEndpoint($this);
         $this->customerPayments = new CustomerPaymentsEndpoint($this);
         $this->mandates = new MandateEndpoint($this);
+        $this->invoices = new InvoiceEndpoint($this);
+        $this->profiles = new ProfileEndpoint($this);
+        $this->orders = new OrderEndpoint($this);
+        $this->orderLines = new OrderLineEndpoint($this);
+        $this->orderRefunds = new OrderRefundEndpoint($this);
+        $this->shipments = new ShipmentEndpoint($this);
+        $this->refunds = new RefundEndpoint($this);
+        $this->paymentRefunds = new PaymentRefundEndpoint($this);
     }
 
     /**
      * @param string $url
+     *
+     * @return MollieApiClient
      */
     public function setApiEndpoint($url)
     {
         $this->apiEndpoint = rtrim(trim($url), '/');
+        return $this;
     }
 
     /**
@@ -169,6 +252,8 @@ class MollieApiClient
 
     /**
      * @param string $apiKey The Mollie API key, starting with 'test_' or 'live_'
+     *
+     * @return MollieApiClient
      * @throws ApiException
      */
     public function setApiKey($apiKey)
@@ -181,10 +266,13 @@ class MollieApiClient
 
         $this->apiKey = $apiKey;
         $this->oauthAccess = false;
+        return $this;
     }
 
     /**
      * @param string $accessToken OAuth access token, starting with 'access_'
+     *
+     * @return MollieApiClient
      * @throws ApiException
      */
     public function setAccessToken($accessToken)
@@ -197,10 +285,13 @@ class MollieApiClient
 
         $this->apiKey = $accessToken;
         $this->oauthAccess = true;
+        return $this;
     }
 
     /**
-     * @return bool
+     * Returns null if no API key has been set yet.
+     *
+     * @return bool|null
      */
     public function usesOAuth()
     {
@@ -209,10 +300,13 @@ class MollieApiClient
 
     /**
      * @param string $versionString
+     *
+     * @return MollieApiClient
      */
     public function addVersionString($versionString)
     {
         $this->versionStrings[] = str_replace([" ", "\t", "\n", "\r"], '-', $versionString);
+        return $this;
     }
 
     /**
@@ -233,9 +327,9 @@ class MollieApiClient
      */
     public function performHttpCall($httpMethod, $apiMethod, $httpBody = null)
     {
-       $url = $this->apiEndpoint . "/" . self::API_VERSION . "/" . $apiMethod;
+        $url = $this->apiEndpoint . "/" . self::API_VERSION . "/" . $apiMethod;
 
-       return $this->performHttpCallToFullUrl($httpMethod, $url, $httpBody);
+        return $this->performHttpCallToFullUrl($httpMethod, $url, $httpBody);
     }
 
     /**
@@ -248,7 +342,7 @@ class MollieApiClient
      * @param string $url
      * @param string|null|resource|StreamInterface $httpBody
      *
-     * @return object
+     * @return object|null
      * @throws ApiException
      *
      * @codeCoverageIgnore
@@ -269,8 +363,11 @@ class MollieApiClient
             'Accept' => "application/json",
             'Authorization' => "Bearer {$this->apiKey}",
             'User-Agent' => $userAgent,
-            'X-Mollie-Client-Info' => php_uname(),
         ];
+
+        if (function_exists("php_uname")) {
+            $headers['X-Mollie-Client-Info'] = php_uname();
+        }
 
         $request = new Request($httpMethod, $url, $headers, $httpBody);
 
@@ -291,13 +388,17 @@ class MollieApiClient
      * Parse the PSR-7 Response body
      *
      * @param ResponseInterface $response
-     * @return object
+     * @return object|null
      * @throws ApiException
      */
     private function parseResponseBody(ResponseInterface $response)
     {
         $body = $response->getBody()->getContents();
         if (empty($body)) {
+            if ($response->getStatusCode() === self::HTTP_NO_CONTENT) {
+                return null;
+            }
+
             throw new ApiException("No response body found.");
         }
 
@@ -327,5 +428,36 @@ class MollieApiClient
         }
 
         return $object;
+    }
+
+    /**
+     * Serialization can be used for caching. Of course doing so can be dangerous but some like to live dangerously.
+     *
+     * \serialize() should be called on the collections or object you want to cache.
+     *
+     * We don't need any property that can be set by the constructor, only properties that are set by setters.
+     *
+     * Note that the API key is not serialized, so you need to set the key again after unserializing if you want to do
+     * more API calls.
+     *
+     * @deprecated
+     * @return string[]
+     */
+    public function __sleep()
+    {
+        return ["apiEndpoint"];
+    }
+
+    /**
+     * When unserializing a collection or a resource, this class should restore itself.
+     *
+     * Note that if you use a custom GuzzleClient, this client is lost. You can't re set the Client, so you should
+     * probably not use this feature.
+     *
+     * @throws IncompatiblePlatform If suddenly unserialized on an incompatible platform.
+     */
+    public function __wakeup()
+    {
+        $this->__construct();
     }
 }

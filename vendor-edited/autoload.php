@@ -5,7 +5,7 @@
 /*
      *
      * Shopware uses GuzzleClient v 5.3.2, Mollie uses 6.3.x. To overcome this
-     * we changed the namespace for Guzzle in Mollie to GuzzleHttpV6V6V6V6
+     * we changed the namespace for Guzzle in Mollie to GuzzleHttpV6
      *
      * This function loads the V6 version before composer would, making sure
      * that the classes are available when needed for Mollie.

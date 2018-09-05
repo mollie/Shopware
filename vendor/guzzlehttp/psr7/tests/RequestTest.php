@@ -8,7 +8,7 @@ use GuzzleHttpV6\Psr7\Uri;
 /**
  * @covers GuzzleHttpV6\Psr7\Request
  */
-class RequestTest extends \PHPUnit_Framework_TestCase
+class RequestTest extends BaseTest
 {
     public function testRequestUriMayBeString()
     {

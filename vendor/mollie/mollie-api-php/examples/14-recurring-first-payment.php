@@ -2,6 +2,7 @@
 /*
  * Example 14 - How to create a first payment to allow recurring payments later.
  */
+
 try {
     /*
      * Initialize the Mollie API library with your API key or OAuth access token.
@@ -18,7 +19,7 @@ try {
      * Generate a unique order id for this example. It is important to include this unique attribute
      * in the redirectUrl (below) so a proper return page can be shown to the customer.
      */
-    $order_id = time();
+    $orderId = time();
 
     /*
      * Determine the url parts to these example files.
@@ -32,41 +33,45 @@ try {
      *
      * See: https://docs.mollie.com/reference/v2/customers-api/create-customer-payment
      */
-    $payment = $customer->createPayment(array(
+    $payment = $customer->createPayment([
         "amount" => [
-            "value" => "10.00",
+            "value" => "10.00", // You must send the correct number of decimals, thus we enforce the use of strings
             "currency" => "EUR"
         ],
-        "description" => "A first payment for recurring",
-        "redirectUrl" => "{$protocol}://{$hostname}{$path}/03-return-page.php?order_id={$order_id}",
+        "description" => "First payment - Order #{$orderId}",
+        "redirectUrl" => "{$protocol}://{$hostname}{$path}/03-return-page.php?order_id={$orderId}",
         "webhookUrl" => "{$protocol}://{$hostname}{$path}/02-webhook-verification.php",
+        "metadata" => [
+            "order_id" => $orderId,
+        ],
 
         // Flag this payment as a first payment to allow recurring payments later.
         "sequenceType" => \Mollie\Api\Types\SequenceType::SEQUENCETYPE_FIRST,
-    ));
+    ]);
 
     /*
      * In this example we store the order with its payment status in a database.
      */
-    database_write($order_id, $payment->status);
+    database_write($orderId, $payment->status);
 
     /*
      * Send the customer off to complete the payment.
      * This request should always be a GET, thus we enforce 303 http response code
-	 *
-	 * After completion, the customer will have a pending or valid mandate that can be
-	 * used for recurring payments and subscriptions.
-	 */
+     *
+     * After completion, the customer will have a pending or valid mandate that can be
+     * used for recurring payments and subscriptions.
+     */
     header("Location: " . $payment->getCheckoutUrl(), true, 303);
 } catch (\Mollie\Api\Exceptions\ApiException $e) {
     echo "API call failed: " . htmlspecialchars($e->getMessage());
 }
+
 /*
  * NOTE: This example uses a text file as a database. Please use a real database like MySQL in production code.
  */
-function database_write($order_id, $status)
+function database_write($orderId, $status)
 {
-    $order_id = intval($order_id);
-    $database = dirname(__FILE__) . "/orders/order-{$order_id}.txt";
+    $orderId = intval($orderId);
+    $database = dirname(__FILE__) . "/orders/order-{$orderId}.txt";
     file_put_contents($database, $status);
 }
