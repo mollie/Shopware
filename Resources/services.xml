@@ -6,6 +6,12 @@
 
     <services>
 
+        <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Mollie\BasketService">
+
+            <argument type="service" id="models" />
+
+        </service>
+
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Mollie\PaymentService">
 
             <argument type="service" id="mollie_shopware.api_factory" />
