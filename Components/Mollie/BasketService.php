@@ -64,7 +64,7 @@ class BasketService
             // get order details
             $order_details = $order->getDetails();
 
-            if (isset($order_details)) {
+            if (!empty($order_details)) {
                 // clear basket
                 $this->basketModule->clearBasket();
 
