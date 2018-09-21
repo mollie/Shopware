@@ -15,19 +15,19 @@ class BasketService
 {
     /**
      *
-     * @var ModelManager
+     * @var ModelManager $modelManager
      */
     private $modelManager;
 
     /**
      *
-     * @var Shopware\Models\Order\Basket
+     * @var sBasket $basketModule
      */
     private $basketModule;
 
     /**
      *
-     * @var Shopware\Models\Order\Order
+     * @var sOrder $orderModule
      */
     private $orderModule;
 
@@ -51,15 +51,9 @@ class BasketService
      */
     public function restoreBasket($order_id)
     {
-        // get order repository
-        $order_repository = $this->modelManager->getRepository(Order::class);
+        // get order from database
+        $order = $this->getOrderById($order_id);
 
-        // find order
-        $order = $order_repository->findOneBy([
-            'id' => $order_id
-        ]);
-
-        // check if the order is an instance of the order model
         if (!empty($order)) {
             // get order details
             $order_details = $order->getDetails();
@@ -73,34 +67,23 @@ class BasketService
                     $result = false;
 
                     if ($order_detail->getMode() == 2) {
-                        // get voucher repository
-                        $voucher_repository = $this->modelManager->getRepository(Voucher::class);
-
-                        // find voucher
-                        $voucher = $voucher_repository->findOneBy([
-                            'id' => $order_detail->getArticleId()
-                        ]);
+                        // get voucher from database
+                        $voucher = $this->getVoucherById($order_detail->getArticleId());
 
                         if (!empty($voucher)) {
                             // remove voucher from original order
-                            $db = shopware()->container()->get('db');
-                            $q = $db->prepare('
-                                DELETE FROM 
-                                s_order_details 
-                                WHERE id=?
-                            ');
-
-                            $q->execute([
-                                $order_detail->getId(),
-                            ]);
+                            $this->removeOrderDetail($order_detail->getId());
 
                             // set comment
-                            $comment = $order->getInternalComment();
-                            $comment = $comment . (strlen($comment) ? "\n\n" : "") . "Order canceled after failed Mollie-payment. Voucher (" . $voucher->getVoucherCode() . ") deleted from this order and added to renewed order.";
-                            $order->setInternalComment($comment);
+                            $comment_text = "De order is geannuleerd nadat Mollie-payment. Voucher (" .
+                                $voucher->getVoucherCode() .
+                                ") deleted from this order and added to renewed order.";
+
+                            // append internal comment
+                            $order = $this->appendInternalComment($order, $comment_text);
 
                             // add voucher to basket
-                            $result = $this->basketModule->sAddVoucher($voucher->getVoucherCode());
+                            $this->basketModule->sAddVoucher($voucher->getVoucherCode());
 
                             // restore order price
                             $order->setInvoiceAmount($order->getInvoiceAmount() - $order_detail->getPrice());
@@ -111,16 +94,109 @@ class BasketService
                         }
                     } else {
                         // add product to basket
-                        $result = $this->basketModule->sAddArticle($order_detail->getArticleNumber(), $order_detail->getQuantity());
+                        $this->basketModule->sAddArticle(
+                            $order_detail->getArticleNumber(),
+                            $order_detail->getQuantity()
+                        );
                     }
                 }
 
                 // update status of original order
-                $this->orderModule->setOrderStatus($order->getId(), Status::ORDER_STATE_CANCELLED_REJECTED);
+                $this->orderModule->setOrderStatus(
+                    $order->getId(),
+                    Status::ORDER_STATE_CANCELLED_REJECTED
+                );
             }
         }
 
         // refresh the basket
         $this->basketModule->sRefreshBasket();
+    }
+
+    /**
+     * Get an order by it's id
+     *
+     * @param int $order_id
+     *
+     * @return Order $order
+     */
+    public function getOrderById($order_id)
+    {
+        // get order repository
+        $order_repository = $this->modelManager->getRepository(Order::class);
+
+        // find order
+        $order = $order_repository->findOneBy([
+            'id' => $order_id
+        ]);
+
+        return $order;
+    }
+
+    /**
+     * Get a voucher by it's id
+     *
+     * @param int $voucher_id
+     *
+     * @return Voucher $voucher
+     */
+    public function getVoucherById($voucher_id)
+    {
+        // get voucher repository
+        $voucher_repository = $this->modelManager->getRepository(Voucher::class);
+
+        // find voucher
+        $voucher = $voucher_repository->findOneBy([
+            'id' => $voucher_id
+        ]);
+
+        return $voucher;
+    }
+
+    /**
+     * Remove detail from order
+     *
+     * @param int $order_detail_id
+     *
+     * @return int $result
+     */
+    public function removeOrderDetail($order_detail_id)
+    {
+        // init db
+        $db = shopware()->container()->get('db');
+
+        // prepare database statement
+        $q = $db->prepare('
+            DELETE FROM 
+            s_order_details 
+            WHERE id=?
+        ');
+
+        // execute sql query
+        $result = $q->execute([
+            $order_detail_id,
+        ]);
+
+        return $result;
+    }
+
+    /**
+     * Append internal comment on order
+     *
+     * @param Order $order
+     * @param string $text
+     *
+     * @return Order $order;
+     */
+    public function appendInternalComment($order, $text)
+    {
+        // ger internal comment on order
+        $comment = $order->getInternalComment();
+
+        // append text to order
+        $comment = $comment . (strlen($comment) ? "\n\n" : "") . $text;
+
+        // update the internal comment
+        return $order->setInternalComment($comment);
     }
 }
