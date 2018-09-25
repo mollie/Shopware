@@ -62,6 +62,9 @@ class BasketService
                 // clear basket
                 $this->basketModule->clearBasket();
 
+                // set comment
+                $comment_text = "De order is geannuleerd nadat de betaling via Mollie is mislukt. ";
+
                 // iterate over products and add them to the basket
                 foreach ($order_details as $order_detail) {
                     $result = false;
@@ -75,22 +78,14 @@ class BasketService
                             $this->removeOrderDetail($order_detail->getId());
 
                             // set comment
-                            $comment_text = "De order is geannuleerd nadat Mollie-payment. Voucher (" .
-                                $voucher->getVoucherCode() .
-                                ") deleted from this order and added to renewed order.";
-
-                            // append internal comment
-                            $order = $this->appendInternalComment($order, $comment_text);
+                            $comment_text = $comment_text . "Kortingscode (" . $voucher->getVoucherCode() .
+                                ") verwijderd van deze order vrijgegeven aan de opnieuw opgebouwde winkelmand. ";
 
                             // add voucher to basket
                             $this->basketModule->sAddVoucher($voucher->getVoucherCode());
 
                             // restore order price
                             $order->setInvoiceAmount($order->getInvoiceAmount() - $order_detail->getPrice());
-
-                            // save order
-                            $this->modelManager->persist($order);
-                            $this->modelManager->flush();
                         }
                     } else {
                         // add product to basket
@@ -100,6 +95,13 @@ class BasketService
                         );
                     }
                 }
+
+                // append internal comment
+                $order = $this->appendInternalComment($order, $comment_text);
+
+                // save order
+                $this->modelManager->persist($order);
+                $this->modelManager->flush();
 
                 // update status of original order
                 $this->orderModule->setOrderStatus(
