@@ -67,5 +67,9 @@
             <tag name="shopware.event_subscriber" />
         </service>
 
+        <service id="mollie_shopware.subscriber.admin_shipping" class="MollieShopware\Subscriber\AdminShippingSubscriber">
+            <tag name="shopware.event_subscriber" />
+        </service>
+
     </services>
 </container>
