@@ -4,6 +4,7 @@
 
 namespace MollieShopware;
 
+use MollieShopware\Models\OrderDetailMollieID;
 use Shopware\Components\Console\Application;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -323,6 +324,7 @@ class MollieShopware extends Plugin
     {
         $schema = new Schema($this->container->get('models'));
         $schema->update([ Transaction::class ]);
+        $schema->update([ OrderDetailMollieID::class ]);
     }
 
     /**

@@ -5,6 +5,7 @@
 namespace MollieShopware\Components\Mollie;
 
     use MollieShopware\Components\Constants\PaymentStatus;
+    use MollieShopware\Models\OrderDetailMollieID;
     use MollieShopware\Models\Transaction;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Tax\Tax;
@@ -53,9 +54,19 @@ namespace MollieShopware\Components\Mollie;
             $mollie_prepared = $this->prepareOrderForMollie($order);
             $mollie_payment = $this->api->orders->create($mollie_prepared);
 
+            $repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
 
-            $this->
 
+            foreach($mollie_payment->lines as $index => $line){
+
+                $item = new OrderDetailMollieID();
+
+                $item->setOrderId($order->getId());
+                $item->setMollieRemoteID($line->id);
+
+                $repository->save($item);
+
+            }
 
             return $mollie_payment->getCheckoutUrl();
 
