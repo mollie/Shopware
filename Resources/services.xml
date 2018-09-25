@@ -12,6 +12,12 @@
 
         </service>
 
+        <service id="test_orders.shipment_service" class="TestOrders\Components\Mollie\ShipmentService">
+            
+            <argument type="service" id="models" />
+
+        </service>
+
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Mollie\PaymentService">
 
             <argument type="service" id="mollie_shopware.api_factory" />
