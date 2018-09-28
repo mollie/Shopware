@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Components\Mollie;
 
+    use Mollie\Api\MollieApiClient;
     use MollieShopware\Components\Constants\PaymentStatus;
     use MollieShopware\Models\OrderDetailMollieID;
     use MollieShopware\Models\OrderDetailMollieIDRepository;
@@ -96,6 +97,29 @@ namespace MollieShopware\Components\Mollie;
             ];
 
             $this->api->shipments->create($shipment);
+
+
+        }
+
+
+        /**
+         * @param Order $order
+         * @return \Mollie\Api\Resources\Order
+         */
+        public function getPaymentObject(Order $order)
+        {
+
+            /**
+             * @var TransactionRepository $transaction_repository
+             * @var Transaction $transaction
+             */
+
+            $transaction_repository = Shopware()->container()->get('models')->getRepository(Transaction::class);
+            $transaction = $transaction_repository->getMostRecentTransactionForOrder($order);
+
+            $mollie_payment = $this->api->orders->get($transaction->getMollieID());
+
+            return $mollie_payment;
 
 
         }

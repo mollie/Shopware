@@ -108,18 +108,30 @@
         {
 
             /**
+             * @var \MollieShopware\Components\Mollie\OrderService $order_service
              * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
-             **/
-
+             * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $order_repository
+             * @var \MollieShopware\Models\Transaction $transaction
+             * @var \MollieShopware\Components\Mollie\BasketService $basket_service
+             */
             $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
+
             $order = $this->getOrder();
 
-            if ($payment_service->checkPaymentStatus($order)) {
-                return $this->redirectBack('Payment failed');
+            $mollie_payment = $payment_service->getPaymentObject($order);
+
+
+            if ($mollie_payment->isPaid()){
+                die('paid!');
             }
-            else {
-                return $this->redirectToFinish();
+            else{
+
+                $basket_service = Shopware()->Container()->get('mollie_shopware.basket_service');
+                $basket_service->restoreBasket($order);
+
+                return $this->redirect('/checkout/confirm');
             }
+
 
         }
 

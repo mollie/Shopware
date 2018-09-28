@@ -58,4 +58,15 @@ class TransactionRepository extends ModelRepository
     }
 
 
+    /**
+     * @param Order $order
+     * @return Transaction
+     */
+    public function getMostRecentTransactionForOrder(Order $order)
+    {
+
+        return $this->findOneBy(['order_id'=> $order->getId()]);
+
+    }
+
 }

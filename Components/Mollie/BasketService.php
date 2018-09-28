@@ -51,8 +51,15 @@ class BasketService
      */
     public function restoreBasket($orderId)
     {
-        // get order from database
-        $order = $this->getOrderById($orderId);
+
+        if (is_object($orderId)) {
+            $order = $orderId;
+        }
+        else{
+            // get order from database
+            $order = $this->getOrderById($orderId);
+        }
+
 
         if (!empty($order)) {
             // get order details
