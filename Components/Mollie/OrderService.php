@@ -5,7 +5,7 @@
 namespace MollieShopware\Components\Mollie;
 
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Order\Status;
+use Shopware\Models\Order\Order;
 use MollieShopware\Models\OrderDetailMollieID;
 
 class OrderService
@@ -28,33 +28,33 @@ class OrderService
     }
 
     /**
-     * Get a Shipment by it's order id
+     * Get an order by it's id
      *
      * @param int $orderId
      *
-     * @return Status $status
+     * @return Order $order
      */
     public function getOrderById($orderId)
     {
-        $status = null;
+        $order = null;
 
         try {
-            // get shipment repository
-            $statusRepo = $this->modelManager->getRepository(Status::class);
+            // get order repository
+            $orderRepo = $this->modelManager->getRepository(Order::class);
 
-            // find status
-            $status = $statusRepo->findOneBy([
+            // find order
+            $order = $orderRepo->findOneBy([
                 'id' => $orderId
             ]);
         }
         catch (Exception $ex) {
             // log error
-            if (!empty($status)) {
-                $statusRepo->addException($status, $ex);
+            if ($order != null) {
+                $orderRepo->addException($order, $ex);
             }
         }
 
-        return $status;
+        return $order;
     }
 
     /**
