@@ -263,6 +263,7 @@ namespace MollieShopware\Components\Mollie;
 
             /**
              * @var \Shopware\Models\Order\Billing $address
+             * @var \Shopware\Models\Order\Shipping $shipping
              */
             if ($type === 'billing'){
                 //\Shopware\Models\Order\Billing
@@ -271,6 +272,7 @@ namespace MollieShopware\Components\Mollie;
             else{
                 //\Shopware\Models\Order\Shipping
                 $address = $order->getShipping();
+                $shipping = $order->getShipping();
             }
 
             $customer = $order->getCustomer();
@@ -284,7 +286,7 @@ namespace MollieShopware\Components\Mollie;
                 'familyName'            => $address->getLastName(),
                 'email'                 => $customer->getEmail(),
                 //'phone'                 => $customer->getPho
-                'streetAndNumber'       => $address->getStreet() . ' ' . $address->getNumber(),
+                'streetAndNumber'       => $address->getStreet(),
                 'streetAdditional'      => $address->getAdditionalAddressLine1(),
                 'postalCode'            => $address->getZipCode(),
                 'city'                  => $address->getCity(),
