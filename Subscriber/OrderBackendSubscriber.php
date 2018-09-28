@@ -5,7 +5,7 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use MollieShopware\Components\Mollie\ShipmentService;
+use MollieShopware\Components\Mollie\OrderService;
 use MollieShopware\Models\OrderDetailMollieID;
 use Shopware\Models\Order\Status;
 use Exception;
