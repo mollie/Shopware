@@ -48,12 +48,17 @@ namespace MollieShopware\Components\Mollie;
 
         /**
          * Start a Mollie transaction and return Mollie payment object
-         **/
+         *
+         * @param Order $order
+         * @param Transaction $transaction
+         * @return null|string
+         */
         public function startTransaction(Order $order, Transaction $transaction)
         {
 
             /**
              * @var TransactionRepository $transaction_repository
+             * @var OrderDetailMollieIDRepository $order_detail_repository
              */
 
             $mollie_prepared = $this->prepareOrderForMollie($order);
@@ -90,6 +95,8 @@ namespace MollieShopware\Components\Mollie;
             $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
             $lines = $order_detail_repository->getShipmentLines($order);
 
+
+            //@todo: throw exceptions if order is not a Mollie paid order
 
 
             $shipment = [

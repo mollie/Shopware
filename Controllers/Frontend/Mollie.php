@@ -123,9 +123,7 @@
 
 
             if ($mollie_payment->isPaid()){
-                //$this->Request()->getParam('sUniqueID')
                 return $this->redirect('/checkout/finish?sUniqueID=' . $order->getTemporaryId());
-
             }
             else{
 
