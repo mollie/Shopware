@@ -333,7 +333,11 @@ namespace MollieShopware\Components\Mollie;
 
         }
 
-        private function preparePaymentDataForMollie(Order $order){ return []; }
+        private function preparePaymentDataForMollie(Order $order){
+
+            return [];
+
+        }
         private function preparePaymentMetaDataForMollie(Order $order){ return []; }
 
         private function prepareRedirectUrl(Order $order, $type = 'redirect')
