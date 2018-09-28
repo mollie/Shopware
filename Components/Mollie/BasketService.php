@@ -46,58 +46,58 @@ class BasketService
     /**
      * Restore Basket
      *
-     * @param int $order_id
+     * @param int $orderId
      *
      */
-    public function restoreBasket($order_id)
+    public function restoreBasket($orderId)
     {
         // get order from database
-        $order = $this->getOrderById($order_id);
+        $order = $this->getOrderById($orderId);
 
         if (!empty($order)) {
             // get order details
-            $order_details = $order->getDetails();
+            $orderDetails = $order->getDetails();
 
-            if (!empty($order_details)) {
+            if (!empty($orderDetails)) {
                 // clear basket
                 $this->basketModule->clearBasket();
 
                 // set comment
-                $comment_text = "De order is geannuleerd nadat de betaling via Mollie is mislukt. ";
+                $commentText = "De order is geannuleerd nadat de betaling via Mollie is mislukt. ";
 
                 // iterate over products and add them to the basket
-                foreach ($order_details as $order_detail) {
+                foreach ($orderDetails as $orderDetail) {
                     $result = false;
 
-                    if ($order_detail->getMode() == 2) {
+                    if ($orderDetail->getMode() == 2) {
                         // get voucher from database
-                        $voucher = $this->getVoucherById($order_detail->getArticleId());
+                        $voucher = $this->getVoucherById($orderDetail->getArticleId());
 
                         if (!empty($voucher)) {
                             // remove voucher from original order
-                            $this->removeOrderDetail($order_detail->getId());
+                            $this->removeOrderDetail($orderDetail->getId());
 
                             // set comment
-                            $comment_text = $comment_text . "Kortingscode (" . $voucher->getVoucherCode() .
+                            $commentText = $comment_text . "Kortingscode (" . $voucher->getVoucherCode() .
                                 ") verwijderd van deze order vrijgegeven aan de opnieuw opgebouwde winkelmand. ";
 
                             // add voucher to basket
                             $this->basketModule->sAddVoucher($voucher->getVoucherCode());
 
                             // restore order price
-                            $order->setInvoiceAmount($order->getInvoiceAmount() - $order_detail->getPrice());
+                            $order->setInvoiceAmount($order->getInvoiceAmount() - $orderDetail->getPrice());
                         }
                     } else {
                         // add product to basket
                         $this->basketModule->sAddArticle(
-                            $order_detail->getArticleNumber(),
-                            $order_detail->getQuantity()
+                            $orderDetail->getArticleNumber(),
+                            $orderDetail->getQuantity()
                         );
                     }
                 }
 
                 // append internal comment
-                $order = $this->appendInternalComment($order, $comment_text);
+                $order = $this->appendInternalComment($order, $commentText);
 
                 // save order
                 $this->modelManager->persist($order);
@@ -118,18 +118,18 @@ class BasketService
     /**
      * Get an order by it's id
      *
-     * @param int $order_id
+     * @param int $orderId
      *
      * @return Order $order
      */
-    public function getOrderById($order_id)
+    public function getOrderById($orderId)
     {
         // get order repository
-        $order_repository = $this->modelManager->getRepository(Order::class);
+        $orderRepo = $this->modelManager->getRepository(Order::class);
 
         // find order
-        $order = $order_repository->findOneBy([
-            'id' => $order_id
+        $order = $orderRepo->findOneBy([
+            'id' => $orderId
         ]);
 
         return $order;
@@ -142,14 +142,14 @@ class BasketService
      *
      * @return Voucher $voucher
      */
-    public function getVoucherById($voucher_id)
+    public function getVoucherById($voucherId)
     {
         // get voucher repository
-        $voucher_repository = $this->modelManager->getRepository(Voucher::class);
+        $voucherRepo = $this->modelManager->getRepository(Voucher::class);
 
         // find voucher
-        $voucher = $voucher_repository->findOneBy([
-            'id' => $voucher_id
+        $voucher = $voucherRepo->findOneBy([
+            'id' => $voucherId
         ]);
 
         return $voucher;
@@ -162,7 +162,7 @@ class BasketService
      *
      * @return int $result
      */
-    public function removeOrderDetail($order_detail_id)
+    public function removeOrderDetail($orderDetailId)
     {
         // init db
         $db = shopware()->container()->get('db');
@@ -176,7 +176,7 @@ class BasketService
 
         // execute sql query
         $result = $q->execute([
-            $order_detail_id,
+            $orderDetailId,
         ]);
 
         return $result;
