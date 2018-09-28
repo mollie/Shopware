@@ -28,7 +28,6 @@ class OrderBackendSubscriber implements SubscriberInterface
         // vars
         $orderId = $args->getRequest()->getParam('id');
         $order = null;
-        $mollieOrderDetails = null;
 
         // check if we have an order
         if (empty($orderId))
@@ -54,9 +53,13 @@ class OrderBackendSubscriber implements SubscriberInterface
         if ($order->getOrderStatus()->getId() != Status::ORDER_STATE_COMPLETELY_DELIVERED)
             return false;
 
-        // get the order details
+        // send the order to mollie
         try {
-            $mollieOrderDetails = $orderService->getMollieOrderDetailsByOrderId($orderId);
+            // create a payment service
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+
+            // send the order
+            $paymentService->sendOrder($order);
         }
         catch (Exception $ex) {
             // to do: handle the exception
