@@ -42,7 +42,11 @@ class OrderBackendSubscriber implements SubscriberInterface
             $order = $orderService->getOrderById($orderId);
         }
         catch (Exception $ex) {
-            // to do: handle the exception
+            // send exception
+            $this->sendException(
+                'HTTP/1.1 422 Unprocessable Entity Error',
+                $ex->getMessage()
+            );
         }
 
         // check if the order is found
@@ -62,7 +66,18 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService->sendOrder($order);
         }
         catch (Exception $ex) {
-            // to do: handle the exception
+            // send exception
+            $this->sendException(
+                'HTTP/1.1 422 Unprocessable Entity Error',
+                $ex->getMessage()
+            );
         }
+    }
+
+    private function sendException($type, $error)
+    {
+        header($type);
+        header('Content-Type: text/html');
+        die($error);
     }
 }
