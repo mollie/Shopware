@@ -138,6 +138,12 @@ namespace MollieShopware\Components\Mollie;
         private function prepareOrderForMollie(Order $order)
         {
 
+            $payment_method = $order->getPayment()->getName();
+
+            if (substr($payment_method, 0, 7) === 'mollie_'){
+                $payment_method = substr($payment_method, 7);
+            }
+
             $mollie_prepared = [
 
                 'amount'                => null,
@@ -150,7 +156,7 @@ namespace MollieShopware\Components\Mollie;
                 'webhookUrl'            => $this->prepareRedirectUrl($order, 'webhook'),
 
                 'locale'                => $this->prepareLocaleForMollie($order),
-                'method'                => 'ideal',
+                'method'                => $payment_method,
 
                 'payment'               => $this->preparePaymentDataForMollie($order),
                 'metadata'              => $this->preparePaymentMetaDataForMollie($order),
