@@ -4,12 +4,12 @@
 
 namespace MollieShopware\Components\Mollie;
 
-
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Voucher\Voucher;
+use Exception;
 
 class BasketService
 {
@@ -131,13 +131,23 @@ class BasketService
      */
     public function getOrderById($orderId)
     {
-        // get order repository
-        $orderRepo = $this->modelManager->getRepository(Order::class);
+        $order = null;
 
-        // find order
-        $order = $orderRepo->findOneBy([
-            'id' => $orderId
-        ]);
+        try {
+            // get order repository
+            $orderRepo = $this->modelManager->getRepository(Order::class);
+
+            // find order
+            $order = $orderRepo->findOneBy([
+                'id' => $orderId
+            ]);
+        }
+        catch (Exception $ex) {
+            // log error
+            if ($order != null) {
+                $orderRepo->addException($order, $ex);
+            }
+        }
 
         return $order;
     }
@@ -145,19 +155,27 @@ class BasketService
     /**
      * Get a voucher by it's id
      *
-     * @param int $voucher_id
+     * @param int $voucherId
      *
      * @return Voucher $voucher
      */
     public function getVoucherById($voucherId)
     {
-        // get voucher repository
-        $voucherRepo = $this->modelManager->getRepository(Voucher::class);
+        try {
+            // get voucher repository
+            $voucherRepo = $this->modelManager->getRepository(Voucher::class);
 
-        // find voucher
-        $voucher = $voucherRepo->findOneBy([
-            'id' => $voucherId
-        ]);
+            // find voucher
+            $voucher = $voucherRepo->findOneBy([
+                'id' => $voucherId
+            ]);
+        }
+        catch (Exception $ex) {
+            // log error
+            if (!empty($voucher)) {
+                $voucherRepo->addException($voucher, $ex);
+            }
+        }
 
         return $voucher;
     }
@@ -165,26 +183,31 @@ class BasketService
     /**
      * Remove detail from order
      *
-     * @param int $order_detail_id
+     * @param int $orderDetailId
      *
      * @return int $result
      */
     public function removeOrderDetail($orderDetailId)
     {
-        // init db
-        $db = shopware()->container()->get('db');
+        try {
+            // init db
+            $db = shopware()->container()->get('db');
 
-        // prepare database statement
-        $q = $db->prepare('
-            DELETE FROM 
-            s_order_details 
-            WHERE id=?
-        ');
+            // prepare database statement
+            $q = $db->prepare('
+                DELETE FROM 
+                s_order_details 
+                WHERE id=?
+            ');
 
-        // execute sql query
-        $result = $q->execute([
-            $orderDetailId,
-        ]);
+            // execute sql query
+            $result = $q->execute([
+                $orderDetailId,
+            ]);
+        }
+        catch (Exception $ex) {
+            // to do: handle the exception
+        }
 
         return $result;
     }

@@ -113,6 +113,7 @@
              * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $order_repository
              * @var \MollieShopware\Models\Transaction $transaction
              * @var \MollieShopware\Components\Mollie\BasketService $basket_service
+             * @var Order $order
              */
             $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
 
@@ -122,7 +123,9 @@
 
 
             if ($mollie_payment->isPaid()){
-                die('paid!');
+                //$this->Request()->getParam('sUniqueID')
+                return $this->redirect('/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+
             }
             else{
 
