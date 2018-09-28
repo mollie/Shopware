@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Models;
 
+use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelRepository;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -18,19 +19,25 @@ class TransactionRepository extends ModelRepository
      * Create a new transaction for the given order with the given
      * mollie Order object. This stores the mollie ID with the
      * order so it can be recovered later.
-     *
-     * @param Order $order
-     * @param \Mollie\Api\Resources\Order $mollie_order
+     * @param Order|null $order
+     * @param \Mollie\Api\Resources\Order|null $mollie_order
+     * @return \MollieShopware\Models\Transaction
      */
-    public function create(Order $order, \Mollie\Api\Resources\Order $mollie_order)
+    public function create(Order $order = null, \Mollie\Api\Resources\Order $mollie_order = null)
     {
 
         $transaction = new Transaction();
 
-        $transaction->setOrderID($order->getId());
-        $transaction->setMollieID($mollie_order->id);
+        if ($order){
+            $transaction->setOrderID($order->getId());
+        }
+        if ($transaction){
+            $transaction->setMollieID($mollie_order->id);
+        }
 
         $this->save($transaction);
+
+        return $transaction;
 
     }
 
@@ -49,5 +56,6 @@ class TransactionRepository extends ModelRepository
         return $transaction;
 
     }
+
 
 }

@@ -6,7 +6,9 @@ namespace MollieShopware\Components\Mollie;
 
     use MollieShopware\Components\Constants\PaymentStatus;
     use MollieShopware\Models\OrderDetailMollieID;
+    use MollieShopware\Models\OrderDetailMollieIDRepository;
     use MollieShopware\Models\Transaction;
+    use MollieShopware\Models\TransactionRepository;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Tax\Tax;
     use Symfony\Component\HttpFoundation\Session\Session;
@@ -29,17 +31,16 @@ namespace MollieShopware\Components\Mollie;
 
         }
 
-        /**
-         * Creates a new transaction and returns the transaction object
-         *
-         * @param \Shopware_Controllers_Frontend_Mollie $controller
-         * @param $order_id
-         * @return Transaction
-         */
-        public function createTransaction($controller, $order_id)
+
+        public function createTransaction()
         {
 
-            return $controller->getTransactionRepo()->createNew($order_id);
+            /**
+             * @var TransactionRepository $transaction_repository
+             */
+
+            $transaction_repository = Shopware()->container()->get('models')->getRepository(Transaction::class);
+            return $transaction_repository->create(null, null);
 
         }
 
@@ -47,15 +48,17 @@ namespace MollieShopware\Components\Mollie;
         /**
          * Start a Mollie transaction and return Mollie payment object
          **/
-        public function startTransaction(Order $order)
+        public function startTransaction(Order $order, Transaction $transaction)
         {
 
+            /**
+             * @var TransactionRepository $transaction_repository
+             */
 
             $mollie_prepared = $this->prepareOrderForMollie($order);
             $mollie_payment = $this->api->orders->create($mollie_prepared);
 
-            $repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
-
+            $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
 
             foreach($mollie_payment->lines as $index => $line){
 
@@ -64,11 +67,36 @@ namespace MollieShopware\Components\Mollie;
                 $item->setOrderId($order->getId());
                 $item->setMollieRemoteID($line->id);
 
-                $repository->save($item);
+                $order_detail_repository->save($item);
 
             }
 
+            $transaction_repository = Shopware()->container()->get('models')->getRepository(Transaction::class);
+            $transaction->setOrderID($order->getId());
+            $transaction->setMollieID($mollie_payment->id);
+            $transaction_repository->save($transaction);
+
             return $mollie_payment->getCheckoutUrl();
+
+        }
+
+        public function sendOrder(Order $order)
+        {
+            /**
+             * @var OrderDetailMollieIDRepository $order_detail_repository
+             */
+
+            $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
+            $lines = $order_detail_repository->getShipmentLines($order);
+
+
+
+            $shipment = [
+                'lines'=>$lines
+            ];
+
+            $this->api->shipments->create($shipment);
+
 
         }
 
@@ -173,43 +201,49 @@ namespace MollieShopware\Components\Mollie;
                  * @var \Shopware\Models\Order\Detail $detail
                  */
 
-                $items[] = [
+                if ($vats['excl'] > 0){
 
-                    'type'=>'physical',
-                    'name'=>$detail->getArticleName(),
+                    $items[] = [
 
-                    // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
-                    'quantity'=>(int)$detail->getQuantity(),
+                        'type'=>'physical',
+                        'name'=>$detail->getArticleName(),
 
-                    'unitPrice'=>$this->getPriceForMollie($order, $detail->getPrice()),
-                    'totalAmount'=>$this->getPriceForMollie($order, $vats['incl'] * $detail->getQuantity()),
-                    'vatRate'=>number_format($detail->getTaxRate(), 2, '.', ''),
-                    'vatAmount'=>$this->getPriceForMollie($order, $vats['vat'] * $detail->getQuantity() ),
-                    'sku'=>$detail->getEan(),
-                    'imageUrl'=>null,
-                    'productUrl'=>null,
+                        // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
+                        'quantity'=>(int)$detail->getQuantity(),
 
-                ];
+                        'unitPrice'=>$this->getPriceForMollie($order, $detail->getPrice()),
+                        'totalAmount'=>$this->getPriceForMollie($order, $vats['incl'] * $detail->getQuantity()),
+                        'vatRate'=>number_format($detail->getTaxRate(), 2, '.', ''),
+                        'vatAmount'=>$this->getPriceForMollie($order, $vats['vat'] * $detail->getQuantity() ),
+                        'sku'=>$detail->getEan(),
+                        'imageUrl'=>null,
+                        'productUrl'=>null,
+
+                    ];
+
+                }
 
             }
 
             $vats = $calculate_vats($order->getInvoiceShippingTaxRate(), null, $order->getInvoiceShippingNet());
 
-            $items[] = [
+            if ($vats['excl'] > 0){
+                $items[] = [
 
-                'type'          =>      'shipping_fee',
-                'name'          =>      'Shipping fee',
-                'quantity'      =>      1,
+                    'type'          =>      'shipping_fee',
+                    'name'          =>      'Shipping fee',
+                    'quantity'      =>      1,
 
-                /**
-                 * Shipping price is excl vat, so convert to including vat
-                 */
-                'unitPrice'     =>      $this->getPriceForMollie($order, $vats['incl']),
-                'totalAmount'   =>      $this->getPriceForMollie($order, $vats['incl']),
-                'vatRate'       =>      number_format($order->getInvoiceShippingTaxRate(), 2, '.', ''),
-                'vatAmount'     =>      $this->getPriceForMollie($order, $vats['vat']),
+                    /**
+                     * Shipping price is excl vat, so convert to including vat
+                     */
+                    'unitPrice'     =>      $this->getPriceForMollie($order, $vats['incl']),
+                    'totalAmount'   =>      $this->getPriceForMollie($order, $vats['incl']),
+                    'vatRate'       =>      number_format($order->getInvoiceShippingTaxRate(), 2, '.', ''),
+                    'vatAmount'     =>      $this->getPriceForMollie($order, $vats['vat']),
 
-            ];
+                ];
+            }
 
             return $items;
 
@@ -227,22 +261,34 @@ namespace MollieShopware\Components\Mollie;
         private function prepareAddressForMollie(Order $order, $type='billing')
         {
 
-            $phone = '+3164010873';
+            /**
+             * @var \Shopware\Models\Order\Billing $address
+             */
+            if ($type === 'billing'){
+                //\Shopware\Models\Order\Billing
+                $address = $order->getBilling();
+            }
+            else{
+                //\Shopware\Models\Order\Shipping
+                $address = $order->getShipping();
+            }
+
+            $customer = $order->getCustomer();
+            $country = $address->getCountry();
 
             return [
 
                 // Mr. or Mrs. (Smith)
-                'title'=>'Mr.',
-                'givenName'=>'Josse',
-                'familyName'=>'Zwols',
-                'email'=>'dev@kiener.nl',
-                'phone'=>$phone,
-                'streetAndNumber'=>'Van Iddekingeweg 125',
-                'streetAdditional'=>'Appartment number',
-                'postalCode'=>'9821VA',
-                'city'=>'Groningen',
-                // ISO 3166-1 alpha-2 format (NL, GB, DE, BE, etc)
-                'country'=>'NL',
+                'title'                 => $address->getSalutation() . '.',
+                'givenName'             => $address->getFirstName(),
+                'familyName'            => $address->getLastName(),
+                'email'                 => $customer->getEmail(),
+                //'phone'                 => $customer->getPho
+                'streetAndNumber'       => $address->getStreet() . ' ' . $address->getNumber(),
+                'streetAdditional'      => $address->getAdditionalAddressLine1(),
+                'postalCode'            => $address->getZipCode(),
+                'city'                  => $address->getCity(),
+                'country'               => $country ? $country->getIso() : 'NL',
 
             ];
 
@@ -349,108 +395,6 @@ namespace MollieShopware\Components\Mollie;
         }
 
 
-
-
-
-
-        /*public function startTransaction($order_number, $signature, $returnUrl, $webhookUrl, $payment_id, $amount, $currency, $payment_method)
-        {
-
-            $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
-
-
-            $paymentOptions = [
-                'amount' => [
-                    'value' => number_format($amount, 2, '.', ''),
-                    'currency' => $currency,
-                ],
-                'description' => 'Order #' . $order_number,
-                'redirectUrl' => $returnUrl,
-                'webhookUrl' => $webhookUrl,
-                'method' => str_replace('mollie_', '', $payment_method),
-                'metadata' => [
-                ],
-            ];
-
-            if (strtolower(str_replace('mollie_', '', $payment_method)) === 'ideal'){
-                $paymentOptions['issuer'] = $this->getIdealIssuer();
-            }
-
-            $remotePayment = $this->api->payments->create($paymentOptions);
-
-            $transaction = $transaction_repository->getByID($payment_id);
-            $transaction->setTransactionId($remotePayment->id);
-            $transaction_repository->save($transaction);
-
-
-            return $remotePayment;
-
-        }*/
-
-        public function getPaymentStatus($controller, $signature, $payment_id)
-        {
-
-            $paid = false;
-
-            $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
-            $transaction = $transaction_repository->getByID($payment_id);
-
-
-            // get Mollie ID
-            $remote_transaction_id = $transaction->getTransactionID();
-
-            $status = $this->api->payments->get($remote_transaction_id)->status;
-
-            // get payment status with Mollie
-            if ($status == 'paid') {
-                $paid = true;
-
-                // store basket
-                $controller->doPersistBasket();
-
-                $status = PaymentStatus::PAID;
-                $controller->getTransactionRepo()->updateStatus($transaction, $status);
-
-            }
-
-            // return either true or false
-            return $paid ? $transaction : false;
-
-        }
-
-        public function restoreSession($signature)
-        {
-
-            $newSessionId = Shopware()->Session()->offsetGet('sessionId');
-
-            $transaction_repository = Shopware()->Container()->get('models')->getRepository(Transaction::class);
-            $transaction = $transaction_repository->findOneBy(['signature' => $signature]);
-
-            $session = json_decode($transaction->getSerializedSession(), 1);
-            foreach($session as $k=>$v){
-
-                if ($k === 'sessionId'){
-                    continue;
-                }
-                Shopware()->Session()->offsetSet($k, $v);
-
-            }
-
-            $db = shopware()->container()->get('db');
-            $q = $db->prepare('
-              UPDATE 
-                s_order_basket 
-              SET sessionID=? 
-              WHERE sessionID=?
-            ');
-
-            $q->execute([
-                $newSessionId,
-                $session['sessionId'],
-            ]);
-
-
-        }
 
         /**
          * Get the id of the chosen ideal issuer from database

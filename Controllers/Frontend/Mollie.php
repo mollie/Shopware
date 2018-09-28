@@ -52,7 +52,7 @@
              * @var \MollieShopware\Components\Mollie\OrderService $order_service
              * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
              * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $order_repository
-             * @var int $transaction_id
+             * @var \MollieShopware\Models\Transaction $transaction
              */
             $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
 
@@ -65,7 +65,7 @@
             /**
              * Create payment transaction in the database
              */
-            $transaction_id = $payment_service->createTransaction($this, $signature)->getID();
+            $transaction = $payment_service->createTransaction();
 
             /*
              * Save our current order in the database. This returns an order
@@ -74,13 +74,12 @@
              * We do NOT send a thank you email at this point. Payment status
              * remains OPEN for now.
              * */
-            $order_number = $this->saveOrder($transaction_id, $signature, PaymentStatus::OPEN, false);
+            $order_number = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
 
             /*
              * Get $order Doctrine model, which is easier to handle than
              * the sOrder class
              * */
-
             $order_repository = Shopware()->Container()->get('models')->getRepository(Order::class);
 
             // find order
@@ -94,7 +93,7 @@
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($payment_service->startTransaction($order));
+            return $this->redirect($payment_service->startTransaction($order, $transaction));
 
         }
 

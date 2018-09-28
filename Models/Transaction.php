@@ -25,7 +25,7 @@ class Transaction
     /**
      * @var integer
      *
-     * @ORM\Column(name="order_id", type="integer", nullable=false)
+     * @ORM\Column(name="order_id", type="integer", nullable=true)
      */
     private $order_id;
 
