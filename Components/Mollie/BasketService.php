@@ -189,6 +189,8 @@ class BasketService
      */
     public function removeOrderDetail($orderDetailId)
     {
+        $result = null;
+
         try {
             // init db
             $db = shopware()->container()->get('db');
