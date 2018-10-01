@@ -32,6 +32,12 @@ class BasketService
     private $orderModule;
 
     /**
+     *
+     * @var OrderService $orderService
+     */
+    private $orderService;
+
+    /**
      * Constructor
      *
      * @param ModelManager $modelManager
@@ -41,6 +47,8 @@ class BasketService
         $this->modelManager = $modelManager;
         $this->basketModule = Shopware()->Modules()->Basket();
         $this->orderModule = Shopware()->Modules()->Order();
+        $this->orderService = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
     }
 
     /**
@@ -55,11 +63,10 @@ class BasketService
         if (is_object($orderId)) {
             $order = $orderId;
         }
-        else{
+        else {
             // get order from database
-            $order = $this->getOrderById($orderId);
+            $order = $this->orderService->getOrderById($orderId);
         }
-
 
         if (!empty($order)) {
             // get order details
@@ -120,36 +127,6 @@ class BasketService
 
         // refresh the basket
         $this->basketModule->sRefreshBasket();
-    }
-
-    /**
-     * Get an order by it's id
-     *
-     * @param int $orderId
-     *
-     * @return Order $order
-     */
-    public function getOrderById($orderId)
-    {
-        $order = null;
-
-        try {
-            // get order repository
-            $orderRepo = $this->modelManager->getRepository(Order::class);
-
-            // find order
-            $order = $orderRepo->findOneBy([
-                'id' => $orderId
-            ]);
-        }
-        catch (Exception $ex) {
-            // log error
-            if ($order != null) {
-                $orderRepo->addException($order, $ex);
-            }
-        }
-
-        return $order;
     }
 
     /**
