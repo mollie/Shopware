@@ -121,16 +121,17 @@
 
             $mollie_payment = $payment_service->getPaymentObject($order);
 
+            $baseUrl = Shopware()->Front()->Request()->getBaseUrl();
 
-            if ($mollie_payment->isPaid()){
-                return $this->redirect('/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            if ($mollie_payment->isPaid()) {
+                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             else{
 
                 $basket_service = Shopware()->Container()->get('mollie_shopware.basket_service');
                 $basket_service->restoreBasket($order);
 
-                return $this->redirect('/checkout/confirm');
+                return $this->redirect($baseUrl . '/checkout/confirm');
             }
 
 

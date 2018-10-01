@@ -14,7 +14,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         var me = this;
         var columns = me.callParent(arguments);
 
-        // columns.push(me.createRefundColumn());
+        columns.push(me.createRefundColumn());
 
         me.createStyleSheet();
 

@@ -4,6 +4,7 @@
 
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Models\OrderLines;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
@@ -12,98 +13,84 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
     public function refundAction()
     {
-        if (false) {
-            $transaction = null;
+        $transaction = null;
 
-            try {
-                $request = $this->Request();
-                $em = $this->container->get('models');
-                $config = $this->container->get('mollie_shopware.config');
+        try {
+            $request = $this->Request();
+            $em = $this->container->get('models');
+            $config = $this->container->get('mollie_shopware.config');
 
-                $orderId = $request->getParam('orderId');
+            $orderId = $request->getParam('orderId');
 
-                $transactionRepo = $em->getRepository(Transaction::class);
-                $transaction = $transactionRepo->getByOrderNumber($orderId);
+            $transactionRepo = $em->getRepository(Transaction::class);
+            $transaction = $transactionRepo->findOneBy([
+                'order_id' => $orderId
+            ]);
 
-                $order = $em->find('Shopware\Models\Order\Order', $orderId);
+            $orderService = $this->container->get('mollie_shopware.order_service');
+            $order = $orderService->getOrderById($orderId);
+            $mollieId = $orderService->getMollieOrderId($order);
 
-                if (empty($order)) {
-                    $this->returnJson([
-                        'success' => false,
-                        'message' => 'Order not found',
-                    ]);
-                }
-
-                $paymentMethod = $order->getPayment();
-
-                // check if order is a Mollie order
-                // Mollie payment ids begin with 'tr_'
-                // Mollie payment methods are prefixed with 'mollie_' in Shopware
-                if (substr($order->getTransactionId(), 0, 3) !== 'tr_' || stripos($paymentMethod->getName(), 'mollie_') === false) {
-                    $this->returnJson([
-                        'success' => false,
-                        'message' => 'Order is not a Mollie order',
-                    ]);
-                }
-
-                // get Mollie payment ID from the order
-                $paymentId = $order->getTransactionId();
-
-                // get an instance of the Mollie api
-                $mollie = $this->container->get('mollie_shopware.api');
-
-                // Retrieve the payment to refund from the API.
-                $payment = $mollie->payments->get($paymentId);
-
-                // Check if this payment can be refunded
-                // You can also check if the payment can be partially refunded
-                // by using $payment->canBePartiallyRefunded() and $payment->getAmountRemaining()
-                if (!$payment->canBeRefunded()) {
-                    $this->returnJson([
-                        'success' => false,
-                        'message' => 'Order payment cannot be refunded',
-                    ]);
-                }
-
-                // Refund the payment.
-                $refund = $mollie->payments->refund($payment);
-
-                // get refund status model
-                $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
-
-                // update order status
-                $order->setPaymentStatus($paymentStatusRefunded);
-                $em->persist($order);
-                $em->flush();
-
-                if (!empty($transaction)) {
-                    $transactionRepo->updateStatus($transaction, PaymentStatus::REFUNDED);
-                }
-
-                // send status mail
-                if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
-                    $mail = Shopware()->Modules()->Order()->createStatusMail($orderId, PaymentStatus::REFUNDED);
-
-                    if ($mail) {
-                        Shopware()->Modules()->Order()->sendStatusMail($mail);
-                    }
-                }
-
-                $this->returnJson([
-                    'success' => true,
-                    'message' => 'Order successfully refunded',
-                    'data' => $refund
-                ]);
-            } catch (Exception $ex) {
-                if (!empty($transaction)) {
-                    $transactionRepo->addException($transaction, $ex);
-                }
-
+            if (empty($order)) {
                 $this->returnJson([
                     'success' => false,
-                    'message' => $ex->getMessage(),
+                    'message' => 'Order not found',
                 ]);
             }
+
+            if (empty($mollieId)) {
+                $this->returnJson([
+                    'success' => false,
+                    'message' => 'Order doesn\'t seem to be paid through Mollie',
+                ]);
+            }
+
+            // get an instance of the Mollie api
+            $mollieApi = $this->container->get('mollie_shopware.api');
+
+            // get an order object from mollie
+            $mollieOrder = $mollieApi->orders->get($mollieId);
+
+            // get shipment lines
+            $mollieOrderDetailRepo = $em->getRepository(OrderLines::class);
+            $mollieShipmentLines = $mollieOrderDetailRepo->getShipmentLines($order);
+
+            // refund the payment
+            $refund = $mollieApi->orderRefunds->createFor($mollieOrder, [
+                'lines' => $mollieShipmentLines
+            ]);
+
+            // get refund status model
+            $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
+
+            // update order status
+            $order->setPaymentStatus($paymentStatusRefunded);
+            $em->persist($order);
+            $em->flush();
+
+            if (!empty($transaction)) {
+                $transactionRepo->updateStatus($transaction, PaymentStatus::REFUNDED);
+            }
+
+            // send status mail
+            if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
+                $mail = Shopware()->Modules()->Order()->createStatusMail($orderId, PaymentStatus::REFUNDED);
+
+                if ($mail) {
+                    Shopware()->Modules()->Order()->sendStatusMail($mail);
+                }
+            }
+
+            $this->returnJson([
+                'success' => true,
+                'message' => 'Order successfully refunded',
+                'data' => $refund
+            ]);
+        } catch (Exception $ex) {
+            $this->returnJson([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ]);
         }
     }
 

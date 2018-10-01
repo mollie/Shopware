@@ -11,14 +11,14 @@ use Exception;
 use DateTime;
 use Shopware\Models\Order\Order;
 
-class OrderDetailMollieIDRepository extends ModelRepository
+class OrderLinesRepository extends ModelRepository
 {
 
-    public function Save(OrderDetailMollieID $orderDetailMollieID)
+    public function Save(OrderLines $mollieOrderLines)
     {
 
         $entityManager = $this->getEntityManager();
-        $entityManager->persist($orderDetailMollieID);
+        $entityManager->persist($mollieOrderLines);
         $entityManager->flush();
 
     }
@@ -34,13 +34,15 @@ class OrderDetailMollieIDRepository extends ModelRepository
     {
 
         /**
-         * @var OrderDetailMollieID $item
+         * @var OrderLines $item
          */
         $result = [];
-        $items = $this->findBy(['order_id'=>$order->getId()]);
+        $items = $this->findBy(['orderId' => $order->getId()]);
 
         foreach($items as $item){
-            $result[] = $item->getMollieRemoteID();
+            $result[] = [
+                'id' => $item->getMollieOrderlineId()
+            ];
         }
 
         return $result;

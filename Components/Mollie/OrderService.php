@@ -63,34 +63,24 @@ class OrderService
      */
     public function getMollieOrderId($orderId)
     {
-        $order = null;
-        $transaction = null;
         $mollieId = null;
+        $transaction = null;
 
-        if (is_object($orderId)) {
-            $order = $orderId;
+        try {
+            $transactionRepo = $this->modelManager->getRepository(Transaction::class);
+            $transaction = $transactionRepo->findOneBy([
+                'orderId' => $orderId
+            ]);
         }
-        else {
-            $order = $this->getOrderById($orderId);
+        catch (Exception $ex) {
+            // log error
+            if ($transaction != null) {
+                $transactionRepo->addException($transaction, $ex);
+            }
         }
 
-        if (!empty($order)) {
-            try {
-                $transactionRepo = $this->modelManager->getRepository(Transaction::class);
-                $transaction = $transactionRepo->findOneBy([
-                    'order_id' => $order->getId()
-                ]);
-            }
-            catch (Exception $ex) {
-                // log error
-                if ($transaction != null) {
-                    $transactionRepo->addException($transaction, $ex);
-                }
-            }
-
-            if (!empty($transaction)) {
-                $mollieId = $transaction->getMollieID();
-            }
+        if (!empty($transaction)) {
+            $mollieId = $transaction->getMollieID();
         }
 
         return $mollieId;

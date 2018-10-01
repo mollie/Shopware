@@ -8,10 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Entity(repositoryClass="MollieShopware\Models\OrderDetailMollieIDRepository")
- * @ORM\Table(name="order_detail_mollie_ids")
+ * @ORM\Entity(repositoryClass="MollieShopware\Models\OrderLinesRepository")
+ * @ORM\Table(name="mol_sw_orderlines")
  */
-class OrderDetailMollieID
+class OrderLines
 {
     /**
      * @var integer
@@ -24,48 +24,48 @@ class OrderDetailMollieID
     /**
      * @var integer
      *
-     * @ORM\Column(name="mollie_remote_id", type="string", nullable=false)
+     * @ORM\Column(name="mollie_orderline_id", type="string", nullable=false)
      */
-    private $mollieRemoteID;
+    private $mollieOrderlineId;
 
     /**
      * @var integer
      *
      * @ORM\Column(name="order_id", type="integer", nullable=false)
      */
-    private $orderID;
+    private $orderId;
 
 
-    public function setID($id)
+    public function setId($id)
     {
         $this->id = $id;
     }
 
-    public function getID()
+    public function getId()
     {
         return $this->id;
     }
 
 
-    public function setMollieRemoteID($mollieRemoteID)
+    public function setMollieOrderlineId($mollieOrderlineId)
     {
-        $this->mollieRemoteID = $mollieRemoteID;
+        $this->mollieOrderlineId = $mollieOrderlineId;
     }
 
-    public function getMollieRemoteID()
+    public function getMollieOrderlineId()
     {
-        return $this->mollieRemoteID;
+        return $this->mollieOrderlineId;
     }
 
 
-    public function setOrderID($orderID)
+    public function setOrderID($orderId)
     {
-        $this->orderID = $orderID;
+        $this->orderId = $orderId;
     }
 
     public function getOrderId()
     {
-        return $this->orderID;
+        return $this->orderId;
     }
 
 }

@@ -6,13 +6,13 @@ namespace MollieShopware\Components\Mollie;
 
     use Mollie\Api\MollieApiClient;
     use MollieShopware\Components\Constants\PaymentStatus;
-    use MollieShopware\Models\OrderDetailMollieID;
-    use MollieShopware\Models\OrderDetailMollieIDRepository;
+    use MollieShopware\Models\OrderLines;
     use MollieShopware\Models\Transaction;
     use MollieShopware\Models\TransactionRepository;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Tax\Tax;
     use Symfony\Component\HttpFoundation\Session\Session;
+    use Exception;
 
     class PaymentService
     {
@@ -58,20 +58,20 @@ namespace MollieShopware\Components\Mollie;
 
             /**
              * @var TransactionRepository $transaction_repository
-             * @var OrderDetailMollieIDRepository $order_detail_repository
+             * @var OrderLines $order_detail_repository
              */
 
             $mollie_prepared = $this->prepareOrderForMollie($order);
             $mollie_payment = $this->api->orders->create($mollie_prepared);
 
-            $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
+            $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderLines::class);
 
             foreach($mollie_payment->lines as $index => $line){
 
-                $item = new OrderDetailMollieID();
+                $item = new OrderLines();
 
                 $item->setOrderId($order->getId());
-                $item->setMollieRemoteID($line->id);
+                $item->setMollieOrderlineId($line->id);
 
                 $order_detail_repository->save($item);
 
@@ -83,29 +83,28 @@ namespace MollieShopware\Components\Mollie;
             $transaction_repository->save($transaction);
 
             return $mollie_payment->getCheckoutUrl();
-
         }
 
-        public function sendOrder(Order $order)
+
+        public function sendOrder(Order $order, $mollieId)
         {
-            /**
-             * @var OrderDetailMollieIDRepository $order_detail_repository
-             */
+            // create mollie order object
+            $mollieOrder = $this->api->orders->get($mollieId);
 
-            $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderDetailMollieID::class);
-            $lines = $order_detail_repository->getShipmentLines($order);
+            if (!empty($mollieOrder)) {
+                if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
+                    if ($mollieOrder->isCompleted()) {
+                        throw new Exception('The order is already completed at Mollie.');
+                    }
+                    else {
+                        throw new Exception('The order doesn\'t seem to be paid or authorized.');
+                    }
+                }
 
+                return $mollieOrder->shipAll();
+            }
 
-            //@todo: throw exceptions if order is not a Mollie paid order
-
-
-            $shipment = [
-                'lines'=>$lines
-            ];
-
-            $this->api->shipments->create($shipment);
-
-
+            return false;
         }
 
 
@@ -227,6 +226,14 @@ namespace MollieShopware\Components\Mollie;
 
 
             $items = [];
+            $invoiceShippingTaxRate = 0;
+
+            if (method_exists($order, 'getInvoiceShippingTaxRate')) {
+                $invoiceShippingTaxRate = $order->getInvoiceShippingTaxRate();
+            }
+            else {
+                $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
+            }
 
             foreach($order->getDetails() as $index => $detail)
             {
@@ -262,7 +269,7 @@ namespace MollieShopware\Components\Mollie;
 
             }
 
-            $vats = $calculate_vats($order->getInvoiceShippingTaxRate(), null, $order->getInvoiceShippingNet());
+            $vats = $calculate_vats($invoiceShippingTaxRate, null, $order->getInvoiceShippingNet());
 
             if ($vats['excl'] > 0){
                 $items[] = [
@@ -276,7 +283,7 @@ namespace MollieShopware\Components\Mollie;
                      */
                     'unitPrice'     =>      $this->getPriceForMollie($order, $vats['incl']),
                     'totalAmount'   =>      $this->getPriceForMollie($order, $vats['incl']),
-                    'vatRate'       =>      number_format($order->getInvoiceShippingTaxRate(), 2, '.', ''),
+                    'vatRate'       =>      number_format($invoiceShippingTaxRate, 2, '.', ''),
                     'vatAmount'     =>      $this->getPriceForMollie($order, $vats['vat']),
 
                 ];
@@ -285,6 +292,20 @@ namespace MollieShopware\Components\Mollie;
             return $items;
 
 
+        }
+
+        private function getInvoiceShippingTaxRate(Order $order)
+        {
+            $invoiceShippingGross = $order->getInvoiceShipping();
+            $invoiceShippingNet = $order->getInvoiceShippingNet();
+
+            if ($invoiceShippingGross == $invoiceShippingNet)
+                return 0;
+
+            $invoiceShippingTaxAmount = $invoiceShippingGross - $invoiceShippingNet;
+            $invoiceShippingTaxRate = round((($invoiceShippingTaxAmount / $invoiceShippingNet) * 100) * 2) / 2;
+
+            return $invoiceShippingTaxRate;
         }
 
         private function getPriceForMollie(Order $order, $amount)
