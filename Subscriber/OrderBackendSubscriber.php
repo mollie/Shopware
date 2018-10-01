@@ -21,23 +21,26 @@ class OrderBackendSubscriber implements SubscriberInterface
 
     public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
     {
+        //@todo: throw better exceptions
+
         // only work on save action
         if ($args->getRequest()->getActionName() != 'save')
-            return false;
+            return true;
 
         // vars
         $orderId = $args->getRequest()->getParam('id');
         $order = null;
+        $mollieId = null;
 
         // check if we have an order
         if (empty($orderId))
             return false;
 
         // create order service
-        try {
-            $orderService = Shopware()->Container()
-                ->get('mollie_shopware.order_service');
+        $orderService = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
 
+        try {
             // get the order
             $order = $orderService->getOrderById($orderId);
         }
@@ -53,6 +56,22 @@ class OrderBackendSubscriber implements SubscriberInterface
         if (empty($order))
             return false;
 
+        try {
+            // get mollie id
+            $mollieId = $orderService->getMollieOrderId($order);
+        }
+        catch (Exception $ex) {
+            // send exception
+            $this->sendException(
+                'HTTP/1.1 422 Unprocessable Entity Error',
+                $ex->getMessage()
+            );
+        }
+
+        // if the order is not a mollie order, return true
+        if (empty($mollieId))
+            return true;
+
         // check if the status is sent
         if ($order->getOrderStatus()->getId() != Status::ORDER_STATE_COMPLETELY_DELIVERED)
             return false;
@@ -63,7 +82,7 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
             // send the order
-            $paymentService->sendOrder($order);
+            $paymentService->sendOrder($order, $mollieId);
         }
         catch (Exception $ex) {
             // send exception
