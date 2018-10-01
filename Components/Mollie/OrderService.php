@@ -4,9 +4,10 @@
 
 namespace MollieShopware\Components\Mollie;
 
+use MollieShopware\Models\Transaction;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
-use MollieShopware\Models\OrderDetailMollieID;
+use Exception;
 
 class OrderService
 {
@@ -54,6 +55,45 @@ class OrderService
         }
 
         return $order;
+    }
+
+    /**
+     * @param $orderId
+     * @return null
+     */
+    public function getMollieOrderId($orderId)
+    {
+        $order = null;
+        $transaction = null;
+        $mollieId = null;
+
+        if (is_object($orderId)) {
+            $order = $orderId;
+        }
+        else {
+            $order = $this->getOrderById($orderId);
+        }
+
+        if (!empty($order)) {
+            try {
+                $transactionRepo = $this->modelManager->getRepository(Transaction::class);
+                $transaction = $transactionRepo->findOneBy([
+                    'order_id' => $order->getId()
+                ]);
+            }
+            catch (Exception $ex) {
+                // log error
+                if ($transaction != null) {
+                    $transactionRepo->addException($transaction, $ex);
+                }
+            }
+
+            if (!empty($transaction)) {
+                $mollieId = $transaction->getMollieID();
+            }
+        }
+
+        return $mollieId;
     }
 
     /**
