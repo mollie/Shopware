@@ -49,12 +49,11 @@
              */
 
             /**
-             * @var \MollieShopware\Components\Mollie\OrderService $order_service
-             * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
-             * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $order_repository
+             * @var \MollieShopware\Components\Mollie\PaymentService $paymentService
+             * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $orderRepo
              * @var \MollieShopware\Models\Transaction $transaction
              */
-            $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
             /*
              * Persist basket from session to database, returning it's signature which
@@ -65,7 +64,7 @@
             /**
              * Create payment transaction in the database
              */
-            $transaction = $payment_service->createTransaction();
+            $transaction = $paymentService->createTransaction();
 
             /*
              * Save our current order in the database. This returns an order
@@ -74,17 +73,17 @@
              * We do NOT send a thank you email at this point. Payment status
              * remains OPEN for now.
              * */
-            $order_number = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
+            $orderNumber = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
 
             /*
              * Get $order Doctrine model, which is easier to handle than
              * the sOrder class
              * */
-            $order_repository = Shopware()->Container()->get('models')->getRepository(Order::class);
+            $orderRepo = Shopware()->Container()->get('models')->getRepository(Order::class);
 
             // find order
-            $order = $order_repository->findOneBy([
-                'number' => $order_number,
+            $order = $orderRepo->findOneBy([
+                'number' => $orderNumber,
             ]);
 
 
@@ -93,7 +92,7 @@
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($payment_service->startTransaction($order, $transaction));
+            return $this->redirect($paymentService->startTransaction($order, $transaction));
 
         }
 
@@ -108,28 +107,30 @@
         {
 
             /**
-             * @var \MollieShopware\Components\Mollie\OrderService $order_service
-             * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
-             * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $order_repository
-             * @var \MollieShopware\Models\Transaction $transaction
-             * @var \MollieShopware\Components\Mollie\BasketService $basket_service
+             * @var \MollieShopware\Components\Mollie\PaymentService $paymentService
+             * @var \Shopware\Bundle\AttributeBundle\Repository\OrderRepository $orderRepo
+             * @var \MollieShopware\Components\Mollie\BasketService $basketService
              * @var Order $order
              */
-            $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
             $order = $this->getOrder();
 
-            $mollie_payment = $payment_service->getPaymentObject($order);
+            $molliePayment = $paymentService->getPaymentObject($order);
 
             $baseUrl = Shopware()->Front()->Request()->getBaseUrl();
 
-            if ($mollie_payment->isPaid()) {
+            if ($molliePayment->isPaid()) {
+                // update order status
+                $sOrder = Shopware()->Modules()->Order();
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
+
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             else{
 
-                $basket_service = Shopware()->Container()->get('mollie_shopware.basket_service');
-                $basket_service->restoreBasket($order);
+                $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+                $basketService->restoreBasket($order);
 
                 return $this->redirect($baseUrl . '/checkout/confirm');
             }
@@ -144,9 +145,9 @@
         {
 
             /**
-             * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
+             * @var \MollieShopware\Components\Mollie\PaymentService $paymentService
              **/
-            $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
             try{
                 $order = $this->getOrder();
@@ -155,7 +156,7 @@
                 return $this->notifyException($e->getMessage());
             }
 
-            if ($payment_service->checkPaymentStatus($order)) {
+            if ($paymentService->checkPaymentStatus($order)) {
                 return $this->notifyOK('Thank you');
             }
             else {
@@ -174,22 +175,22 @@
         {
 
             /**
-             * @var \MollieShopware\Components\Mollie\PaymentService $payment_service
+             * @var \MollieShopware\Components\Mollie\PaymentService $paymentService
              * @var string $order_number
              * @var string $ts
              * @var string $checksum
              */
 
-            $payment_service = Shopware()->Container()->get('mollie_shopware.payment_service');
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
 
             // load (selected) request variables to local variables
             foreach(['order_number', 'checksum', 'ts'] as $var){ $$var = $this->request()->getParam($var); }
 
-            $order_repository = Shopware()->Container()->get('models')->getRepository(Order::class);
+            $orderRepo = Shopware()->Container()->get('models')->getRepository(Order::class);
 
             // find order
-            $order = $order_repository->findOneBy([
+            $order = $orderRepo->findOneBy([
                 'number' => $order_number,
             ]);
 
@@ -198,7 +199,7 @@
                 throw new \Exception('order error');
             }
 
-            if ($payment_service->generateChecksum($order, $ts) !== $checksum){
+            if ($paymentService->generateChecksum($order, $ts) !== $checksum){
                 // @todo: this deserves a more describing error message
                 throw new \Exception('order error: bad checksum');
             }

@@ -69,7 +69,7 @@ class OrderService
         try {
             $transactionRepo = $this->modelManager->getRepository(Transaction::class);
             $transaction = $transactionRepo->findOneBy([
-                'orderId' => $orderId
+                'order_id' => $orderId
             ]);
         }
         catch (Exception $ex) {

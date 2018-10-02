@@ -68,10 +68,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $em->persist($order);
             $em->flush();
 
-            if (!empty($transaction)) {
-                $transactionRepo->updateStatus($transaction, PaymentStatus::REFUNDED);
-            }
-
             // send status mail
             if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
                 $mail = Shopware()->Modules()->Order()->createStatusMail($orderId, PaymentStatus::REFUNDED);

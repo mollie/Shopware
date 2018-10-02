@@ -58,23 +58,6 @@ class TransactionRepository extends ModelRepository
     }
 
     /**
-     * Update the status on a Transaction
-     *
-     * @param  Transaction $transaction
-     * @param  int         $status
-     * @return Transaction
-     */
-    public function updateStatus(Transaction $transaction, $status)
-    {
-        if (PaymentStatus::isPaymentStatus($status)) {
-            $transaction->setStatus($status);
-            return $this->save($transaction);
-        }
-        throw new Exception("{$status} is not a valid PaymentStatus");
-    }
-
-
-    /**
      * @param Order $order
      * @return Transaction
      */
