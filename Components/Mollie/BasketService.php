@@ -92,7 +92,7 @@ class BasketService
                             $this->removeOrderDetail($orderDetail->getId());
 
                             // set comment
-                            $commentText = $comment_text . "Kortingscode (" . $voucher->getVoucherCode() .
+                            $commentText = $commentText . "Kortingscode (" . $voucher->getVoucherCode() .
                                 ") verwijderd van deze order vrijgegeven aan de opnieuw opgebouwde winkelmand. ";
 
                             // add voucher to basket
