@@ -1,9 +1,10 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.3
+	// Mollie Shopware Plugin Version: 1.3.0
 
 namespace MollieShopware;
 
+use MollieShopware\Models\OrderLines;
 use Shopware\Components\Console\Application;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -206,7 +207,7 @@ class MollieShopware extends Plugin
     }
 
     /**
-     * @param ActivateContext $context
+     * @param ActivateContext $contextOrderLines
      */
     public function activate(ActivateContext $context)
     {
@@ -323,6 +324,7 @@ class MollieShopware extends Plugin
     {
         $schema = new Schema($this->container->get('models'));
         $schema->update([ Transaction::class ]);
+        $schema->update([ OrderLines::class ]);
     }
 
     /**

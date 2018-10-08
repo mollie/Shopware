@@ -8,7 +8,7 @@ use GuzzleHttpV6\Psr7\Response;
  * @covers GuzzleHttpV6\Psr7\MessageTrait
  * @covers GuzzleHttpV6\Psr7\Response
  */
-class ResponseTest extends \PHPUnit_Framework_TestCase
+class ResponseTest extends BaseTest
 {
     public function testDefaultConstructor()
     {

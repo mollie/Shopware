@@ -8,7 +8,7 @@ use GuzzleHttpV6\Psr7\NoSeekStream;
  * @covers GuzzleHttpV6\Psr7\NoSeekStream
  * @covers GuzzleHttpV6\Psr7\StreamDecoratorTrait
  */
-class NoSeekStreamTest extends \PHPUnit_Framework_TestCase
+class NoSeekStreamTest extends BaseTest
 {
     /**
      * @expectedException \RuntimeException

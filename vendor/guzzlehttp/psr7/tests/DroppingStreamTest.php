@@ -4,7 +4,7 @@ namespace GuzzleHttpV6\Tests\Psr7;
 use GuzzleHttpV6\Psr7\BufferStream;
 use GuzzleHttpV6\Psr7\DroppingStream;
 
-class DroppingStreamTest extends \PHPUnit_Framework_TestCase
+class DroppingStreamTest extends BaseTest
 {
     public function testBeginsDroppingWhenSizeExceeded()
     {

@@ -3,13 +3,11 @@
  * How to prepare a new payment with the Mollie API.
  */
 
-use Mollie\Api\Exceptions\ApiException;
-
 try {
     /*
      * Initialize the Mollie API library with your API key.
      *
-     * See: https://www.mollie.com/dashboard/settings/profiles
+     * See: https://www.mollie.com/dashboard/developers/api-keys
      */
     require "./initialize.php";
 
@@ -37,7 +35,7 @@ try {
     $payment = $mollie->payments->create([
         "amount" => [
             "currency" => "EUR",
-            "value" => "10.00"
+            "value" => "10.00" // You must send the correct number of decimals, thus we enforce the use of strings
         ],
         "description" => "Order #{$orderId}",
         "redirectUrl" => "{$protocol}://{$hostname}{$path}/03-return-page.php?order_id={$orderId}",
@@ -57,7 +55,7 @@ try {
      * This request should always be a GET, thus we enforce 303 http response code
      */
     header("Location: " . $payment->getCheckoutUrl(), true, 303);
-} catch (ApiException $e) {
+} catch (\Mollie\Api\Exceptions\ApiException $e) {
     echo "API call failed: " . htmlspecialchars($e->getMessage());
 }
 

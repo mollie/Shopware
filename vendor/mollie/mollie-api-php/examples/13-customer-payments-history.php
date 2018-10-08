@@ -2,11 +2,12 @@
 /*
  * Example 13 - How to retrieve your customers' payments history.
  */
+
 try {
     /*
      * Initialize the Mollie API library with your API key.
      *
-     * See: https://www.mollie.com/dashboard/settings/profiles
+     * See: https://www.mollie.com/dashboard/developers/api-keys
      */
     require "initialize.php";
 

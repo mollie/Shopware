@@ -1,9 +1,10 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.3
+	// Mollie Shopware Plugin Version: 1.3.0
 
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Models\OrderLines;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
@@ -22,9 +23,13 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $orderId = $request->getParam('orderId');
 
             $transactionRepo = $em->getRepository(Transaction::class);
-            $transaction = $transactionRepo->getByOrderNumber($orderId);
+            $transaction = $transactionRepo->findOneBy([
+                'order_id' => $orderId
+            ]);
 
-            $order = $em->find('Shopware\Models\Order\Order', $orderId);
+            $orderService = $this->container->get('mollie_shopware.order_service');
+            $order = $orderService->getOrderById($orderId);
+            $mollieId = $orderService->getMollieOrderId($order);
 
             if (empty($order)) {
                 $this->returnJson([
@@ -33,39 +38,27 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 ]);
             }
 
-            $paymentMethod = $order->getPayment();
-
-            // check if order is a Mollie order
-            // Mollie payment ids begin with 'tr_'
-            // Mollie payment methods are prefixed with 'mollie_' in Shopware
-            if (substr($order->getTransactionId(), 0, 3) !== 'tr_' || stripos($paymentMethod->getName(), 'mollie_') === false) {
+            if (empty($mollieId)) {
                 $this->returnJson([
                     'success' => false,
-                    'message' => 'Order is not a Mollie order',
+                    'message' => 'Order doesn\'t seem to be paid through Mollie',
                 ]);
             }
-
-            // get Mollie payment ID from the order
-            $paymentId = $order->getTransactionId();
 
             // get an instance of the Mollie api
-            $mollie = $this->container->get('mollie_shopware.api');
+            $mollieApi = $this->container->get('mollie_shopware.api');
 
-            // Retrieve the payment to refund from the API.
-            $payment = $mollie->payments->get($paymentId);
+            // get an order object from mollie
+            $mollieOrder = $mollieApi->orders->get($mollieId);
 
-            // Check if this payment can be refunded
-            // You can also check if the payment can be partially refunded
-            // by using $payment->canBePartiallyRefunded() and $payment->getAmountRemaining()
-            if (!$payment->canBeRefunded()) {
-                $this->returnJson([
-                    'success' => false,
-                    'message' => 'Order payment cannot be refunded',
-                ]);
-            }
+            // get shipment lines
+            $mollieOrderDetailRepo = $em->getRepository(OrderLines::class);
+            $mollieShipmentLines = $mollieOrderDetailRepo->getShipmentLines($order);
 
-            // Refund the payment.
-            $refund = $mollie->payments->refund($payment);
+            // refund the payment
+            $refund = $mollieApi->orderRefunds->createFor($mollieOrder, [
+                'lines' => $mollieShipmentLines
+            ]);
 
             // get refund status model
             $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
@@ -74,10 +67,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $order->setPaymentStatus($paymentStatusRefunded);
             $em->persist($order);
             $em->flush();
-
-            if (!empty($transaction)) {
-                $transactionRepo->updateStatus($transaction, PaymentStatus::REFUNDED);
-            }
 
             // send status mail
             if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
@@ -94,10 +83,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 'data' => $refund
             ]);
         } catch (Exception $ex) {
-            if (!empty($transaction)) {
-                $transactionRepo->addException($transaction, $ex);
-            }
-
             $this->returnJson([
                 'success' => false,
                 'message' => $ex->getMessage(),

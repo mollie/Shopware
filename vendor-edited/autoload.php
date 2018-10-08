@@ -1,11 +1,11 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.3
+	// Mollie Shopware Plugin Version: 1.3.0
 
 /*
      *
      * Shopware uses GuzzleClient v 5.3.2, Mollie uses 6.3.x. To overcome this
-     * we changed the namespace for Guzzle in Mollie to GuzzleHttpV6V6V6V6
+     * we changed the namespace for Guzzle in Mollie to Guzzle HttpV6
      *
      * This function loads the V6 version before composer would, making sure
      * that the classes are available when needed for Mollie.
@@ -15,6 +15,7 @@
      * @author: Josse Zwols [Kiener]
      *
      * */
+
 
     spl_autoload_register(function($x){
 
@@ -64,4 +65,5 @@
 
     });
 
+    require_once(__DIR__ . '/../vendor/guzzlehttp/promises/src/functions.php');
     require_once(__DIR__ . '/../vendor/guzzlehttp/psr7/src/functions.php');

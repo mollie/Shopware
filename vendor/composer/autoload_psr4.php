@@ -11,4 +11,5 @@ return array(
     'GuzzleHttpV6\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
     'GuzzleHttpV6\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
     'GuzzleHttpV6\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
+    'Composer\\CaBundle\\' => array($vendorDir . '/composer/ca-bundle/src'),
 );
