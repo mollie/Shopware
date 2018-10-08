@@ -28,6 +28,9 @@ git fetch --all --tags --prune
 git checkout tags/$version -b $version
 
 sudo rm -r -f .git
+sudo rm -r -f releases
+sudo rm ShopwareValetDriver.php
+sudo rm insert_version.php
 
 cd ..
 
