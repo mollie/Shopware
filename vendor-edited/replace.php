@@ -1,6 +1,15 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.3
+	// Mollie Shopware Plugin Version: 1.3.0
+
+/*
+ *
+ * Remove GIT files from vendor folder (to prevent submodule creation)
+ *
+ * find vendor -type d -name \.git -exec rm -rf \{\} \;
+ *
+ *
+ * */
 
 function replace_in_dir($dirname, $find, $replace, $depth = 0)
     {
@@ -48,7 +57,7 @@ function replace_in_dir($dirname, $find, $replace, $depth = 0)
     }
 
 
-    replace_in_dir(realpath(__DIR__ . '/..') . '/', 'GuzzleHttpV6', 'GuzzleHttpV6V6');
+    replace_in_dir(realpath(__DIR__ . '/..') . '/', 'Guzzle' . 'Http', 'Guzzle' . 'HttpV6');
 
 
 ?>

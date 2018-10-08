@@ -3,13 +3,11 @@
  * Example 6 - How to get the currently activated payment methods.
  */
 
-use Mollie\Api\Exceptions\ApiException;
-
 try {
     /*
      * Initialize the Mollie API library with your API key.
      *
-     * See: https://www.mollie.com/dashboard/settings/profiles
+     * See: https://www.mollie.com/dashboard/developers/api-keys
      */
     require "./initialize.php";
     /*
@@ -22,6 +20,6 @@ try {
         echo htmlspecialchars($method->description) . ' (' . htmlspecialchars($method->id) . ')';
         echo '</div>';
     }
-} catch (ApiException $e) {
+} catch (\Mollie\Api\Exceptions\ApiException $e) {
     echo "API call failed: " . htmlspecialchars($e->getMessage());
 }

@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.2.3
+	// Mollie Shopware Plugin Version: 1.3.0
 
 namespace MollieShopware\Components;
 
@@ -14,7 +14,7 @@ use Shopware\Components\Model\ModelManager;
 class Schema
 {
     /**
-     * @var Shopware\Components\Model\ModelManager
+     * @var \Shopware\Components\Model\ModelManager
      */
     protected $em;
 

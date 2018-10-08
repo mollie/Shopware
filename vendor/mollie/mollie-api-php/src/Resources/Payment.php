@@ -147,7 +147,7 @@ class Payment extends BaseResource
     /**
      * Webhook URL set on this payment
      *
-     * @var string
+     * @var string|null
      */
     public $webhookUrl;
 
@@ -166,6 +166,22 @@ class Payment extends BaseResource
      * @var string|null
      */
     public $subscriptionId;
+
+    /**
+     * The order ID this payment belongs to.
+     *
+     * @example ord_pbjz8x
+     * @var string|null
+     */
+    public $orderId;
+
+    /**
+     * The settlement ID this payment belongs to.
+     *
+     * @example stl_jDk30akdN
+     * @var string|null
+     */
+    public $settlementId;
 
     /**
      * The locale used for this payment.
@@ -386,6 +402,17 @@ class Payment extends BaseResource
     }
 
     /**
+     * @param string $refundId
+     * @param array $parameters
+     *
+     * @return Refund
+     */
+    public function getRefund($refundId, array $parameters = [])
+    {
+        return $this->client->paymentRefunds->getFor($this, $refundId, $parameters);
+    }
+
+    /**
      * Retrieves all chargebacks associated with this payment
      *
      * @return ChargebackCollection
@@ -394,12 +421,12 @@ class Payment extends BaseResource
     public function chargebacks()
     {
         if (!isset($this->_links->chargebacks->href)) {
-            return new ChargebackCollection(0, null);
+            return new ChargebackCollection($this->client, 0, null);
         }
 
         $result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_GET, $this->_links->chargebacks->href);
 
-        $resourceCollection = new ChargebackCollection($result->count, $result->_links);
+        $resourceCollection = new ChargebackCollection($this->client, $result->count, $result->_links);
         foreach ($result->_embedded->chargebacks as $dataResult) {
             $resourceCollection[] = ResourceFactory::createFromApiResult($dataResult, new Chargeback($this->client));
         }

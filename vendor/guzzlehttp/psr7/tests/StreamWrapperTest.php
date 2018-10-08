@@ -7,7 +7,7 @@ use GuzzleHttpV6\Psr7;
 /**
  * @covers GuzzleHttpV6\Psr7\StreamWrapper
  */
-class StreamWrapperTest extends \PHPUnit_Framework_TestCase
+class StreamWrapperTest extends BaseTest
 {
     public function testResource()
     {
@@ -95,7 +95,7 @@ class StreamWrapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      */
     public function testReturnsFalseWhenStreamDoesNotExist()
     {

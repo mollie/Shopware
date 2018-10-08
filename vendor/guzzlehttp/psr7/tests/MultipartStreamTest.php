@@ -1,10 +1,10 @@
 <?php
-namespace GuzzleHttpV6\Tests;
+namespace GuzzleHttpV6\Tests\Psr7;
 
 use GuzzleHttpV6\Psr7;
 use GuzzleHttpV6\Psr7\MultipartStream;
 
-class MultipartStreamTest extends \PHPUnit_Framework_TestCase
+class MultipartStreamTest extends BaseTest
 {
     public function testCreatesDefaultBoundary()
     {

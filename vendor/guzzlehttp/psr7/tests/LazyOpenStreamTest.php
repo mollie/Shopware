@@ -3,7 +3,7 @@ namespace GuzzleHttpV6\Tests\Psr7;
 
 use GuzzleHttpV6\Psr7\LazyOpenStream;
 
-class LazyOpenStreamTest extends \PHPUnit_Framework_TestCase
+class LazyOpenStreamTest extends BaseTest
 {
     private $fname;
 
