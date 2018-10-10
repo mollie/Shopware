@@ -10,6 +10,7 @@
 
             <argument type="service" id="mollie_shopware.api_factory" />
             <argument type="service" id="session" />
+            <argument>%shopware.custom%</argument>
 
         </service>
 
