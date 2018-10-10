@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php 
+
+// removed strict types declaration, strict types are not supported in shopware plugins
 
 // scoper.inc.php
 

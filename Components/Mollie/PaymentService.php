@@ -9,6 +9,7 @@ namespace MollieShopware\Components\Mollie;
     use MollieShopware\Models\OrderLines;
     use MollieShopware\Models\Transaction;
     use MollieShopware\Models\TransactionRepository;
+    use Shopware\Components\ConfigLoader;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Tax\Tax;
     use Symfony\Component\HttpFoundation\Session\Session;
@@ -20,15 +21,20 @@ namespace MollieShopware\Components\Mollie;
         private $apiFactory = null;
         private $api = null;
         private $session = null;
+        private $customEnvironmentVariables = null;
 
-        public function __construct(\MollieShopware\Components\MollieApiFactory $apiFactory, \Enlight_Components_Session_Namespace $session)
-        {
+        public function __construct(
+            \MollieShopware\Components\MollieApiFactory $apiFactory,
+            \Enlight_Components_Session_Namespace $session,
+            array $customEnvironmentVariables
+        ) {
 
             // create API client object
             $this->apiFactory = $apiFactory;
             $this->api = $apiFactory->create();
 
             $this->session = $session;
+            $this->customEnvironmentVariables = $customEnvironmentVariables;
 
         }
 
@@ -382,8 +388,6 @@ namespace MollieShopware\Components\Mollie;
 
             $rnd = time();
 
-
-
             $url = $front->Router()->assemble([
 
                 'controller'    => 'Mollie',
@@ -396,8 +400,15 @@ namespace MollieShopware\Components\Mollie;
 
             ]);
 
+            // check if we are on local development
+            $mollieLocalDevelopment = false;
 
-            if (true || defined('LOCAL_MOLLIE_DEV') && LOCAL_MOLLIE_DEV){
+            if (isset($this->customEnvironmentVariables['mollieLocalDevelopment'])) {
+                $mollieLocalDevelopment = $this->customEnvironmentVariables['mollieLocalDevelopment'];
+            }
+
+            // if we are on local development, reroute to a feedback URL
+            if ($mollieLocalDevelopment == true) {
                 return 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($url);
             }
 
