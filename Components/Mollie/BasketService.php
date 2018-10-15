@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.1
+	// Mollie Shopware Plugin Version: 1.3.2
 
 namespace MollieShopware\Components\Mollie;
 
@@ -108,10 +108,16 @@ class BasketService
                             $orderDetail->getQuantity()
                         );
                     }
+
+                    // reset ordered quantity
+                    $this->resetOrderDetailQuantity($orderDetail);
                 }
 
                 // append internal comment
                 $order = $this->appendInternalComment($order, $commentText);
+
+                // recalculate order
+                $order->calculateInvoiceAmount();
 
                 // save order
                 $this->modelManager->persist($order);
@@ -189,6 +195,44 @@ class BasketService
         }
 
         return $result;
+    }
+
+    /**
+     * Reset the order quantity for a canceled order
+     *
+     * @param OrderDetail $orderDetail
+     *
+     * @return OrderDetail $orderDetail
+     */
+    public function resetOrderDetailQuantity($orderDetail) {
+        // store ordered quantity
+        $orderedQuantity = $orderDetail->getQuantity();
+
+        // reset quantity
+        $orderDetail->setQuantity(0);
+
+        // build order detail repository
+        $orderDetailRepo = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
+
+        // variables
+        $article = null;
+
+        try {
+            $article = $orderDetailRepo->findOneBy(['number' => $orderDetail->getArticleNumber()]);
+        }
+        catch (Exception $ex) {
+            // @todo error handling of order detail reset
+        }
+
+        if (!empty($article)) {
+            // set new stock
+            $article->setInStock($article->getInStock() + $orderedQuantity);
+
+            // save stock
+            Shopware()->Models()->persist($article);
+        }
+
+        return $orderDetail;
     }
 
     /**
