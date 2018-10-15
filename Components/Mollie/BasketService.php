@@ -14,6 +14,11 @@ use Exception;
 class BasketService
 {
     /**
+     * @var $config
+     */
+    private $config;
+
+    /**
      *
      * @var ModelManager $modelManager
      */
@@ -44,6 +49,8 @@ class BasketService
      */
     public function __construct(ModelManager $modelManager)
     {
+        $this->config = Shopware()->Container()
+            ->get('mollie_shopware.config');
         $this->modelManager = $modelManager;
         $this->basketModule = Shopware()->Modules()->Basket();
         $this->orderModule = Shopware()->Modules()->Order();
@@ -110,7 +117,8 @@ class BasketService
                     }
 
                     // reset ordered quantity
-                    $this->resetOrderDetailQuantity($orderDetail);
+                    if ($this->config->autoResetStock())
+                        $this->resetOrderDetailQuantity($orderDetail);
                 }
 
                 // append internal comment

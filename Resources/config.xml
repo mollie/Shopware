@@ -53,6 +53,28 @@
             </store>
         </element>
 
+        <element type="select" scope="shop">
+            <name>auto_reset_stock</name>
+            <label lang="de">Lader automatisch züruckzetsen nach ein fehlgeschlagener Zahlung</label>
+            <label lang="en">Automatically reset stock on failed payment</label>
+            <label lang="nl">Voorraad automatisch herstellen na een mislukte betaling</label>
+            <value>yes</value>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

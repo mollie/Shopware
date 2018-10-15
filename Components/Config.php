@@ -83,6 +83,16 @@ class Config
     }
 
     /**
+     * Whether to automatically reset stock after a failed or canceled payment
+     *
+     * @return boolean
+     */
+    public function autoResetStock()
+    {
+        return $this->get('auto_reset_stock', 'no') == 'yes';
+    }
+
+    /**
      * @return string
      */
     public function extraMetaData()
