@@ -84,8 +84,8 @@ namespace MollieShopware\Components\Mollie;
             }
 
             $transaction_repository = Shopware()->container()->get('models')->getRepository(Transaction::class);
-            $transaction->setOrderID($order->getId());
-            $transaction->setMollieID($mollie_payment->id);
+            $transaction->setOrderId($order->getId());
+            $transaction->setMollieId($mollie_payment->id);
             $transaction_repository->save($transaction);
 
             return $mollie_payment->getCheckoutUrl();
@@ -129,7 +129,7 @@ namespace MollieShopware\Components\Mollie;
             $transaction_repository = Shopware()->container()->get('models')->getRepository(Transaction::class);
             $transaction = $transaction_repository->getMostRecentTransactionForOrder($order);
 
-            $mollie_payment = $this->api->orders->get($transaction->getMollieID());
+            $mollie_payment = $this->api->orders->get($transaction->getMollieId());
 
             return $mollie_payment;
 

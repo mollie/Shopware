@@ -38,13 +38,13 @@ class Transaction
 
 
 
-    public function getID()                 { return $this->id; }
-    public function setID($id)              { $this->id = $id; }
+    public function getId()                 { return $this->id; }
+    public function setId($id)              { $this->id = $id; }
 
-    public function getOrderID()            { return $this->order_id; }
-    public function setOrderID($order_id)   { $this->order_id = $order_id; }
+    public function getOrderId()            { return $this->order_id; }
+    public function setOrderId($order_id)   { $this->order_id = $order_id; }
 
-    public function getMollieID()           { return $this->mollie_id; }
-    public function setMollieID($mollie_id) { $this->mollie_id = $mollie_id; }
+    public function getMollieId()           { return $this->mollie_id; }
+    public function setMollieId($mollie_id) { $this->mollie_id = $mollie_id; }
 
 }

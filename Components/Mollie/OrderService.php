@@ -7,6 +7,7 @@ namespace MollieShopware\Components\Mollie;
 use MollieShopware\Models\Transaction;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
+use Mollie\Api\Resources\Order as MollieOrder;
 use Exception;
 
 class OrderService
@@ -31,7 +32,6 @@ class OrderService
      * Get an order by it's id
      *
      * @param int $orderId
-     *
      * @return Order $order
      */
     public function getOrderById($orderId)
@@ -58,32 +58,75 @@ class OrderService
     }
 
     /**
-     * @param $orderId
-     * @return null
+     * @param Shopware\Models\Order\Order $order
+     * @return Transaction $transaction
      */
-    public function getMollieOrderId($orderId)
+    public function getTransaction(Shopware\Models\Order\Order $order)
     {
-        $mollieId = null;
         $transaction = null;
 
         try {
             $transactionRepo = $this->modelManager->getRepository(Transaction::class);
             $transaction = $transactionRepo->findOneBy([
-                'order_id' => $orderId
+                'order_id' => $order->getId()
             ]);
         }
         catch (Exception $ex) {
-            // log error
-            if ($transaction != null) {
-                $transactionRepo->addException($transaction, $ex);
-            }
+            // @todo Handle exception
         }
 
+        return $transaction;
+    }
+
+    /**
+     * @param Shopware\Models\Order\Order $order
+     * @return string $mollieId
+     */
+    public function getMollieOrderId(Shopware\Models\Order\Order $order)
+    {
+        // vars
+        $mollieId = null;
+
+        // get transaction
+        $transaction = $this->getTransaction($order);
+
+        // get mollie id
         if (!empty($transaction)) {
-            $mollieId = $transaction->getMollieID();
+            $mollieId = $transaction->getMollieId();
         }
 
         return $mollieId;
+    }
+
+    /**
+     * @param MollieOrder $mollieOrder
+     * @return array $orderlines
+     */
+    public function getMollieOrderLines(MollieOrder $mollieOrder)
+    {
+        // vars
+        $orderLines = [];
+
+        // add data to orderlines array
+        if (count($mollieOrder->lines)) {
+            foreach ($mollieOrder->lines as $line) {
+                $orderLines[] = [
+                    'id' => $line->id,
+                    'name' => $line->name,
+                    'sku' => $line->sku,
+                    'isCancelable' => $line->isCancelable,
+                    'quantity' => $line->quantity,
+                    'quantityShipped' => $line->quantityShipped,
+                    'quantityRefunded' => $line->quantityRefunded,
+                    'shippableQuantity' => $line->shippableQuantity,
+                    'refundableQuantity' => $line->refundableQuantity,
+                    'totalAmountValue' => $line->totalAmount->value,
+                    'totalAmountCurrency' => $line->totalAmount->currency
+                ];
+            }
+        }
+
+        return $orderLines;
     }
 
     /**
@@ -91,7 +134,10 @@ class OrderService
      */
     public function checksum()
     {
+        // vars
         $hash = '';
+
+        // add arguments to hash
         foreach(func_get_args() as $argument){
             $hash .= $argument;
         }
