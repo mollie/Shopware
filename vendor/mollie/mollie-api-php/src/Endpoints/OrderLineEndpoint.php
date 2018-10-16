@@ -2,7 +2,11 @@
 
 namespace Mollie\Api\Endpoints;
 
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\OrderLine;
+use Mollie\Api\Resources\OrderLineCollection;
+use Mollie\Api\Resources\ResourceFactory;
 
 class OrderLineEndpoint extends EndpointAbstract
 {
@@ -21,7 +25,7 @@ class OrderLineEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new OrderLine($this->api);
+        return new OrderLine($this->client);
     }
 
     /**
@@ -35,23 +39,34 @@ class OrderLineEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new OrderLineCollection($this->api, $count, $_links);
+        return new OrderLineCollection($count, $_links);
     }
 
     /**
-     * Cancel a line for the provided order.
-     * Returns HTTP status 204 (no content) if succesful.
+     * Cancel lines for the provided order.
+     * The data array must contain a lines array.
+     * You can pass an empty lines array if you want to cancel all eligible lines.
+     * Returns null if successful.
      *
      * @param Order $order
-     * @param string $lineId
      * @param array $data
      *
      * @return null
+     * @throws ApiException
      */
-    public function cancelFor(Order $order, $lineId, $data = [])
+    public function cancelFor(Order $order, array $data)
     {
+        if(! isset($data, $data['lines']) || ! is_array($data['lines'])) {
+            throw new ApiException("A lines array is required.");
+        }
         $this->parentId = $order->id;
 
-        return parent::rest_delete($lineId, $data);
+        $this->client->performHttpCall(
+            self::REST_DELETE,
+            "{$this->getResourcePath()}",
+            $this->parseRequestBody($data)
+        );
+
+        return null;
     }
 }

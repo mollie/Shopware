@@ -57,6 +57,13 @@ class Settlement extends BaseResource
     public $periods;
 
     /**
+     * The ID of the invoice on which this settlement is invoiced, if it has been invoiced.
+     *
+     * @var string|null
+     */
+    public $invoiceId;
+
+    /**
      * @var object[]
      */
     public $_links;
@@ -166,4 +173,26 @@ class Settlement extends BaseResource
 
         return $resourceCollection;
     }
+
+	/**
+	 * Retrieves all captures associated with this settlement
+	 *
+	 * @return CaptureCollection
+	 * @throws ApiException
+	 */
+	public function captures()
+	{
+		if (!isset($this->_links->captures->href)) {
+			return new CaptureCollection($this->client, 0, null);
+		}
+
+		$result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_GET, $this->_links->captures->href);
+
+		$resourceCollection = new CaptureCollection($this->client, $result->count, $result->_links);
+		foreach ($result->_embedded->captures as $dataResult) {
+			$resourceCollection[] = ResourceFactory::createFromApiResult($dataResult, new Capture($this->client));
+		}
+
+		return $resourceCollection;
+	}
 }

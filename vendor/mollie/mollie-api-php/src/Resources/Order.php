@@ -254,15 +254,29 @@ class Order extends BaseResource
 
     /**
      * Cancel a line for this order.
-     * Returns HTTP status 204 (no content) if succesful.
+     * The data array must contain a lines array.
+     * You can pass an empty lines array if you want to cancel all eligible lines.
+     * Returns null if successful.
      *
-     * @param  string $lineId
      * @param  array|null $data
      * @return null
      */
-    public function cancelLine($lineId, $data = [])
+    public function cancelLines(array $data)
     {
-        return $this->client->orderLines->cancelFor($this, $lineId, $data);
+        return $this->client->orderLines->cancelFor($this, $data);
+    }
+
+    /**
+     * Cancels all eligible lines for this order.
+     * Returns null if successful.
+     *
+     * @param  array|null $data
+     * @return null
+     */
+    public function cancelAllLines($data = [])
+    {
+        $data['lines'] = [];
+        return $this->client->orderLines->cancelFor($this, $data);
     }
 
     /**
@@ -346,15 +360,14 @@ class Order extends BaseResource
     }
 
     /**
-     * Refund some order lines. You can provide an empty array for the
-     * "lines" data to refund all eligable lines for this order.
+     * Refund specific order lines.
      *
      * @param  array  $data
      * @return Refund
      */
     public function refund(array $data)
     {
-        return $this->client->orderRefunds->createFor($this, $data = []);
+        return $this->client->orderRefunds->createFor($this, $data);
     }
 
     /**
@@ -390,5 +403,26 @@ class Order extends BaseResource
         }
 
         return $resourceCollection;
+    }
+
+    /**
+     * Saves the order's updated billingAddress and/or shippingAddress.
+     *
+     * @return Order
+     */
+    public function update()
+    {
+        if (!isset($this->_links->self->href)) {
+            return $this;
+        }
+
+        $body = json_encode(array(
+            "billingAddress" => $this->billingAddress,
+            "shippingAddress" => $this->shippingAddress,
+        ));
+
+        $result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_PATCH, $this->_links->self->href, $body);
+
+        return ResourceFactory::createFromApiResult($result, new Order($this->client));
     }
 }

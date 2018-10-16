@@ -19,7 +19,7 @@ class SubscriptionEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Subscription($this->api);
+        return new Subscription($this->client);
     }
 
     /**
@@ -32,7 +32,7 @@ class SubscriptionEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new SubscriptionCollection($this->api, $count, $_links);
+        return new SubscriptionCollection($this->client, $count, $_links);
     }
 
     /**
@@ -84,12 +84,14 @@ class SubscriptionEndpoint extends EndpointAbstract
      * @param Customer $customer
      * @param string $subscriptionId
      *
+     * @param array $data
      * @return null
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function cancelFor(Customer $customer, $subscriptionId)
+    public function cancelFor(Customer $customer, $subscriptionId, array $data = [])
     {
         $this->parentId = $customer->id;
 
-        return parent::rest_delete($subscriptionId);
+        return parent::rest_delete($subscriptionId, $data);
     }
 }

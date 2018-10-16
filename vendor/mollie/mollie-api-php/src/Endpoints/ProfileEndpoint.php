@@ -17,7 +17,7 @@ class ProfileEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Profile($this->api);
+        return new Profile($this->client);
     }
 
     /**
@@ -30,7 +30,7 @@ class ProfileEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new ProfileCollection($this->api, $count, $_links);
+        return new ProfileCollection($this->client, $count, $_links);
     }
 
     /**
@@ -71,12 +71,13 @@ class ProfileEndpoint extends EndpointAbstract
      *
      * @param string $profileId
      *
+     * @param array $data
      * @return Profile
      * @throws ApiException
      */
-    public function delete($profileId)
+    public function delete($profileId, array $data = [])
     {
-        return $this->rest_delete($profileId);
+        return $this->rest_delete($profileId, $data);
     }
 
     /**
