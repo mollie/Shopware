@@ -126,7 +126,7 @@ class MollieShopware extends Plugin
         $view->addTemplateDir(__DIR__ . '/Views');
 
         if ($request->getActionName() == 'index') {
-            //$view->extendsTemplate('backend/swag_extend_customer/app.js');
+            $view->extendsTemplate('backend/mollie_orderlines/app.js');
         }
 
         if ($request->getActionName() == 'load') {

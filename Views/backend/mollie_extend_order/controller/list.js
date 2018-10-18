@@ -17,11 +17,12 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
 
     onRefundOrder: function(record) {
         var me = this;
-        var store = me.subApplication.getStore('Order');
+        //var store = me.subApplication.getStore('Order');
 
-        Ext.create('Shopware.apps.Mollie.view.window.Orderlines', {
-            flex: 2
-        });
+        // me.refundWindow = me.getView('Shopware.apps.MollieOrderlines.view.main.Window').create({});
+        //
+        // return me.refundWindow;
+        Ext.create('Shopware.apps.Mollie.view.list.Window').show();
     },
 
     // onRefundOrder: function(record) {
@@ -81,6 +82,6 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
         var current = store.currentPage;
 
         store.loadPage(current);
-    }
+    },
 });
 //{/block}
