@@ -1,6 +1,6 @@
 <?php
 
-    // Mollie Shopware Plugin Version: 1.3.2
+	// Mollie Shopware Plugin Version: 1.3.3
 
 use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
@@ -127,15 +127,18 @@ use MollieShopware\Components\Base\AbstractPaymentController;
 
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
-            else{
+            elseif ($molliePayment->isAuthorized()) {
+                $sOrder = Shopware()->Modules()->Order();
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
 
+                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            }
+            else {
                 $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
                 $basketService->restoreBasket($order);
 
                 return $this->redirect($baseUrl . '/checkout/confirm');
             }
-
-
         }
 
         /**
@@ -160,7 +163,7 @@ use MollieShopware\Components\Base\AbstractPaymentController;
                 return $this->notifyOK('Thank you');
             }
             else {
-                return $this->notifyOK('Thank you');
+                return $this->notifyException('The payment status could not be updated.');
             }
 
         }
@@ -205,7 +208,6 @@ use MollieShopware\Components\Base\AbstractPaymentController;
             }
 
             return $order;
-
         }
 
         /**
