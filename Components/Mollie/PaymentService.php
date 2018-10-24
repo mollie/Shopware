@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.3
+	// Mollie Shopware Plugin Version: 1.3.4
 
 namespace MollieShopware\Components\Mollie;
 
@@ -150,7 +150,6 @@ namespace MollieShopware\Components\Mollie;
             }
 
             $mollie_prepared = [
-
                 'amount'                => null,
                 'orderNumber'           => $this->prepareOrderNumberForMollie($order),
                 'lines'                 => $this->prepareOrderLinesForMollie($order),

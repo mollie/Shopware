@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.3
+	// Mollie Shopware Plugin Version: 1.3.4
 
 use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
@@ -120,17 +120,17 @@ use MollieShopware\Components\Base\AbstractPaymentController;
 
             $baseUrl = Shopware()->Front()->Request()->getBaseUrl();
 
-            if ($molliePayment->isPaid()) {
-                // update order status
-                $sOrder = Shopware()->Modules()->Order();
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
+            $sOrder = Shopware()->Modules()->Order();
 
+            if ($molliePayment->isPaid()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             elseif ($molliePayment->isAuthorized()) {
-                $sOrder = Shopware()->Modules()->Order();
                 $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
-
+                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            }
+            elseif ($molliePayment->isCreated()) {
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             else {
