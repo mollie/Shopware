@@ -413,8 +413,6 @@ namespace MollieShopware\Components\Mollie;
             }
 
             return $url;
-
-
         }
 
         private function prepareLocaleForMollie(Order $order)
@@ -469,8 +467,6 @@ namespace MollieShopware\Components\Mollie;
 
         }
 
-
-
         /**
          * Get the id of the chosen ideal issuer from database
          */
@@ -492,7 +488,6 @@ namespace MollieShopware\Components\Mollie;
 
         public function generateChecksum(Order $order, $salt = null)
         {
-
             $handle = [
                 $order->getNumber(),
                 $order->getInvoiceAmount(),
@@ -505,19 +500,41 @@ namespace MollieShopware\Components\Mollie;
             }
 
             return sha1(implode(',', $handle));
-
-
         }
-
 
         public function checkPaymentStatus(Order $order)
         {
+            // get mollie payment
+            $molliePayment = $this->getPaymentObject($order);
 
-            return true;
+            // get the order module
+            $sOrder = Shopware()->Modules()->Order();
 
+            if (empty($sOrder))
+                return false;
 
+            // set the status
+            if ($molliePayment->isPaid()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
+                return true;
+            }
+            elseif ($molliePayment->isAuthorized()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED, true);
+                return true;
+            }
+            elseif ($molliePayment->isCanceled()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::CANCELLED, true);
+                return true;
+            }
+            elseif ($molliePayment->isExpired()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::OPEN, true);
+                return true;
+            }
+            elseif ($molliePayment->isRefunded()) {
+                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::RE_CREDITING, true);
+                return true;
+            }
+
+            return false;
         }
-
-
-
     }
