@@ -150,7 +150,6 @@ namespace MollieShopware\Components\Mollie;
             }
 
             $mollie_prepared = [
-
                 'amount'                => null,
                 'orderNumber'           => $this->prepareOrderNumberForMollie($order),
                 'lines'                 => $this->prepareOrderLinesForMollie($order),
