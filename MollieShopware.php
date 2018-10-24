@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.2
+	// Mollie Shopware Plugin Version: 1.3.3
 
 namespace MollieShopware;
 
@@ -258,7 +258,7 @@ class MollieShopware extends Plugin
         $mollie = $this->getMollieClient();
 
         // TODO: get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
-        $methods = $mollie->methods->all();
+        $methods = $mollie->methods->all(['resource' => 'orders']);
 
         $options = [];
         $position = 0;
