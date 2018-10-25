@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.4
+	// Mollie Shopware Plugin Version: 1.3.5
 
 class ShopwareValetDriver extends ValetDriver
 {

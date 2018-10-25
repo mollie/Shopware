@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.4
+	// Mollie Shopware Plugin Version: 1.3.5
 
 use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
@@ -130,7 +130,7 @@ use MollieShopware\Components\Base\AbstractPaymentController;
                 $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
-            elseif ($molliePayment->isCreated()) {
+            elseif ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer') {
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             else {
