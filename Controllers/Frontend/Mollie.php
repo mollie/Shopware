@@ -55,6 +55,10 @@ use MollieShopware\Components\Base\AbstractPaymentController;
              */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
+            $basketModule = Shopware()->Modules()->Basket();
+
+            $basketData = $basketModule->sGetBasket();
+
             /*
              * Persist basket from session to database, returning it's signature which
              * is then used to save the basket to an order.
@@ -92,7 +96,7 @@ use MollieShopware\Components\Base\AbstractPaymentController;
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($paymentService->startTransaction($order, $transaction));
+            return $this->redirect($paymentService->startTransaction($order, $transaction, $basketData));
 
         }
 

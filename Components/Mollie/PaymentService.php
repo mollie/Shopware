@@ -59,15 +59,15 @@ namespace MollieShopware\Components\Mollie;
          * @param Transaction $transaction
          * @return null|string
          */
-        public function startTransaction(Order $order, Transaction $transaction)
+        public function startTransaction(Order $order, Transaction $transaction, $basketData = array())
         {
-
             /**
              * @var TransactionRepository $transaction_repository
              * @var OrderLines $order_detail_repository
              */
 
-            $mollie_prepared = $this->prepareOrderForMollie($order);
+            $mollie_prepared = $this->prepareOrderForMollie($order, $basketData);
+
             $mollie_payment = $this->api->orders->create($mollie_prepared);
 
             $order_detail_repository = Shopware()->container()->get('models')->getRepository(OrderLines::class);
@@ -140,7 +140,7 @@ namespace MollieShopware\Components\Mollie;
          * @param Order $order
          * @return array
          */
-        private function prepareOrderForMollie(Order $order)
+        private function prepareOrderForMollie(Order $order, $basketData = array())
         {
 
             $payment_method = $order->getPayment()->getName();
@@ -152,7 +152,7 @@ namespace MollieShopware\Components\Mollie;
             $mollie_prepared = [
                 'amount'                => null,
                 'orderNumber'           => $this->prepareOrderNumberForMollie($order),
-                'lines'                 => $this->prepareOrderLinesForMollie($order),
+                'lines'                 => $this->prepareOrderLinesForMollie($order, $basketData),
                 'billingAddress'        => $this->prepareAddressForMollie($order, 'billing'),
                 'shippingAddress'       => $this->prepareAddressForMollie($order, 'shipping'),
 
@@ -186,7 +186,7 @@ namespace MollieShopware\Components\Mollie;
          * @param Order $order
          * @return array
          */
-        private function prepareOrderLinesForMollie(Order $order)
+        private function prepareOrderLinesForMollie(Order $order, $basketData = array())
         {
 
             $calculate_vats = function($percentage, $total_incl = null, $total_excl = null, $vat = null){
@@ -229,7 +229,6 @@ namespace MollieShopware\Components\Mollie;
 
             };
 
-
             $items = [];
             $invoiceShippingTaxRate = 0;
 
@@ -240,37 +239,32 @@ namespace MollieShopware\Components\Mollie;
                 $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
             }
 
-            foreach($order->getDetails() as $index => $detail)
+            foreach($basketData['content'] as $detail)
             {
+                //$vats = $calculate_vats($detail->getTaxRate(), $detail->getPrice());
 
-
-                $vats = $calculate_vats($detail->getTaxRate(), $detail->getPrice());
+                $totalAmount = $detail['price'] * $detail['quantity'];
+                $vatAmount = $totalAmount * ($detail['tax_rate'] / (100 + $detail['tax_rate']));
 
                 /**
                  * @var \Shopware\Models\Order\Detail $detail
                  */
+                $items[] = [
 
-                if ($vats['excl'] > 0){
+                    'type'=>'physical',
+                    'name'=>$detail['articlename'],
 
-                    $items[] = [
+                    // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
+                    'quantity'=>(int)$detail['quantity'],
+                    'unitPrice'=>$this->getPriceForMollie($order, $detail['price']),
+                    'totalAmount'=>$this->getPriceForMollie($order, $totalAmount),
+                    'vatRate'=>number_format($detail['tax_rate'], 2, '.', ''),
+                    'vatAmount'=>$this->getPriceForMollie($order, $vatAmount),
+                    'sku'=>$detail['ean'],
+                    'imageUrl'=>null,
+                    'productUrl'=>null,
 
-                        'type'=>'physical',
-                        'name'=>$detail->getArticleName(),
-
-                        // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
-                        'quantity'=>(int)$detail->getQuantity(),
-
-                        'unitPrice'=>$this->getPriceForMollie($order, $detail->getPrice()),
-                        'totalAmount'=>$this->getPriceForMollie($order, $vats['incl'] * $detail->getQuantity()),
-                        'vatRate'=>number_format($detail->getTaxRate(), 2, '.', ''),
-                        'vatAmount'=>$this->getPriceForMollie($order, $vats['vat'] * $detail->getQuantity() ),
-                        'sku'=>$detail->getEan(),
-                        'imageUrl'=>null,
-                        'productUrl'=>null,
-
-                    ];
-
-                }
+                ];
 
             }
 
@@ -295,8 +289,6 @@ namespace MollieShopware\Components\Mollie;
             }
 
             return $items;
-
-
         }
 
         private function getInvoiceShippingTaxRate(Order $order)

@@ -6,6 +6,7 @@ namespace MollieShopware\Components\Mollie;
 
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Voucher\Voucher;
@@ -56,6 +57,36 @@ class BasketService
         $this->orderModule = Shopware()->Modules()->Order();
         $this->orderService = Shopware()->Container()
             ->get('mollie_shopware.order_service');
+    }
+
+    public function getOrderLines()
+    {
+        $items = [];
+
+        try {
+            $basketRepo = $this->modelManager->getRepository(Basket::class);
+            $basketItems = $basketRepo->findBy([
+                'customerId' => Shopware()->Session()['sUserId']
+            ]);
+
+            if (!empty($basketItems)) {
+                foreach ($basketItems as $basketItem) {
+                    $unitPrice = $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100);
+
+                    $items[] = [
+                        'name' => $basketItem->getArticleName(),
+                        'quantity' => $basketItem->getQuantity(),
+                        'unit_price' => $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100),
+                        'total_amount' => $unitPrice * $basketItem->getQuanity(),
+                        'vat_rate' => $basketItem->getTaxRate(),
+                        'vat_amount' => ($unitPrice - $basketItem->getNetPrice()) * $basketItem->getQuantity(),
+                    ];
+                }
+            }
+        }
+        catch (\Exception $ex) {
+
+        }
     }
 
     /**
