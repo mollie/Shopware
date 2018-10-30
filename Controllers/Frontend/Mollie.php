@@ -55,9 +55,9 @@ use MollieShopware\Components\Base\AbstractPaymentController;
              */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
-            $basketModule = Shopware()->Modules()->Basket();
+            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
 
-            $basketData = $basketModule->sGetBasket();
+            $basketData = $basketService->getOrderLines();
 
             /*
              * Persist basket from session to database, returning it's signature which

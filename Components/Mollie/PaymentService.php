@@ -239,12 +239,12 @@ namespace MollieShopware\Components\Mollie;
                 $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
             }
 
-            foreach($basketData['content'] as $detail)
+            foreach($basketData as $detail)
             {
                 //$vats = $calculate_vats($detail->getTaxRate(), $detail->getPrice());
 
-                $totalAmount = $detail['price'] * $detail['quantity'];
-                $vatAmount = $totalAmount * ($detail['tax_rate'] / (100 + $detail['tax_rate']));
+                $totalAmount = $detail['unit_price'] * $detail['quantity'];
+                $vatAmount = $totalAmount * ($detail['vat_rate'] / (100 + $detail['vat_rate']));
 
                 /**
                  * @var \Shopware\Models\Order\Detail $detail
@@ -252,15 +252,15 @@ namespace MollieShopware\Components\Mollie;
                 $items[] = [
 
                     'type'=>'physical',
-                    'name'=>$detail['articlename'],
+                    'name'=>$detail['name'],
 
                     // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
                     'quantity'=>(int)$detail['quantity'],
-                    'unitPrice'=>$this->getPriceForMollie($order, $detail['price']),
+                    'unitPrice'=>$this->getPriceForMollie($order, $detail['unit_price']),
                     'totalAmount'=>$this->getPriceForMollie($order, $totalAmount),
-                    'vatRate'=>number_format($detail['tax_rate'], 2, '.', ''),
+                    'vatRate'=>number_format($detail['vat_rate'], 2, '.', ''),
                     'vatAmount'=>$this->getPriceForMollie($order, $vatAmount),
-                    'sku'=>$detail['ean'],
+                    'sku'=>null,
                     'imageUrl'=>null,
                     'productUrl'=>null,
 
@@ -374,7 +374,7 @@ namespace MollieShopware\Components\Mollie;
                 default:
                     throw new \Exception('Cannot generate "' . $type . '" url as type is undefined');
             }
-            
+
             $front = Shopware()->Container()->get('Front');
 
             $rnd = time();

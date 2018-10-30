@@ -77,7 +77,8 @@ class BasketService
                         'name' => $basketItem->getArticleName(),
                         'quantity' => $basketItem->getQuantity(),
                         'unit_price' => $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100),
-                        'total_amount' => $unitPrice * $basketItem->getQuanity(),
+                        'net_price' => $basketItem->getNetPrice(),
+                        'total_amount' => $unitPrice * $basketItem->getQuantity(),
                         'vat_rate' => $basketItem->getTaxRate(),
                         'vat_amount' => ($unitPrice - $basketItem->getNetPrice()) * $basketItem->getQuantity(),
                     ];
@@ -87,6 +88,8 @@ class BasketService
         catch (\Exception $ex) {
 
         }
+
+        return $items;
     }
 
     /**
