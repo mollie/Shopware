@@ -109,8 +109,6 @@ class BasketService
             // @todo handle exception for orderlines
         }
 
-        file_put_contents(__DIR__ . '/orderlines.txt', print_r($items, true));
-
         return $items;
     }
 
