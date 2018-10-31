@@ -241,8 +241,6 @@ namespace MollieShopware\Components\Mollie;
 
             foreach($basketData as $detail)
             {
-                //$vats = $calculate_vats($detail->getTaxRate(), $detail->getPrice());
-
                 $totalAmount = $detail['unit_price'] * $detail['quantity'];
                 $vatAmount = $totalAmount * ($detail['vat_rate'] / (100 + $detail['vat_rate']));
 
@@ -251,7 +249,7 @@ namespace MollieShopware\Components\Mollie;
                  */
                 $items[] = [
 
-                    'type'=>'physical',
+                    'type'=>$detail['type'],
                     'name'=>$detail['name'],
 
                     // warning: Mollie does not accept floating point amounts (like 2,5 tons of X)
@@ -265,7 +263,6 @@ namespace MollieShopware\Components\Mollie;
                     'productUrl'=>null,
 
                 ];
-
             }
 
             $vats = $calculate_vats($invoiceShippingTaxRate, null, $order->getInvoiceShippingNet());
