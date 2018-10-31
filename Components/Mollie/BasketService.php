@@ -88,6 +88,12 @@ class BasketService
                     ];
 
                     // set the order line type
+                    if (strstr($basketItem->getOrderNumber(), 'surcharge'))
+                        $orderLine['type'] = 'surcharge';
+
+                    if (strstr($basketItem->getOrderNumber(), 'discount'))
+                        $orderLine['type'] = 'discount';
+
                     if ($basketItem->getEsdArticle() > 0)
                         $orderLine['type'] = 'digital';
 
@@ -102,6 +108,8 @@ class BasketService
         catch (\Exception $ex) {
             // @todo handle exception for orderlines
         }
+
+        file_put_contents(__DIR__ . '/orderlines.txt', print_r($items, true));
 
         return $items;
     }
