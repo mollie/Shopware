@@ -1,5 +1,7 @@
-# Official Mollie extension for Shopware
-The official Mollie extension for Shopware. 
+<p align="center">
+  <img src="https://info.mollie.com/hubfs/github/shopware/logo.png" width="128" height="128"/>
+</p>
+<h1 align="center">Mollie for Shopware</h1>
 
 ## Introduction
 Mollie offers various payment methods which can be easily integrated into your Shopware-powered webshop by using our official plugin. Mollie accepts all major payment methods such as Visa, Mastercard, American Express, PayPal, iDEAL, SOFORT Banking, SEPA Bank Transfer, SEPA Direct Debit, Bitcoin, ING Home'Pay, KBC/CBC Payment Button, Bancontact, Belfius Pay Button, paysafecard, CartaSi, Cartes Bancaires and Gift cards
