@@ -43,7 +43,6 @@ use MollieShopware\Components\Base\AbstractPaymentController;
          */
         public function directAction()
         {
-
             /**
              * @todo: check if basket exists!!
              */
