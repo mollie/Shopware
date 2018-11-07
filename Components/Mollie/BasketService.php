@@ -60,14 +60,15 @@ class BasketService
             ->get('mollie_shopware.order_service');
     }
 
-    public function getOrderLines($customerId)
+    public function getOrderLines($customerId, $sessionId)
     {
         $items = [];
 
         try {
             $basketRepo = $this->modelManager->getRepository(Basket::class);
             $basketItems = $basketRepo->findBy([
-                'customerId' => $customerId
+                'customerId' => $customerId,
+                'sessionId' => $sessionId
             ]);
 
             if (!empty($basketItems)) {
@@ -120,7 +121,6 @@ class BasketService
      */
     public function restoreBasket($orderId)
     {
-
         if (is_object($orderId)) {
             $order = $orderId;
         }

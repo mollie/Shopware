@@ -57,7 +57,8 @@ use MollieShopware\Components\Base\AbstractPaymentController;
             $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
 
             $basketData = $basketService->getOrderLines(
-                Shopware()->Session()['sUserId']
+                Shopware()->Session()['sUserId'],
+                Shopware()->Session()->get('sessionId')
             );
 
             /*
