@@ -2,7 +2,7 @@
 
 	// Mollie Shopware Plugin Version: 1.3.5
 
-use MollieShopware\Components\Base\AbstractPaymentController;
+    use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
     use Shopware\Models\Order\Order;
 
