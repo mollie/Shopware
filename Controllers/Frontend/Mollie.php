@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.5
+	// Mollie Shopware Plugin Version: 1.3.6
 
     use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
@@ -43,7 +43,6 @@
          */
         public function directAction()
         {
-
             /**
              * @todo: check if basket exists!!
              */
@@ -54,6 +53,12 @@
              * @var \MollieShopware\Models\Transaction $transaction
              */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+
+            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+
+            $basketData = $basketService->getOrderLines(
+                Shopware()->Session()['sUserId']
+            );
 
             /*
              * Persist basket from session to database, returning it's signature which
@@ -92,7 +97,7 @@
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($paymentService->startTransaction($order, $transaction));
+            return $this->redirect($paymentService->startTransaction($order, $transaction, $basketData));
 
         }
 
