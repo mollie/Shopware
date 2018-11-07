@@ -1,12 +1,10 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.5
+	// Mollie Shopware Plugin Version: 1.3.6
 
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use MollieShopware\Components\Mollie\OrderService;
-use MollieShopware\Models\OrderDetailMollieID;
 use Shopware\Models\Order\Status;
 use Exception;
 
@@ -28,9 +26,20 @@ class OrderBackendSubscriber implements SubscriberInterface
             return true;
 
         // vars
-        $orderId = $args->getRequest()->getParam('id');
+        $orderId = null;
         $order = null;
         $mollieId = null;
+
+        try {
+            $orderId = $args->getRequest()->getParam('id');
+        }
+        catch (Exception $ex) {
+            // send exception
+            $this->sendException(
+                'HTTP/1.1 422 Unprocessable Entity Error',
+                $ex->getMessage()
+            );
+        }
 
         // check if we have an order
         if (empty($orderId))

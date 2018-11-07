@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.5
+	// Mollie Shopware Plugin Version: 1.3.6
 
 namespace MollieShopware\Components\Mollie;
 
@@ -95,9 +95,18 @@ namespace MollieShopware\Components\Mollie;
         public function sendOrder(Order $order, $mollieId)
         {
             // create mollie order object
-            $mollieOrder = $this->api->orders->get($mollieId);
+            $mollieOrder = null;
+
+            try {
+                $mollieOrder = $this->api->orders->get($mollieId);
+            }
+            catch (Exception $ex) {
+                throw new Exception('The order could not be found at Mollie.');
+            }
 
             if (!empty($mollieOrder)) {
+                $result = null;
+
                 if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
                     if ($mollieOrder->isCompleted()) {
                         throw new Exception('The order is already completed at Mollie.');
@@ -107,7 +116,14 @@ namespace MollieShopware\Components\Mollie;
                     }
                 }
 
-                return $mollieOrder->shipAll();
+                try {
+                    $result = $mollieOrder->shipAll();
+                }
+                catch (Exception $ex) {
+                    throw new Exception('The order can\'t be shipped.');
+                }
+
+                return $result;
             }
 
             return false;
@@ -167,7 +183,7 @@ namespace MollieShopware\Components\Mollie;
             ];
 
             $total_incl = 0.;
-            foreach($mollie_prepared['lines'] as $line){
+            foreach($mollie_prepared['lines'] as $line) {
                 $total_incl += $line['totalAmount']['value'];
             }
 

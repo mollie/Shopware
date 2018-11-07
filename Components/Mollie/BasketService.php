@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.5
+	// Mollie Shopware Plugin Version: 1.3.6
 
 namespace MollieShopware\Components\Mollie;
 
@@ -60,14 +60,15 @@ class BasketService
             ->get('mollie_shopware.order_service');
     }
 
-    public function getOrderLines($customerId)
+    public function getOrderLines($customerId, $sessionId)
     {
         $items = [];
 
         try {
             $basketRepo = $this->modelManager->getRepository(Basket::class);
             $basketItems = $basketRepo->findBy([
-                'customerId' => $customerId
+                'customerId' => $customerId,
+                'sessionId' => $sessionId
             ]);
 
             if (!empty($basketItems)) {
@@ -109,8 +110,6 @@ class BasketService
             // @todo handle exception for orderlines
         }
 
-        file_put_contents(__DIR__ . '/orderlines.txt', print_r($items, true));
-
         return $items;
     }
 
@@ -122,7 +121,6 @@ class BasketService
      */
     public function restoreBasket($orderId)
     {
-
         if (is_object($orderId)) {
             $order = $orderId;
         }

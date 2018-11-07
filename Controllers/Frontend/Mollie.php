@@ -1,8 +1,8 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.5
+	// Mollie Shopware Plugin Version: 1.3.6
 
-use MollieShopware\Components\Base\AbstractPaymentController;
+    use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
     use Shopware\Models\Order\Order;
 
@@ -43,7 +43,6 @@ use MollieShopware\Components\Base\AbstractPaymentController;
          */
         public function directAction()
         {
-
             /**
              * @todo: check if basket exists!!
              */
@@ -58,7 +57,8 @@ use MollieShopware\Components\Base\AbstractPaymentController;
             $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
 
             $basketData = $basketService->getOrderLines(
-                Shopware()->Session()['sUserId']
+                Shopware()->Session()['sUserId'],
+                Shopware()->Session()->get('sessionId')
             );
 
             /*
