@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.7
+	// Mollie Shopware Plugin Version: 1.3.8
 
 namespace MollieShopware\Components\Mollie;
 
@@ -421,35 +421,34 @@ namespace MollieShopware\Components\Mollie;
 
         private function prepareLocaleForMollie(Order $order)
         {
-
-            $iso = $order->getLanguageIso();
-
-            $translation = [
-                'NLD'=>'nl_NL',
-                'FRA'=>'fr_FR',
-                'ITA'=>'it_IT',
-                'ENG'=>'en_US',
-                'DLD'=>'de_DE',
-                'ESP'=>'es_ES',
-                'POR'=>'pt_PT',
-                'SVE'=>'sv_SE',
-                'FIN'=>'fi_FI',
-                'DEN'=>'da_DK',
-                'ISL'=>'is_IS',
-                'HUN'=>'hu_HU',
-                'POL'=>'pl_PL',
-                'LAT'=>'lv_LV',
-                'LIT'=>'lt_LT',
+            $mollieLocales = [
+                'en_US',
+                'nl_NL',
+                'fr_FR',
+                'it_IT',
+                'de_DE',
+                'de_AT',
+                'de_CH',
+                'es_ES',
+                'ca_ES',
+                'nb_NO',
+                'pt_PT',
+                'sv_SE',
+                'fi_FI',
+                'da_DK',
+                'is_IS',
+                'hu_HU',
+                'pl_PL',
+                'lv_LV',
+                'lt_LT'
             ];
 
-            if (isset($translation[$iso])){
-                return $translation[$iso];
-            }
-            else
-            {
-                return $translation['ENG'];
-            }
+            $locale = Shopware()->Shop()->getLocale()->getLocale();
 
+            if (empty($locale) || !in_array($locale, $mollieLocales))
+                $locale = 'en_US';
+
+            return $locale;
         }
 
         /**

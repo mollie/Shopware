@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.7
+	// Mollie Shopware Plugin Version: 1.3.8
 
 namespace MollieShopware\Models;
 
