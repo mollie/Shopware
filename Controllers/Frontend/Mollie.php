@@ -61,6 +61,8 @@ use MollieShopware\Components\Base\AbstractPaymentController;
                 Shopware()->Session()->get('sessionId')
             );
 
+            file_put_contents(__DIR__ . '/basketdata.txt', print_r($basketData, true));
+
             /*
              * Persist basket from session to database, returning it's signature which
              * is then used to save the basket to an order.

@@ -74,18 +74,24 @@ class BasketService
             if (!empty($basketItems)) {
                 foreach ($basketItems as $basketItem) {
                     // get the unit price
-                    $unitPrice = $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100);
+                    $unitPrice = $basketItem->getPrice();
+
+                    // get net price
+                    $netPrice = $basketItem->getNetPrice();
+
+                    // get vat amount
+                    $vatAmount = ($unitPrice * $basketItem->getQuantity()) - ($netPrice * $basketItem->getQuantity());
 
                     // build the order line array
                     $orderLine = [
                         'name' => $basketItem->getArticleName(),
                         'type' => 'physical',
                         'quantity' => $basketItem->getQuantity(),
-                        'unit_price' => $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100),
-                        'net_price' => $basketItem->getNetPrice(),
+                        'unit_price' => $unitPrice,
+                        'net_price' => $netPrice,
                         'total_amount' => $unitPrice * $basketItem->getQuantity(),
-                        'vat_rate' => $basketItem->getTaxRate(),
-                        'vat_amount' => ($unitPrice - $basketItem->getNetPrice()) * $basketItem->getQuantity()
+                        'vat_rate' => ($vatAmount > 0 ? $basketItem->getTaxRate() : 0),
+                        'vat_amount' => $vatAmount
                     ];
 
                     // set the order line type
