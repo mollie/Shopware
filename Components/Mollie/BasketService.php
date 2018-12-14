@@ -71,6 +71,8 @@ class BasketService
                 'sessionId' => $sessionId
             ]);
 
+            file_put_contents(__DIR__ . '/basketitems.txt', print_r($basketItems, true));
+
             if (!empty($basketItems)) {
                 foreach ($basketItems as $basketItem) {
                     // get the unit price
@@ -84,17 +86,16 @@ class BasketService
 
                     // get vat amount
                     $vatAmount = ($unitPrice * $basketItem->getQuantity()) - ($basketItem->getNetPrice() * $basketItem->getQuantity());
-                    $vatAmount = $vatAmount > 0 ? $vatAmount : 0;
 
                     // build the order line array
                     $orderLine = [
                         'name' => $basketItem->getArticleName(),
                         'type' => 'physical',
                         'quantity' => $basketItem->getQuantity(),
-                        'unit_price' => $unitPrice,
+                        'unit_price' => round($unitPrice, 2),
                         'net_price' => $netPrice,
                         'total_amount' => round($unitPrice * $basketItem->getQuantity(), 2),
-                        'vat_rate' => $vatAmount > 0 ? $basketItem->getTaxRate() : 0,
+                        'vat_rate' => ($vatAmount > 0 || $vatAmount < 0 ? $basketItem->getTaxRate() : 0),
                         'vat_amount' => round($vatAmount, 2),
                     ];
 
@@ -111,6 +112,9 @@ class BasketService
                     if ($basketItem->getMode() == 2)
                         $orderLine['type'] = 'discount';
 
+                    if ($unitPrice < 0)
+                        $orderLine['type'] = 'discount';
+
                     // add the order line to items
                     $items[] = $orderLine;
                 }
@@ -119,6 +123,8 @@ class BasketService
         catch (\Exception $ex) {
             // @todo handle exception for orderlines
         }
+
+        file_put_contents(__DIR__ . '/items.txt', print_r($items, true));
 
         return $items;
     }

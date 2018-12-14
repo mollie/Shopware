@@ -233,8 +233,8 @@ namespace MollieShopware\Components\Mollie;
                     'quantity' => (int)$detail['quantity'],
                     'unitPrice' => $this->getPrice($order, $detail['unit_price']),
                     'totalAmount' => $this->getPrice($order, $detail['total_amount']),
-                    'vatRate' => $detail['vat_rate'],
-                    'vatAmount' => $this->getPrice($order, $detail['vat_amount']),
+                    'vatRate' => number_format($this->isTaxFree() ? 0 : $detail['vat_rate'], 2, '.', ''),
+                    'vatAmount' => $this->getPrice($order, ($this->isTaxFree() ? 0 : $detail['vat_amount'])),
                     'sku' => null,
                     'imageUrl' => null,
                     'productUrl' => null,
@@ -253,6 +253,10 @@ namespace MollieShopware\Components\Mollie;
             // get shipping vat amount
             $shippingVatAmount = round($shippingUnitPrice - $shippingNetPrice, 2);
 
+            // clear shipping tax if taxfree
+            if ($this->isTaxFree())
+                $shippingVatAmount = 0;
+
             // add shipping costs to items
             $items[] = [
                 'type' => 'shipping_fee',
@@ -260,7 +264,7 @@ namespace MollieShopware\Components\Mollie;
                 'quantity' => 1,
                 'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
                 'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
-                'vatRate' => $shippingVatAmount > 0 ? number_format($invoiceShippingTaxRate, 2, '.', '') : 0,
+                'vatRate' => $shippingVatAmount > 0 || $shippingVatAmount < 0 ? number_format($invoiceShippingTaxRate, 2, '.', '') : 0,
                 'vatAmount' => $this->getPrice($order, $shippingVatAmount),
             ];
 
@@ -528,5 +532,25 @@ namespace MollieShopware\Components\Mollie;
             }
 
             return false;
+        }
+
+        /**
+         * Check wether the current user shops tax free
+         *
+         * @return boolean
+         */
+        private function isTaxFree()
+        {
+            // get userdata
+            $userData = Shopware()->Modules()->Admin()->sGetUserData();
+
+            // check if taxfree
+            if (!empty($userData['additional']['countryShipping']['taxfree'])) {
+                return true;
+            }
+            if (empty($userData['additional']['countryShipping']['taxfree_ustid'])) {
+                return false;
+            }
+            return !empty($userData['shippingaddress']['ustid']);
         }
     }
