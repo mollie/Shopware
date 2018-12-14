@@ -74,13 +74,13 @@ class BasketService
             if (!empty($basketItems)) {
                 foreach ($basketItems as $basketItem) {
                     // get the unit price
-                    $unitPrice = $basketItem->getPrice();
+                    $unitPrice = round($basketItem->getPrice(), 2);
 
                     // get net price
-                    $netPrice = $basketItem->getNetPrice();
+                    $netPrice = round($basketItem->getNetPrice(), 2);
 
                     // get vat amount
-                    $vatAmount = ($unitPrice * $basketItem->getQuantity()) - ($netPrice * $basketItem->getQuantity());
+                    $vatAmount = round(($unitPrice * $basketItem->getQuantity()) - ($netPrice * $basketItem->getQuantity()), 2);
 
                     // build the order line array
                     $orderLine = [
@@ -89,9 +89,9 @@ class BasketService
                         'quantity' => $basketItem->getQuantity(),
                         'unit_price' => $unitPrice,
                         'net_price' => $netPrice,
-                        'total_amount' => $unitPrice * $basketItem->getQuantity(),
-                        'vat_rate' => ($vatAmount > 0 ? $basketItem->getTaxRate() : 0),
-                        'vat_amount' => $vatAmount
+                        'total_amount' => round($unitPrice * $basketItem->getQuantity(), 2),
+                        'vat_rate' => round($vatAmount > 0 ? $basketItem->getTaxRate() : 0, 2),
+                        'vat_amount' => $vatAmount,
                     ];
 
                     // set the order line type
