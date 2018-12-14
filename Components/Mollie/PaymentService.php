@@ -257,8 +257,8 @@ namespace MollieShopware\Components\Mollie;
                 'quantity' => 1,
                 'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
                 'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
-                'vatRate' => round($shippingVatAmount > 0 ? number_format($invoiceShippingTaxRate, 2, '.', '') : 0, 2),
-                'vatAmount' => $this->getPrice($order, round($shippingVatAmount, 2)),
+                'vatRate' => $shippingVatAmount > 0 ? number_format($invoiceShippingTaxRate, 2, '.', '') : 0,
+                'vatAmount' => $this->getPrice($order, $shippingVatAmount),
             ];
 
             return $items;

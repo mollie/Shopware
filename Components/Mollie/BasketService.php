@@ -80,7 +80,7 @@ class BasketService
                     $netPrice = round($basketItem->getNetPrice(), 2);
 
                     // get vat amount
-                    $vatAmount = round(($unitPrice * $basketItem->getQuantity()) - ($netPrice * $basketItem->getQuantity()), 2);
+                    $vatAmount = ($basketItem->getPrice() * $basketItem->getQuantity()) - ($basketItem->getNetPrice() * $basketItem->getQuantity());
 
                     // build the order line array
                     $orderLine = [
@@ -90,8 +90,8 @@ class BasketService
                         'unit_price' => $unitPrice,
                         'net_price' => $netPrice,
                         'total_amount' => round($unitPrice * $basketItem->getQuantity(), 2),
-                        'vat_rate' => round($vatAmount > 0 ? $basketItem->getTaxRate() : 0, 2),
-                        'vat_amount' => $vatAmount,
+                        'vat_rate' => $vatAmount > 0 ? $basketItem->getTaxRate() : 0,
+                        'vat_amount' => round($vatAmount, 2),
                     ];
 
                     // set the order line type
