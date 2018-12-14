@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9.1
+	// Mollie Shopware Plugin Version: 1.3.9.2
 
 namespace MollieShopware\Components\Mollie;
 
@@ -84,6 +84,7 @@ class BasketService
 
                     // get vat amount
                     $vatAmount = ($unitPrice * $basketItem->getQuantity()) - ($basketItem->getNetPrice() * $basketItem->getQuantity());
+                    $vatAmount = $vatAmount > 0 ? $vatAmount : 0;
 
                     // build the order line array
                     $orderLine = [
