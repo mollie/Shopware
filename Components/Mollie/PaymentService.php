@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9.3
+	// Mollie Shopware Plugin Version: 1.3.9.4
 
 namespace MollieShopware\Components\Mollie;
 
@@ -267,7 +267,7 @@ namespace MollieShopware\Components\Mollie;
                 'quantity' => 1,
                 'unitPrice' => $this->getPrice($order, round($shippingUnitPrice, 2)),
                 'totalAmount' => $this->getPrice($order, round($shippingUnitPrice, 2)),
-                'vatRate' => number_format($shippingVatAmount > 0 || $shippingVatAmount < 0 ? $invoiceShippingTaxRate : 0, 2, '.', ''),
+                'vatRate' => number_format($order->getTaxFree() ? 0 : $invoiceShippingTaxRate, 2, '.', ''),
                 'vatAmount' => $this->getPrice($order, round($shippingVatAmount, 2)),
             ];
 

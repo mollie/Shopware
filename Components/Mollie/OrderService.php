@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9.3
+	// Mollie Shopware Plugin Version: 1.3.9.4
 
 namespace MollieShopware\Components\Mollie;
 
@@ -160,7 +160,7 @@ class OrderService
                         'unit_price' => round($unitPrice, 2),
                         'net_price' => round($netPrice, 2),
                         'total_amount' => round($unitPrice * $orderDetail->getQuantity(), 2),
-                        'vat_rate' => ($vatAmount > 0 || $vatAmount < 0 ? $orderDetail->getTaxRate() : 0),
+                        'vat_rate' => ($order->getTaxFree() ? 0 : $orderDetail->getTaxRate()),
                         'vat_amount' => round($vatAmount, 2),
                     ];
 

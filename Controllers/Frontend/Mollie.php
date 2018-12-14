@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9.3
+	// Mollie Shopware Plugin Version: 1.3.9.4
 
 use MollieShopware\Components\Base\AbstractPaymentController;
     use MollieShopware\Components\Constants\PaymentStatus;
