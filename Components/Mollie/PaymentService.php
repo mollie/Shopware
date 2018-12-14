@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9
+	// Mollie Shopware Plugin Version: 1.3.9.1
 
 namespace MollieShopware\Components\Mollie;
 
@@ -243,6 +243,9 @@ namespace MollieShopware\Components\Mollie;
 
             // get shipping unit price
             $shippingUnitPrice = round($order->getInvoiceShipping(), 2);
+
+            if (Shopware()->Shop()->getCustomerGroup()->getTaxInput() === true)
+                $shippingUnitPrice = round($order->getInvoiceShippingNet() * (($invoiceShippingTaxRate + 100) / 100), 2);
 
             // get shipping net price
             $shippingNetPrice = round($order->getInvoiceShippingNet(), 2);

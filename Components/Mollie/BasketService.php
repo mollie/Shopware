@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.9
+	// Mollie Shopware Plugin Version: 1.3.9.1
 
 namespace MollieShopware\Components\Mollie;
 
@@ -74,13 +74,16 @@ class BasketService
             if (!empty($basketItems)) {
                 foreach ($basketItems as $basketItem) {
                     // get the unit price
-                    $unitPrice = round($basketItem->getPrice(), 2);
+                    $unitPrice = $basketItem->getPrice();
+
+                    if (Shopware()->Shop()->getCustomerGroup()->getTaxInput() === true)
+                        $unitPrice = $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100);
 
                     // get net price
                     $netPrice = round($basketItem->getNetPrice(), 2);
 
                     // get vat amount
-                    $vatAmount = ($basketItem->getPrice() * $basketItem->getQuantity()) - ($basketItem->getNetPrice() * $basketItem->getQuantity());
+                    $vatAmount = ($unitPrice * $basketItem->getQuantity()) - ($basketItem->getNetPrice() * $basketItem->getQuantity());
 
                     // build the order line array
                     $orderLine = [
