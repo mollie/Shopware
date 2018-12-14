@@ -31,7 +31,6 @@ class OrderService
      * Get an order by it's id
      *
      * @param int $orderId
-     *
      * @return Order $order
      */
     public function getOrderById($orderId)
@@ -45,6 +44,35 @@ class OrderService
             // find order
             $order = $orderRepo->findOneBy([
                 'id' => $orderId
+            ]);
+        }
+        catch (Exception $ex) {
+            // log error
+            if ($order != null) {
+                $orderRepo->addException($order, $ex);
+            }
+        }
+
+        return $order;
+    }
+
+    /**
+     * Get an order by it's number
+     *
+     * @param string $orderNumber
+     * @return Order $order
+     */
+    public function getOrderByNumber($orderNumber)
+    {
+        $order = null;
+
+        try {
+            // get order repository
+            $orderRepo = $this->modelManager->getRepository(Order::class);
+
+            // find order
+            $order = $orderRepo->findOneBy([
+                'number' => $orderNumber
             ]);
         }
         catch (Exception $ex) {
@@ -84,6 +112,84 @@ class OrderService
         }
 
         return $mollieId;
+    }
+
+    public function getOrderLines($orderId)
+    {
+        // vars
+        $order = null;
+        $items = [];
+
+        // get order
+        if ($orderId instanceof Order)
+            $order = $orderId;
+        else
+            $this->getOrderById($orderId);
+
+        try {
+            $orderDetails = $order->getDetails();
+
+            if (!empty($orderDetails)) {
+                foreach ($orderDetails as $orderDetail) {
+                    // get the unit price
+                    $unitPrice = $orderDetail->getPrice();
+
+                    // get net price
+                    $netPrice = ($unitPrice / ($orderDetail->getTaxRate() + 100)) * 100;
+
+                    // add tax if net order
+                    if ($order->getNet() == true) {
+                        $netPrice = $unitPrice;
+                        $unitPrice = $unitPrice * (($orderDetail->getTaxRate() + 100) / 100);
+                    }
+
+                    // get vat amount
+                    $vatAmount = ($unitPrice * $orderDetail->getQuantity()) - ($netPrice * $orderDetail->getQuantity());
+
+                    // clear tax if order is tax free
+                    if ($order->getTaxFree()) {
+                        $vatAmount = 0;
+                        $unitPrice = $netPrice;
+                    }
+
+                    // build the order line array
+                    $orderLine = [
+                        'name' => $orderDetail->getArticleName(),
+                        'type' => 'physical',
+                        'quantity' => $orderDetail->getQuantity(),
+                        'unit_price' => round($unitPrice, 2),
+                        'net_price' => round($netPrice, 2),
+                        'total_amount' => round($unitPrice * $orderDetail->getQuantity(), 2),
+                        'vat_rate' => ($vatAmount > 0 || $vatAmount < 0 ? $orderDetail->getTaxRate() : 0),
+                        'vat_amount' => round($vatAmount, 2),
+                    ];
+
+                    // set the order line type
+                    if (strstr($orderDetail->getNumber(), 'surcharge'))
+                        $orderLine['type'] = 'surcharge';
+
+                    if (strstr($orderDetail->getNumber(), 'discount'))
+                        $orderLine['type'] = 'discount';
+
+                    if ($orderDetail->getEsdArticle() > 0)
+                        $orderLine['type'] = 'digital';
+
+                    if ($orderDetail->getMode() == 2)
+                        $orderLine['type'] = 'discount';
+
+                    if ($unitPrice < 0)
+                        $orderLine['type'] = 'discount';
+
+                    // add the order line to items
+                    $items[] = $orderLine;
+                }
+            }
+        }
+        catch (\Exception $ex) {
+            // @todo handle exception for orderlines
+        }
+
+        return $items;
     }
 
     /**

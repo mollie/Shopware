@@ -8,6 +8,7 @@ namespace MollieShopware\Components\Mollie;
     use Mollie\Api\Resources\Payment;
     use MollieShopware\Components\Constants\PaymentStatus;
     use MollieShopware\Models\OrderLines;
+    use MollieShopware\Models\OrderLinesRepository;
     use MollieShopware\Models\Transaction;
     use MollieShopware\Models\TransactionRepository;
     use Shopware\Components\ConfigLoader;
@@ -62,20 +63,20 @@ namespace MollieShopware\Components\Mollie;
          *
          * @param Order $order
          * @param Transaction $transaction
-         * @param array $basketData
+         * @param array $orderDetails
          * @return null|string
          * @throws \Mollie\Api\Exceptions\ApiException
          */
-        public function startTransaction(Order $order, Transaction $transaction, $basketData = array())
+        public function startTransaction(Order $order, Transaction $transaction, $orderDetails = array())
         {
             // prepare the order for mollie
-            $molliePrepared = $this->prepareOrder($order, $basketData);
+            $molliePrepared = $this->prepareOrder($order, $orderDetails);
 
             /** @var Payment $molliePayment */
             $molliePayment = $this->api->orders->create($molliePrepared);
 
-            /** @var OrderLines $orderDetailRepo */
-            $orderDetailRepo = Shopware()->container()->get('models')->getRepository(OrderLines::class);
+            /** @var OrderLinesRepository $orderLinesRepo */
+            $orderLinesRepo = Shopware()->container()->get('models')->getRepository(OrderLines::class);
 
             // iterate over lines
             foreach($molliePayment->lines as $index => $line) {
@@ -87,7 +88,7 @@ namespace MollieShopware\Components\Mollie;
                 $item->setMollieOrderlineId($line->id);
 
                 // save item
-                $orderDetailRepo->save($item);
+                $orderLinesRepo->save($item);
             }
 
             /** @var TransactionRepository $transactionRepo */
@@ -172,15 +173,15 @@ namespace MollieShopware\Components\Mollie;
          * Prepare the order for Mollie
          *
          * @param Order $order
-         * @param array $basketData
+         * @param array $orderDetails
          * @return array
          * @throws Exception
          */
-        private function prepareOrder(Order $order, $basketData = array())
+        private function prepareOrder(Order $order, $orderDetails = array())
         {
             // vars
             $paymentMethod = $order->getPayment()->getName();
-            $orderLines = $this->getOrderlines($order, $basketData);
+            $orderLines = $this->getOrderlines($order, $orderDetails);
 
             // remove mollie_ from payment method
             if (substr($paymentMethod, 0, 7) === 'mollie_'){
@@ -209,7 +210,7 @@ namespace MollieShopware\Components\Mollie;
          * @param Order $order
          * @return array
          */
-        private function getOrderlines(Order $order, $basketData = array())
+        private function getOrderlines(Order $order, $orderDetails = array())
         {
             // vars
             $items = [];
@@ -223,18 +224,18 @@ namespace MollieShopware\Components\Mollie;
                 $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
             }
 
-            // iterate over basket data
-            foreach($basketData as $detail)
+            // iterate over order details data
+            foreach($orderDetails as $orderDetail)
             {
                 // add detail to items
                 $items[] = [
-                    'type' => $detail['type'],
-                    'name' => $detail['name'],
-                    'quantity' => (int)$detail['quantity'],
-                    'unitPrice' => $this->getPrice($order, $detail['unit_price']),
-                    'totalAmount' => $this->getPrice($order, $detail['total_amount']),
-                    'vatRate' => number_format($this->isTaxFree() ? 0 : $detail['vat_rate'], 2, '.', ''),
-                    'vatAmount' => $this->getPrice($order, ($this->isTaxFree() ? 0 : $detail['vat_amount'])),
+                    'type' => $orderDetail['type'],
+                    'name' => $orderDetail['name'],
+                    'quantity' => (int)$orderDetail['quantity'],
+                    'unitPrice' => $this->getPrice($order, $orderDetail['unit_price']),
+                    'totalAmount' => $this->getPrice($order, $orderDetail['total_amount']),
+                    'vatRate' => number_format($orderDetail['vat_rate'], 2, '.', ''),
+                    'vatAmount' => $this->getPrice($order, $orderDetail['vat_amount']),
                     'sku' => null,
                     'imageUrl' => null,
                     'productUrl' => null,
@@ -242,30 +243,32 @@ namespace MollieShopware\Components\Mollie;
             }
 
             // get shipping unit price
-            $shippingUnitPrice = round($order->getInvoiceShipping(), 2);
+            $shippingUnitPrice = $order->getInvoiceShipping();
 
-            if (Shopware()->Shop()->getCustomerGroup()->getTaxInput() === true)
-                $shippingUnitPrice = round($order->getInvoiceShippingNet() * (($invoiceShippingTaxRate + 100) / 100), 2);
+            if ($order->getNet() == true)
+                $shippingUnitPrice = $shippingUnitPrice * (($invoiceShippingTaxRate + 100) / 100);
 
             // get shipping net price
-            $shippingNetPrice = round($order->getInvoiceShippingNet(), 2);
+            $shippingNetPrice = $order->getInvoiceShippingNet();
 
             // get shipping vat amount
-            $shippingVatAmount = round($shippingUnitPrice - $shippingNetPrice, 2);
+            $shippingVatAmount = $shippingUnitPrice - $shippingNetPrice;
 
-            // clear shipping tax if taxfree
-            if ($this->isTaxFree())
+            // clear tax if order is tax free
+            if ($order->getTaxFree()) {
                 $shippingVatAmount = 0;
+                $shippingUnitPrice = $shippingNetPrice;
+            }
 
             // add shipping costs to items
             $items[] = [
                 'type' => 'shipping_fee',
                 'name' => 'Shipping fee',
                 'quantity' => 1,
-                'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
-                'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
-                'vatRate' => $shippingVatAmount > 0 || $shippingVatAmount < 0 ? number_format($invoiceShippingTaxRate, 2, '.', '') : 0,
-                'vatAmount' => $this->getPrice($order, $shippingVatAmount),
+                'unitPrice' => $this->getPrice($order, round($shippingUnitPrice, 2)),
+                'totalAmount' => $this->getPrice($order, round($shippingUnitPrice, 2)),
+                'vatRate' => number_format($shippingVatAmount > 0 || $shippingVatAmount < 0 ? $invoiceShippingTaxRate : 0, 2, '.', ''),
+                'vatAmount' => $this->getPrice($order, round($shippingVatAmount, 2)),
             ];
 
             return $items;
@@ -532,25 +535,5 @@ namespace MollieShopware\Components\Mollie;
             }
 
             return false;
-        }
-
-        /**
-         * Check wether the current user shops tax free
-         *
-         * @return boolean
-         */
-        private function isTaxFree()
-        {
-            // get userdata
-            $userData = Shopware()->Modules()->Admin()->sGetUserData();
-
-            // check if taxfree
-            if (!empty($userData['additional']['countryShipping']['taxfree'])) {
-                return true;
-            }
-            if (empty($userData['additional']['countryShipping']['taxfree_ustid'])) {
-                return false;
-            }
-            return !empty($userData['shippingaddress']['ustid']);
         }
     }

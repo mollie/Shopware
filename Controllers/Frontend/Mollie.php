@@ -54,13 +54,6 @@ use MollieShopware\Components\Base\AbstractPaymentController;
              */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
-            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-
-            $basketData = $basketService->getOrderLines(
-                Shopware()->Session()['sUserId'],
-                Shopware()->Session()->get('sessionId')
-            );
-
             /*
              * Persist basket from session to database, returning it's signature which
              * is then used to save the basket to an order.
@@ -81,25 +74,19 @@ use MollieShopware\Components\Base\AbstractPaymentController;
              * */
             $orderNumber = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
 
-            /*
-             * Get $order Doctrine model, which is easier to handle than
-             * the sOrder class
-             * */
-            $orderRepo = Shopware()->Container()->get('models')->getRepository(Order::class);
+            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
             // find order
-            $order = $orderRepo->findOneBy([
-                'number' => $orderNumber,
-            ]);
-
+            $order = $orderService->getOrderByNumber($orderNumber);
 
             if (empty($order)) {
                 // @todo: this deserves a more describing error message
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($paymentService->startTransaction($order, $transaction, $basketData));
+            $orderDetails = $orderService->getOrderLines($order);
 
+            return $this->redirect($paymentService->startTransaction($order, $transaction, $orderDetails));
         }
 
         /**
