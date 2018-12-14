@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.8
+	// Mollie Shopware Plugin Version: 1.3.9
 
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
