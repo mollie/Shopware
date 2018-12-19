@@ -13,7 +13,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Transaction
 {
-
     /**
      * @var integer
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -21,6 +20,13 @@ class Transaction
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     private $id;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="transaction_id", type="string", nullable=true)
+     */
+    private $transaction_id;
 
     /**
      * @var integer
@@ -36,15 +42,43 @@ class Transaction
      */
     private $mollie_id;
 
+    public function getID()
+    {
+        return $this->id;
+    }
 
+    public function setID($id)
+    {
+        $this->id = $id;
+    }
 
-    public function getID()                 { return $this->id; }
-    public function setID($id)              { $this->id = $id; }
+    public function getTransactionID()
+    {
+        return $this->transaction_id;
+    }
 
-    public function getOrderID()            { return $this->order_id; }
-    public function setOrderID($order_id)   { $this->order_id = $order_id; }
+    public function setTransactionID($transaction_id)
+    {
+        $this->transaction_id = $transaction_id;
+    }
 
-    public function getMollieID()           { return $this->mollie_id; }
-    public function setMollieID($mollie_id) { $this->mollie_id = $mollie_id; }
+    public function getOrderID()
+    {
+        return $this->order_id;
+    }
 
+    public function setOrderID($order_id)
+    {
+        $this->order_id = $order_id;
+    }
+
+    public function getMollieID()
+    {
+        return $this->mollie_id;
+    }
+
+    public function setMollieID($mollie_id)
+    {
+        $this->mollie_id = $mollie_id;
+    }
 }

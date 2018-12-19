@@ -28,6 +28,11 @@ class TransactionRepository extends ModelRepository
 
         $transaction = new Transaction();
 
+        $transactionId = $this->getLastId() + 1;
+
+        $transaction->setID($transactionId);
+        $transaction->setTransactionID('mollie_' . $transactionId);
+
         if ($order){
             $transaction->setOrderID($order->getId());
         }
@@ -68,4 +73,26 @@ class TransactionRepository extends ModelRepository
 
     }
 
+    /**
+     * Get the last transaction id
+     *
+     * @return int|null
+     */
+    public function getLastId()
+    {
+        $id = null;
+
+        try {
+            $result = $this->findOneBy([], ['id' => 'DESC']);
+
+            if (!empty($result))
+                $id = $result->getID();
+        }
+        catch (Exception $ex) {
+            // @todo Handle exception
+            file_put_contents(__DIR__ . '/errors.txt', $ex->getMessage() . "\n", FILE_APPEND);
+        }
+
+        return $id;
+    }
 }

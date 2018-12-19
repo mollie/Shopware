@@ -72,7 +72,7 @@ use MollieShopware\Components\Base\AbstractPaymentController;
              * We do NOT send a thank you email at this point. Payment status
              * remains OPEN for now.
              * */
-            $orderNumber = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
+            $orderNumber = $this->saveOrder($transaction->getTransactionID(), $signature, PaymentStatus::OPEN, false);
 
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
