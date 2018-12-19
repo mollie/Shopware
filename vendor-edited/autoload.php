@@ -65,5 +65,6 @@
 
     });
 
+    require_once(__DIR__ . '/../vendor/guzzlehttp/guzzle/src/functions.php');
     require_once(__DIR__ . '/../vendor/guzzlehttp/promises/src/functions.php');
     require_once(__DIR__ . '/../vendor/guzzlehttp/psr7/src/functions.php');
