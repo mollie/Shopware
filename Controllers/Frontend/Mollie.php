@@ -132,8 +132,14 @@ use Shopware\Models\Order\Order;
                 $variables = @json_decode($transaction->getOrdermailVariables(), true);
 
                 if (is_array($variables)) {
-                    $sOrder->sUserData = $variables;
-                    $sOrder->sendMail($variables);
+                    try {
+                        $sOrder->sUserData = $variables;
+                        $sOrder->sendMail($variables);
+                    }
+                    catch (Exception $ex) {
+                        // write exception to log
+                        Logger::log('error', $ex->getMessage(), $ex);
+                    }
                 }
 
                 try {
