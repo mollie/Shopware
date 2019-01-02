@@ -5,6 +5,11 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\Mollie\OrderService;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
+use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 use Exception;
 
@@ -14,7 +19,49 @@ class OrderBackendSubscriber implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
+            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail',
         ];
+    }
+
+    public function onSendMail(\Enlight_Event_EventArgs $args)
+    {
+        $variables = $args->get('variables');
+        $orderNumber = (isset($variables['ordernumber']) ? $variables['ordernumber'] : null);
+        $order = null;
+        $mollieOrder = null;
+
+        if (!empty($orderNumber)) {
+            /** @var OrderService $orderService */
+            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+
+            /** @var Order $order */
+            $order = $orderService->getOrderByNumber($orderNumber);
+        }
+
+        if (!empty($order)) {
+            if (strstr($order->getTransactionId(), 'mollie_') &&
+                $order->getPaymentStatus()->getId() == PaymentStatus::OPEN) {
+                /** @var TransactionRepository $transactionRepo */
+                $transactionRepo = Shopware()->Models()->getRepository(Transaction::class);
+
+                /** @var Transaction $transaction */
+                $transaction = $transactionRepo->findOneBy([
+                    'transaction_id' => $order->getTransactionId()
+                ]);
+
+                if (!empty($transaction) && empty($transaction->getOrdermailVariables())) {
+                    try {
+                        $transaction->setOrdermailVariables(json_encode($variables));
+                        $transactionRepo->save($transaction);
+                    }
+                    catch (Exception $ex) {
+                        // @todo Handle exception
+                    }
+
+                    return false;
+                }
+            }
+        }
     }
 
     public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)

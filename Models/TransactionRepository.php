@@ -90,7 +90,6 @@ class TransactionRepository extends ModelRepository
         }
         catch (Exception $ex) {
             // @todo Handle exception
-            file_put_contents(__DIR__ . '/errors.txt', $ex->getMessage() . "\n", FILE_APPEND);
         }
 
         return $id;

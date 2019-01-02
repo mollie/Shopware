@@ -3,8 +3,10 @@
 	// Mollie Shopware Plugin Version: 1.3.10.1
 
 use MollieShopware\Components\Base\AbstractPaymentController;
-    use MollieShopware\Components\Constants\PaymentStatus;
-    use Shopware\Models\Order\Order;
+use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
+use Shopware\Models\Order\Order;
 
     class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
@@ -115,6 +117,34 @@ use MollieShopware\Components\Base\AbstractPaymentController;
 
             $sOrder = Shopware()->Modules()->Order();
 
+            /** @var TransactionRepository $transactionRepo */
+            $transactionRepo = Shopware()->Models()->getRepository(Transaction::class);
+
+            /** @var Transaction $transaction */
+            $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
+
+            // send order confirmation
+            if (!empty($transaction) &&
+                ($molliePayment->isPaid() ||
+                $molliePayment->isAuthorized() ||
+                ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer'))) {
+                $variables = @json_decode($transaction->getOrdermailVariables(), true);
+
+                if (is_array($variables)) {
+                    $sOrder->sUserData = $variables;
+                    $sOrder->sendMail($variables);
+                }
+
+                try {
+                    $transaction->setOrdermailVariables(null);
+                    $transactionRepo->save($transaction);
+                }
+                catch (Exception $ex) {
+                    // @todo Handle exception
+                }
+            }
+
+            // set payment status and redirect
             if ($molliePayment->isPaid()) {
                 $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());

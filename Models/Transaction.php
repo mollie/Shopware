@@ -42,6 +42,13 @@ class Transaction
      */
     private $mollie_id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ordermail_variables", type="text", nullable=true)
+     */
+    private $ordermail_variables;
+
     public function getID()
     {
         return $this->id;
@@ -80,5 +87,15 @@ class Transaction
     public function setMollieID($mollie_id)
     {
         $this->mollie_id = $mollie_id;
+    }
+
+    public function setOrdermailVariables($ordermail_variables)
+    {
+        $this->ordermail_variables = $ordermail_variables;
+    }
+
+    public function getOrdermailVariables()
+    {
+        return $this->ordermail_variables;
     }
 }
