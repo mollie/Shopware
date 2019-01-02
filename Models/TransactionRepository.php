@@ -5,6 +5,7 @@
 namespace MollieShopware\Models;
 
 use Doctrine\ORM\QueryBuilder;
+use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelRepository;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -89,7 +90,8 @@ class TransactionRepository extends ModelRepository
                 $id = $result->getID();
         }
         catch (Exception $ex) {
-            // @todo Handle exception
+            // write exception to log
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $id;

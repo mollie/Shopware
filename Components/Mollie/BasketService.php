@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Components\Mollie;
 
+use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Order\Order;
@@ -164,9 +165,7 @@ class BasketService
         }
         catch (Exception $ex) {
             // log error
-            if (!empty($voucher)) {
-                $voucherRepo->addException($voucher, $ex);
-            }
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $voucher;
@@ -230,7 +229,8 @@ class BasketService
             $article = $orderDetailRepo->findOneBy(['number' => $orderDetail->getArticleNumber()]);
         }
         catch (Exception $ex) {
-            // @todo error handling of order detail reset
+            // write exception to log
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         if (!empty($article)) {

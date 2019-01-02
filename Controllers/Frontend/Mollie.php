@@ -2,6 +2,7 @@
 
 	// Mollie Shopware Plugin Version: 1.3.10.1
 
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\Base\AbstractPaymentController;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
@@ -140,7 +141,8 @@ use Shopware\Models\Order\Order;
                     $transactionRepo->save($transaction);
                 }
                 catch (Exception $ex) {
-                    // @todo Handle exception
+                    // write exception to log
+                    Logger::log('error', $ex->getMessage(), $ex);
                 }
             }
 

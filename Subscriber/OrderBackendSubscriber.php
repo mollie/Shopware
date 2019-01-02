@@ -6,6 +6,7 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\Mollie\OrderService;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
@@ -55,7 +56,7 @@ class OrderBackendSubscriber implements SubscriberInterface
                         $transactionRepo->save($transaction);
                     }
                     catch (Exception $ex) {
-                        // @todo Handle exception
+                        Logger::log('error', $ex->getMessage(), $ex);
                     }
 
                     return false;

@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Components\Mollie;
 
+use MollieShopware\Components\Logger;
 use MollieShopware\Models\Transaction;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
@@ -48,9 +49,7 @@ class OrderService
         }
         catch (Exception $ex) {
             // log error
-            if ($order != null) {
-                $orderRepo->addException($order, $ex);
-            }
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $order;
@@ -77,9 +76,7 @@ class OrderService
         }
         catch (Exception $ex) {
             // log error
-            if ($order != null) {
-                $orderRepo->addException($order, $ex);
-            }
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $order;
@@ -102,9 +99,7 @@ class OrderService
         }
         catch (Exception $ex) {
             // log error
-            if ($transaction != null) {
-                $transactionRepo->addException($transaction, $ex);
-            }
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         if (!empty($transaction)) {
@@ -186,7 +181,8 @@ class OrderService
             }
         }
         catch (\Exception $ex) {
-            // @todo handle exception for orderlines
+            // write exception to log
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $items;
