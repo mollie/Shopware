@@ -214,6 +214,9 @@ class MollieShopware extends Plugin
         // clear config cache
         $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
 
+        // update db tables
+        $this->updateDbTables();
+
         // first set all payment methods to inactive
         // $this->setActiveFlag($context->getPlugin()->getPayments(), false);
         $this->deactivatePayments();

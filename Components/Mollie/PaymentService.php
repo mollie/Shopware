@@ -180,12 +180,19 @@ namespace MollieShopware\Components\Mollie;
         private function prepareOrder(Order $order, $orderDetails = array())
         {
             // vars
+            $paymentParameters = [];
             $paymentMethod = $order->getPayment()->getName();
             $orderLines = $this->getOrderlines($order, $orderDetails);
 
             // remove mollie_ from payment method
             if (substr($paymentMethod, 0, 7) === 'mollie_'){
                 $paymentMethod = substr($paymentMethod, 7);
+            }
+
+            if (strtolower($paymentMethod == 'ideal')) {
+                $paymentParameters = [
+                    'issuer' => $this->getIdealIssuer(),
+                ];
             }
 
             // create prepared order array
@@ -199,7 +206,7 @@ namespace MollieShopware\Components\Mollie;
                 'webhookUrl' => $this->prepareRedirectUrl($order, 'webhook'),
                 'locale' => $this->getLocale($order),
                 'method' => $paymentMethod,
-                'payment' => [],
+                'payment' => $paymentParameters,
                 'metadata' => [],
             ];
 
