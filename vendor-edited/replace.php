@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.11
+	// Mollie Shopware Plugin Version: 1.3.12
 
 /*
  *
