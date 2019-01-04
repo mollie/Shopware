@@ -308,13 +308,13 @@ namespace MollieShopware\Components\Mollie;
          * @param $amount
          * @return array
          */
-        private function getPrice(Order $order, $amount)
+        private function getPrice(Order $order, $amount, $decimals = 2)
         {
             // return an array with currency and value
 
             return [
                 'currency' => $order->getCurrency(),
-                'value' => number_format($amount, 2, '.', ''),
+                'value' => number_format($amount, $decimals, '.', ''),
             ];
         }
 

@@ -132,19 +132,24 @@ class OrderService
                     // get net price
                     $netPrice = ($unitPrice / ($orderDetail->getTaxRate() + 100)) * 100;
 
+                    // get total amount
+                    $totalAmount = round($unitPrice, 2) * $orderDetail->getQuantity();
+
                     // add tax if net order
                     if ($order->getNet() == true) {
                         $netPrice = $unitPrice;
                         $unitPrice = $unitPrice * (($orderDetail->getTaxRate() + 100) / 100);
+                        $totalAmount = ($totalAmount / 100) * ($orderDetail->getTaxRate() + 100);
                     }
 
                     // get vat amount
-                    $vatAmount = ($unitPrice * $orderDetail->getQuantity()) - ($netPrice * $orderDetail->getQuantity());
+                    $vatAmount = (round($netPrice * $orderDetail->getQuantity(), 2) / 100) * $orderDetail->getTaxRate();
 
                     // clear tax if order is tax free
                     if ($order->getTaxFree()) {
                         $vatAmount = 0;
                         $unitPrice = $netPrice;
+                        $totalAmount = round($unitPrice, 2) * $orderDetail->getQuantity();
                     }
 
                     // build the order line array
@@ -154,8 +159,8 @@ class OrderService
                         'quantity' => $orderDetail->getQuantity(),
                         'unit_price' => round($unitPrice, 2),
                         'net_price' => round($netPrice, 2),
-                        'total_amount' => round($unitPrice * $orderDetail->getQuantity(), 2),
-                        'vat_rate' => ($order->getTaxFree() ? 0 : $orderDetail->getTaxRate()),
+                        'total_amount' => round($totalAmount, 2),
+                        'vat_rate' => round($order->getTaxFree() ? 0 : $orderDetail->getTaxRate(), 2),
                         'vat_amount' => round($vatAmount, 2),
                     ];
 
