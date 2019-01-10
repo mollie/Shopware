@@ -161,7 +161,7 @@ class OrderService
                         'net_price' => round($netPrice, 2),
                         'total_amount' => round($totalAmount, 2),
                         'vat_rate' => round($order->getTaxFree() ? 0 : $orderDetail->getTaxRate(), 2),
-                        'vat_amount' => round($vatAmount, 2),
+                        'vat_amount' => round($vatAmount, 3),
                     ];
 
                     // set the order line type
