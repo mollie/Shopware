@@ -17,7 +17,7 @@ class SettlementsEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Settlement($this->client);
+        return new Settlement($this->api);
     }
 
     /**
@@ -30,7 +30,7 @@ class SettlementsEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new SettlementCollection($this->client, $count, $_links);
+        return new SettlementCollection($this->api, $count, $_links);
     }
 
     /**

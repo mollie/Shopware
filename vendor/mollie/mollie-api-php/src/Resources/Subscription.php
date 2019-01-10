@@ -67,11 +67,6 @@ class Subscription extends BaseResource
     public $method;
 
     /**
-     * @var string|null
-     */
-    public $mandateId;
-
-    /**
      * UTC datetime the subscription canceled in ISO-8601 format.
      *
      * @var string|null
@@ -113,7 +108,6 @@ class Subscription extends BaseResource
             "startDate" => $this->startDate,
             "webhookUrl" => $this->webhookUrl,
             "description" => $this->description,
-            "mandateId" => $this->mandateId,
         ]);
 
         $result = $this->client->performHttpCallToFullUrl(
@@ -186,19 +180,7 @@ class Subscription extends BaseResource
         if (!isset($this->_links->self->href)) {
             return $this;
         }
-
-        $body = null;
-        if($this->client->usesOAuth()) {
-            $body = json_encode([
-                "testmode" => $this->mode === "test" ? true : false
-            ]);
-        }
-
-        $result = $this->client->performHttpCallToFullUrl(
-            MollieApiClient::HTTP_DELETE,
-            $this->_links->self->href,
-            $body
-        );
+        $result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_DELETE, $this->_links->self->href);
 
         return ResourceFactory::createFromApiResult($result, new Subscription($this->client));
     }

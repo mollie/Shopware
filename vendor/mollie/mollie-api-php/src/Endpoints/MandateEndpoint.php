@@ -18,7 +18,7 @@ class MandateEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Mandate($this->client);
+        return new Mandate($this->api);
     }
 
     /**
@@ -31,7 +31,7 @@ class MandateEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new MandateCollection($this->client, $count, $_links);
+        return new MandateCollection($this->api, $count, $_links);
     }
 
     /**
@@ -81,14 +81,12 @@ class MandateEndpoint extends EndpointAbstract
      * @param Customer $customer
      * @param string $mandateId
      *
-     * @param array $data
      * @return null
-     * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function revokeFor(Customer $customer, $mandateId, $data = [])
+    public function revokeFor(Customer $customer, $mandateId)
     {
         $this->parentId = $customer->id;
 
-        return parent::rest_delete($mandateId, $data);
+        return parent::rest_delete($mandateId);
     }
 }

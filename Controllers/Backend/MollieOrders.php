@@ -3,8 +3,8 @@
 	// Mollie Shopware Plugin Version: 1.3.12
 
 use MollieShopware\Components\Constants\PaymentStatus;
-//use MollieShopware\Models\Transaction;
-//use MollieShopware\Models\OrderLines;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\OrderLines;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
@@ -16,41 +16,57 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $transaction = null;
 
         try {
-            // vars
             $request = $this->Request();
-            $orderId = $request->getParam('orderId');
-
-            // services
-            $modelManager = $this->container->get('models');
-            $orderService = $this->container->get('mollie_shopware.order_service');
-            $mollieApi = $this->container->get('mollie_shopware.api');
+            $em = $this->container->get('models');
             $config = $this->container->get('mollie_shopware.config');
 
-            // get order
+            $orderId = $request->getParam('orderId');
+
+            $transactionRepo = $em->getRepository(Transaction::class);
+            $transaction = $transactionRepo->findOneBy([
+                'order_id' => $orderId
+            ]);
+
+            $orderService = $this->container->get('mollie_shopware.order_service');
             $order = $orderService->getOrderById($orderId);
+            $mollieId = $orderService->getMollieOrderId($order);
 
-            if (empty($order))
-                $this->returnError('Order not found');
+            if (empty($order)) {
+                $this->returnJson([
+                    'success' => false,
+                    'message' => 'Order not found',
+                ]);
+            }
 
-            // get transaction
-            $transaction = $orderService->getTransaction($order);
+            if (empty($mollieId)) {
+                $this->returnJson([
+                    'success' => false,
+                    'message' => 'Order doesn\'t seem to be paid through Mollie',
+                ]);
+            }
 
-            if (empty($transaction))
-                $this->returnError('Mollie transaction not found');
+            // get an instance of the Mollie api
+            $mollieApi = $this->container->get('mollie_shopware.api');
 
             // get an order object from mollie
-            $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
+            $mollieOrder = $mollieApi->orders->get($mollieId);
 
-            // refund the whole order
-            $refund = $mollieOrder->refundAll();
+            // get shipment lines
+            $mollieOrderDetailRepo = $em->getRepository(OrderLines::class);
+            $mollieShipmentLines = $mollieOrderDetailRepo->getShipmentLines($order);
+
+            // refund the payment
+            $refund = $mollieApi->orderRefunds->createFor($mollieOrder, [
+                'lines' => $mollieShipmentLines
+            ]);
 
             // get refund status model
-            $paymentStatusRefunded = $modelManager->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
+            $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
 
             // update order status
             $order->setPaymentStatus($paymentStatusRefunded);
-            $modelManager->persist($order);
-            $modelManager->flush();
+            $em->persist($order);
+            $em->flush();
 
             // send status mail
             if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
@@ -67,132 +83,11 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 'data' => $refund
             ]);
         } catch (Exception $ex) {
-            $this->returnError($ex->getMessage());
+            $this->returnJson([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ]);
         }
-    }
-
-    public function partialRefundAction()
-    {
-        $refund = null;
-
-        try {
-            // vars
-            $request = $this->Request();
-            $orderId = $request->getParam('orderId');
-
-            // services
-            $modelManager = $this->container->get('models');
-            $orderService = $this->container->get('mollie_shopware.order_service');
-            $mollieApi = $this->container->get('mollie_shopware.api');
-
-            // get the order
-            $order = $orderService->getOrderById($orderId);
-
-            if (empty($order))
-                $this->returnError('Order not found');
-
-            // get the order lines
-            $orderLine = $request->getParam('orderLine');
-
-            if (empty($orderLine))
-                $this->returnError('No order line selected for refund');
-
-            // get the order lines
-            $orderLineQuantity = $request->getParam('orderLineQuantity');
-
-            if (empty($orderLineQuantity))
-                $this->returnError('No order line selected for refund');
-
-            // get transaction
-            $transaction = $orderService->getTransaction($order);
-
-            if (empty($transaction))
-                $this->returnError('Mollie transaction not found');
-
-            // get mollie order
-            $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
-
-            if (!empty($mollieOrder)) {
-                $refund = $mollieOrder->refund([
-                    'lines' => [
-                        [
-                            'id' => $orderLine,
-                            'quantity' => $orderLineQuantity
-                        ]
-                    ]
-                ]);
-            }
-
-            // set payment status
-            if (!empty($refund)) {
-                // get refund status model
-                $paymentStatusRefunded = $modelManager
-                    ->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
-
-                // update order status
-                $order->setPaymentStatus($paymentStatusRefunded);
-                $modelManager->persist($order);
-                $modelManager->flush();
-            }
-        }
-        catch (Exception $ex) {
-            $this->returnError($ex->getMessage());
-        }
-    }
-
-    public function listOrderlinesAction()
-    {
-        try {
-            // vars
-            $request = $this->Request();
-            $orderId = $request->getParam('orderId');
-
-            // services
-            $orderService = $this->container->get('mollie_shopware.order_service');
-            $mollieApi = $this->container->get('mollie_shopware.api');
-
-            // get order
-            $order = $orderService->getOrderById($orderId);
-
-            if (empty($order))
-                $this->returnError('Order not found');
-
-            // get mollie id
-            $transaction = $orderService->getTransaction($order);
-
-            if (empty($transaction))
-                $this->returnError('Mollie transaction not found');
-
-            // get mollie order
-            $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
-
-            if (empty($mollieOrder))
-                $this->returnError('Mollie order not found');
-
-            // get order lines
-            $mollieOrderLines = $orderService->getMollieOrderLines($mollieOrder);
-
-            if (count($mollieOrderLines)) {
-                $this->returnJson([
-                    'success' => true,
-                    'message' => 'Order lines successfully retrieved',
-                    'data' => $mollieOrderLines
-                ]);
-            }
-            else {
-                $this->returnError('Order lines not found');
-            }
-        }
-        catch (Exception $ex) {
-            $this->returnError($ex->getMessage());
-        }
-    }
-
-    private function returnError($message) {
-        $this->returnJson([
-            'success' => false,
-            'message' => $message,
-        ]);
     }
 
     protected function returnJson($data, $httpCode = 200)
@@ -202,7 +97,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
 
         header('Content-Type: application/json');
+
         echo json_encode($data);
+
         exit;
     }
 }

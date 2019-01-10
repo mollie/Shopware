@@ -46,7 +46,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
              */
             handler: function(view, rowIndex, colIndex, item) {
                 var store = view.getStore(),
-                    record = store.getAt(rowIndex);
+                        record = store.getAt(rowIndex);
 
                 me.fireEvent('refundOrder', record);
             },
@@ -74,11 +74,11 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
      */
     hasOrderPaymentName: function(record) {
         return record.getPaymentStore &&
-            record.getPaymentStore.data &&
-            record.getPaymentStore.data.items &&
-            record.getPaymentStore.data.items[0] &&
-            record.getPaymentStore.data.items[0].data &&
-            record.getPaymentStore.data.items[0].data.name;
+        record.getPaymentStore.data &&
+        record.getPaymentStore.data.items &&
+        record.getPaymentStore.data.items[0] &&
+        record.getPaymentStore.data.items[0].data &&
+        record.getPaymentStore.data.items[0].data.name;
     },
 
     /**
@@ -114,9 +114,9 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
             style.setAttribute('id', 'mollie-styles');
 
             if( style.styleSheet ) {
-                style.styleSheet.cssText = css;
+              style.styleSheet.cssText = css;
             } else {
-                style.appendChild(document.createTextNode(css));
+              style.appendChild(document.createTextNode(css));
             }
 
             head.appendChild(style);

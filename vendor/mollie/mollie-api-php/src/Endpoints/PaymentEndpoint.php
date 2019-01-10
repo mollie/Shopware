@@ -22,7 +22,7 @@ class PaymentEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Payment($this->client);
+        return new Payment($this->api);
     }
 
     /**
@@ -35,7 +35,7 @@ class PaymentEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new PaymentCollection($this->client, $count, $_links);
+        return new PaymentCollection($this->api, $count, $_links);
     }
 
     /**
@@ -79,13 +79,12 @@ class PaymentEndpoint extends EndpointAbstract
      *
      * @param string $paymentId
      *
-     * @param array $data
      * @return Payment
      * @throws ApiException
      */
-    public function delete($paymentId, array $data = [])
+    public function delete($paymentId)
     {
-        return $this->rest_delete($paymentId, $data);
+        return $this->rest_delete($paymentId);
     }
 
     /**
@@ -96,13 +95,12 @@ class PaymentEndpoint extends EndpointAbstract
      *
      * @param string $paymentId
      *
-     * @param array $data
      * @return Payment
      * @throws ApiException
      */
-    public function cancel($paymentId, array $data = [])
+    public function cancel($paymentId)
     {
-        return $this->rest_delete($paymentId, $data);
+        return $this->rest_delete($paymentId);
     }
 
     /**
@@ -141,8 +139,8 @@ class PaymentEndpoint extends EndpointAbstract
             $body = json_encode($data);
         }
 
-        $result = $this->client->performHttpCall(self::REST_CREATE, $resource, $body);
+        $result = $this->api->performHttpCall(self::REST_CREATE, $resource, $body);
 
-        return ResourceFactory::createFromApiResult($result, new Refund($this->client));
+        return ResourceFactory::createFromApiResult($result, new Refund($this->api));
     }
 }

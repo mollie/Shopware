@@ -131,7 +131,7 @@ class Customer extends BaseResource
      */
     public function cancelSubscription($subscriptionId)
     {
-        return $this->client->subscriptions->cancelFor($this, $subscriptionId, $this->getPresetOptions());
+        return $this->client->subscriptions->cancelFor($this, $subscriptionId);
     }
 
     /**
@@ -173,7 +173,7 @@ class Customer extends BaseResource
      */
     public function revokeMandate($mandateId)
     {
-        return $this->client->mandates->revokeFor($this, $mandateId, $this->getPresetOptions());
+        return $this->client->mandates->revokeFor($this, $mandateId);
     }
 
     /**
@@ -193,26 +193,9 @@ class Customer extends BaseResource
      */
     public function hasValidMandate()
     {
-        $mandates = $this->mandates();
+        $mandates = $this->client->mandates->listFor($this, null, null, $this->getPresetOptions());
         foreach ($mandates as $mandate) {
             if ($mandate->isValid()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Helper function to check for specific payment method mandate with status valid
-     *
-     * @return bool
-     */
-    public function hasValidMandateForMethod($method)
-    {
-        $mandates = $this->mandates();
-        foreach ($mandates as $mandate) {
-            if ($mandate->method === $method && $mandate->isValid()) {
                 return true;
             }
         }

@@ -17,7 +17,7 @@ class CustomerEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Customer($this->client);
+        return new Customer($this->api);
     }
 
     /**
@@ -30,7 +30,7 @@ class CustomerEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new CustomerCollection($this->client, $count, $_links);
+        return new CustomerCollection($this->api, $count, $_links);
     }
 
     /**
@@ -70,13 +70,12 @@ class CustomerEndpoint extends EndpointAbstract
      *
      * @param string $customerId
      *
-     * @param array $data
      * @return null
      * @throws ApiException
      */
-    public function delete($customerId, array $data = [])
+    public function delete($customerId)
     {
-        return $this->rest_delete($customerId, $data);
+        return $this->rest_delete($customerId);
     }
 
     /**

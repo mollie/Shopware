@@ -22,7 +22,7 @@ class ShipmentEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Shipment($this->client);
+        return new Shipment($this->api);
     }
 
     /**
@@ -36,7 +36,7 @@ class ShipmentEndpoint extends EndpointAbstract
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new ShipmentCollection($this->client, $count, $_links);
+        return new ShipmentCollection($this->api, $count, $_links);
     }
 
     /**

@@ -58,7 +58,7 @@ class OrderLines
     }
 
 
-    public function setOrderId($orderId)
+    public function setOrderID($orderId)
     {
         $this->orderId = $orderId;
     }
