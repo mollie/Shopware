@@ -15,6 +15,7 @@ namespace MollieShopware\Components\Mollie;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Tax\Tax;
     use Symfony\Component\HttpFoundation\Session\Session;
+    use Enlight_Components_Session;
     use Exception;
 
     class PaymentService
@@ -394,9 +395,8 @@ namespace MollieShopware\Components\Mollie;
                 'controller'    => 'Mollie',
                 'action'        => $mode,
                 'forceSecure'   => true,
-                'order_number'  => $order->getNumber(),
-                'ts'            => $randomNumber,
-                'checksum'      => $this->generateChecksum($order, $randomNumber)
+                'orderNumber'   => $order->getNumber(),
+                '__sid'         => Enlight_Components_Session::getId()
             ]);
 
             // check if we are on local development
