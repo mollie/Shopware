@@ -1,10 +1,13 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.6
+	// Mollie Shopware Plugin Version: 1.3.12
 
-    use MollieShopware\Components\Base\AbstractPaymentController;
-    use MollieShopware\Components\Constants\PaymentStatus;
-    use Shopware\Models\Order\Order;
+use MollieShopware\Components\Logger;
+use MollieShopware\Components\Base\AbstractPaymentController;
+use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
+use Shopware\Models\Order\Order;
 
     class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
@@ -54,13 +57,6 @@
              */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
-            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-
-            $basketData = $basketService->getOrderLines(
-                Shopware()->Session()['sUserId'],
-                Shopware()->Session()->get('sessionId')
-            );
-
             /*
              * Persist basket from session to database, returning it's signature which
              * is then used to save the basket to an order.
@@ -79,27 +75,21 @@
              * We do NOT send a thank you email at this point. Payment status
              * remains OPEN for now.
              * */
-            $orderNumber = $this->saveOrder($transaction->getID(), $signature, PaymentStatus::OPEN, false);
+            $orderNumber = $this->saveOrder($transaction->getTransactionID(), $signature, PaymentStatus::OPEN, false);
 
-            /*
-             * Get $order Doctrine model, which is easier to handle than
-             * the sOrder class
-             * */
-            $orderRepo = Shopware()->Container()->get('models')->getRepository(Order::class);
+            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
             // find order
-            $order = $orderRepo->findOneBy([
-                'number' => $orderNumber,
-            ]);
-
+            $order = $orderService->getOrderByNumber($orderNumber);
 
             if (empty($order)) {
                 // @todo: this deserves a more describing error message
                 throw new \Exception('order error');
             }
 
-            return $this->redirect($paymentService->startTransaction($order, $transaction, $basketData));
+            $orderDetails = $orderService->getOrderLines($order);
 
+            return $this->redirect($paymentService->startTransaction($order, $transaction, $orderDetails));
         }
 
         /**
@@ -128,6 +118,41 @@
 
             $sOrder = Shopware()->Modules()->Order();
 
+            /** @var TransactionRepository $transactionRepo */
+            $transactionRepo = Shopware()->Models()->getRepository(Transaction::class);
+
+            /** @var Transaction $transaction */
+            $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
+
+            // send order confirmation
+            if (!empty($transaction) &&
+                ($molliePayment->isPaid() ||
+                $molliePayment->isAuthorized() ||
+                ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer'))) {
+                $variables = @json_decode($transaction->getOrdermailVariables(), true);
+
+                if (is_array($variables)) {
+                    try {
+                        $sOrder->sUserData = $variables;
+                        $sOrder->sendMail($variables);
+                    }
+                    catch (Exception $ex) {
+                        // write exception to log
+                        Logger::log('error', $ex->getMessage(), $ex);
+                    }
+                }
+
+                try {
+                    $transaction->setOrdermailVariables(null);
+                    $transactionRepo->save($transaction);
+                }
+                catch (Exception $ex) {
+                    // write exception to log
+                    Logger::log('error', $ex->getMessage(), $ex);
+                }
+            }
+
+            // set payment status and redirect
             if ($molliePayment->isPaid()) {
                 $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());

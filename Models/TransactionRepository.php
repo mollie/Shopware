@@ -1,10 +1,11 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.6
+	// Mollie Shopware Plugin Version: 1.3.12
 
 namespace MollieShopware\Models;
 
 use Doctrine\ORM\QueryBuilder;
+use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelRepository;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -27,6 +28,11 @@ class TransactionRepository extends ModelRepository
     {
 
         $transaction = new Transaction();
+
+        $transactionId = $this->getLastId() + 1;
+
+        $transaction->setID($transactionId);
+        $transaction->setTransactionID('mollie_' . $transactionId);
 
         if ($order){
             $transaction->setOrderId($order->getId());
@@ -68,4 +74,26 @@ class TransactionRepository extends ModelRepository
 
     }
 
+    /**
+     * Get the last transaction id
+     *
+     * @return int|null
+     */
+    public function getLastId()
+    {
+        $id = null;
+
+        try {
+            $result = $this->findOneBy([], ['id' => 'DESC']);
+
+            if (!empty($result))
+                $id = $result->getID();
+        }
+        catch (Exception $ex) {
+            // write exception to log
+            Logger::log('error', $ex->getMessage(), $ex);
+        }
+
+        return $id;
+    }
 }

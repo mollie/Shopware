@@ -1,9 +1,10 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.6
+	// Mollie Shopware Plugin Version: 1.3.12
 
 namespace MollieShopware\Components\Mollie;
 
+use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Article;
 use Shopware\Models\Order\Order;
@@ -58,59 +59,6 @@ class BasketService
         $this->orderModule = Shopware()->Modules()->Order();
         $this->orderService = Shopware()->Container()
             ->get('mollie_shopware.order_service');
-    }
-
-    public function getOrderLines($customerId, $sessionId)
-    {
-        $items = [];
-
-        try {
-            $basketRepo = $this->modelManager->getRepository(Basket::class);
-            $basketItems = $basketRepo->findBy([
-                'customerId' => $customerId,
-                'sessionId' => $sessionId
-            ]);
-
-            if (!empty($basketItems)) {
-                foreach ($basketItems as $basketItem) {
-                    // get the unit price
-                    $unitPrice = $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100);
-
-                    // build the order line array
-                    $orderLine = [
-                        'name' => $basketItem->getArticleName(),
-                        'type' => 'physical',
-                        'quantity' => $basketItem->getQuantity(),
-                        'unit_price' => $basketItem->getNetPrice() * (($basketItem->getTaxRate() + 100) / 100),
-                        'net_price' => $basketItem->getNetPrice(),
-                        'total_amount' => $unitPrice * $basketItem->getQuantity(),
-                        'vat_rate' => $basketItem->getTaxRate(),
-                        'vat_amount' => ($unitPrice - $basketItem->getNetPrice()) * $basketItem->getQuantity()
-                    ];
-
-                    // set the order line type
-                    if (strstr($basketItem->getOrderNumber(), 'surcharge'))
-                        $orderLine['type'] = 'surcharge';
-
-                    if (strstr($basketItem->getOrderNumber(), 'discount'))
-                        $orderLine['type'] = 'discount';
-
-                    if ($basketItem->getEsdArticle() > 0)
-                        $orderLine['type'] = 'digital';
-
-                    if ($basketItem->getMode() == 2)
-                        $orderLine['type'] = 'discount';
-
-                    // add the order line to items
-                    $items[] = $orderLine;
-                }
-            }
-        }
-        catch (\Exception $ex) {
-            // @todo handle exception for orderlines
-        }
-
-        return $items;
     }
 
     /**
@@ -217,9 +165,7 @@ class BasketService
         }
         catch (Exception $ex) {
             // log error
-            if (!empty($voucher)) {
-                $voucherRepo->addException($voucher, $ex);
-            }
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         return $voucher;
@@ -283,7 +229,8 @@ class BasketService
             $article = $orderDetailRepo->findOneBy(['number' => $orderDetail->getArticleNumber()]);
         }
         catch (Exception $ex) {
-            // @todo error handling of order detail reset
+            // write exception to log
+            Logger::log('error', $ex->getMessage(), $ex);
         }
 
         if (!empty($article)) {
