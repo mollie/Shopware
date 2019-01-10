@@ -6,14 +6,14 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.3.12</version>
+    <version>1.3.13</version>
     <copyright>(c) Mollie B.V.</copyright>
     <author>Kiener E-commerce</author>
     <link>https://www.kiener.nl</link>
 
-    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.3.12)</description>
-    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.3.12)</description>
-    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.3.12)</description>
+    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.3.13)</description>
+    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.3.13)</description>
+    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.3.13)</description>
 
     <compatibility minVersion="5.2.13"/>
 
