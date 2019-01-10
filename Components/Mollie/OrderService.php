@@ -94,7 +94,7 @@ class OrderService
         try {
             $transactionRepo = $this->modelManager->getRepository(Transaction::class);
             $transaction = $transactionRepo->findOneBy([
-                'order_id' => $orderId
+                'orderId' => $orderId
             ]);
         }
         catch (Exception $ex) {
@@ -103,7 +103,7 @@ class OrderService
         }
 
         if (!empty($transaction)) {
-            $mollieId = $transaction->getMollieID();
+            $mollieId = $transaction->getMollieId();
         }
 
         return $mollieId;

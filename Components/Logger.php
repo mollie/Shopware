@@ -7,14 +7,17 @@ namespace MollieShopware\Components;
 class Logger
 {
     /**
-     * Log message
+     * Log error and throw exception if necessary
      *
-     * @param string $type
-     * @param string $message
-     * @param \Exception $exception
+     * @param $type
+     * @param $message
+     * @param null $exception
+     * @param bool $throw
+     * @throws \Exception
      */
-    public static function log($type, $message, $exception = null)
+    public static function log($type, $message, $exception = null, $throw = false)
     {
+        // log the error
         switch ($type) {
             case "info":
                 Shopware()->PluginLogger()->info($message);
@@ -25,6 +28,14 @@ class Logger
             case "error":
                 Shopware()->PluginLogger()->error($message, ['exception' => $exception]);
                 break;
+        }
+
+        // also throw exception
+        if ($throw == true) {
+            if (is_null($exception))
+                $exception = new \Exception($message);
+
+            throw $exception;
         }
     }
 }

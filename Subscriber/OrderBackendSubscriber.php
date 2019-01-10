@@ -47,7 +47,7 @@ class OrderBackendSubscriber implements SubscriberInterface
 
                 /** @var Transaction $transaction */
                 $transaction = $transactionRepo->findOneBy([
-                    'transaction_id' => $order->getTransactionId()
+                    'transactionId' => $order->getTransactionId()
                 ]);
 
                 if (!empty($transaction) && empty($transaction->getOrdermailVariables())) {

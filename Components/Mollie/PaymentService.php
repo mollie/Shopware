@@ -96,8 +96,8 @@ namespace MollieShopware\Components\Mollie;
             $transactionRepo = Shopware()->container()->get('models')->getRepository(Transaction::class);
 
             // set transaction vars
-            $transaction->setOrderID($order->getId());
-            $transaction->setMollieID($molliePayment->id);
+            $transaction->setOrderId($order->getId());
+            $transaction->setMollieId($molliePayment->id);
 
             // save transaction
             $transactionRepo->save($transaction);
@@ -165,7 +165,7 @@ namespace MollieShopware\Components\Mollie;
             $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
 
             /** @var Payment $molliePayment */
-            $molliePayment = $this->api->orders->get($transaction->getMollieID());
+            $molliePayment = $this->api->orders->get($transaction->getMollieId());
 
             return $molliePayment;
         }
@@ -395,8 +395,8 @@ namespace MollieShopware\Components\Mollie;
                 'controller'    => 'Mollie',
                 'action'        => $mode,
                 'forceSecure'   => true,
+                'appendSession' => true,
                 'orderNumber'   => $order->getNumber(),
-                '__sid'         => Enlight_Components_Session::getId()
             ]);
 
             // check if we are on local development

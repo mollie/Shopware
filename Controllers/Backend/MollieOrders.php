@@ -24,7 +24,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $transactionRepo = $em->getRepository(Transaction::class);
             $transaction = $transactionRepo->findOneBy([
-                'order_id' => $orderId
+                'orderId' => $orderId
             ]);
 
             $orderService = $this->container->get('mollie_shopware.order_service');
