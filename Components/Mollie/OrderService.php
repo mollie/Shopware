@@ -127,41 +127,40 @@ class OrderService
             if (!empty($orderDetails)) {
                 foreach ($orderDetails as $orderDetail) {
                     // get the unit price
-                    $unitPrice = $orderDetail->getPrice();
+                    $unitPrice = round($orderDetail->getPrice(), 2);
 
                     // get net price
                     $netPrice = ($unitPrice / ($orderDetail->getTaxRate() + 100)) * 100;
 
-                    // get total amount
-                    $totalAmount = round($unitPrice, 2) * $orderDetail->getQuantity();
-
                     // add tax if net order
-                    if ($order->getNet() == true) {
+                    if ($order->getNet()) {
                         $netPrice = $unitPrice;
                         $unitPrice = $unitPrice * (($orderDetail->getTaxRate() + 100) / 100);
-                        $totalAmount = ($totalAmount / 100) * ($orderDetail->getTaxRate() + 100);
                     }
-
-                    // get vat amount
-                    $vatAmount = (round($netPrice * $orderDetail->getQuantity(), 2) / 100) * $orderDetail->getTaxRate();
 
                     // clear tax if order is tax free
-                    if ($order->getTaxFree()) {
-                        $vatAmount = 0;
+                    if ($order->getTaxFree())
                         $unitPrice = $netPrice;
-                        $totalAmount = round($unitPrice, 2) * $orderDetail->getQuantity();
-                    }
+
+                    // get total amount
+                    $totalAmount = $unitPrice * $orderDetail->getQuantity();
+
+                    // get vat amount
+                    $vatAmount = $totalAmount * ($orderDetail->getTaxRate() / ($orderDetail->getTaxRate() + 100));
+
+                    if ($order->getTaxFree())
+                        $vatAmount = 0;
 
                     // build the order line array
                     $orderLine = [
                         'name' => $orderDetail->getArticleName(),
                         'type' => 'physical',
                         'quantity' => $orderDetail->getQuantity(),
-                        'unit_price' => round($unitPrice, 2),
-                        'net_price' => round($netPrice, 2),
-                        'total_amount' => round($totalAmount, 2),
-                        'vat_rate' => round($order->getTaxFree() ? 0 : $orderDetail->getTaxRate(), 2),
-                        'vat_amount' => round($vatAmount, 3),
+                        'unit_price' => $unitPrice,
+                        'net_price' => $netPrice,
+                        'total_amount' => $totalAmount,
+                        'vat_rate' => $order->getTaxFree() ? 0 : $orderDetail->getTaxRate(),
+                        'vat_amount' => $vatAmount,
                     ];
 
                     // set the order line type
@@ -191,18 +190,5 @@ class OrderService
         }
 
         return $items;
-    }
-
-    /**
-     * @return string
-     */
-    public function checksum()
-    {
-        $hash = '';
-        foreach(func_get_args() as $argument){
-            $hash .= $argument;
-        }
-
-        return sha1($hash);
     }
 }

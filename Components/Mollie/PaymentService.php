@@ -269,10 +269,10 @@ namespace MollieShopware\Components\Mollie;
                 'type' => 'shipping_fee',
                 'name' => 'Shipping fee',
                 'quantity' => 1,
-                'unitPrice' => $this->getPrice($order, round($shippingUnitPrice, 2)),
-                'totalAmount' => $this->getPrice($order, round($shippingUnitPrice, 2)),
+                'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
+                'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
                 'vatRate' => number_format($shippingVatAmount == 0 ? 0 : $invoiceShippingTaxRate, 2, '.', ''),
-                'vatAmount' => $this->getPrice($order, round($shippingVatAmount, 2)),
+                'vatAmount' => $this->getPrice($order, $shippingVatAmount),
             ];
 
             return $items;
