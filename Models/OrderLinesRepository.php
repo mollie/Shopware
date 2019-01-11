@@ -6,7 +6,6 @@ namespace MollieShopware\Models;
 
 use Shopware\Components\Model\ModelRepository;
 use MollieShopware\Models\Transaction;
-use MollieShopware\Components\Constants\PaymentStatus;
 use Exception;
 use DateTime;
 use Shopware\Models\Order\Order;

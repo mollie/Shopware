@@ -144,7 +144,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * Send the confirmation e-mail
          */
         if ($this->isComplete($molliePayment))
-            $this->sendConfirmationEmail();
+            $this->sendConfirmationEmail($order);
 
         /**
          * Set the payment status of the order and redirect the customer
@@ -182,7 +182,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $sOrder = Shopware()->Modules()->Order();
 
         /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
-        $transactionRepo = Shopware()->Models()->getRepository(Transaction::class);
+        $transactionRepo = Shopware()->Models()->getRepository(
+            \MollieShopware\Models\Transaction::class
+        );
 
         /** @var \MollieShopware\Models\Transaction $transaction */
         $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
@@ -347,8 +349,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             // log the error
             Logger::log('error', $message);
-
-            return false;
         }
 
         return $order;
