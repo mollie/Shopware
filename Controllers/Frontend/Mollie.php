@@ -4,7 +4,7 @@
 
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Base\AbstractPaymentController;
-use MollieShopware\Components\Constants\PaymentStatus;
+use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 {
@@ -71,7 +71,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $orderNumber = $this->saveOrder(
             $transaction->getTransactionId(),
             $signature,
-            PaymentStatus::OPEN,
+            Status::PAYMENT_STATE_OPEN,
             false
         );
 
@@ -150,12 +150,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * Set the payment status of the order and redirect the customer
          */
         if ($molliePayment->isPaid()) {
-            $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
+            $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_COMPLETELY_PAID, true);
             return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
         }
 
         elseif ($molliePayment->isAuthorized()) {
-            $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
+            $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED);
             return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
         }
 
@@ -288,7 +288,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         try {
             /** @var \Shopware\Models\Order\Repository $orderRepo */
-            $orderRepo = Shopware()->Container()->get('models')->getRepository(Order::class);
+            $orderRepo = Shopware()->Container()->get('models')->getRepository(
+                \Shopware\Models\Order\Order::class
+            );
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $orderRepo->findOneBy([
@@ -307,7 +309,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         try {
             /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
-            $transactionRepo = Shopware()->Container()->get('models')->getRepository(Transaction::class);
+            $transactionRepo = Shopware()->Container()->get('models')->getRepository(
+                \MollieShopware\Models\Transaction::class
+            );
 
             /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->findOneBy([
@@ -419,66 +423,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 500
             );
         }
-    }
-
-    /**
-     * Get the id of the chosen ideal issuer from database
-     *
-     * @return string
-     */
-    protected function getIdealIssuer()
-    {
-        /** @var \MollieShopware\PaymentMethods\Ideal $ideal */
-        $ideal = $this->container->get('mollie_shopware.payment_methods.ideal');
-
-        return $ideal->getSelectedIssuer();
-    }
-
-    /**
-     * Sets a session variable
-     *
-     * @param string $variable The variable to be set in Session storage
-     * @param mixed $value The variable's value
-     */
-    protected function session($variable, $value)
-    {
-        Shopware()->Session()->$variable = $value;
-    }
-
-    /**
-     * Sends the user back to the payment screen with the given error
-     *
-     * @param $error
-     */
-    protected function paymentError($error)
-    {
-        $this->session('mollieStatusError', $error);
-        $this->redirectBack();
-    }
-
-    /**
-     * Return the ISO code for the currency that's being used
-     *
-     * @param string $default
-     * @return string
-     */
-    public function getCurrencyISO($default = 'eur')
-    {
-        /** @var \Shopware\Models\Order\Basket $basket */
-        $basket = $this->getBasket();
-
-        return $basket ? $basket['sCurrencyName'] : strtoupper($default);
-    }
-
-    /**
-     * Load the shopping basket from a signature
-     *
-     * @param $signature
-     * @return mixed
-     */
-    protected function loadBasketFromSignature($signature)
-    {
-        return parent::loadBasketFromSignature($signature);
     }
 
     /**

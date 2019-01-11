@@ -14,7 +14,7 @@ use Shopware\Models\Order\Order;
 class OrderLinesRepository extends ModelRepository
 {
 
-    public function Save(OrderLines $mollieOrderLines)
+    public function save(OrderLines $mollieOrderLines)
     {
 
         $entityManager = $this->getEntityManager();
@@ -39,7 +39,7 @@ class OrderLinesRepository extends ModelRepository
         $result = [];
         $items = $this->findBy(['orderId' => $order->getId()]);
 
-        foreach($items as $item){
+        foreach($items as $item) {
             $result[] = [
                 'id' => $item->getMollieOrderlineId()
             ];

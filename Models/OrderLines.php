@@ -14,7 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 class OrderLines
 {
     /**
-     * @var integer
+     * @var integer $id
+     *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -22,14 +23,14 @@ class OrderLines
     private $id;
 
     /**
-     * @var integer
+     * @var integer $mollieOrderlineId
      *
      * @ORM\Column(name="mollie_orderline_id", type="string", nullable=false)
      */
     private $mollieOrderlineId;
 
     /**
-     * @var integer
+     * @var integer $orderId
      *
      * @ORM\Column(name="order_id", type="integer", nullable=false)
      */
@@ -58,7 +59,7 @@ class OrderLines
     }
 
 
-    public function setOrderID($orderId)
+    public function setOrderId($orderId)
     {
         $this->orderId = $orderId;
     }

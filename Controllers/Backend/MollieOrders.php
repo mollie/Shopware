@@ -2,9 +2,9 @@
 
 	// Mollie Shopware Plugin Version: 1.3.12
 
-use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
+use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
@@ -61,7 +61,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             ]);
 
             // get refund status model
-            $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', PaymentStatus::REFUNDED);
+            $paymentStatusRefunded = $em->find('Shopware\Models\Order\Status', Status::PAYMENT_STATE_RE_CREDITING);
 
             // update order status
             $order->setPaymentStatus($paymentStatusRefunded);
@@ -70,7 +70,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             // send status mail
             if ($config->sendStatusMail() && $config->sendRefundStatusMail()) {
-                $mail = Shopware()->Modules()->Order()->createStatusMail($orderId, PaymentStatus::REFUNDED);
+                $mail = Shopware()->Modules()->Order()->createStatusMail($orderId, Status::PAYMENT_STATE_RE_CREDITING);
 
                 if ($mail) {
                     Shopware()->Modules()->Order()->sendStatusMail($mail);

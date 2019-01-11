@@ -6,13 +6,13 @@ namespace MollieShopware\Components\Mollie;
 
     use Mollie\Api\MollieApiClient;
     use Mollie\Api\Resources\Payment;
-    use MollieShopware\Components\Constants\PaymentStatus;
     use MollieShopware\Models\OrderLines;
     use MollieShopware\Models\OrderLinesRepository;
     use MollieShopware\Models\Transaction;
     use MollieShopware\Models\TransactionRepository;
     use Shopware\Components\ConfigLoader;
     use Shopware\Models\Order\Order;
+    use Shopware\Models\Order\Status;
     use Shopware\Models\Tax\Tax;
     use Symfony\Component\HttpFoundation\Session\Session;
     use Enlight_Components_Session;
@@ -78,6 +78,7 @@ namespace MollieShopware\Components\Mollie;
 
             /** @var OrderLinesRepository $orderLinesRepo */
             $orderLinesRepo = Shopware()->container()->get('models')->getRepository(OrderLines::class);
+
 
             // iterate over lines
             foreach($molliePayment->lines as $index => $line) {
@@ -198,7 +199,7 @@ namespace MollieShopware\Components\Mollie;
 
             // create prepared order array
             $molliePrepared = [
-                'amount' => $this->getPrice($order, round($order->getInvoiceAmount(), 2)),
+                'amount' => $this->getPrice($order, $order->getInvoiceAmount()),
                 'orderNumber' => $order->getNumber(),
                 'lines' => $orderLines,
                 'billingAddress' => $this->getAddress($order, 'billing'),
@@ -270,10 +271,10 @@ namespace MollieShopware\Components\Mollie;
                 'type' => 'shipping_fee',
                 'name' => 'Shipping fee',
                 'quantity' => 1,
-                'unitPrice' => $this->getPrice($order, round($shippingUnitPrice, 2)),
-                'totalAmount' => $this->getPrice($order, round($shippingUnitPrice, 2)),
+                'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
+                'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
                 'vatRate' => number_format($shippingVatAmount == 0 ? 0 : $invoiceShippingTaxRate, 2, '.', ''),
-                'vatAmount' => $this->getPrice($order, round($shippingVatAmount, 2)),
+                'vatAmount' => $this->getPrice($order, $shippingVatAmount),
             ];
 
             return $items;
@@ -518,23 +519,23 @@ namespace MollieShopware\Components\Mollie;
 
             // set the status
             if ($molliePayment->isPaid()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
+                $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_COMPLETELY_PAID, true);
                 return true;
             }
             elseif ($molliePayment->isAuthorized()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED, true);
+                $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED, true);
                 return true;
             }
             elseif ($molliePayment->isCanceled()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::CANCELLED, true);
+                $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED, true);
                 return true;
             }
             elseif ($molliePayment->isExpired()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::OPEN, true);
+                $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_OPEN, true);
                 return true;
             }
             elseif ($molliePayment->isRefunded()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::RE_CREDITING, true);
+                $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_RE_CREDITING, true);
                 return true;
             }
 
