@@ -2,7 +2,7 @@
 
 	// Mollie Shopware Plugin Version: 1.3.12
 
-namespace MollieShopware\Commands\Mollie;
+namespace MollieShopware\Commands;
 
     use Shopware\Bundle\StoreFrontBundle\Struct\Shop;
     use Shopware\Commands\ShopwareCommand;

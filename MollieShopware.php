@@ -13,8 +13,8 @@ use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Models\Payment\Payment;
-use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
-use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
+use MollieShopware\Commands\GetIdealBanksCommand;
+use MollieShopware\Commands\GetPaymentMethodsCommand;
 use Smarty;
 use Enlight_Event_EventArgs;
 use Enlight_Controller_EventArgs;
@@ -44,7 +44,7 @@ class MollieShopware extends Plugin
     {
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
-            'Shopware_Console_Add_Command' => 'requireDependencies',
+            //'Shopware_Console_Add_Command' => 'registerCommands',
 
             // 'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Mollie' => 'registerController',
 
@@ -123,11 +123,7 @@ class MollieShopware extends Plugin
         $view = $controller->View();
         $request = $controller->Request();
 
-        $view->addTemplateDir(__DIR__ . '/Views');
-
-        if ($request->getActionName() == 'index') {
-            //$view->extendsTemplate('backend/swag_extend_customer/app.js');
-        }
+        $view->addTemplateDir(__DIR__ . '/Resources/views');
 
         if ($request->getActionName() == 'load') {
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
@@ -267,7 +263,7 @@ class MollieShopware extends Plugin
         $position = 0;
 
         // path to template dir for extra payment-mean options
-        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment/';
+        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment';
 
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
@@ -277,11 +273,11 @@ class MollieShopware extends Plugin
             $smarty->assign('router', Shopware()->Router());
 
             // template path
-            $adTemplate = __DIR__ . '/Resources/PaymentmethodViews/' . strtolower($method->id) . '.tpl';
+            $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
 
             // set default template if no specific template exists
             if (!file_exists($adTemplate)) {
-                $adTemplate =  __DIR__ . '/Resources/PaymentmethodViews/main.tpl';
+                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
             }
 
             $additionalDescription = $smarty->fetch('file:' . $adTemplate);
@@ -296,7 +292,7 @@ class MollieShopware extends Plugin
             ];
 
             // check template exist
-            if (file_exists($paymentTemplateDir . $name . '.tpl')) {
+            if (file_exists($paymentTemplateDir . '/' . $name . '.tpl')) {
                 $option['template'] = $name . '.tpl';
             }
 

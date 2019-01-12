@@ -28,7 +28,7 @@ class FrontendViewSubscriber implements SubscriberInterface
         $controller = $args->getSubject();
         $view = $controller->View();
 
-        $view->addTemplateDir(__DIR__ . '/../Views');
+        $view->addTemplateDir(__DIR__ . '/../Resources/views');
 
     }
 
