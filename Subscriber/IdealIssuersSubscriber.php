@@ -9,18 +9,15 @@ use Enlight_Event_EventArgs;
 use Enlight_Controller_Front;
 use Enlight_Controller_ActionEventArgs;
 use Mollie\Api\Exceptions\ApiException;
-use MollieShopware\PaymentMethods\Ideal;
 
 class IdealIssuersSubscriber implements SubscriberInterface
 {
-    /**
-     * @var \MollieShopware\PaymentMethods\Ideal
-     */
-    protected $ideal;
+    /** @var \MollieShopware\Components\Services\IdealService */
+    protected $idealService;
 
-    public function __construct(Ideal $ideal)
+    public function __construct(\MollieShopware\Components\Services\IdealService $idealService)
     {
-        $this->ideal = $ideal;
+        $this->idealService = $idealService;
     }
 
     public static function getSubscribedEvents()
@@ -41,7 +38,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $view = $controller->View();
 
         try {
-            $idealIssuers = $this->ideal->getIssuers();
+            $idealIssuers = $this->idealService->getIssuers();
 
             $view->assign('mollieIdealIssuers', $idealIssuers);
             $view->assign('mollieIssues', false);
@@ -70,7 +67,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $issuer = Shopware()->Front()->Request()->getPost('mollie-ideal-issuer');
 
         // write issuer id to database
-        $this->ideal->setSelectedIssuer($issuer);
+        $this->idealService->setSelectedIssuer($issuer);
 
         return $query;
     }

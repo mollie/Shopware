@@ -42,18 +42,25 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         // @todo: check if basket exists!!
 
-        /** @var \MollieShopware\Components\Mollie\PaymentService $paymentService */
+        /**
+         * Create an instance of the PaymentService. The PaymentService is used
+         * to handle transactions.
+         *
+         * @var \MollieShopware\Components\Services\PaymentService $paymentService
+         */
         $paymentService = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
         /**
-         * Persist basket from session to database, returning it's signature which
+         * Persist the basket from session to database, returning it's signature which
          * is then used to save the basket to an order.
+         *
+         * @var string $signature
          */
         $signature = $this->doPersistBasket();
 
         /**
-         * Create the Mollie transaction
+         * Create the Mollie transaction.
          *
          * @var \MollieShopware\Models\Transaction $transaction
          */
@@ -75,18 +82,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             false
         );
 
-        /** @var \MollieShopware\Components\Mollie\OrderService $orderService */
+        /**
+         * Create an OrderService instance. The OrderService is used to retrieve orders,
+         * order lines for mollie, etc.
+         *
+         * @var \MollieShopware\Components\Services\OrderService $orderService
+         */
         $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
         /**
-         * Get the order by the order number
+         * Get the order by order number from the OrderService.
          *
-         * @var \Shopware\Models\Order\Order $order
-         */
+         * @var \Shopware\Models\Order\Order $order */
         $order = $orderService->getOrderByNumber($orderNumber);
 
         /**
-         * Log an error if the order could not be found
+         * Check if the order is set, otherwise log an throw an error. The error is thrown
+         * to also tell the customer that something went wrong.
          */
         if (empty($order)) {
             Logger::log(
@@ -98,7 +110,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         /**
-         * Get the order lines of the order
+         * Get the order lines of the order from the OrderService.
          *
          * @var array
          */
@@ -116,14 +128,24 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function returnAction()
     {
-        /** @var \MollieShopware\Components\Mollie\PaymentService $paymentService */
+        /**
+         * Create an instance of the PaymentService. The PaymentService is used
+         * to handle transactions.
+         *
+         * @var \MollieShopware\Components\Services\PaymentService $paymentService
+         */
         $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
-        /** @var \Shopware\Models\Order\Order $order */
+        /**
+         * Get the current order.
+         *
+         * @var \Shopware\Models\Order\Order $order
+         */
         $order = $this->getOrder();
 
         /**
-         * Check if the order is set, if not throw an error
+         * Check if the order is set, otherwise log an throw an error. The error is thrown
+         * to also tell the customer that something went wrong.
          */
         if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
             Logger::log(
@@ -134,64 +156,113 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        /** @var \Mollie\Api\Resources\Order $molliePayment */
+        /**
+         * Get Mollie's payment object from the PaymentService.
+         *
+         * @var \Mollie\Api\Resources\Order $molliePayment
+         */
         $molliePayment = $paymentService->getPaymentObject($order);
 
-        $sOrder = Shopware()->Modules()->Order();
-        $baseUrl = Shopware()->Front()->Request()->getBaseUrl();
+        /**
+         * Generate the URL of the finish page to redirect the customer to.
+         *
+         * @var string $finishUrl
+         */
+        $finishUrl = Shopware()->Front()->Router()->assemble([
+            'controller' => 'checkout',
+            'action' => 'finish',
+            'sUniqueID' => $order->getTemporaryId()
+        ]);
 
         /**
-         * Send the confirmation e-mail
+         * Send the confirmation e-mail if the payment is complete.
          */
         if ($this->isComplete($molliePayment))
             $this->sendConfirmationEmail($order);
 
         /**
-         * Set the payment status of the order and redirect the customer
+         * Set the payment status of the order and redirect the customer.
+         *
+         * We use the deprecated sOrder class to set the payment status
+         * for a paid order to also send a payment status e-mail. This might
+         * need to be reworked later.
          */
         if ($molliePayment->isPaid()) {
-            $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_COMPLETELY_PAID, true);
-            return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            Shopware()->Modules()->Order()->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_COMPLETELY_PAID,
+                true
+            );
+
+            $this->persistOrder($order);
+
+            return $this->redirect($finishUrl);
         }
 
         elseif ($molliePayment->isAuthorized()) {
-            $sOrder->setPaymentStatus($order->getId(), Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED);
-            return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            $order->setPaymentStatus(
+                Shopware()->Models()->find('Shopware\Models\Order\Status', Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED)
+            );
+
+            $this->persistOrder($order);
+
+            return $this->redirect($finishUrl);
         }
 
         elseif ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer') {
-            return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
+            return $this->redirect($finishUrl);
         }
 
         else {
             $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
             $basketService->restoreBasket($order);
 
-            return $this->redirect($baseUrl . '/checkout/confirm');
+            return $this->redirect(
+                Shopware()->Front()->Router()->assemble([
+                    'controller' => 'checkout',
+                    'action' => 'confirm'
+                ])
+            );
         }
     }
 
     /**
-     * Send confirmation e-mail
+     * Send a confirmation e-mail once the order is processed.
      *
      * @param \Shopware\Models\Order\Order\ $order
      * @throws \Exception
      */
     public function sendConfirmationEmail($order)
     {
+        /**
+         * Create an instance of the core sOrder class. The sOrder
+         * class is used to send the confirmation e-mail.
+         *
+         * @var $sOrder
+         */
         $sOrder = Shopware()->Modules()->Order();
 
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /**
+         * Create an instance of the TransactionRepository. The TransactionRepository is used to
+         * get transactions from the database.
+         *
+         * @var \MollieShopware\Models\TransactionRepository $transactionRepo
+         */
         $transactionRepo = Shopware()->Models()->getRepository(
             \MollieShopware\Models\Transaction::class
         );
 
-        /** @var \MollieShopware\Models\Transaction $transaction */
+        /**
+         * Get the most recent transaction for the order from the TransactionRepository.
+         *
+         * @var \MollieShopware\Models\Transaction $transaction
+         */
         $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
 
         if (!empty($transaction)) {
             /**
-             * Get the variables for the order mail
+             * Get the variables for the order mail from the transaction. The order mail variables
+             * are returned as JSON value, we decode that JSON to an array here.
              *
              * @var array $variables
              */
@@ -199,13 +270,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             /**
              * Send the confirmation e-mail using the retrieved variables
-             * or log an error if the e-mail could not be sent
+             * or log an error if the e-mail could not be sent.
              */
             if (is_array($variables)) {
                 try {
                     $sOrder->sUserData = $variables;
                     $sOrder->sendMail($variables);
                 }
+
                 catch (\Exception $ex) {
                     Logger::log('error', $ex->getMessage(), $ex);
                 }
@@ -214,12 +286,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             /**
              * Clear the order mail variables from the transaction
              * as they are no longer needed, or log an error if the
-             * changes could not be saved
+             * changes could not be saved.
              */
             try {
                 $transaction->setOrdermailVariables(null);
                 $transactionRepo->save($transaction);
             }
+
             catch (\Exception $ex) {
                 Logger::log('error', $ex->getMessage(), $ex);
             }
@@ -227,67 +300,77 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * Background process for Mollie callbacks
+     * Background process for Mollie callbacks.
      */
     public function notifyAction()
     {
         /** @var \Shopware\Models\Order\Order $order */
         $order = null;
 
-        /** @var \MollieShopware\Components\Mollie\PaymentService $paymentService */
+        /**
+         * Create an instance of the PaymentService. The PaymentService is used
+         * to handle transactions.
+         *
+         * @var \MollieShopware\Components\Services\PaymentService $paymentService
+         */
         $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
         /**
          * Try to retrieve the order, or return an error if the order
-         * could not be retrieved
+         * could not be retrieved.
          */
         try {
             $order = $this->getOrder();
         }
+
         catch(\Exception $ex){
             return $this->notifyException($ex->getMessage());
         }
 
         /**
-         * Check the payment status for the order and notify the user
+         * Check the payment status for the order and notify the user.
          */
         if ($paymentService->checkPaymentStatus($order)) {
-            return $this->notifyOK('Thank you');
+            return $this->notifyOK('Thank you!');
         }
+
         else {
             return $this->notifyException('The payment status could not be updated.');
         }
     }
 
     /**
-     * Start a session with a given sessiond ID
+     * Start a session with a given sessiond ID.
+     *
+     * Close the current session, set the ID to the given sessionId
+     * and start the session.
      *
      * @param $sessionId
      */
     private function startSession($sessionId) {
-        /**
-         * Close the current session, set the ID to the given sessionId
-         * and start the session
-         */
         \Enlight_Components_Session::writeClose();
         \Enlight_Components_Session::setId($sessionId);
         \Enlight_Components_Session::start();
     }
 
     /**
-     * Get the current order by request parameter, taking into account
-     * the checksum and the timestamp/salt (ts)
-     * @return mixed
+     * Get the current order by orderNumber, taking into account
+     * the session that started the order.
+     *
+     * @return null | boolean | \Shopware\Models\Order\Order
      * @throws Exception
      */
     private function getOrder()
     {
-        // vars
         $order = null;
         $transaction = null;
         $sessionId = $this->Request()->getParam('session-1');
         $orderNumber = $this->Request()->getParam('orderNumber');
 
+        /**
+         * Get the order from the OrderRepository, or log an error
+         * when the order can't be retrieved.
+         */
         try {
             /** @var \Shopware\Models\Order\Repository $orderRepo */
             $orderRepo = Shopware()->Container()->get('models')->getRepository(
@@ -299,16 +382,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'number' => $orderNumber,
             ]);
         }
+
         catch (Exception $ex) {
             Logger::log('error', $ex->getMessage(), $ex);
         }
 
+        /**
+         * Check if the order is set, otherwise log an error.
+         */
         if (empty($order)) {
             Logger::log('error', 'The order with number ' . $orderNumber . ' could not be retrieved.');
-
             return false;
         }
 
+        /**
+         * Get the transaction from the TransactionRepository, or log an error
+         * when the transaction can't be retrieved.
+         */
         try {
             /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
             $transactionRepo = Shopware()->Container()->get('models')->getRepository(
@@ -320,34 +410,39 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'transactionId' => $order->getTransactionId()
             ]);
         }
+
         catch (\Exception $ex) {
             Logger::log('error', $ex->getMessage(), $ex);
         }
 
+        /**
+         * Check if the transaction is set, otherwise log an error.
+         */
         if (empty($transaction)) {
             Logger::log('error', 'The transaction for order ' . $orderNumber . ' could not be found.');
 
             return false;
         }
 
-        // check if the returned session matches the transaction's session
+        /**
+         * Check if the returned session matches the transaction's session. If there is a match,
+         * restore that session and clear the stored session from the transaction. This is done to
+         * prevent that Mollie's return URL for the confirmation is used ever again.
+         *
+         * If there is no match, log the error and move on.
+         */
         if ($transaction->getSessionId() == $sessionId) {
-            // start the session
             $this->startSession($sessionId);
-
-            // remove the session from the transaction
             $transaction->setSessionId(null);
-
-            // save the transaction
             $transactionRepo->save($transaction);
-        } else {
-            // set the message
+        }
+
+        else {
             $message = 'The returned session ID does not match the session ID of the transaction.';
 
             if (empty($sessionId))
                 $message = 'The returned transaction does not have a session ID.';
 
-            // log the error
             Logger::log('error', $message);
         }
 
@@ -355,13 +450,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * Return whether the Mollie payment is completed
+     * Persist the order model.
+     *
+     * @param \Shopware\Models\Order\Order $order
+     */
+    public function persistOrder($order)
+    {
+        Shopware()->Models()->persist($order);
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Return whether the Mollie payment is completed.
      *
      * @param $molliePayment
      * @return bool
      */
     private function isComplete($molliePayment) {
-        // check if order is complete
         if ($molliePayment->isPaid() ||
             $molliePayment->isAuthorized() ||
             ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer')) {
@@ -385,7 +490,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * Shows a JSON thank you message, with a 200 HTTP ok
+     * Shows a JSON thank you message, with a 200 HTTP ok.
      *
      * @param $msg
      */
@@ -397,25 +502,32 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * Get the issuers for the iDEAL payment method
-     * Called in an ajax call on the frontend
+     * Get the issuers for the iDEAL payment method.
+     * Called in an ajax call on the frontend.
      */
     public function idealIssuersAction()
     {
+        /**
+         * Prevent this action from being stored or cached.
+         */
         $this->setNoRender();
 
+        /**
+         * Get the issuers from the IdealService, or return an error.
+         */
         try {
-            /** @var \MollieShopware\PaymentMethods\Ideal $ideal */
-            $ideal = $this->container->get('mollie_shopware.payment_methods.ideal');
+            /** @var \MollieShopware\Components\Services\IdealService $ideal */
+            $idealService = $this->container->get('mollie_shopware.ideal_service');
 
             /** @var array $idealIssuers */
-            $idealIssuers = $ideal->getIssuers();
+            $idealIssuers = $idealService->getIssuers();
 
             return $this->sendResponse([
                 'data' => $idealIssuers,
                 'success' => true
             ]);
         }
+
         catch (\Exception $ex) {
             return $this->sendResponse([
                 'message' => $ex->getMessage(),
@@ -427,7 +539,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
     /**
      * Wrapper function for persistbasket, which is declared protected
-     * and cannot be called from outside
+     * and cannot be called from outside.
 
      * @return string
      */

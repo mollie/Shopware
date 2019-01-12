@@ -2,7 +2,7 @@
 
 // Mollie Shopware Plugin Version: 1.3.12
 
-namespace MollieShopware\Components\Mollie;
+namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
 use MollieShopware\Models\Transaction;
@@ -32,7 +32,8 @@ class OrderService
      * Get an order by it's id
      *
      * @param int $orderId
-     * @return Order $order
+     * @return null | Order $order
+     * @throws \Exception
      */
     public function getOrderById($orderId)
     {

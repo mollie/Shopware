@@ -6,7 +6,7 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use MollieShopware\Components\Logger;
-use MollieShopware\Components\Mollie\OrderService;
+use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Order;

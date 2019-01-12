@@ -2,7 +2,7 @@
 
 	// Mollie Shopware Plugin Version: 1.3.12
 
-namespace MollieShopware\Components\Mollie;
+namespace MollieShopware\Components\Services;
 
     class RefundService{
 

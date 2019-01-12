@@ -2,7 +2,7 @@
 
 	// Mollie Shopware Plugin Version: 1.3.12
 
-namespace MollieShopware\Components\Mollie;
+namespace MollieShopware\Components\Services;
 
     use Mollie\Api\MollieApiClient;
     use Mollie\Api\Resources\Payment;
@@ -458,15 +458,20 @@ namespace MollieShopware\Components\Mollie;
 
         /**
          * Get the id of the chosen ideal issuer from database
+         *
+         * @return string
          */
         protected function getIdealIssuer()
         {
-            $ideal = Shopware()->container()->get('mollie_shopware.payment_methods.ideal');
-            return $ideal->getSelectedIssuer();
+            /** @var \MollieShopware\Components\Services\IdealService $idealService */
+            $idealService = Shopware()->container()->get('mollie_shopware.ideal_service');
+
+            return $idealService->getSelectedIssuer();
         }
 
         /**
          * Checks if current user has a session with the webshop
+         *
          * @return bool
          */
         public function hasSession()
@@ -475,9 +480,9 @@ namespace MollieShopware\Components\Mollie;
         }
 
         /**
-         * Generate a checksum code
+         * Generate a checksum code.
          *
-         * @param Order $order
+         * @param \Shopware\Models\Order\Order $order
          * @param null $salt
          * @return string
          */
@@ -502,7 +507,7 @@ namespace MollieShopware\Components\Mollie;
         /**
          * Check the payment status
          *
-         * @param Order $order
+         * @param \Shopware\Models\Order\Order $order
          * @return bool
          * @throws \Mollie\Api\Exceptions\ApiException
          */

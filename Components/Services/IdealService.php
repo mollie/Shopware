@@ -2,14 +2,14 @@
 
 	// Mollie Shopware Plugin Version: 1.3.12
 
-namespace MollieShopware\PaymentMethods;
+namespace MollieShopware\Components\Services;
 
 use Mollie\Api\Types\PaymentMethod;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\CurrentCustomer;
 use Shopware\Components\Model\ModelManager;
 
-class Ideal
+class IdealService
 {
     /**
      * @var MollieApiClient
