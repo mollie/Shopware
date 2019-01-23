@@ -117,26 +117,21 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          */
         $orderDetails = $orderService->getOrderLines($order);
 
-        return $this->redirect($paymentService->startTransaction($order, $transaction, $orderDetails));
+        return $this->redirect(
+            $paymentService->startTransaction(
+                $order,
+                $transaction,
+                $orderDetails
+            )
+        );
     }
 
     /**
-     * Returns the user from Mollie's checkout and
-     * processes his payment. If payment failed we
-     * restore the basket and enable retrying. If
-     * payment succeeded we show the /checkout/finish
-     * page
+     * Returns the user from Mollie's checkout and processes his payment. If payment failed we restore
+     * the basket. If payment succeeded we show the /checkout/finish page
      */
     public function returnAction()
     {
-        /**
-         * Create an instance of the PaymentService. The PaymentService is used
-         * to handle transactions.
-         *
-         * @var \MollieShopware\Components\Services\PaymentService $paymentService
-         */
-        $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
-
         /**
          * Get the current order.
          *
@@ -145,7 +140,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $order = $this->getOrder();
 
         /**
-         * Check if the order is set, otherwise log an throw an error. The error is thrown
+         * Check if the order is set, otherwise log and throw an error. The error is thrown
          * to also tell the customer that something went wrong.
          */
         if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
@@ -158,13 +153,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         /**
-         * Get Mollie's payment object from the PaymentService.
-         *
-         * @var \Mollie\Api\Resources\Order $molliePayment
-         */
-        $molliePayment = $paymentService->getPaymentObject($order);
-
-        /**
          * Generate the URL of the finish page to redirect the customer to.
          *
          * @var string $finishUrl
@@ -174,6 +162,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             'action' => 'finish',
             'sUniqueID' => $order->getTemporaryId()
         ]);
+
+        /**
+         * Create an instance of the PaymentService. The PaymentService is used
+         * to handle transactions.
+         *
+         * @var \MollieShopware\Components\Services\PaymentService $paymentService
+         */
+        $paymentService = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
+
+        /**
+         * Get Mollie's payment object from the PaymentService.
+         *
+         * @var \Mollie\Api\Resources\Order $molliePayment
+         */
+        $molliePayment = $paymentService->getPaymentObject($order);
 
         /**
          * Send the confirmation e-mail if the payment is complete.
@@ -199,7 +203,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             return $this->redirect($finishUrl);
         }
-
         elseif ($molliePayment->isAuthorized()) {
             $order->setPaymentStatus(
                 Shopware()->Models()->find(
@@ -212,13 +215,19 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             return $this->redirect($finishUrl);
         }
-
         elseif ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer') {
             return $this->redirect($finishUrl);
         }
-
         else {
-            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+            /**
+             * Create an instance of the BasketService. The BasketService
+             * is used to restore the basket after a payment failed.
+             *
+             * @var \MollieShopware\Components\Services\BasketService $basketService
+             */
+            $basketService = Shopware()->Container()
+                ->get('mollie_shopware.basket_service');
+
             $basketService->restoreBasket($order);
 
             return $this->redirect(
