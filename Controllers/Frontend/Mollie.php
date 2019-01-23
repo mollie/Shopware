@@ -523,7 +523,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     /**
      * Wrapper function for persistbasket, which is declared protected
      * and cannot be called from outside.
-
+     *
      * @return string
      */
     public function doPersistBasket()
