@@ -3,6 +3,7 @@
 	// Mollie Shopware Plugin Version: 1.3.12
 
 use MollieShopware\Components\Logger;
+use MollieShopware\Components\Notifier;
 use MollieShopware\Components\Base\AbstractPaymentController;
 use Shopware\Models\Order\Status;
 
@@ -201,7 +202,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         elseif ($molliePayment->isAuthorized()) {
             $order->setPaymentStatus(
-                Shopware()->Models()->find('Shopware\Models\Order\Status', Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED)
+                Shopware()->Models()->find(
+                    'Shopware\Models\Order\Status',
+                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED
+                )
             );
 
             $this->persistOrder($order);
@@ -277,7 +281,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     $sOrder->sUserData = $variables;
                     $sOrder->sendMail($variables);
                 }
-
                 catch (\Exception $ex) {
                     Logger::log('error', $ex->getMessage(), $ex);
                 }
@@ -292,7 +295,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $transaction->setOrdermailVariables(null);
                 $transactionRepo->save($transaction);
             }
-
             catch (\Exception $ex) {
                 Logger::log('error', $ex->getMessage(), $ex);
             }
@@ -313,7 +315,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          *
          * @var \MollieShopware\Components\Services\PaymentService $paymentService
          */
-        $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+        $paymentService = Shopware()->Container()
+            ->get('mollie_shopware.payment_service');
 
         /**
          * Try to retrieve the order, or return an error if the order
@@ -322,20 +325,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         try {
             $order = $this->getOrder();
         }
-
-        catch(\Exception $ex){
-            return $this->notifyException($ex->getMessage());
+        catch(\Exception $ex) {
+            Notifier::notifyException(
+                $ex->getMessage()
+            );
         }
 
         /**
          * Check the payment status for the order and notify the user.
          */
         if ($paymentService->checkPaymentStatus($order)) {
-            return $this->notifyOK('Thank you!');
+            Notifier::notifyOk('Thank you!');
         }
-
         else {
-            return $this->notifyException('The payment status could not be updated.');
+            Notifier::notifyException(
+                'The payment status could not be updated.'
+            );
         }
     }
 
@@ -382,7 +387,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'number' => $orderNumber,
             ]);
         }
-
         catch (Exception $ex) {
             Logger::log('error', $ex->getMessage(), $ex);
         }
@@ -391,7 +395,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * Check if the order is set, otherwise log an error.
          */
         if (empty($order)) {
-            Logger::log('error', 'The order with number ' . $orderNumber . ' could not be retrieved.');
+            Logger::log(
+                'error',
+                'The order with number ' . $orderNumber . ' could not be retrieved.'
+            );
+
             return false;
         }
 
@@ -410,7 +418,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'transactionId' => $order->getTransactionId()
             ]);
         }
-
         catch (\Exception $ex) {
             Logger::log('error', $ex->getMessage(), $ex);
         }
@@ -419,7 +426,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          * Check if the transaction is set, otherwise log an error.
          */
         if (empty($transaction)) {
-            Logger::log('error', 'The transaction for order ' . $orderNumber . ' could not be found.');
+            Logger::log(
+                'error',
+                'The transaction for order ' . $orderNumber . ' could not be found.'
+            );
 
             return false;
         }
@@ -436,7 +446,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transaction->setSessionId(null);
             $transactionRepo->save($transaction);
         }
-
         else {
             $message = 'The returned session ID does not match the session ID of the transaction.';
 
@@ -477,31 +486,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * Shows a JSON exception for the given request. Also sends
-     * a 500 server error.
-     *
-     * @param $error
-     */
-    private function notifyException($error) {
-        header('HTTP/1.0 500 Server Error');
-        header('Content-Type: text/json');
-        echo json_encode(['success'=>false, 'message'=>$error], JSON_PRETTY_PRINT);
-        die();
-    }
-
-    /**
-     * Shows a JSON thank you message, with a 200 HTTP ok.
-     *
-     * @param $msg
-     */
-    private function notifyOK($msg) {
-        header('HTTP/1.0 200 Ok');
-        header('Content-Type: text/json');
-        echo json_encode(['success'=>true, 'message'=>$msg], JSON_PRETTY_PRINT);
-        die();
-    }
-
-    /**
      * Get the issuers for the iDEAL payment method.
      * Called in an ajax call on the frontend.
      */
@@ -527,7 +511,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'success' => true
             ]);
         }
-
         catch (\Exception $ex) {
             return $this->sendResponse([
                 'message' => $ex->getMessage(),
