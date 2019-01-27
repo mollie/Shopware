@@ -4,12 +4,9 @@
 
 namespace MollieShopware\Components\Services;
 
-    use Mollie\Api\MollieApiClient;
     use Mollie\Api\Resources\Payment;
     use MollieShopware\Models\OrderLines;
     use MollieShopware\Models\OrderLinesRepository;
-    use MollieShopware\Models\Transaction;
-    use MollieShopware\Models\TransactionRepository;
     use Shopware\Components\ConfigLoader;
     use Shopware\Models\Order\Order;
     use Shopware\Models\Order\Status;
@@ -20,10 +17,24 @@ namespace MollieShopware\Components\Services;
 
     class PaymentService
     {
-        // vars
+        /**
+         * @var \MollieShopware\Components\MollieApiFactory|null $apiFactory
+         */
         private $apiFactory = null;
-        private $api = null;
+
+        /**
+         * @var \Mollie\Api\MollieApiClient|null $apiClient
+         */
+        private $apiClient = null;
+
+        /**
+         * @var \Enlight_Components_Session_Namespace|null $session
+         */
         private $session = null;
+
+        /**
+         * @var array|null
+         */
         private $customEnvironmentVariables = null;
 
         /**
@@ -38,24 +49,32 @@ namespace MollieShopware\Components\Services;
             \Enlight_Components_Session_Namespace $session,
             array $customEnvironmentVariables
         ) {
-            // create API client object
             $this->apiFactory = $apiFactory;
-            $this->api = $apiFactory->create();
-
+            $this->apiClient = $apiFactory->create();
             $this->session = $session;
             $this->customEnvironmentVariables = $customEnvironmentVariables;
         }
 
         /**
-         * Create the transaction
+         * Create the transaction in the TransactionRepository.
          *
-         * @return Transaction
+         * @return \MollieShopware\Models\Transaction
          */
         public function createTransaction()
         {
-            /** @var TransactionRepository $transactionRepo */
-            $transactionRepo = Shopware()->container()->get('models')->getRepository(Transaction::class);
+            /**
+             * Create an instance of the TransactionRepository. The TransactionRepository is used to
+             * get transactions from the database.
+             *
+             * @var \MollieShopware\Models\TransactionRepository $transactionRepo
+             */
+            $transactionRepo = Shopware()->container()->get('models')->getRepository(
+                \MollieShopware\Models\Transaction::class
+            );
 
+            /**
+             * Create a new transaction and return it.
+             */
             return $transactionRepo->create(null, null);
         }
 
@@ -74,7 +93,7 @@ namespace MollieShopware\Components\Services;
             $molliePrepared = $this->prepareOrder($order, $orderDetails);
 
             /** @var Payment $molliePayment */
-            $molliePayment = $this->api->orders->create($molliePrepared);
+            $molliePayment = $this->apiClient->orders->create($molliePrepared);
 
             /** @var OrderLinesRepository $orderLinesRepo */
             $orderLinesRepo = Shopware()->container()->get('models')->getRepository(OrderLines::class);
@@ -119,7 +138,7 @@ namespace MollieShopware\Components\Services;
             $mollieOrder = null;
 
             try {
-                $mollieOrder = $this->api->orders->get($mollieId);
+                $mollieOrder = $this->apiClient->orders->get($mollieId);
             }
             catch (Exception $ex) {
                 throw new Exception('The order could not be found at Mollie.');
@@ -166,7 +185,7 @@ namespace MollieShopware\Components\Services;
             $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
 
             /** @var Payment $molliePayment */
-            $molliePayment = $this->api->orders->get($transaction->getMollieId());
+            $molliePayment = $this->apiClient->orders->get($transaction->getMollieId());
 
             return $molliePayment;
         }
