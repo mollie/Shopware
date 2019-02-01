@@ -67,46 +67,6 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
         });
     },
 
-    onShipOrder: function(record) {
-        var me = this;
-        var store = me.subApplication.getStore('Order');
-        var message = ((me.snippets.shipOrderConfirm && me.snippets.shipOrderConfirm.message) || 'Are you sure you want to ship the order' ) + ' ' + record.get('number');
-        var title = (me.snippets.shipOrderConfirm && me.snippets.shipOrderConfirm.title) || 'Ship order';
-
-        Ext.MessageBox.confirm(title, message, function(answer) {
-            if ( answer !== 'yes' ) return;
-
-            Ext.Ajax.request({
-                url: '{url action="ship" controller=MollieOrders}',
-                params: {
-                    orderId: record.get('id'),
-                    orderNumber: record.get('number')
-                },
-                success: function(res) {
-                    try {
-                        var result = JSON.parse(res.responseText);
-                        if( !result.success ) throw new Error(result.message);
-
-                        Shopware.Notification.createGrowlMessage(
-                            me.snippets.successTitle,
-                            me.snippets.changeStatus.successMessage,
-                            me.snippets.growlMessage
-                        );
-
-                        // refresh order screen
-                        me.doRefresh();
-                    } catch(e) {
-                        Shopware.Notification.createGrowlMessage(
-                            me.snippets.failureTitle,
-                            me.snippets.changeStatus.failureMessage + '<br> ' + e.message,
-                            me.snippets.growlMessage
-                        );
-                    }
-                }
-            });
-        });
-    },
-
     doRefresh: function() {
         var me = this;
         var store = me.subApplication.getStore('Order');
