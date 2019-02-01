@@ -67,55 +67,32 @@ class OrderBackendSubscriber implements SubscriberInterface
 
     public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
     {
-        //@todo: throw better exceptions
-
         // only work on save action
         if ($args->getRequest()->getActionName() != 'save')
             return true;
 
         // vars
-        $orderId = null;
+        $orderId = $args->getRequest()->getParam('id');
         $order = null;
         $mollieId = null;
 
-        try {
-            $orderId = $args->getRequest()->getParam('id');
-        }
-        catch (Exception $ex) {
-            // send exception
-            $this->sendException(
-                'HTTP/1.1 422 Unprocessable Entity Error',
-                $ex->getMessage()
-            );
-        }
-
         // check if we have an order
         if (empty($orderId))
-            return false;
+            return true;
 
         // create order service
         $orderService = Shopware()->Container()
             ->get('mollie_shopware.order_service');
 
-        try {
-            // get the order
-            $order = $orderService->getOrderById($orderId);
-        }
-        catch (Exception $ex) {
-            // @todo handle exception
-        }
+        // get the order
+        $order = $orderService->getOrderById($orderId);
 
         // check if the order is found
         if (empty($order))
-            return false;
+            return true;
 
-        try {
-            // get mollie id
-            $mollieId = $orderService->getMollieOrderId($order);
-        }
-        catch (Exception $ex) {
-            // @todo handle exception
-        }
+        // get mollie id
+        $mollieId = $orderService->getMollieOrderId($order);
 
         // if the order is not a mollie order, return true
         if (empty($mollieId))
@@ -123,7 +100,7 @@ class OrderBackendSubscriber implements SubscriberInterface
 
         // check if the status is sent
         if ($order->getOrderStatus()->getId() != Status::ORDER_STATE_COMPLETELY_DELIVERED)
-            return false;
+            return true;
 
         // send the order to mollie
         try {
@@ -133,49 +110,31 @@ class OrderBackendSubscriber implements SubscriberInterface
             // get an instance of the Mollie api
             $mollieApi = Shopware()->Container()->get('mollie_shopware.api');
 
-            try {
-                $mollieOrder = $mollieApi->orders->get($mollieId);
-            }
-            catch (Exception $ex) {
-                throw new Exception('The order could not be found at Mollie.');
-            }
-
-            $result = null;
+            // get the order at Mollie
+            $mollieOrder = $mollieApi->orders->get($mollieId);
 
             // ship the order
             if (!empty($mollieOrder)) {
                 if ($mollieOrder->isCompleted()) {
-                    throw new Exception('The order is already completed at Mollie.');
+                    Logger::log(
+                        'info',
+                        'Order ' . $order->getNumber() . ' is already completed at Mollie.'
+                    );
                 }
 
                 if ($mollieOrder->isShipping()) {
-                    throw new Exception('The order is already shipping at Mollie.');
+                    Logger::log(
+                        'info',
+                        'Order ' . $order->getNumber() . ' is already shipping at Mollie.'
+                    );
                 }
 
-                try {
-                    $mollieOrder->shipAll();
-                }
-                catch (Exception $ex) {
-                    throw new Exception('The order can\'t be shipped.');
-                }
-            }
-            else {
-                throw new Exception('The order can\'t be found at Mollie.');
+                $mollieOrder->shipAll();
             }
         }
         catch (Exception $ex) {
-            // send exception
-            $this->sendException(
-                'HTTP/1.1 422 Unprocessable Entity Error',
-                $ex->getMessage()
-            );
+            // log the error
+            Logger::log('error', $ex->getMessage(), $ex);
         }
-    }
-
-    private function sendException($type, $error)
-    {
-        header($type);
-        header('Content-Type: text/html');
-        die($error);
     }
 }
