@@ -144,17 +144,16 @@ class OrderBackendSubscriber implements SubscriberInterface
 
             // ship the order
             if (!empty($mollieOrder)) {
-                if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
-                    if ($mollieOrder->isCompleted()) {
-                        throw new Exception('The order is already completed at Mollie.');
-                    }
-                    else {
-                        throw new Exception('The order doesn\'t seem to be paid or authorized.');
-                    }
+                if ($mollieOrder->isCompleted()) {
+                    throw new Exception('The order is already completed at Mollie.');
+                }
+
+                if ($mollieOrder->isShipping()) {
+                    throw new Exception('The order is already shipping at Mollie.');
                 }
 
                 try {
-                    $result = $mollieOrder->shipAll();
+                    $mollieOrder->shipAll();
                 }
                 catch (Exception $ex) {
                     throw new Exception('The order can\'t be shipped.');
