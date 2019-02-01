@@ -90,6 +90,56 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
     }
 
+    public function shipAction()
+    {
+        $transaction = null;
+
+        try {
+            $request = $this->Request();
+            $em = $this->container->get('models');
+            $config = $this->container->get('mollie_shopware.config');
+
+            $orderId = $request->getParam('orderId');
+
+            $orderService = $this->container->get('mollie_shopware.order_service');
+
+            $order = $orderService->getOrderById($orderId);
+
+            $mollieId = $orderService->getMollieOrderId($order);
+
+            if (empty($order)) {
+                $this->returnJson([
+                    'success' => false,
+                    'message' => 'Order not found',
+                ]);
+            }
+
+            if (empty($mollieId)) {
+                $this->returnJson([
+                    'success' => false,
+                    'message' => 'Order doesn\'t seem to be paid through Mollie',
+                ]);
+            }
+
+            // create a payment service
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+
+            // send the order
+            $paymentService->sendOrder($order, $mollieId);
+
+            $this->returnJson([
+                'success' => true,
+                'message' => 'Order successfully shipped',
+                'data' => ''
+            ]);
+        } catch (Exception $ex) {
+            $this->returnJson([
+                'success' => false,
+                'message' => $ex->getMessage(),
+            ]);
+        }
+    }
+
     protected function returnJson($data, $httpCode = 200)
     {
         if ($httpCode !== 200) {

@@ -16,6 +16,8 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
         columns.push(me.createRefundColumn());
 
+        columns.push(me.createShipColumn());
+
         me.createStyleSheet();
 
         return columns;
@@ -33,6 +35,18 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         });
     },
 
+    createShipColumn: function() {
+        var me = this;
+
+        return Ext.create('Ext.grid.column.Action', {
+            width: 80,
+            items: [
+                me.createShipOrderColumn()
+            ],
+            header: me.snippets.columns.mollie_shipping || 'Mollie shipping',
+        });
+    },
+
     createRefundOrderColumn: function() {
         var me = this;
 
@@ -46,19 +60,51 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
              */
             handler: function(view, rowIndex, colIndex, item) {
                 var store = view.getStore(),
-                        record = store.getAt(rowIndex);
+                    record = store.getAt(rowIndex);
 
                 me.fireEvent('refundOrder', record);
             },
 
             getClass: function(value, metadata, record) {
                 if(
-                    // order should be paid with a Buckaroo payment method
+                    // order should be paid with a Mollie payment method
                     me.hasOrderPaymentName(record) &&
                     me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
 
                     // order should not have been refunded already
                     record.data && parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID
+                ) {
+                    return '';
+                }
+
+                return 'mollie-hide';
+            }
+        }
+    },
+
+    createShipOrderColumn: function() {
+        var me = this;
+
+        return {
+            iconCls: 'sprite-truck-box-label',
+            action: 'editOrder',
+            tooltip: me.snippets.columns.ship,
+            /**
+             * Add button handler to fire the showDetail event which is handled
+             * in the list controller.
+             */
+            handler: function(view, rowIndex, colIndex, item) {
+                var store = view.getStore(),
+                    record = store.getAt(rowIndex);
+
+                me.fireEvent('shipOrder', record);
+            },
+
+            getClass: function(value, metadata, record) {
+                if(
+                    // order should be paid with a Mollie payment method
+                    me.hasOrderPaymentName(record) &&
+                    me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
                 ) {
                     return '';
                 }

@@ -161,7 +161,7 @@ use Shopware\Models\Order\Order;
                 $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
-            elseif ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer') {
+            elseif ($molliePayment->isCreated()) {
                 return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
             }
             else {
