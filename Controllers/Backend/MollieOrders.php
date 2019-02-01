@@ -96,8 +96,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
         try {
             $request = $this->Request();
-            $em = $this->container->get('models');
-            $config = $this->container->get('mollie_shopware.config');
 
             $orderId = $request->getParam('orderId');
 
@@ -121,18 +119,50 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 ]);
             }
 
-            // create a payment service
-            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+            // create mollie order object
+            $mollieOrder = null;
 
-            // send the order
-            $paymentService->sendOrder($order, $mollieId);
+            // get an instance of the Mollie api
+            $mollieApi = $this->container->get('mollie_shopware.api');
+
+            try {
+                $mollieOrder = $mollieApi->orders->get($mollieId);
+            }
+            catch (Exception $ex) {
+                throw new Exception('The order could not be found at Mollie.');
+            }
+
+            $result = null;
+
+            // ship the order
+            if (!empty($mollieOrder)) {
+                if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
+                    if ($mollieOrder->isCompleted()) {
+                        throw new Exception('The order is already completed at Mollie.');
+                    }
+                    else {
+                        throw new Exception('The order doesn\'t seem to be paid or authorized.');
+                    }
+                }
+
+                try {
+                    $result = $mollieOrder->shipAll();
+                }
+                catch (Exception $ex) {
+                    throw new Exception('The order can\'t be shipped.');
+                }
+            }
+            else {
+                throw new Exception('The order can\'t be found at Mollie.');
+            }
 
             $this->returnJson([
                 'success' => true,
                 'message' => 'Order successfully shipped',
-                'data' => ''
+                'data' => $result
             ]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             $this->returnJson([
                 'success' => false,
                 'message' => $ex->getMessage(),

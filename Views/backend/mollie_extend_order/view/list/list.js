@@ -16,7 +16,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
         columns.push(me.createRefundColumn());
 
-        columns.push(me.createShipColumn());
+        //columns.push(me.createShipColumn());
 
         me.createStyleSheet();
 
@@ -29,21 +29,10 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return Ext.create('Ext.grid.column.Action', {
             width: 80,
             items: [
-                me.createRefundOrderColumn()
-            ],
-            header: me.snippets.columns.mollie_refund || 'Mollie refund',
-        });
-    },
-
-    createShipColumn: function() {
-        var me = this;
-
-        return Ext.create('Ext.grid.column.Action', {
-            width: 80,
-            items: [
+                me.createRefundOrderColumn(),
                 me.createShipOrderColumn()
             ],
-            header: me.snippets.columns.mollie_shipping || 'Mollie shipping',
+            header: me.snippets.columns.mollie_actions || 'Mollie actions',
         });
     },
 
@@ -53,7 +42,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return {
             iconCls: 'sprite-money-coin',
             action: 'editOrder',
-            tooltip: me.snippets.columns.refund,
+            tooltip: me.snippets.columns.refund || 'Refund order',
             /**
              * Add button handler to fire the showDetail event which is handled
              * in the list controller.
@@ -88,7 +77,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return {
             iconCls: 'sprite-truck-box-label',
             action: 'editOrder',
-            tooltip: me.snippets.columns.ship,
+            tooltip: me.snippets.columns.ship || 'Ship order',
             /**
              * Add button handler to fire the showDetail event which is handled
              * in the list controller.
@@ -104,7 +93,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
                 if(
                     // order should be paid with a Mollie payment method
                     me.hasOrderPaymentName(record) &&
-                    me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
+                    me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_'
                 ) {
                     return '';
                 }
