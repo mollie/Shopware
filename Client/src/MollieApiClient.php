@@ -1,5 +1,7 @@
 <?php
 
+	// Mollie Shopware Plugin Version: 1.3.15
+
 namespace Mollie\Api;
 
 use _PhpScoper5c52a41b78b7a\GuzzleHttp\Client;

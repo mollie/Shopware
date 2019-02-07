@@ -1,5 +1,7 @@
 <?php
 
+	// Mollie Shopware Plugin Version: 1.3.15
+
 namespace Mollie\Api\Exceptions;
 
 class IncompatiblePlatform extends \Mollie\Api\Exceptions\ApiException
