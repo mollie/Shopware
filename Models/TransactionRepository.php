@@ -34,10 +34,10 @@ class TransactionRepository extends ModelRepository
         $transaction->setID($transactionId);
         $transaction->setTransactionID('mollie_' . $transactionId);
 
-        if ($order){
+        if ($order) {
             $transaction->setOrderID($order->getId());
         }
-        if ($transaction){
+        if ($mollie_order){
             $transaction->setMollieID($mollie_order->id);
         }
 

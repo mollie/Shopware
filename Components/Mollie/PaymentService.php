@@ -72,7 +72,7 @@ namespace MollieShopware\Components\Mollie;
             // prepare the order for mollie
             $molliePrepared = $this->prepareOrder($order, $orderDetails);
 
-            /** @var Payment $molliePayment */
+            /** @var \Mollie\Api\Resources\Order $molliePayment */
             $molliePayment = $this->api->orders->create($molliePrepared);
 
             /** @var OrderLinesRepository $orderLinesRepo */
@@ -191,7 +191,10 @@ namespace MollieShopware\Components\Mollie;
 
             if (strtolower($paymentMethod == 'ideal')) {
                 $paymentParameters = [
+                    'customerId' => $order->getCustomer()->getNumber(),
                     'issuer' => $this->getIdealIssuer(),
+                    'mandateId' => '',
+                    'webhookUrl' => $this->prepareRedirectUrl($order, 'webhook', 'payment'),
                 ];
             }
 
@@ -369,22 +372,14 @@ namespace MollieShopware\Components\Mollie;
          * @return string
          * @throws Exception
          */
-        private function prepareRedirectUrl(Order $order, $type = 'redirect')
+        private function prepareRedirectUrl(Order $order, $method = 'redirect', $type = 'order')
         {
-            // get url type
-            switch($type) {
-                case 'redirect':
-                    $mode = 'return';
+            // check for errors
+            if (!in_array($method, ['redirect', 'webhook']))
+                throw new \Exception('Cannot generate "' . $method . '" url as method is undefined');
 
-                    break;
-                case 'webhook':
-                    $mode = 'notify';
-
-                    break;
-
-                default:
-                    throw new \Exception('Cannot generate "' . $type . '" url as type is undefined');
-            }
+            if (!in_array($type, ['order', 'payment']))
+                throw new \Exception('Cannot generate "' . $method . '" url as type is undefined');
 
             // get random number
             $randomNumber = time();
@@ -392,7 +387,8 @@ namespace MollieShopware\Components\Mollie;
             // generate redirect url
             $url = Shopware()->Front()->Router()->assemble([
                 'controller'    => 'Mollie',
-                'action'        => $mode,
+                'action'        => $method,
+                'type'          => $type,
                 'forceSecure'   => true,
                 'order_number'  => $order->getNumber(),
                 'ts'            => $randomNumber,

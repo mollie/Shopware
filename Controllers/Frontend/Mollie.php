@@ -112,7 +112,7 @@ use Shopware\Models\Order\Order;
 
             $order = $this->getOrder();
 
-            $molliePayment = $paymentService->getPaymentObject($order);
+            $mollieOrder = $paymentService->getPaymentObject($order);
 
             $baseUrl = Shopware()->Front()->Request()->getBaseUrl();
 
@@ -126,9 +126,9 @@ use Shopware\Models\Order\Order;
 
             // send order confirmation
             if (!empty($transaction) &&
-                ($molliePayment->isPaid() ||
-                $molliePayment->isAuthorized() ||
-                ($molliePayment->isCreated() && $molliePayment->method == 'banktransfer'))) {
+                ($mollieOrder->isPaid() ||
+                $mollieOrder->isAuthorized() ||
+                ($mollieOrder->isCreated() && $mollieOrder->method == 'banktransfer'))) {
                 $variables = @json_decode($transaction->getOrdermailVariables(), true);
 
                 if (is_array($variables)) {
@@ -152,24 +152,36 @@ use Shopware\Models\Order\Order;
                 }
             }
 
-            // set payment status and redirect
-            if ($molliePayment->isPaid()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::PAID, true);
-                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
-            }
-            elseif ($molliePayment->isAuthorized()) {
-                $sOrder->setPaymentStatus($order->getId(), PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED);
-                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
-            }
-            elseif ($molliePayment->isCreated()) {
-                return $this->redirect($baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId());
-            }
-            else {
-                $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-                $basketService->restoreBasket($order);
+            $paymentStatus = null;
+            $redirectUrl = null;
 
-                return $this->redirect($baseUrl . '/checkout/confirm');
+            if ($mollieOrder->isPaid()) {
+                $paymentStatus = PaymentStatus::PAID;
+                $redirectUrl = $baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId();
             }
+            elseif ($mollieOrder->isAuthorized()) {
+                $paymentStatus = PaymentStatus::THE_CREDIT_HAS_BEEN_ACCEPTED;
+                $redirectUrl = $baseUrl . '/checkout/finish?sUniqueID=' . $order->getTemporaryId();
+            }
+            elseif ($mollieOrder->isPending()) {
+                $paymentStatus = PaymentStatus::DELAYED;
+            }
+            elseif ($mollieOrder->isCanceled()) {
+                $paymentStatus = PaymentStatus::CANCELLED;
+            }
+
+            if (!empty($paymentStatus)) {
+                $sOrder->setPaymentStatus($order->getId(), $paymentStatus);
+            }
+
+            if (!empty($redirectUrl)) {
+                return $this->redirect($redirectUrl);
+            }
+
+            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+            $basketService->restoreBasket($order);
+
+            return $this->redirect($baseUrl . '/checkout/confirm');
         }
 
         /**
@@ -239,6 +251,55 @@ use Shopware\Models\Order\Order;
             }
 
             return $order;
+        }
+
+        /**
+         * @param \Mollie\Api\Resources\PaymentCollection $payments
+         * @return array
+         */
+        private function getPaymentsResult($payments)
+        {
+            $paymentResult = [
+                'total' => $payments->count(),
+                'paid' => 0,
+                'pending' => 0,
+                'authorized' => 0,
+                'canceled' => 0,
+                'failed' => 0,
+                'expired' => 0,
+            ];
+
+            /** @var \Mollie\Api\Resources\Payment $payment */
+            foreach ($payments as $payment) {
+
+                switch ($payment->status) {
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_PAID:
+                        $paymentResult['paid']++;
+                        break;
+
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_PENDING:
+                        $paymentResult['pending']++;
+                        break;
+
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_AUTHORIZED:
+                        $paymentResult['authorized']++;
+                        break;
+
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_CANCELED:
+                        $paymentResult['canceled']++;
+                        break;
+
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_FAILED:
+                        $paymentResult['failed']++;
+                        break;
+
+                    case \Mollie\Api\Types\PaymentStatus::STATUS_EXPIRED:
+                        $paymentResult['expired']++;
+                        break;
+                }
+            }
+
+            return $paymentResult;
         }
 
         /**

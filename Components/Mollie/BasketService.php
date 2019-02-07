@@ -35,12 +35,6 @@ class BasketService
 
     /**
      *
-     * @var sOrder $orderModule
-     */
-    private $orderModule;
-
-    /**
-     *
      * @var OrderService $orderService
      */
     private $orderService;
@@ -56,7 +50,6 @@ class BasketService
             ->get('mollie_shopware.config');
         $this->modelManager = $modelManager;
         $this->basketModule = Shopware()->Modules()->Basket();
-        $this->orderModule = Shopware()->Modules()->Order();
         $this->orderService = Shopware()->Container()
             ->get('mollie_shopware.order_service');
     }
@@ -86,7 +79,7 @@ class BasketService
                 $this->basketModule->clearBasket();
 
                 // set comment
-                $commentText = "De order is geannuleerd nadat de betaling via Mollie is mislukt. ";
+                $commentText = "De betaling via Mollie is geannuleerd of mislukt. ";
 
                 // iterate over products and add them to the basket
                 foreach ($orderDetails as $orderDetail) {
@@ -132,12 +125,6 @@ class BasketService
                 // save order
                 $this->modelManager->persist($order);
                 $this->modelManager->flush();
-
-                // update status of original order
-                $this->orderModule->setOrderStatus(
-                    $order->getId(),
-                    Status::ORDER_STATE_CANCELLED_REJECTED
-                );
             }
         }
 

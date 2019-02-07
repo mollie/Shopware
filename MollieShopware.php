@@ -328,7 +328,7 @@ class MollieShopware extends Plugin
      */
     protected function getMollieClient()
     {
-        require_once $this->getPath() . '/vendor/autoload.php';
+        $this->requireDependencies();
 
         $render= $this->container->get('shopware.plugin.cached_config_reader');
 
