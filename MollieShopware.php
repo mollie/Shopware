@@ -28,8 +28,6 @@ use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 
-require 'vendor-edited/autoload.php';
-
 class MollieShopware extends Plugin
 {
     /**
@@ -62,10 +60,29 @@ class MollieShopware extends Plugin
      */
     public function requireDependencies()
     {
-
         // Load composer libraries
-        if (file_exists($this->getPath() . '/vendor/autoload.php')) {
-            require_once $this->getPath() . '/vendor/autoload.php';
+        if (file_exists($this->getPath() . '/Client/vendor/autoload.php')) {
+            require_once $this->getPath() . '/Client/vendor/autoload.php';
+        }
+
+        // Load guzzle functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php';
+        }
+
+        // Load promises functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php';
+        }
+
+        // Load psr7 functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php';
+        }
+
+        // Load client
+        if (file_exists($this->getPath() . '/Client/src/MollieApiClient.php')) {
+            require_once $this->getPath() . '/Client/src/MollieApiClient.php';
         }
     }
 
