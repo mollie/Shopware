@@ -43,14 +43,7 @@ class MollieShopware extends Plugin
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
             'Shopware_Console_Add_Command' => 'requireDependencies',
-
-            // 'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Mollie' => 'registerController',
-
-            // extend some backend ext.js files
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
-
-            // Call event with a negative position to run before
-            // engine/Shopware/Plugins/Default/Core/Router/Bootstrap.php
             'Enlight_Controller_Front_RouteStartup' => [ 'fixLanguageShopPush', -10 ],
         ];
     }
@@ -140,11 +133,7 @@ class MollieShopware extends Plugin
         $view = $controller->View();
         $request = $controller->Request();
 
-        $view->addTemplateDir(__DIR__ . '/Views');
-
-        if ($request->getActionName() == 'index') {
-            //$view->extendsTemplate('backend/swag_extend_customer/app.js');
-        }
+        $view->addTemplateDir(__DIR__ . '/Resources/views');
 
         if ($request->getActionName() == 'load') {
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
@@ -284,7 +273,7 @@ class MollieShopware extends Plugin
         $position = 0;
 
         // path to template dir for extra payment-mean options
-        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment/';
+        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment/methods';
 
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
@@ -294,11 +283,11 @@ class MollieShopware extends Plugin
             $smarty->assign('router', Shopware()->Router());
 
             // template path
-            $adTemplate = __DIR__ . '/Resources/PaymentmethodViews/' . strtolower($method->id) . '.tpl';
+            $adTemplate = $paymentTemplateDir . '/' . strtolower($method->id) . '.tpl';
 
             // set default template if no specific template exists
             if (!file_exists($adTemplate)) {
-                $adTemplate =  __DIR__ . '/Resources/PaymentmethodViews/main.tpl';
+                $adTemplate =  $paymentTemplateDir . '/main.tpl';
             }
 
             $additionalDescription = $smarty->fetch('file:' . $adTemplate);
@@ -324,7 +313,7 @@ class MollieShopware extends Plugin
     }
 
     /**
-     * @return Mollie_API_Client
+     * @return \Mollie\Api\MollieApiClient
      */
     protected function getMollieClient()
     {

@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.15
+// Mollie Shopware Plugin Version: 1.3.15
 
 namespace MollieShopware\Models;
 
@@ -26,76 +26,93 @@ class Transaction
      *
      * @ORM\Column(name="transaction_id", type="string", nullable=true)
      */
-    private $transaction_id;
+    private $transactionId;
 
     /**
      * @var integer
      *
      * @ORM\Column(name="order_id", type="integer", nullable=true)
      */
-    private $order_id;
+    private $orderId;
 
     /**
      * @var string
      *
      * @ORM\Column(name="mollie_id", type="string", nullable=true)
      */
-    private $mollie_id;
+    private $mollieId;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="session_id", type="string", nullable=true)
+     */
+    private $sessionId;
 
     /**
      * @var string
      *
      * @ORM\Column(name="ordermail_variables", type="text", nullable=true)
      */
-    private $ordermail_variables;
+    private $ordermailVariables;
 
-    public function getID()
+    public function getId()
     {
         return $this->id;
     }
 
-    public function setID($id)
+    public function setId($id)
     {
         $this->id = $id;
     }
 
-    public function getTransactionID()
+    public function getTransactionId()
     {
-        return $this->transaction_id;
+        return $this->transactionId;
     }
 
-    public function setTransactionID($transaction_id)
+    public function setTransactionId($transactionId)
     {
-        $this->transaction_id = $transaction_id;
+        $this->transactionId = $transactionId;
     }
 
-    public function getOrderID()
+    public function getOrderId()
     {
-        return $this->order_id;
+        return $this->orderId;
     }
 
-    public function setOrderID($order_id)
+    public function setOrderId($orderId)
     {
-        $this->order_id = $order_id;
+        $this->orderId = $orderId;
     }
 
-    public function getMollieID()
+    public function getMollieId()
     {
-        return $this->mollie_id;
+        return $this->mollieId;
     }
 
-    public function setMollieID($mollie_id)
+    public function setMollieId($mollieId)
     {
-        $this->mollie_id = $mollie_id;
+        $this->mollieId = $mollieId;
     }
 
-    public function setOrdermailVariables($ordermail_variables)
+    public function getSessionId()
     {
-        $this->ordermail_variables = $ordermail_variables;
+        return $this->sessionId;
+    }
+
+    public function setSessionId($sessionId)
+    {
+        $this->sessionId = $sessionId;
+    }
+
+    public function setOrdermailVariables($ordermailVariables)
+    {
+        $this->ordermailVariables = $ordermailVariables;
     }
 
     public function getOrdermailVariables()
     {
-        return $this->ordermail_variables;
+        return $this->ordermailVariables;
     }
 }

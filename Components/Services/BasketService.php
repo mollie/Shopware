@@ -1,8 +1,8 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.15
+// Mollie Shopware Plugin Version: 1.3.15
 
-namespace MollieShopware\Components\Mollie;
+namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelManager;
