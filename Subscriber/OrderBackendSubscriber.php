@@ -6,8 +6,6 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use MollieShopware\Components\Logger;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
 
 class OrderBackendSubscriber implements SubscriberInterface
 {
@@ -19,6 +17,14 @@ class OrderBackendSubscriber implements SubscriberInterface
         ];
     }
 
+    /**
+     * Catch mailvariables when the confirmation email is triggered and store
+     * them in the database to use them when the order is fully processed.
+     *
+     * @param \Enlight_Event_EventArgs $args
+     * @return bool
+     * @throws \Exception
+     */
     public function onSendMail(\Enlight_Event_EventArgs $args)
     {
         $variables = $args->get('variables');
@@ -27,16 +33,17 @@ class OrderBackendSubscriber implements SubscriberInterface
         $mollieOrder = null;
 
         if (!empty($orderNumber)) {
-            /** @var OrderService $orderService */
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
-            /** @var Order $order */
+            /** @var \Shopware\Models\Order\Order $order */
             $order = $orderService->getOrderByNumber($orderNumber);
         }
 
         if (!empty($order)) {
             if (strstr($order->getTransactionId(), 'mollie_') &&
-                $order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
+                $order->getPaymentStatus()->getId() == \Shopware\Models\Order\Status::PAYMENT_STATE_OPEN) {
+
                 /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
                 $transactionRepo = Shopware()->Models()->getRepository(
                     \MollieShopware\Models\Transaction::class
