@@ -4,6 +4,9 @@
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
+    protected $model = 'Mollie\Models\MollieOrder';
+    protected $alias = 'mollie_order';
+
     /** @var \MollieShopware\Components\Config $config */
     protected $config;
 
@@ -43,9 +46,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
 
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
-            $mollieOrder = $this->apiClient->orders->get(
-                $this->orderService->getMollieOrderId($order)
-            );
+            try {
+                $mollieOrder = $this->apiClient->orders->get(
+                    $this->orderService->getMollieOrderId($order)
+                );
+            }
+            catch (\Exception $ex) {
+                //
+            }
 
             $refund = null;
 
@@ -53,9 +61,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $refund = $this->refundOrder($order, $mollieOrder);
             }
             else {
-                $molliePayment = $this->apiClient->payments->get(
-                    $this->orderService->getMolliePaymentId($order)
-                );
+                try {
+                    $molliePayment = $this->apiClient->payments->get(
+                        $this->orderService->getMolliePaymentId($order)
+                    );
+                }
+                catch (\Exception $ex) {
+                    //
+                }
 
                 if (!empty($molliePayment))
                     $refund = $this->refundPayment($order, $molliePayment);
@@ -198,7 +211,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     {
         $this->returnJson([
             'success' => false,
-            'message' => $$message,
+            'message' => $message,
         ]);
     }
 
