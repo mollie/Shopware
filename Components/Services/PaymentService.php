@@ -335,8 +335,6 @@ class PaymentService
             $order
         );
 
-        file_put_contents(__DIR__ . '/prepared.txt', print_r($molliePrepared, true));
-
         return $molliePrepared;
     }
 
