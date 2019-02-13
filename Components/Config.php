@@ -4,22 +4,17 @@
 
 namespace MollieShopware\Components;
 
-use Shopware\Components\Plugin\ConfigReader;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
 {
-    /**
-     * @var Shopware\Components\Plugin\ConfigReader
-     */
+    /** @var \Shopware\Components\Plugin\ConfigReader */
     protected $configReader;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $data = null;
 
-    public function __construct(ConfigReader $configReader)
+    public function __construct(\Shopware\Components\Plugin\ConfigReader $configReader)
     {
         $this->configReader = $configReader;
     }
@@ -27,17 +22,18 @@ class Config
     /**
      * Get the Shopware config for a Shopware shop
      *
-     * @param  int $shopId
+     * @param string $key
+     * @param string $default
+     *
      * @return array
      */
     public function get($key = null, $default = null)
     {
-        if (is_null($this->data)) {
-
-            try{
+        if (empty($this->data)) {
+            try {
                 $shop = Shopware()->Shop();
             }
-            catch(ServiceNotFoundException $e){
+            catch(ServiceNotFoundException $ex) {
                 $shop = null;
             }
 
@@ -47,7 +43,7 @@ class Config
             $this->data = $this->configReader->getByPluginName($name, $shop);
         }
 
-        if (!is_null($key)) {
+        if (!empty($key)) {
             return isset($this->data[$key]) ? $this->data[$key] : $default;
         }
 
@@ -55,6 +51,8 @@ class Config
     }
 
     /**
+     * Get the API key
+     *
      * @return string
      */
     public function apiKey()
