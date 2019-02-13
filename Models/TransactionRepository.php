@@ -22,7 +22,11 @@ class TransactionRepository extends ModelRepository
      *
      * @return \MollieShopware\Models\Transaction
      */
-    public function create($order = null, $mollieOrder = null, $molliePayment = null)
+    public function create(
+        \Shopware\Models\Order\Order $order = null,
+        \Mollie\Api\Resources\Order $mollieOrder = null,
+        \Mollie\Api\Resources\Payment $molliePayment = null
+    )
     {
         $transaction = new Transaction();
         $transactionId = $this->getLastId() + 1;
@@ -50,11 +54,11 @@ class TransactionRepository extends ModelRepository
     /**
      * Save a transaction to the database
      *
-     * @param \MollieShopware\Models\Transaction $transaction
+     * @param Transaction $transaction
      * @return \MollieShopware\Models\Transaction
      * @throws \Exception
      */
-    public function save($transaction)
+    public function save(Transaction $transaction)
     {
         try {
             $this->getEntityManager()->persist($transaction);
@@ -77,7 +81,7 @@ class TransactionRepository extends ModelRepository
      * @param \Shopware\Models\Order\Order $order
      * @return Transaction
      */
-    public function getMostRecentTransactionForOrder($order)
+    public function getMostRecentTransactionForOrder(\Shopware\Models\Order\Order $order)
     {
         /** @var Transaction $transaction */
         $transaction = $this->findOneBy([

@@ -9,14 +9,19 @@ use Shopware\Models\Order\Order;
 
 class OrderLinesRepository extends ModelRepository
 {
-
+    /**
+     * Save the order line
+     *
+     * @param OrderLines $mollieOrderLines
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function save(OrderLines $mollieOrderLines)
     {
-
+        /** @var \Doctrine\ORM\EntityManager $entityManager */
         $entityManager = $this->getEntityManager();
+
         $entityManager->persist($mollieOrderLines);
         $entityManager->flush();
-
     }
 
     /**
@@ -28,11 +33,9 @@ class OrderLinesRepository extends ModelRepository
      */
     public function getShipmentLines(Order $order)
     {
-
-        /**
-         * @var OrderLines $item
-         */
         $result = [];
+
+        /** @var OrderLines[] $items */
         $items = $this->findBy(['orderId' => $order->getId()]);
 
         foreach($items as $item) {
@@ -42,7 +45,5 @@ class OrderLinesRepository extends ModelRepository
         }
 
         return $result;
-
     }
-
 }
