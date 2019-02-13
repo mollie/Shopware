@@ -5,47 +5,35 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Voucher\Voucher;
-use Exception;
 
 class BasketService
 {
-    /**
-     * @var $config
-     */
+    /** @var \MollieShopware\Components\Config $config */
     private $config;
 
-    /**
-     *
-     * @var ModelManager $modelManager
-     */
+    /** @var \Shopware\Components\Model\ModelManager $modelManager */
     private $modelManager;
 
-    /**
-     *
-     * @var sBasket $basketModule
-     */
+    /** @var \Shopware_Components_Modules $basketModule */
     private $basketModule;
 
-    /**
-     *
-     * @var OrderService $orderService
-     */
+    /** @var \MollieShopware\Components\Services\OrderService $orderService */
     private $orderService;
 
     /**
      * Constructor
      *
-     * @param ModelManager $modelManager
+     * @param \Shopware\Components\Model\ModelManager $modelManager
      */
-    public function __construct(ModelManager $modelManager)
+    public function __construct(\Shopware\Components\Model\ModelManager $modelManager)
     {
         $this->config = Shopware()->Container()
             ->get('mollie_shopware.config');
+
         $this->modelManager = $modelManager;
+
         $this->basketModule = Shopware()->Modules()->Basket();
+
         $this->orderService = Shopware()->Container()
             ->get('mollie_shopware.order_service');
     }
@@ -54,15 +42,16 @@ class BasketService
      * Restore Basket
      *
      * @param \Shopware\Models\Order\Order|int $orderId
+     *
      * @throws \Exception
      */
     public function restoreBasket($orderId)
     {
-        if (is_object($orderId)) {
+        // get the order model
+        if ($orderId instanceof \Shopware\Models\Order\Order) {
             $order = $orderId;
         }
         else {
-            // get order from database
             $order = $this->orderService->getOrderById($orderId);
         }
 
@@ -75,11 +64,11 @@ class BasketService
                 $this->basketModule->clearBasket();
 
                 // set comment
-                $commentText = "De betaling via Mollie is mislukt. ";
+                $commentText = "Payment through Mollie failed. ";
 
                 // iterate over products and add them to the basket
                 foreach ($orderDetails as $orderDetail) {
-                    $result = false;
+                    $result = null;
 
                     if ($orderDetail->getMode() == 2) {
                         // get voucher from database
@@ -90,8 +79,8 @@ class BasketService
                             $this->removeOrderDetail($orderDetail->getId());
 
                             // set comment
-                            $commentText = $commentText . "Kortingscode (" . $voucher->getVoucherCode() .
-                                ") verwijderd van deze order vrijgegeven aan de opnieuw opgebouwde winkelmand. ";
+                            $commentText = $commentText . "Voucher code (" . $voucher->getVoucherCode() .
+                                ") is removed van this order and reused in the newly created basket. ";
 
                             // add voucher to basket
                             $this->basketModule->sAddVoucher($voucher->getVoucherCode());
@@ -118,12 +107,15 @@ class BasketService
                 // recalculate order
                 $order->calculateInvoiceAmount();
 
-                // set payment status
-                $order->setPaymentStatus(
-                    Shopware()->Models()->getRepository(\Shopware\Models\Order\Status::class)->find(
-                        \Shopware\Models\Order\Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
-                    )
+                /** @var \Shopware\Models\Order\Status $statusCanceled */
+                $statusCanceled = Shopware()->Models()->getRepository(
+                    \Shopware\Models\Order\Status::class
+                )->find(
+                    \Shopware\Models\Order\Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
                 );
+
+                // set payment status
+                $order->setPaymentStatus($statusCanceled);
 
                 // save order
                 $this->modelManager->persist($order);
@@ -139,23 +131,32 @@ class BasketService
      * Get a voucher by it's id
      *
      * @param int $voucherId
-     * @return Voucher $voucher
+     *
+     * @return \Shopware\Models\Voucher\Voucher $voucher
+     *
      * @throws \Exception
      */
     public function getVoucherById($voucherId)
     {
-        try {
-            // get voucher repository
-            $voucherRepo = $this->modelManager->getRepository(Voucher::class);
+        $voucher = null;
 
-            // find voucher
+        try {
+            /** @var \Shopware\Models\Voucher\Repository $voucherRepo */
+            $voucherRepo = $this->modelManager->getRepository(
+                \Shopware\Models\Voucher\Voucher::class
+            );
+
+            /** @var \Shopware\Models\Voucher\Voucher $voucher */
             $voucher = $voucherRepo->findOneBy([
                 'id' => $voucherId
             ]);
         }
-        catch (Exception $ex) {
-            // log error
-            Logger::log('error', $ex->getMessage(), $ex);
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $voucher;
@@ -167,6 +168,8 @@ class BasketService
      * @param int $orderDetailId
      *
      * @return int $result
+     *
+     * @throws \Exception
      */
     public function removeOrderDetail($orderDetailId)
     {
@@ -174,7 +177,7 @@ class BasketService
 
         try {
             // init db
-            $db = shopware()->container()->get('db');
+            $db = Shopware()->Container()->get('db');
 
             // prepare database statement
             $q = $db->prepare('
@@ -188,8 +191,12 @@ class BasketService
                 $orderDetailId,
             ]);
         }
-        catch (Exception $ex) {
-            // to do: handle the exception
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $result;
@@ -199,24 +206,28 @@ class BasketService
      * Reset the order quantity for a canceled order
      *
      * @param \Shopware\Models\Order\Detail $orderDetail
+     *
      * @return \Shopware\Models\Order\Detail $orderDetail
+     *
      * @throws \Exception
      */
-    public function resetOrderDetailQuantity($orderDetail) {
-        // store ordered quantity
+    public function resetOrderDetailQuantity(\Shopware\Models\Order\Detail $orderDetail) {
+        // variables
+        $article = null;
         $orderedQuantity = $orderDetail->getQuantity();
 
         // reset quantity
         $orderDetail->setQuantity(0);
 
         // build order detail repository
-        $orderDetailRepo = Shopware()->Models()->getRepository('Shopware\Models\Article\Detail');
-
-        // variables
-        $article = null;
+        $orderDetailRepo = Shopware()->Models()->getRepository(
+            \Shopware\Models\Article\Detail::class
+        );
 
         try {
-            $article = $orderDetailRepo->findOneBy(['number' => $orderDetail->getArticleNumber()]);
+            $article = $orderDetailRepo->findOneBy([
+                'number' => $orderDetail->getArticleNumber()
+            ]);
         }
         catch (\Exception $ex) {
             // write exception to log
@@ -227,11 +238,10 @@ class BasketService
             );
         }
 
+        // restore stock
         if (!empty($article)) {
-            // set new stock
             $article->setInStock($article->getInStock() + $orderedQuantity);
 
-            // save stock
             Shopware()->Models()->persist($article);
         }
 
@@ -241,20 +251,16 @@ class BasketService
     /**
      * Append internal comment on order
      *
-     * @param Order $order
+     * @param \Shopware\Models\Order\Order $order
      * @param string $text
      *
-     * @return Order $order;
+     * @return \Shopware\Models\Order\Order $order;
      */
-    public function appendInternalComment($order, $text)
+    public function appendInternalComment(\Shopware\Models\Order\Order $order, $text)
     {
-        // ger internal comment on order
         $comment = $order->getInternalComment();
-
-        // append text to order
         $comment = $comment . (strlen($comment) ? "\n\n" : "") . $text;
 
-        // update the internal comment
         return $order->setInternalComment($comment);
     }
 }
