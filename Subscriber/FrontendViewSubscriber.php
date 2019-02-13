@@ -5,7 +5,6 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use Enlight_Event_EventArgs;
 
 class FrontendViewSubscriber implements SubscriberInterface
 {
@@ -20,26 +19,38 @@ class FrontendViewSubscriber implements SubscriberInterface
     /**
      * Add plugin view dir to Smarty
      *
-     * @param  Enlight_Event_EventArgs $args
+     * @param \Enlight_Event_EventArgs $args
      */
-    public function addViewDirectory(Enlight_Event_EventArgs $args)
+    public function addViewDirectory(\Enlight_Event_EventArgs $args)
     {
         $controller = $args->getSubject();
-        $view = $controller->View();
+        $view = null;
 
-        $view->addTemplateDir(__DIR__ . '/../Resources/views');
+        if (!empty($controller))
+            $view = $controller->View();
+
+        if (!empty($view))
+            $view->addTemplateDir(__DIR__ . '/../Resources/views');
     }
 
-    public function getController(Enlight_Event_EventArgs $args)
+    /**
+     * Get error messages from session and assign them to the frontend view
+     *
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function getController(\Enlight_Event_EventArgs $args)
     {
         $session = Shopware()->Session();
+        $controller = $args->getSubject();
+        $view = null;
 
-        if ($session->mollieError || $session->mollieStatusError) {
-
-            $controller = $args->getSubject();
-
+        if (!empty($controller))
             $view = $controller->view();
 
+        if (!empty($session) && !empty($view) &&
+            ($session->mollieError || $session->mollieStatusError)) {
+
+            // assign errors to view
             $view->sMollieError = $session->mollieError;
             $view->sMollieStatusError = $session->mollieStatusError;
 
