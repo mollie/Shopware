@@ -90,6 +90,8 @@ class OrderService
     }
 
     /**
+     * Get Mollie order ID for order
+     *
      * @param $orderId
      *
      * @return null|string
@@ -109,7 +111,7 @@ class OrderService
 
             /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->findOneBy([
-                'order_id' => $orderId
+                'orderId' => $orderId
             ]);
         }
         catch (\Exception $ex) {
@@ -124,6 +126,45 @@ class OrderService
             $mollieId = $transaction->getMollieId();
 
         return $mollieId;
+    }
+
+    /**
+     * Get mollie payment ID for order
+     *
+     * @param $orderId
+     *
+     * @return null|string
+     *
+     * @throws \Exception
+     */
+    public function getMolliePaymentId($orderId)
+    {
+        $molliePaymentId = null;
+        $transaction = null;
+
+        try {
+            /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+            $transactionRepo = $this->modelManager->getRepository(
+                \MollieShopware\Models\Transaction::class
+            );
+
+            /** @var \MollieShopware\Models\Transaction $transaction */
+            $transaction = $transactionRepo->findOneBy([
+                'orderId' => $orderId
+            ]);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        if (!empty($transaction))
+            $molliePaymentId = $transaction->getMolliePaymentId();
+
+        return $molliePaymentId;
     }
 
     /**
