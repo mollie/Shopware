@@ -8,30 +8,37 @@ use Mollie\Api\MollieApiClient;
 
 class MollieApiFactory
 {
-    /**
-     * @var \MollieShopware\Components\Config
-     */
+    /** @var \MollieShopware\Components\Config */
     protected $config;
 
-    /**
-     * @var MollieApiClient
-     */
-    protected $mollieApi;
+    /** @var MollieApiClient */
+    protected $apiClient;
 
+    /**
+     * MollieApiFactory constructor
+     *
+     * @param Config $config
+     */
     public function __construct(Config $config)
     {
         $this->config = $config;
     }
 
+    /**
+     * Create the API client
+     *
+     * @return MollieApiClient
+     *
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     */
     public function create()
     {
-        if (empty($this->mollieApi)) {
-            $apiKey = $this->config->apikey();
-
-            $this->mollieApi = new MollieApiClient;
-            $this->mollieApi->setApiKey($apiKey);
+        if (empty($this->apiClient)) {
+            $this->apiClient = new MollieApiClient();
+            $this->apiClient->setApiKey($this->config->apikey());
         }
 
-        return $this->mollieApi;
+        return $this->apiClient;
     }
 }
