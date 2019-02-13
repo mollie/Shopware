@@ -23,7 +23,10 @@ class FrontendViewSubscriber implements SubscriberInterface
      */
     public function addViewDirectory(\Enlight_Event_EventArgs $args)
     {
+        /** @var \Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
         $view = null;
 
         if (!empty($controller))
@@ -40,8 +43,13 @@ class FrontendViewSubscriber implements SubscriberInterface
      */
     public function getController(\Enlight_Event_EventArgs $args)
     {
+        /** @var \Enlight_Components_Session_Namespace $session */
         $session = Shopware()->Session();
+
+        /** @var \Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
         $view = null;
 
         if (!empty($controller))
