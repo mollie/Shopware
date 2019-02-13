@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.15
+// Mollie Shopware Plugin Version: 1.4
 
 namespace Mollie\Api\Exceptions;
 
