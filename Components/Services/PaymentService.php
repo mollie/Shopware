@@ -93,7 +93,9 @@ class PaymentService
             $mollieOrderPrepared = $this->prepareOrder($order, $orderDetails);
 
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
-            $mollieOrder = $this->apiClient->orders->create($mollieOrderPrepared);
+            $mollieOrder = $this->apiClient->orders->create(
+                $mollieOrderPrepared
+            );
 
             /** @var \MollieShopware\Models\OrderLinesRepository $orderLinesRepo */
             $orderLinesRepo = Shopware()->container()->get('models')
@@ -267,7 +269,7 @@ class PaymentService
 
         $paymentParameters['webhookUrl'] = $paymentWebhookUrl;
 
-        if (substr($paymentMethod, 0, strlen('mollie_') == 'mollie_'))
+        if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_')
             $paymentMethod = substr($paymentMethod, strlen('mollie_'));
 
         // set method specific parameters
@@ -313,7 +315,7 @@ class PaymentService
         $paymentWebhookUrl = $this->prepareRedirectUrl($order, 'notify', 'payment');
         $paymentRedirectUrl = $this->prepareRedirectUrl($order, 'return', 'payment');
 
-        if (substr($paymentMethod, 0, strlen('mollie_') == 'mollie_'))
+        if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_')
             $paymentMethod = substr($paymentMethod, strlen('mollie_'));
 
         // create prepared order array
@@ -332,6 +334,8 @@ class PaymentService
             $molliePrepared,
             $order
         );
+
+        file_put_contents(__DIR__ . '/prepared.txt', print_r($molliePrepared, true));
 
         return $molliePrepared;
     }
