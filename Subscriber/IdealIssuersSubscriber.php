@@ -28,7 +28,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
     /**
      * Assign iDeal issuers to the view
      *
-     * @param Enlight_Event_EventArgs $args
+     * @param \Enlight_Event_EventArgs $args
      */
     public function onChoosePaymentDispatch(\Enlight_Event_EventArgs $args)
     {
