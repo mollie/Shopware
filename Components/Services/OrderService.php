@@ -33,6 +33,7 @@ class OrderService
      *
      * @param int $orderId
      * @return Order $order
+     * @throws \Exception
      */
     public function getOrderById($orderId)
     {
@@ -60,6 +61,7 @@ class OrderService
      *
      * @param string $orderNumber
      * @return Order $order
+     * @throws \Exception
      */
     public function getOrderByNumber($orderNumber)
     {
@@ -85,6 +87,7 @@ class OrderService
     /**
      * @param $orderId
      * @return null
+     * @throws \Exception
      */
     public function getMollieOrderId($orderId)
     {
@@ -109,6 +112,11 @@ class OrderService
         return $mollieId;
     }
 
+    /**
+     * @param $orderId
+     * @return array
+     * @throws \Exception
+     */
     public function getOrderLines($orderId)
     {
         // vars

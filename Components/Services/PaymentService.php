@@ -5,6 +5,7 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
+use MollieShopware\Components\Constants\PaymentStatus;
 use Shopware\Models\Order\Status;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -577,16 +578,6 @@ class PaymentService
     }
 
     /**
-     * Checks if current user has a session with the webshop
-     *
-     * @return bool
-     */
-    public function hasSession()
-    {
-        return Shopware()->Session()->offsetGet('userId');
-    }
-
-    /**
      * Check the payment status
      *
      * @param \Shopware\Models\Order\Order $order
@@ -598,47 +589,15 @@ class PaymentService
         // get mollie payment
         $mollieOrder = $this->getMollieOrder($order);
 
-        // get the order module
-        $sOrder = Shopware()->Modules()->Order();
-
-        if (empty($sOrder))
-            return false;
-
         // set the status
-        if ($mollieOrder->isPaid()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_COMPLETELY_PAID,
-                true
-            );
-
-            return true;
-        }
-        elseif ($mollieOrder->isAuthorized()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
-                true
-            );
-        }
-        elseif ($mollieOrder->isCanceled()) {
-            $sOrder->setOrderStatus(
-                $order->getId(),
-                Status::ORDER_STATE_CANCELLED_REJECTED,
-                true
-            );
-
-            return true;
-        }
-        elseif ($mollieOrder->isCompleted()) {
-            $sOrder->setOrderStatus(
-                $order->getId(),
-                Status::ORDER_STATE_COMPLETED,
-                true
-            );
-
-            return true;
-        }
+        if ($mollieOrder->isPaid())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+        elseif ($mollieOrder->isAuthorized())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+        elseif ($mollieOrder->isCanceled())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true, 'order');
+        elseif ($mollieOrder->isCompleted())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_COMPLETED, true, 'order');
 
         return false;
     }
@@ -655,47 +614,15 @@ class PaymentService
         // get mollie payment
         $molliePayment = $this->getMolliePayment($order);
 
-        // get the order module
-        $sOrder = Shopware()->Modules()->Order();
-
-        if (empty($sOrder))
-            return false;
-
         // set the status
-        if ($molliePayment->isPaid()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_COMPLETELY_PAID,
-                true
-            );
-
-            return true;
-        }
-        elseif ($molliePayment->isPending()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_DELAYED,
-                true
-            );
-
-            return true;
-        }
-        elseif ($molliePayment->isAuthorized()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
-                true
-            );
-
-            return true;
-        }
-        elseif ($molliePayment->isCanceled()) {
-            $sOrder->setPaymentStatus(
-                $order->getId(),
-                Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-                true
-            );
-        }
+        if ($molliePayment->isPaid())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+        elseif ($molliePayment->isPending())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
+        elseif ($molliePayment->isAuthorized())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+        elseif ($molliePayment->isCanceled())
+            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
 
         return $this->checkPaymentStatusForOrder($order, true);
     }
@@ -705,57 +632,31 @@ class PaymentService
      * Check the payment status for order
      *
      * @param \Shopware\Models\Order\Order $order
-     * @param boolean $return
+     * @param boolean $returnResult
      * @throws \Mollie\Api\Exceptions\ApiException
      * @return bool
      */
-    public function checkPaymentStatusForOrder($order, $return = false)
+    public function checkPaymentStatusForOrder($order, $returnResult = false)
     {
-        $sOrder = Shopware()->Modules()->Order();
-
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->getMollieorder($order);
         $paymentsResult = $this->getPaymentsResultForOrder($mollieOrder);
 
         if ($paymentsResult['total'] > 0) {
             // fully paid
-            if ($paymentsResult['paid'] == $paymentsResult['total']) {
-                $sOrder->setPaymentStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_COMPLETELY_PAID,
-                    true
-                );
-
-                if ($return)
-                    return true;
-            }
+            if ($paymentsResult['paid'] == $paymentsResult['total'])
+                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, $returnResult);
 
             // fully authorized
-            if ($paymentsResult['authorized'] == $paymentsResult['total']) {
-                $sOrder->setPaymentStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
-                    true
-                );
-
-                if ($return)
-                    return true;
-            }
+            if ($paymentsResult['authorized'] == $paymentsResult['total'])
+                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, $returnResult);
 
             // fully canceled
-            if ($paymentsResult['canceled'] == $paymentsResult['total']) {
-                $sOrder->setPaymentStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-                    true
-                );
-
-                if ($return)
-                    return true;
-            }
+            if ($paymentsResult['canceled'] == $paymentsResult['total'])
+                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
         }
 
-        if ($return)
+        if ($returnResult)
             return false;
     }
 
@@ -766,7 +667,7 @@ class PaymentService
      * @return bool
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function paymentsForOrderFailed($order)
+    public function havePaymentsForOrderFailed($order)
     {
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->getMollieOrder($order);
@@ -779,6 +680,94 @@ class PaymentService
         }
 
         return false;
+    }
+
+    /**
+     * Check the order status and redirect the user if possible
+     * also, if the payment is complete or authorized, send the confirmation e-mail
+     *
+     * @param \Shopware\Models\Order\Order $order
+     * @param string $status
+     * @param boolean $returnResult
+     * @throws \Exception
+     * @return mixed
+     */
+    public function setPaymentStatus($order, $status, $returnResult = false, $type = 'payment')
+    {
+        // get the order module
+        $sOrder = Shopware()->Modules()->Order();
+
+        /**
+         * The order is paid
+         */
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID) {
+            if ($type == 'order') {
+                $sOrder->setOrderStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_COMPLETELY_PAID,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($type == 'payment') {
+                $sOrder->setPaymentStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_COMPLETELY_PAID,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($returnResult)
+                return true;
+        }
+
+        /**
+         * The order is authorized
+         */
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
+            if ($type == 'order') {
+                $sOrder->setOrderStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($type == 'payment') {
+                $sOrder->setPaymentStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($returnResult)
+                return true;
+        }
+
+        /**
+         * The order is canceled
+         */
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
+            if ($type == 'order') {
+                $sOrder->setOrderStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($type == 'payment') {
+                $sOrder->setPaymentStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($returnResult)
+                return true;
+        }
     }
 
     /**
