@@ -6,46 +6,35 @@ namespace MollieShopware\Components;
 
 class Url
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     public $scheme;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $username;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $password;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $host;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $port;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $path;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     public $queryVars = [];
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $fragment;
 
+    /**
+     * Url constructor
+     *
+     * @param $url
+     */
     public function __construct($url)
     {
         $this->scheme = parse_url($url, PHP_URL_SCHEME);
@@ -58,6 +47,12 @@ class Url
         $this->fragment = parse_url($url, PHP_URL_FRAGMENT);
     }
 
+    /**
+     * Parse query
+     *
+     * @param $query
+     * @return array
+     */
     public function parseQuery($query)
     {
         $queryVars = [];
@@ -65,12 +60,22 @@ class Url
         return $queryVars;
     }
 
+    /**
+     * Get query
+     *
+     * @return string
+     */
     public function getQuery()
     {
         $query = http_build_query($this->queryVars);
         return empty($query) ? '' : '?' . $query;
     }
 
+    /**
+     * Get URL
+     *
+     * @return string
+     */
     public function get()
     {
         return $this->scheme .
@@ -88,6 +93,11 @@ class Url
             $this->fragment;
     }
 
+    /**
+     * Get string
+     *
+     * @return string
+     */
     public function __toString()
     {
         return $this->get();
