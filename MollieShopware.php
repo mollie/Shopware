@@ -112,14 +112,15 @@ class MollieShopware extends Plugin
 
     /**
      * Register Console commands
+     *
+     * @param \Shopware\Components\Console\Application $application
      */
-    public function registerCommands($application)
+    public function registerCommands(\Shopware\Components\Console\Application $application)
     {
         $application->add(new GetPaymentMethodsCommand());
         $application->add(new GetIdealBanksCommand());
-        return parent::__construct($application);
+        return parent::registerCommands($application);
     }
-
 
     /**
      * Inject some backend ext.js extensions for the order module
