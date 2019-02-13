@@ -4,38 +4,45 @@
 
 namespace MollieShopware\Components;
 
-use Shopware\Components\Model\ModelManager;
-use Shopware\Bundle\AttributeBundle\Service\CrudService;
-
-
 class Attributes
 {
     /**
      * @var \Shopware\Components\Model\ModelManager
      */
-    protected $em;
+    protected $modelManager;
 
     /**
      * @var  \Shopware\Bundle\AttributeBundle\Service\CrudService
      */
     protected $crudService;
 
+    /**
+     * Attributes constructor
+     *
+     * @param \Shopware\Components\Model\ModelManager $modelManager
+     * @param \Shopware\Bundle\AttributeBundle\Service\CrudService $crudService
+     */
     public function __construct(
-        ModelManager $em,
-        CrudService $crudService
+        \Shopware\Components\Model\ModelManager $modelManager,
+        \Shopware\Bundle\AttributeBundle\Service\CrudService $crudService
     ) {
-        $this->em = $em;
+        $this->modelManager = $modelManager;
         $this->crudService = $crudService;
     }
 
+    /**
+     * Rebuild the attribute tables
+     *
+     * @param $tables
+     */
     public function rebuildAttributeModels($tables)
     {
         $tables = array_unique($tables);
 
-        $metaDataCache = $this->em->getConfiguration()->getMetadataCacheImpl();
+        $metaDataCache = $this->modelManager->getConfiguration()->getMetadataCacheImpl();
         $metaDataCache->deleteAll();
 
-        $this->em->generateAttributeModels($tables);
+        $this->modelManager->generateAttributeModels($tables);
     }
 
     /**
