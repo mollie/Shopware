@@ -4,7 +4,7 @@
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
-    protected $model = 'Mollie\Models\MollieOrder';
+    protected $model = \MollieShopware\Models\Transaction::class;
     protected $alias = 'mollie_order';
 
     /** @var \MollieShopware\Components\Config $config */
@@ -109,6 +109,51 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             'lines' => $mollieShipmentLines
         ]);
 
+        if (!empty($refund))
+            $this->processRefund($order);
+
+        return $refund;
+    }
+
+    /**
+     * Refund a Mollie payment
+     *
+     * @param \Shopware\Models\Order\Order $order
+     * @param \Mollie\Api\Resources\Payment $molliePayment
+     *
+     * @return Mollie\Api\Resources\BaseResource
+     *
+     * @throws \Exception
+     */
+    private function refundPayment(\Shopware\Models\Order\Order $order, \Mollie\Api\Resources\Payment $molliePayment)
+    {
+        $refund = $molliePayment->refund([
+            'amount' => [
+                'currency' => $order->getCurrency(),
+                'value' => number_format($order->getInvoiceAmount(), 2, '.', '')
+            ]
+        ]);
+
+        if (!empty($refund))
+            $this->processRefund($order);
+
+        return $refund;
+    }
+
+    /**
+     * Send the status e-mail
+     *
+     * @param \Shopware\Models\Order\Order $order
+     *
+     * @return bool
+     *
+     * @throws \Exception
+     */
+    private function processRefund(\Shopware\Models\Order\Order $order)
+    {
+        if (empty($this->config) || empty($this->modelManager))
+            return false;
+
         /** @var \Shopware\Models\Order\Repository $orderStatusRepo */
         $orderStatusRepo = $this->modelManager->getRepository(
             \Shopware\Models\Order\Status::class
@@ -126,57 +171,10 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $this->modelManager->persist($order);
         $this->modelManager->flush();
 
-        // send the status mail
-        $this->sendStatusMail($order->getId());
-
-        return $refund;
-    }
-
-    /**
-     * Refund a Mollie payment
-     *
-     * @param \Shopware\Models\Order\Order $order
-     * @param \Mollie\Api\Resources\Payment $molliePayment
-     *
-     * @return Mollie\Api\Resources\BaseResource
-     *
-     * @throws \Exception
-     */
-    private function refundPayment(\Shopware\Models\Order\Order $order, \Mollie\Api\Resources\Payment $molliePayment)
-    {
-        return $molliePayment->refund([
-            'amount' => [
-                'currency' => $order->getCurrency(),
-                'value' => number_format($order->getInvoiceAmount(), 2, '.', '')
-            ]
-        ]);
-    }
-
-    /**
-     * Send the status e-mail
-     *
-     * @param $orderId
-     *
-     * @return bool
-     */
-    private function sendStatusMail($orderId)
-    {
-        if (empty($this->config) || empty($this->modelManager))
-            return false;
-
-        /** @var \Shopware\Models\Order\Repository $orderStatusRepo */
-        $orderStatusRepo = $this->modelManager->getRepository(
-            \Shopware\Models\Order\Status::class
-        );
-
-        /** @var \Shopware\Models\Order\Status $paymentStatusRefunded */
-        $paymentStatusRefunded = $orderStatusRepo->find(
-            \Shopware\Models\Order\Status::PAYMENT_STATE_RE_CREDITING
-        );
-
+        // send status email
         if ($this->config->sendStatusMail() && $this->config->sendRefundStatusMail()) {
             $mail = Shopware()->Modules()->Order()->createStatusMail(
-                $orderId,
+                $order->getId(),
                 $paymentStatusRefunded
             );
 
