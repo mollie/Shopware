@@ -4,37 +4,25 @@
 
 namespace MollieShopware\Components\Services;
 
-use MollieShopware\Components\Logger;
 use MollieShopware\Components\Constants\PaymentStatus;
 use Shopware\Models\Order\Status;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 class PaymentService
 {
-    /**
-     * @var \MollieShopware\Components\MollieApiFactory|null $apiFactory
-     */
-    private $apiFactory = null;
+    /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
+    private $apiFactory;
 
-    /**
-     * @var \Mollie\Api\MollieApiClient|null $apiClient
-     */
-    private $apiClient = null;
+    /** @var \Mollie\Api\MollieApiClient $apiClient */
+    private $apiClient;
 
-    /**
-     * @var \MollieShopware\Components\Config|null $config
-     */
-    private $config = null;
+    /** @var \MollieShopware\Components\Config $config */
+    private $config;
 
-    /**
-     * @var \Enlight_Components_Session_Namespace|null $session
-     */
-    private $session = null;
+    /** @var \Enlight_Components_Session_Namespace $session */
+    private $session;
 
-    /**
-     * @var array|null
-     */
-    private $customEnvironmentVariables = null;
+    /** @var array */
+    private $customEnvironmentVariables;
 
     /**
      * PaymentService constructor
