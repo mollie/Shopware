@@ -7,7 +7,6 @@ namespace MollieShopware;
 use Smarty;
 
 use Enlight_Event_EventArgs;
-use Enlight_Controller_EventArgs;
 
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
@@ -19,7 +18,6 @@ use MollieShopware\Components\Logger;
 use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
 use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
 
-use Shopware\Components\Console\Application;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -92,10 +90,11 @@ class MollieShopware extends Plugin
      * (engine\Library\Enlight\Controller\Front.php)
      * where the Request has been populated.
      *
-     * @param  Enlight_Controller_EventArgs $args
+     * @param \Enlight_Controller_EventArgs $args
      */
-    public function fixLanguageShopPush(Enlight_Controller_EventArgs $args)
+    public function fixLanguageShopPush(\Enlight_Controller_EventArgs $args)
     {
+        /** @var \Enlight_Controller_Request_Request $request */
         $request = $args->getRequest();
 
         if ($request->getQuery('__shop')) {
@@ -106,7 +105,7 @@ class MollieShopware extends Plugin
     /**
      * Register Mollie controller
      */
-    public function registerController(Enlight_Event_EventArgs $args)
+    public function registerController()
     {
         return $this->getPath() . '/Controllers/Frontend/Mollie.php';
     }
@@ -114,7 +113,7 @@ class MollieShopware extends Plugin
     /**
      * Register Console commands
      */
-    public function registerCommands(Application $application)
+    public function registerCommands($application)
     {
         $application->add(new GetPaymentMethodsCommand());
         $application->add(new GetIdealBanksCommand());
@@ -124,12 +123,18 @@ class MollieShopware extends Plugin
 
     /**
      * Inject some backend ext.js extensions for the order module
+     *
+     * @param \Enlight_Event_EventArgs $args
      */
-    public function onOrderPostDispatch(Enlight_Event_EventArgs $args)
+    public function onOrderPostDispatch(\Enlight_Event_EventArgs $args)
     {
         /** @var \Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
         $view = $controller->View();
+
+        /** @var \Enlight_Controller_Request_Request $request */
         $request = $controller->Request();
 
         $view->addTemplateDir(__DIR__ . '/Resources/views');
@@ -206,7 +211,7 @@ class MollieShopware extends Plugin
     }
 
     /**
-     * @param ActivateContext $contextOrderLines
+     * @param ActivateContext $context
      */
     public function activate(ActivateContext $context)
     {
@@ -254,6 +259,8 @@ class MollieShopware extends Plugin
     /**
      * Get the current payment methods via the Mollie API
      * @return array[] $options
+     *
+     * @throws \Exception
      */
     protected function getPaymentOptions()
     {
