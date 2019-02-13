@@ -5,20 +5,12 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use Enlight_Event_EventArgs;
-use Enlight_Controller_Front;
-use Enlight_Controller_ActionEventArgs;
-use Mollie\Api\Exceptions\ApiException;
-use MollieShopware\PaymentMethods\Ideal;
 
 class IdealIssuersSubscriber implements SubscriberInterface
 {
     /** @var \MollieShopware\Components\Services\IdealService $idealService */
     protected $idealService;
 
-    /**
-     * @param \MollieShopware\Components\Services\IdealService $idealService
-     */
     public function __construct($idealService)
     {
         $this->idealService = $idealService;
@@ -27,15 +19,18 @@ class IdealIssuersSubscriber implements SubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            // engine/Shopware/Core/sAdmin.php (method: sUpdatePayment line: 613)
-            // Called when a user selects an other payment method
             'Shopware_Modules_Admin_UpdatePayment_FilterSql' => 'onUpdatePaymentForUser',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onChoosePaymentDispatch',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Account' => 'onChoosePaymentDispatch',
         ];
     }
 
-    public function onChoosePaymentDispatch(Enlight_Event_EventArgs $args)
+    /**
+     * Assign iDeal issuers to the view
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function onChoosePaymentDispatch(\Enlight_Event_EventArgs $args)
     {
         $controller = $args->getSubject();
         $view = $controller->View();
@@ -46,27 +41,26 @@ class IdealIssuersSubscriber implements SubscriberInterface
             $view->assign('mollieIdealIssuers', $idealIssuers);
             $view->assign('mollieIssues', false);
         }
-        catch(ApiException $e){
-            // API authentication issues
+        catch(\Exception $ex) {
             $view->assign('mollieIssues', true);
         }
-        catch(\Exception $e){
-            // Some other issue with ideal
-            $view->assign('mollieIssues', true);
-        }
-        $view->addTemplateDir(__DIR__ . '/Views');
+
+        $view->addTemplateDir(__DIR__ . '/../Resources/views');
     }
 
     /**
      * When a payment method is changed, the chosen payment method is saved on the user
      * For iDEAL an issuer should also be saved to the database
+     *
+     * @param \Enlight_Event_EventArgs $args
+     * @return mixed $query
      */
-    public function onUpdatePaymentForUser(Enlight_Event_EventArgs $args)
+    public function onUpdatePaymentForUser(\Enlight_Event_EventArgs $args)
     {
-        $query = $args->getReturn(); // "UPDATE s_user SET paymentID = ? WHERE id = ?";
-        $sAdmin = $args->get('subject');
-        $userId = $args->get('id');
+        // get query
+        $query = $args->getReturn();
 
+        // get issuer
         $issuer = Shopware()->Front()->Request()->getPost('mollie-ideal-issuer');
 
         // write issuer id to database
