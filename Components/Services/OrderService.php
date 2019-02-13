@@ -5,25 +5,18 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
-use MollieShopware\Models\Transaction;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Order\Order;
-use Exception;
 
 class OrderService
 {
-    /**
-     *
-     * @var ModelManager $modelManager
-     */
-    private $modelManager;
+    /** @var \Shopware\Components\Model\ModelManager $modelManager */
+    protected $modelManager;
 
     /**
      * Constructor
      *
-     * @param ModelManager $modelManager
+     * @param \Shopware\Components\Model\ModelManager $modelManager
      */
-    public function __construct(ModelManager $modelManager)
+    public function __construct(\Shopware\Components\Model\ModelManager $modelManager)
     {
         $this->modelManager = $modelManager;
     }
@@ -32,7 +25,9 @@ class OrderService
      * Get an order by it's id
      *
      * @param int $orderId
-     * @return Order $order
+     *
+     * @return \Shopware\Models\Order\Order $order
+     *
      * @throws \Exception
      */
     public function getOrderById($orderId)
@@ -40,17 +35,20 @@ class OrderService
         $order = null;
 
         try {
-            // get order repository
-            $orderRepo = $this->modelManager->getRepository(Order::class);
+            /** @var \Shopware\Models\Order\Repository $orderRepo */
+            $orderRepo = $this->modelManager->getRepository(
+                \Shopware\Models\Order\Order::class
+            );
 
-            // find order
-            $order = $orderRepo->findOneBy([
-                'id' => $orderId
-            ]);
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $orderRepo->find($orderId);
         }
-        catch (Exception $ex) {
-            // log error
-            Logger::log('error', $ex->getMessage(), $ex);
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $order;
@@ -60,7 +58,9 @@ class OrderService
      * Get an order by it's number
      *
      * @param string $orderNumber
-     * @return Order $order
+     *
+     * @return \Shopware\Models\Order\Order $order
+     *
      * @throws \Exception
      */
     public function getOrderByNumber($orderNumber)
@@ -68,17 +68,22 @@ class OrderService
         $order = null;
 
         try {
-            // get order repository
-            $orderRepo = $this->modelManager->getRepository(Order::class);
+            /** @var \Shopware\Models\Order\Repository $orderRepo */
+            $orderRepo = $this->modelManager->getRepository(
+                \Shopware\Models\Order\Order::class
+            );
 
-            // find order
+            /** @var \Shopware\Models\Order\Order $order */
             $order = $orderRepo->findOneBy([
                 'number' => $orderNumber
             ]);
         }
-        catch (Exception $ex) {
-            // log error
-            Logger::log('error', $ex->getMessage(), $ex);
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $order;
@@ -86,7 +91,9 @@ class OrderService
 
     /**
      * @param $orderId
-     * @return null
+     *
+     * @return null|string
+     *
      * @throws \Exception
      */
     public function getMollieOrderId($orderId)
@@ -95,39 +102,47 @@ class OrderService
         $transaction = null;
 
         try {
-            $transactionRepo = $this->modelManager->getRepository(Transaction::class);
+            /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+            $transactionRepo = $this->modelManager->getRepository(
+                \MollieShopware\Models\Transaction::class
+            );
+
+            /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->findOneBy([
                 'order_id' => $orderId
             ]);
         }
-        catch (Exception $ex) {
-            // log error
-            Logger::log('error', $ex->getMessage(), $ex);
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
-        if (!empty($transaction)) {
-            $mollieId = $transaction->getMollieID();
-        }
+        if (!empty($transaction))
+            $mollieId = $transaction->getMollieId();
 
         return $mollieId;
     }
 
     /**
      * @param $orderId
+     *
      * @return array
+     *
      * @throws \Exception
      */
     public function getOrderLines($orderId)
     {
-        // vars
         $order = null;
         $items = [];
 
-        // get order
-        if ($orderId instanceof Order)
+        /** @var \Shopware\Models\Order\Order $order */
+        if ($orderId instanceof \Shopware\Models\Order\Order)
             $order = $orderId;
         else
-            $this->getOrderById($orderId);
+            $order = $this->getOrderById($orderId);
 
         try {
             $orderDetails = $order->getDetails();
@@ -193,8 +208,11 @@ class OrderService
             }
         }
         catch (\Exception $ex) {
-            // write exception to log
-            Logger::log('error', $ex->getMessage(), $ex);
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $items;
