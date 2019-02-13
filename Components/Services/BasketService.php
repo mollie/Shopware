@@ -9,16 +9,16 @@ use MollieShopware\Components\Logger;
 class BasketService
 {
     /** @var \MollieShopware\Components\Config $config */
-    private $config;
+    protected $config;
 
     /** @var \Shopware\Components\Model\ModelManager $modelManager */
-    private $modelManager;
+    protected $modelManager;
 
     /** @var \Shopware_Components_Modules $basketModule */
-    private $basketModule;
+    protected $basketModule;
 
     /** @var \MollieShopware\Components\Services\OrderService $orderService */
-    private $orderService;
+    protected $orderService;
 
     /**
      * Constructor
