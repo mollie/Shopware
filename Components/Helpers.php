@@ -4,11 +4,6 @@
 
 namespace MollieShopware\Components;
 
-use Closure;
-use InvalidArgumentException;
-use Countable;
-use Smarty;
-
 class Helpers
 {
     /**
