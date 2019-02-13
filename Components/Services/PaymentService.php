@@ -11,19 +11,19 @@ use Shopware\Models\Order\Status;
 class PaymentService
 {
     /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
-    private $apiFactory;
+    protected $apiFactory;
 
     /** @var \Mollie\Api\MollieApiClient $apiClient */
-    private $apiClient;
+    protected $apiClient;
 
     /** @var \MollieShopware\Components\Config $config */
-    private $config;
+    protected $config;
 
     /** @var \Enlight_Components_Session_Namespace $session */
-    private $session;
+    protected $session;
 
     /** @var array */
-    private $customEnvironmentVariables;
+    protected $customEnvironmentVariables;
 
     /**
      * PaymentService constructor

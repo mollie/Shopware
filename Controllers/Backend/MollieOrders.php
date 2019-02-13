@@ -9,6 +9,7 @@ use MollieShopware\Models\OrderLines;
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
     protected $model = 'Mollie\Models\MollieOrder';
+
     protected $alias = 'mollie_order';
 
     public function refundAction()
