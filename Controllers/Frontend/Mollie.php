@@ -131,24 +131,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function returnAction()
     {
-        /**
-         * Get the type
-         *
-         * @var string $type
-         */
+        /** @var string $type */
         $type = $this->Request()->getParam('type');
 
-        /**
-         * Get the current order.
-         *
-         * @var \Shopware\Models\Order\Order $order
-         */
+        /** @var \Shopware\Models\Order\Order $order */
         $order = $this->getOrder();
 
-        /**
-         * Check if the order is set, otherwise log and throw an error. The error is thrown
-         * to also tell the customer that something went wrong.
-         */
         if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
             Logger::log(
                 'error',
@@ -158,18 +146,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        /**
-         * Create an instance of the PaymentService. The PaymentService is used
-         * to handle transactions.
-         *
-         * @var \MollieShopware\Components\Services\PaymentService $paymentService
-         */
+        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
         $paymentService = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        /**
-         * Process the return
-         */
         if ($type == 'order')
             return $this->processOrderReturn($order, $paymentService);
 
@@ -185,19 +165,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         /** @var \Shopware\Models\Order\Order $order */
         $order = null;
 
-        /**
-         * Create an instance of the PaymentService. The PaymentService is used
-         * to handle transactions.
-         *
-         * @var \MollieShopware\Components\Services\PaymentService $paymentService
-         */
+        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
         $paymentService = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        /**
-         * Try to retrieve the order, or return an error if the order
-         * could not be retrieved.
-         */
         try {
             $order = $this->getOrder();
         }
@@ -207,28 +178,20 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        /**
-         * Get the type of notification: order / payment
-         */
-        $type = $this->Request()->getParam('type');
-
-        /**
-         * Check the payment status for the order and notify the user.
-         */
+        // check the payment status for the order and notify the user.
         try {
             $result = null;
-            $transactionId = $this->Request()->getParam('id');
+            $type = $this->Request()->getParam('type');
 
-            if (strlen($transactionId) && substr($transactionId, 0, 3) == 'tr_')
-                $result = $paymentService->checkPaymentStatus($order);
-            else
+            if ($type == 'order')
                 $result = $paymentService->checkOrderStatus($order);
+            else
+                $result = $paymentService->checkPaymentStatus($order);
 
             // log result
             Logger::log(
                 'info',
-                'Webhook for order ' . $order->getNumber() .
-                (strlen($transactionId) ? ' (' . $transactionId . ')' : '') . ' has been called.'
+                'Webhook for order ' . $order->getNumber() . ' has been called.'
             );
 
             if ($result) {
@@ -347,14 +310,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function idealIssuersAction()
     {
-        /**
-         * Prevent this action from being stored or cached.
-         */
+        // prevent this action from being stored or cached
         $this->setNoRender();
 
-        /**
-         * Get the issuers from the IdealService, or return an error.
-         */
+        // get the issuers from the IdealService, or return an error
         try {
             /** @var \MollieShopware\Components\Services\IdealService $ideal */
             $idealService = $this->container->get('mollie_shopware.ideal_service');
@@ -379,17 +338,17 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     /**
      * Process order returns
      *
-     * @var \Shopware\Models\Order\Order $order
+     * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Components\Services\PaymentService $paymentService
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    private function processOrderReturn($order, $paymentService)
+    private function processOrderReturn(
+        \Shopware\Models\Order\Order $order,
+        \MollieShopware\Components\Services\PaymentService $paymentService
+    )
     {
-        /**
-         * Get Mollie's payment object from the PaymentService.
-         *
-         * @var \Mollie\Api\Resources\Order $molliePayment
-         */
+        /** @var \Mollie\Api\Resources\Order $molliePayment */
         try {
             $mollieOrder = $paymentService->getMollieOrder($order);
         } catch (\Exception $ex) {
@@ -401,9 +360,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        /**
-         * Check payment status for order
-         */
+        // check payment status for order
         try {
             $paymentService->checkPaymentStatusForOrder($order);
         }
@@ -445,15 +402,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      *
      * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Components\Services\PaymentService $paymentService
+     *
      * @throws Exception
      */
     private function processPaymentReturn($order, $paymentService)
     {
-        /**
-         * Get Mollie's payment object from the PaymentService.
-         *
-         * @var \Mollie\Api\Resources\Order $molliePayment
-         */
+        /** @var \Mollie\Api\Resources\Order $molliePayment */
         try {
             $molliePayment = $paymentService->getMolliePayment($order);
         }
@@ -491,30 +445,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
+     * Process the payment status for an order
+     *
      * @param string $status
      * @param \Shopware\Models\Order\Order $order
      * @param string $type
+     *
      * @throws \Exception
      */
-    private function processPaymentStatus($order, $status, $type = 'payment')
+    private function processPaymentStatus(\Shopware\Models\Order\Order $order, $status, $type = 'payment')
     {
-        /**
-         * Create an instance of the PaymentService. The PaymentService is used
-         * to handle transactions.
-         *
-         * @var \MollieShopware\Components\Services\PaymentService $paymentService
-         */
+        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
         $paymentService = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
-        /**
-         * Set payment status
-         */
         $paymentService->setPaymentStatus($order, $status, false, $type);
 
-        /**
-         * Send the order confirmation e-mail
-         */
+        // send the order confirmation e-mail
         if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID ||
             $status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
 
@@ -530,21 +477,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
         }
 
-        /**
-         * Redirect customer to finish page on successful payment
-         */
+        // redirect customer to finish page on successful payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID ||
             $status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
             return $this->redirectToFinish($order->getTemporaryId());
         }
 
-        /**
-         * Create an instance of the BasketService. The BasketService
-         * is used to restore the basket after a payment failed.
-         *
-         * @var \MollieShopware\Components\Services\BasketService $basketService
-         */
+        // restore the order on a failed payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
+            /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()
                 ->get('mollie_shopware.basket_service');
 
@@ -558,6 +499,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * Send a confirmation e-mail once the order is processed.
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @throws \Exception
      */
     private function sendConfirmationEmail($order)
@@ -565,16 +507,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         /**
          * Create an instance of the core sOrder class. The sOrder
          * class is used to send the confirmation e-mail.
-         *
-         * @var $sOrder
          */
         $sOrder = Shopware()->Modules()->Order();
 
-        /**
-         * Get the most recent transaction for the order from the TransactionRepository.
-         *
-         * @var \MollieShopware\Models\Transaction $transaction
-         */
+        /** @var \MollieShopware\Models\Transaction $transaction */
         $transaction = $this->getTransactionRepository()->getMostRecentTransactionForOrder($order);
 
         if (!empty($transaction)) {
