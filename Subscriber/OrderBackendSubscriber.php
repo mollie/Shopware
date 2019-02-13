@@ -5,9 +5,7 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
-use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Logger;
-use MollieShopware\Components\Mollie\OrderService;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Order;
@@ -41,7 +39,7 @@ class OrderBackendSubscriber implements SubscriberInterface
 
         if (!empty($order)) {
             if (strstr($order->getTransactionId(), 'mollie_') &&
-                $order->getPaymentStatus()->getId() == PaymentStatus::OPEN) {
+                $order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
                 /** @var TransactionRepository $transactionRepo */
                 $transactionRepo = Shopware()->Models()->getRepository(Transaction::class);
 

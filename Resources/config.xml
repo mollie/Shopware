@@ -75,6 +75,28 @@
             </store>
         </element>
 
+        <element type="select" scope="shop">
+            <name>orders_api_only_where_mandatory</name>
+            <label lang="de">Nur Bestellungen bei Mollie erstellen für Klarna Pay Later und Klarna Slice It</label>
+            <label lang="en">Only create orders at Mollie for Klarna Pay Later and Klarna Slice It</label>
+            <label lang="nl">Alleen orders bij Mollie aanmaken voor Klarna Pay Later en Klarna Slice It gebruiken</label>
+            <value>yes</value>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

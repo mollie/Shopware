@@ -20,7 +20,7 @@
 
 {/block}
 
-{block name='frontend_checkout_confirm_left_payment_method'}
+{block name='frontend_checkout_confirm_error_messages'}
 
     {if $sMollieError}
          <div class="alert is--error is--rounded" style="margin: 0 0 20px 0;">
@@ -29,11 +29,9 @@
             </div>
             <div class="alert--content">
 
-
-
                 {if $sMollieError == 'Payment failed'}
 
-                    {s name="YourPaymentHasBeenCancelled" namespace="frontend/mollie/plugins"}Your payment has been cancelled. Please try again.{/s}
+                    {s name="YourPaymentHasFailed" namespace="frontend/mollie/plugins"}Your payment has failed. Please try again.{/s}
 
                 {elseif $sMollieError == 'No session'}
 
@@ -50,9 +48,6 @@
                     {s name="PleaseCheckYourBankStatementsAndContactSupport" namespace="frontend/mollie/plugins"}Please check your bank statements and contact support if you feel this is in error.{/s}
 
                 {/if}
-
-
-
 
             </div>
         </div>

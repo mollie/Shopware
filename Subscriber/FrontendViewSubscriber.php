@@ -24,20 +24,17 @@ class FrontendViewSubscriber implements SubscriberInterface
      */
     public function addViewDirectory(Enlight_Event_EventArgs $args)
     {
-
         $controller = $args->getSubject();
         $view = $controller->View();
 
-        $view->addTemplateDir(__DIR__ . '/../Views');
-
+        $view->addTemplateDir(__DIR__ . '/../Resources/views');
     }
 
     public function getController(Enlight_Event_EventArgs $args)
     {
-
         $session = Shopware()->Session();
 
-        if ($session->mollieError || $session->mollieStatusError){
+        if ($session->mollieError || $session->mollieStatusError) {
 
             $controller = $args->getSubject();
 
@@ -48,9 +45,6 @@ class FrontendViewSubscriber implements SubscriberInterface
 
             // unset error, so it wont show up on next page view
             $session->mollieStatusError = $session->mollieError = null;
-
         }
-
-
     }
 }

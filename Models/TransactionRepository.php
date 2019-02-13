@@ -21,7 +21,7 @@ class TransactionRepository extends ModelRepository
      * @param \Mollie\Api\Resources\Order|null $mollieOrder
      * @return \MollieShopware\Models\Transaction
      */
-    public function create(Order $order = null, \Mollie\Api\Resources\Order $mollieOrder = null)
+    public function create(Order $order = null, \Mollie\Api\Resources\Order $mollieOrder = null, $molliePayment = null)
     {
         // get new transaction ID
         $transactionId = $this->getLastId() + 1;
@@ -40,6 +40,11 @@ class TransactionRepository extends ModelRepository
         // add the mollie order ID if present
         if ($transaction) {
             $transaction->setMollieId($mollieOrder->id);
+        }
+
+        // add the mollie payment ID if present
+        if ($molliePayment) {
+            $transaction->setMolliePaymentId($molliePayment->id);
         }
 
         // save the transaction
@@ -69,12 +74,14 @@ class TransactionRepository extends ModelRepository
     }
 
     /**
-     * @param Order $order
+     * @param \Shopware\Models\Order\Order $order
      * @return Transaction
      */
-    public function getMostRecentTransactionForOrder(Order $order)
+    public function getMostRecentTransactionForOrder($order)
     {
-        return $this->findOneBy(['orderId'=> $order->getId()]);
+        return $this->findOneBy([
+            'orderId'=> $order->getId()
+        ]);
     }
 
     /**

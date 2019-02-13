@@ -4,9 +4,6 @@
 
 namespace MollieShopware\Components\Services;
 
-use Mollie\Api\MollieApiClient;
-use MollieShopware\Components\CurrentCustomer;
-use Shopware\Components\Model\ModelManager;
 
 class IdealService
 {
@@ -23,13 +20,19 @@ class IdealService
     /**
      * @var \Shopware\Components\Model\ModelManager
      */
-    protected $em;
+    protected $modelManager;
 
-    public function __construct(MollieApiClient $mollieApi, CurrentCustomer $customer, ModelManager $em)
+    /**
+     * IdealService constructor.
+     * @param \Mollie\Api\MollieApiClient $mollieApi
+     * @param \MollieShopware\Components\CurrentCustomer $customer
+     * @param \Shopware\Components\Model\ModelManager $modelManager
+     */
+    public function __construct($mollieApi, $customer, $modelManager)
     {
         $this->mollieApi = $mollieApi;
         $this->customer = $customer;
-        $this->em = $em;
+        $this->modelManager = $modelManager;
     }
 
     public function getIssuers()
@@ -78,8 +81,8 @@ class IdealService
 
         $attributes->setMollieShopwareIdealIssuer($issuer);
 
-        $this->em->persist($attributes);
-        $this->em->flush();
+        $this->modelManager->persist($attributes);
+        $this->modelManager->flush();
 
         return $issuer;
     }
@@ -105,7 +108,7 @@ class IdealService
          * In B2b a contact customer doesn't have attributes,
          * so take the attributes of the debtor user it belongs to
          */
-        $issuer = $this->em->getConnection()->fetchColumn('
+        $issuer = $this->modelManager->getConnection()->fetchColumn('
             SELECT s_user_attributes.mollie_shopware_ideal_issuer FROM s_user
             JOIN s_user_attributes ON (s_user.id = s_user_attributes.userID)
             WHERE s_user.customernumber = ?

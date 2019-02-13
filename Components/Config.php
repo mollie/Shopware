@@ -99,4 +99,12 @@ class Config
     {
         return $this->get('extra_metadata', '<metadata><Customer></Customer></metadata>');
     }
+
+    /**
+     * @return bool
+     */
+    public function useOrdersApiOnlyWhereMandatory()
+    {
+        return ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+    }
 }

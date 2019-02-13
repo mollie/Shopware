@@ -6,11 +6,7 @@ namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Article\Article;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Basket;
-use Shopware\Models\Order\Detail;
-use Shopware\Models\Order\Status;
 use Shopware\Models\Voucher\Voucher;
 use Exception;
 
@@ -57,8 +53,8 @@ class BasketService
     /**
      * Restore Basket
      *
-     * @param int $orderId
-     *
+     * @param \Shopware\Models\Order\Order|int $orderId
+     * @throws \Exception
      */
     public function restoreBasket($orderId)
     {
@@ -79,7 +75,7 @@ class BasketService
                 $this->basketModule->clearBasket();
 
                 // set comment
-                $commentText = "De betaling via Mollie is geannuleerd of mislukt. ";
+                $commentText = "De betaling via Mollie is mislukt. ";
 
                 // iterate over products and add them to the basket
                 foreach ($orderDetails as $orderDetail) {
@@ -122,6 +118,13 @@ class BasketService
                 // recalculate order
                 $order->calculateInvoiceAmount();
 
+                // set payment status
+                $order->setPaymentStatus(
+                    Shopware()->Models()->getRepository(\Shopware\Models\Order\Status::class)->find(
+                        \Shopware\Models\Order\Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+                    )
+                );
+
                 // save order
                 $this->modelManager->persist($order);
                 $this->modelManager->flush();
@@ -136,8 +139,8 @@ class BasketService
      * Get a voucher by it's id
      *
      * @param int $voucherId
-     *
      * @return Voucher $voucher
+     * @throws \Exception
      */
     public function getVoucherById($voucherId)
     {
@@ -195,9 +198,9 @@ class BasketService
     /**
      * Reset the order quantity for a canceled order
      *
-     * @param OrderDetail $orderDetail
-     *
-     * @return OrderDetail $orderDetail
+     * @param \Shopware\Models\Order\Detail $orderDetail
+     * @return \Shopware\Models\Order\Detail $orderDetail
+     * @throws \Exception
      */
     public function resetOrderDetailQuantity($orderDetail) {
         // store ordered quantity
@@ -215,9 +218,13 @@ class BasketService
         try {
             $article = $orderDetailRepo->findOneBy(['number' => $orderDetail->getArticleNumber()]);
         }
-        catch (Exception $ex) {
+        catch (\Exception $ex) {
             // write exception to log
-            Logger::log('error', $ex->getMessage(), $ex);
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         if (!empty($article)) {

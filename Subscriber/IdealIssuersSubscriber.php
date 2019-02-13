@@ -13,14 +13,15 @@ use MollieShopware\PaymentMethods\Ideal;
 
 class IdealIssuersSubscriber implements SubscriberInterface
 {
-    /**
-     * @var \MollieShopware\PaymentMethods\Ideal
-     */
-    protected $ideal;
+    /** @var \MollieShopware\Components\Services\IdealService $idealService */
+    protected $idealService;
 
-    public function __construct(Ideal $ideal)
+    /**
+     * @param \MollieShopware\Components\Services\IdealService $idealService
+     */
+    public function __construct($idealService)
     {
-        $this->ideal = $ideal;
+        $this->idealService = $idealService;
     }
 
     public static function getSubscribedEvents()
@@ -29,7 +30,6 @@ class IdealIssuersSubscriber implements SubscriberInterface
             // engine/Shopware/Core/sAdmin.php (method: sUpdatePayment line: 613)
             // Called when a user selects an other payment method
             'Shopware_Modules_Admin_UpdatePayment_FilterSql' => 'onUpdatePaymentForUser',
-
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Checkout' => 'onChoosePaymentDispatch',
             'Enlight_Controller_Action_PostDispatchSecure_Frontend_Account' => 'onChoosePaymentDispatch',
         ];
@@ -41,7 +41,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $view = $controller->View();
 
         try {
-            $idealIssuers = $this->ideal->getIssuers();
+            $idealIssuers = $this->idealService->getIssuers();
 
             $view->assign('mollieIdealIssuers', $idealIssuers);
             $view->assign('mollieIssues', false);
@@ -70,7 +70,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $issuer = Shopware()->Front()->Request()->getPost('mollie-ideal-issuer');
 
         // write issuer id to database
-        $this->ideal->setSelectedIssuer($issuer);
+        $this->idealService->setSelectedIssuer($issuer);
 
         return $query;
     }

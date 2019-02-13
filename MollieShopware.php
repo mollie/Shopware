@@ -1,10 +1,24 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.15
+// Mollie Shopware Plugin Version: 1.3.15
 
 namespace MollieShopware;
 
+use Smarty;
+
+use Enlight_Event_EventArgs;
+use Enlight_Controller_EventArgs;
+
+use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
+use MollieShopware\Components\Schema;
+use MollieShopware\Components\Attributes;
+use MollieShopware\Components\Config;
+use MollieShopware\Components\MollieApiFactory;
+use MollieShopware\Components\Logger;
+use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
+use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
+
 use Shopware\Components\Console\Application;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -12,21 +26,6 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
-use Shopware\Models\Payment\Payment;
-use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
-use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
-use Smarty;
-use Enlight_Event_EventArgs;
-use Enlight_Controller_EventArgs;
-use MollieShopware\Components\ShopwareConfig;
-use MollieShopware\Components\Schema;
-use MollieShopware\Models\PaymentSession;
-use MollieShopware\Models\Transaction;
-use MollieShopware\Components\Url;
-use MollieShopware\Components\RequestLogger;
-use MollieShopware\Components\Attributes;
-use MollieShopware\Components\Config;
-use MollieShopware\Components\MollieApiFactory;
 
 class MollieShopware extends Plugin
 {
@@ -161,9 +160,6 @@ class MollieShopware extends Plugin
         // add extra attributes
         $this->updateAttributes();
 
-        // make sure incrementer exists
-        $this->initMollieQuoteNumberIncrementer();
-
         parent::install($context);
     }
 
@@ -180,9 +176,6 @@ class MollieShopware extends Plugin
 
         // add extra attributes
         $this->updateAttributes();
-
-        // make sure incrementer exists
-        $this->initMollieQuoteNumberIncrementer();
 
         parent::update($context);
     }
@@ -273,7 +266,7 @@ class MollieShopware extends Plugin
         $position = 0;
 
         // path to template dir for extra payment-mean options
-        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment/methods';
+        $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment/methods';
 
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
@@ -331,9 +324,18 @@ class MollieShopware extends Plugin
      */
     protected function updateDbTables()
     {
-        $schema = new Schema($this->container->get('models'));
-        $schema->update([ Transaction::class ]);
-        $schema->update([ OrderLines::class ]);
+        try {
+            $schema = new Schema($this->container->get('models'));
+            $schema->update([Transaction::class]);
+            $schema->update([OrderLines::class]);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
     }
 
     /**
@@ -341,8 +343,17 @@ class MollieShopware extends Plugin
      */
     protected function removeDBTables()
     {
-        $schema = new Schema($this->container->get('models'));
-        $schema->remove(Transaction::class);
+        try {
+            $schema = new Schema($this->container->get('models'));
+            $schema->remove(Transaction::class);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
     }
 
     /**
@@ -370,30 +381,5 @@ class MollieShopware extends Plugin
     protected function removeAttributes()
     {
         $this->makeAttributes()->remove([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer' ] ]);
-    }
-
-    /**
-     * To match a payment in Mollie with an order in Shopware,
-     * a number is generated.
-     *
-     * To make sure the number has not been used before,
-     * it is generated via the NumberRangeIncrementer.
-     * This method inits the number for the incrementer.
-     */
-    protected function initMollieQuoteNumberIncrementer()
-    {
-        $db = $this->container->get('db');
-
-        $name = 'mollie_quoteNumber';
-
-        $rows = $db->executeQuery('SELECT * FROM s_order_number WHERE name = :name', [ 'name' => $name ])->fetchAll();
-
-        if (count($rows) < 1) {
-            $db->executeQuery('INSERT INTO `s_order_number` (`number`, `name`, `desc`) VALUES (:number, :name, :description)', [
-                'number' => 10000000,
-                'name' => $name,
-                'description' => 'Invoice number for Mollie'
-            ]);
-        }
     }
 }

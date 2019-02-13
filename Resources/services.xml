@@ -7,23 +7,24 @@
     <services>
 
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
-
             <argument type="service" id="mollie_shopware.api_factory" />
+            <argument type="service" id="mollie_shopware.config" />
             <argument type="service" id="session" />
             <argument>%shopware.custom%</argument>
-
         </service>
 
         <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService">
-
             <argument type="service" id="models" />
-
         </service>
 
         <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService">
-
             <argument type="service" id="models" />
+        </service>
 
+        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\Services\IdealService">
+            <argument type="service" id="mollie_shopware.api" />
+            <argument type="service" id="mollie_shopware.customer" />
+            <argument type="service" id="models" />
         </service>
 
         <service id="mollie_shopware.schema" class="MollieShopware\Components\Schema">
@@ -52,20 +53,13 @@
             <argument type="service" id="models" />
         </service>
 
-        <service id="mollie_shopware.payment_methods.ideal" class="MollieShopware\PaymentMethods\Ideal">
-            <argument type="service" id="mollie_shopware.api" />
-            <argument type="service" id="mollie_shopware.customer" />
-            <argument type="service" id="models" />
-        </service>
-
-
         <!-- Event Subscribers -->
         <service id="mollie_shopware.subscriber.frontend_view" class="MollieShopware\Subscriber\FrontendViewSubscriber">
             <tag name="shopware.event_subscriber" />
         </service>
 
         <service id="mollie_shopware.subscriber.ideal_issuers" class="MollieShopware\Subscriber\IdealIssuersSubscriber">
-            <argument type="service" id="mollie_shopware.payment_methods.ideal" />
+            <argument type="service" id="mollie_shopware.ideal_service" />
             <tag name="shopware.event_subscriber" />
         </service>
 
