@@ -13,6 +13,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
 
     public function __construct($idealService)
     {
+        /** @var \MollieShopware\Components\Services\IdealService idealService */
         $this->idealService = $idealService;
     }
 
@@ -32,7 +33,10 @@ class IdealIssuersSubscriber implements SubscriberInterface
      */
     public function onChoosePaymentDispatch(\Enlight_Event_EventArgs $args)
     {
+        /** @var \Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
         $view = $controller->View();
 
         try {
