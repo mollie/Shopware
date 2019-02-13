@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Components\Services;
 
+use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use Shopware\Models\Order\Status;
 
@@ -32,7 +33,13 @@ class PaymentService
      * @param \Enlight_Components_Session_Namespace $session
      * @param array $customEnvironmentVariables
      */
-    public function __construct($apiFactory, $config, $session, $customEnvironmentVariables) {
+    public function __construct(
+        \MollieShopware\Components\MollieApiFactory $apiFactory,
+        \MollieShopware\Components\Config $config,
+        \Enlight_Components_Session_Namespace $session,
+        array $customEnvironmentVariables
+    )
+    {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
@@ -44,22 +51,16 @@ class PaymentService
      * Create the transaction in the TransactionRepository.
      *
      * @return \MollieShopware\Models\Transaction
+     *
+     * @throws \Exception
      */
     public function createTransaction()
     {
-        /**
-         * Create an instance of the TransactionRepository. The TransactionRepository is used to
-         * get transactions from the database.
-         *
-         * @var \MollieShopware\Models\TransactionRepository $transactionRepo
-         */
+        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
             \MollieShopware\Models\Transaction::class
         );
 
-        /**
-         * Create a new transaction and return it.
-         */
         return $transactionRepo->create(null, null, null);
     }
 
@@ -69,21 +70,25 @@ class PaymentService
      * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Models\Transaction $transaction
      * @param array $orderDetails
+     *
      * @return null|string
-     * @throws \Mollie\Api\Exceptions\ApiException
+     *
+     * @throws \Mollie\Api\Exceptions\ApiException|\Exception
      */
-    public function startTransaction($order, $transaction, $orderDetails = array())
+    public function startTransaction(
+        \Shopware\Models\Order\Order $order,
+        \MollieShopware\Models\Transaction $transaction,
+        $orderDetails = array())
     {
-        // vars
+        // variables
         $checkoutUrl = '';
         $mollieOrder = null;
         $molliePayment = null;
-
-        // get payment method
         $paymentMethod = $order->getPayment()->getName();
 
         if (strstr($paymentMethod, 'klarna') ||
             $this->config->useOrdersApiOnlyWhereMandatory() == false) {
+
             // prepare the order for mollie
             $mollieOrderPrepared = $this->prepareOrder($order, $orderDetails);
 
@@ -94,12 +99,11 @@ class PaymentService
             $orderLinesRepo = Shopware()->container()->get('models')
                 ->getRepository('\MollieShopware\Models\OrderLines');
 
-            // iterate over lines
             foreach($mollieOrder->lines as $index => $line) {
                 // create new item
                 $item = new \MollieShopware\Models\OrderLines();
 
-                // set vars
+                // set variables
                 $item->setOrderId($order->getId());
                 $item->setMollieOrderlineId($line->id);
 
@@ -121,20 +125,18 @@ class PaymentService
         $transactionRepo = Shopware()->container()->get('models')
             ->getRepository('\MollieShopware\Models\Transaction');
 
-        // set transaction vars
         $transaction->setOrderId($order->getId());
 
-        if (!is_null($mollieOrder)) {
+        if (!empty($mollieOrder)) {
             $transaction->setMollieId($mollieOrder->id);
             $checkoutUrl = $mollieOrder->getCheckoutUrl();
         }
 
-        if (!is_null($molliePayment)) {
+        if (!empty($molliePayment)) {
             $transaction->setMolliePaymentId(($molliePayment->id));
             $checkoutUrl = $molliePayment->getCheckoutUrl();
         }
 
-        // save transaction
         $transactionRepo->save($transaction);
 
         return $checkoutUrl;
@@ -142,14 +144,15 @@ class PaymentService
 
     /**
      * Ship the order
-     * @param \Shopware\Models\Order\Order $order
-     * @param $mollieId
+     *
+     * @param string $mollieId
+     *
      * @return bool|\Mollie\Api\Resources\Shipment|null
+     *
      * @throws \Exception
      */
-    public function sendOrder($order, $mollieId)
+    public function sendOrder($mollieId)
     {
-        // create mollie order object
         $mollieOrder = null;
 
         try {
@@ -189,10 +192,12 @@ class PaymentService
      * Get the Mollie order object
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return \Mollie\Api\Resources\Order
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function getMollieOrder($order)
+    public function getMollieOrder(\Shopware\Models\Order\Order $order)
     {
         /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
@@ -217,10 +222,12 @@ class PaymentService
      * Get the Mollie payment object
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return \Mollie\Api\Resources\Payment
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function getMolliePayment($order)
+    public function getMolliePayment(\Shopware\Models\Order\Order $order)
     {
         /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
@@ -243,36 +250,36 @@ class PaymentService
      *
      * @param \Shopware\Models\Order\Order $order
      * @param array $orderDetails
+     *
      * @return array
+     *
      * @throws \Exception
      */
-    private function prepareOrder($order, $orderDetails = array())
+    private function prepareOrder(\Shopware\Models\Order\Order $order, $orderDetails = array())
     {
-        // vars
         $paymentParameters = [];
         $paymentMethod = $order->getPayment()->getName();
         $orderLines = $this->getOrderlines($order, $orderDetails);
 
-        // prepare the redirect URLs
         $paymentWebhookUrl = $this->prepareRedirectUrl($order, 'notify', 'payment');
         $orderRedirectUrl = $this->prepareRedirectUrl($order, 'return');
         $orderWebhookUrl = $this->prepareRedirectUrl($order, 'notify');
 
-        // remove mollie_ from payment method
-        if (substr($paymentMethod, 0, 7) === 'mollie_'){
-            $paymentMethod = substr($paymentMethod, 7);
-        }
+        $paymentParameters['webhookUrl'] = $paymentWebhookUrl;
 
-        if (strtolower($paymentMethod == 'ideal')) {
-            $paymentParameters = [
-                'issuer' => $this->getIdealIssuer(),
-                'webhookUrl' => $paymentWebhookUrl,
-            ];
-        }
+        if (substr($paymentMethod, 0, strlen('mollie_') == 'mollie_'))
+            $paymentMethod = substr($paymentMethod, strlen('mollie_'));
+
+        // set method specific parameters
+        $paymentParameters = $this->preparePaymentParameters(
+            $paymentMethod,
+            $paymentParameters,
+            $order
+        );
 
         // create prepared order array
         $molliePrepared = [
-            'amount' => $this->getPrice($order, round($order->getInvoiceAmount(), 2)),
+            'amount' => $this->getPriceArray($order, round($order->getInvoiceAmount(), 2)),
             'orderNumber' => $order->getNumber(),
             'lines' => $orderLines,
             'billingAddress' => $this->getAddress($order, 'billing'),
@@ -292,11 +299,12 @@ class PaymentService
      * Prepare the payment for Mollie
      *
      * @param \Shopware\Models\Order\Order $order
-     * @param array $orderDetails
+     *
      * @return array
+     *
      * @throws \Exception
      */
-    private function preparePayment($order)
+    private function preparePayment(\Shopware\Models\Order\Order $order)
     {
         // vars
         $paymentMethod = $order->getPayment()->getName();
@@ -305,14 +313,12 @@ class PaymentService
         $paymentWebhookUrl = $this->prepareRedirectUrl($order, 'notify', 'payment');
         $paymentRedirectUrl = $this->prepareRedirectUrl($order, 'return', 'payment');
 
-        // remove mollie_ from payment method
-        if (substr($paymentMethod, 0, 7) === 'mollie_'){
-            $paymentMethod = substr($paymentMethod, 7);
-        }
+        if (substr($paymentMethod, 0, strlen('mollie_') == 'mollie_'))
+            $paymentMethod = substr($paymentMethod, strlen('mollie_'));
 
         // create prepared order array
         $molliePrepared = [
-            'amount' => $this->getPrice($order, round($order->getInvoiceAmount(), 2)),
+            'amount' => $this->getPriceArray($order, round($order->getInvoiceAmount(), 2)),
             'description' => 'Order ' . $order->getNumber(),
             'method' => $paymentMethod,
             'redirectUrl' => $paymentRedirectUrl,
@@ -320,59 +326,56 @@ class PaymentService
             'locale' => $this->getLocale(),
         ];
 
-        // get issuer
-        if (strtolower($paymentMethod == 'ideal'))
-            $molliePrepared['issuer'] = $this->getIdealIssuer();
+        // prepare payment parameters
+        $molliePrepared = $this->preparePaymentParameters(
+            $paymentMethod,
+            $molliePrepared,
+            $order
+        );
 
         return $molliePrepared;
     }
 
     /**
+     * Get the order lines for an order
+     *
      * @param \Shopware\Models\Order\Order $order
+     * @param array $orderDetails
+     *
      * @return array
      */
-    private function getOrderlines($order, $orderDetails = array())
+    private function getOrderlines(\Shopware\Models\Order\Order $order, $orderDetails = array())
     {
-        // vars
         $items = [];
         $invoiceShippingTaxRate = null;
 
-        // get invoice shipping tax rate
-        if (method_exists($order, 'getInvoiceShippingTaxRate')) {
+        if (method_exists($order, 'getInvoiceShippingTaxRate'))
             $invoiceShippingTaxRate = $order->getInvoiceShippingTaxRate();
-        }
-        else {
+        else
             $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
-        }
 
-        // iterate over order details data
         foreach($orderDetails as $orderDetail)
         {
-            // add detail to items
             $items[] = [
                 'type' => $orderDetail['type'],
                 'name' => $orderDetail['name'],
                 'quantity' => (int)$orderDetail['quantity'],
-                'unitPrice' => $this->getPrice($order, $orderDetail['unit_price']),
-                'totalAmount' => $this->getPrice($order, $orderDetail['total_amount']),
+                'unitPrice' => $this->getPriceArray($order, $orderDetail['unit_price']),
+                'totalAmount' => $this->getPriceArray($order, $orderDetail['total_amount']),
                 'vatRate' => number_format($orderDetail['vat_rate'], 2, '.', ''),
-                'vatAmount' => $this->getPrice($order, $orderDetail['vat_amount']),
+                'vatAmount' => $this->getPriceArray($order, $orderDetail['vat_amount']),
                 'sku' => null,
                 'imageUrl' => null,
                 'productUrl' => null,
             ];
         }
 
-        // get shipping unit price
+        // get shipping amount
         $shippingUnitPrice = $order->getInvoiceShipping();
-
-        // get shipping net price
         $shippingNetPrice = $order->getInvoiceShippingNet();
-
-        // get shipping vat amount
         $shippingVatAmount = $shippingUnitPrice - $shippingNetPrice;
 
-        // clear tax if order is tax free
+        // clear shipping tax if order is tax free
         if ($order->getTaxFree()) {
             $shippingVatAmount = 0;
             $shippingUnitPrice = $shippingNetPrice;
@@ -383,10 +386,10 @@ class PaymentService
             'type' => 'shipping_fee',
             'name' => 'Shipping fee',
             'quantity' => 1,
-            'unitPrice' => $this->getPrice($order, $shippingUnitPrice),
-            'totalAmount' => $this->getPrice($order, $shippingUnitPrice),
+            'unitPrice' => $this->getPriceArray($order, $shippingUnitPrice),
+            'totalAmount' => $this->getPriceArray($order, $shippingUnitPrice),
             'vatRate' => number_format($shippingVatAmount == 0 ? 0 : $invoiceShippingTaxRate, 2, '.', ''),
-            'vatAmount' => $this->getPrice($order, $shippingVatAmount),
+            'vatAmount' => $this->getPriceArray($order, $shippingVatAmount),
         ];
 
         return $items;
@@ -396,9 +399,10 @@ class PaymentService
      * Get the invoice shipping taxrate
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return float|int
      */
-    private function getInvoiceShippingTaxRate($order)
+    private function getInvoiceShippingTaxRate(\Shopware\Models\Order\Order $order)
     {
         // vars
         $invoiceShippingGross = $order->getInvoiceShipping();
@@ -416,16 +420,16 @@ class PaymentService
     }
 
     /**
-     * Get price in Mollie's format
+     * Get price in currency/value array
      *
      * @param \Shopware\Models\Order\Order $order
      * @param $amount
+     * @param int $decimals
+     *
      * @return array
      */
-    private function getPrice($order, $amount, $decimals = 2)
+    private function getPriceArray($order, $amount, $decimals = 2)
     {
-        // return an array with currency and value
-
         return [
             'currency' => $order->getCurrency(),
             'value' => number_format($amount, $decimals, '.', ''),
@@ -433,15 +437,16 @@ class PaymentService
     }
 
     /**
-     * Get the address in Mollie's format
+     * Get the address in array
      *
      * @param \Shopware\Models\Order\Order $order
      * @param string $type
+     *
      * @return array
      */
-    private function getAddress($order, $type = 'billing')
+    private function getAddress(\Shopware\Models\Order\Order $order, $type = 'billing')
     {
-        if ($type === 'billing') {
+        if ($type == 'billing') {
             /** @var \Shopware\Models\Order\Billing $address */
             $address = $order->getBilling();
         }
@@ -450,13 +455,9 @@ class PaymentService
             $address = $order->getShipping();
         }
 
-        // get the customer
         $customer = $order->getCustomer();
-
-        // get the country
         $country = $address->getCountry();
 
-        // return an array with address details
         return [
             'title' => $address->getSalutation() . '.',
             'givenName' => $address->getFirstName(),
@@ -474,12 +475,14 @@ class PaymentService
      * Prepare the redirect URL for Mollie
      *
      * @param \Shopware\Models\Order\Order $order
-     * @param string $method
+     * @param string $action
      * @param string $type
+     *
      * @return string
+     *
      * @throws \Exception
      */
-    private function prepareRedirectUrl($order, $action = 'return', $type = 'order')
+    private function prepareRedirectUrl(\Shopware\Models\Order\Order $order, $action = 'return', $type = 'order')
     {
         // check for errors
         if (!in_array($action, ['return', 'notify']))
@@ -500,14 +503,11 @@ class PaymentService
         // check if we are on local development
         $mollieLocalDevelopment = false;
 
-        if (isset($this->customEnvironmentVariables['mollieLocalDevelopment'])) {
+        if (isset($this->customEnvironmentVariables['mollieLocalDevelopment']))
             $mollieLocalDevelopment = $this->customEnvironmentVariables['mollieLocalDevelopment'];
-        }
 
-        // if we are on local development, reroute to a feedback URL
-        if ($mollieLocalDevelopment == true) {
+        if ($mollieLocalDevelopment == true)
             return 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($url);
-        }
 
         return $url;
     }
@@ -569,10 +569,12 @@ class PaymentService
      * Check the payment status
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return bool
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function checkOrderStatus($order)
+    public function checkOrderStatus(\Shopware\Models\Order\Order $order)
     {
         // get mollie payment
         $mollieOrder = $this->getMollieOrder($order);
@@ -594,10 +596,12 @@ class PaymentService
      * Check the payment status
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return bool
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function checkPaymentStatus($order)
+    public function checkPaymentStatus(\Shopware\Models\Order\Order $order)
     {
         // get mollie payment
         $molliePayment = $this->getMolliePayment($order);
@@ -621,10 +625,12 @@ class PaymentService
      *
      * @param \Shopware\Models\Order\Order $order
      * @param boolean $returnResult
-     * @throws \Mollie\Api\Exceptions\ApiException
+     *
      * @return bool
+     *
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function checkPaymentStatusForOrder($order, $returnResult = false)
+    public function checkPaymentStatusForOrder(\Shopware\Models\Order\Order $order, $returnResult = false)
     {
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->getMollieorder($order);
@@ -652,10 +658,12 @@ class PaymentService
      * Check if the payments for an order failed
      *
      * @param \Shopware\Models\Order\Order $order
+     *
      * @return bool
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function havePaymentsForOrderFailed($order)
+    public function havePaymentsForOrderFailed(\Shopware\Models\Order\Order $order)
     {
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->getMollieOrder($order);
@@ -680,14 +688,12 @@ class PaymentService
      * @throws \Exception
      * @return mixed
      */
-    public function setPaymentStatus($order, $status, $returnResult = false, $type = 'payment')
+    public function setPaymentStatus(\Shopware\Models\Order\Order $order, $status, $returnResult = false, $type = 'payment')
     {
         // get the order module
         $sOrder = Shopware()->Modules()->Order();
 
-        /**
-         * The order is paid
-         */
+        // the order is paid
         if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
@@ -709,9 +715,7 @@ class PaymentService
                 return true;
         }
 
-        /**
-         * The order is authorized
-         */
+        // the order is authorized
         if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
@@ -733,9 +737,7 @@ class PaymentService
                 return true;
         }
 
-        /**
-         * The order is canceled
-         */
+        // the order is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
@@ -756,6 +758,32 @@ class PaymentService
             if ($returnResult)
                 return true;
         }
+    }
+
+    /**
+     * Prepare the payment parameters based on the payment method's requirements
+     *
+     * @param $paymentMethod
+     * @param array $paymentParameters
+     * @param \Shopware\Models\Order\Order $order
+     *
+     * @return array
+     */
+    private function preparePaymentParameters(
+        $paymentMethod,
+        array $paymentParameters,
+        \Shopware\Models\Order\Order $order)
+    {
+        if ($paymentMethod == PaymentMethod::IDEAL)
+            $paymentParameters['issuer'] = $this->getIdealIssuer();
+
+        if ($paymentMethod == PaymentMethod::KBC || $paymentMethod == PaymentMethod::PAYPAL)
+            $paymentParameters['description'] = 'Order ' . $order->getNumber();
+
+        if ($paymentMethod == PaymentMethod::P24)
+            $paymentParameters['billingEmail'] = $order->getCustomer()->getEmail();
+
+        return $paymentParameters;
     }
 
     /**
