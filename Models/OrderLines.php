@@ -36,34 +36,62 @@ class OrderLines
      */
     private $orderId;
 
-
+    /**
+     * Set the ID for the order line
+     *
+     * @param $id
+     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * Get the ID of the order line
+     *
+     * @return int
+     */
     public function getId()
     {
         return $this->id;
     }
 
 
+    /**
+     * Set Mollie's order line ID
+     *
+     * @param $mollieOrderlineId
+     */
     public function setMollieOrderlineId($mollieOrderlineId)
     {
         $this->mollieOrderlineId = $mollieOrderlineId;
     }
 
+    /**
+     * Get Mollie's order line ID
+     *
+     * @return int
+     */
     public function getMollieOrderlineId()
     {
         return $this->mollieOrderlineId;
     }
 
-
+    /**
+     * Set the order ID for the order line
+     *
+     * @param $orderId
+     */
     public function setOrderId($orderId)
     {
         $this->orderId = $orderId;
     }
 
+    /**
+     * Get the order ID for the order line
+     *
+     * @return int
+     */
     public function getOrderId()
     {
         return $this->orderId;
