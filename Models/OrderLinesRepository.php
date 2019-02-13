@@ -5,7 +5,6 @@
 namespace MollieShopware\Models;
 
 use Shopware\Components\Model\ModelRepository;
-use Shopware\Models\Order\Order;
 
 class OrderLinesRepository extends ModelRepository
 {
@@ -28,10 +27,10 @@ class OrderLinesRepository extends ModelRepository
      * Gets an array of remote IDs for the order's order lines
      * which can be directly used in Mollie's Shipment API
      *
-     * @param Order $order
+     * @param \Shopware\Models\Order\Order $order
      * @return array
      */
-    public function getShipmentLines(Order $order)
+    public function getShipmentLines(\Shopware\Models\Order\Order $order)
     {
         $result = [];
 
