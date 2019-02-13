@@ -236,7 +236,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ]);
         }
         catch (\Exception $ex) {
-            Logger::log('error', $ex->getMessage(), $ex);
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         /**
@@ -262,7 +266,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ]);
         }
         catch (\Exception $ex) {
-            Logger::log('error', $ex->getMessage(), $ex);
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         /**
@@ -298,7 +306,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     'Therefore the customer is not automatically logged in.';
             }
 
-            Logger::log('error', $message);
+            Logger::log(
+                'error',
+                $message
+            );
         }
 
         return $order;

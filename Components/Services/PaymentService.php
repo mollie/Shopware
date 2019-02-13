@@ -630,30 +630,53 @@ class PaymentService
      *
      * @return bool
      *
-     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Exception
      */
     public function checkPaymentStatusForOrder(\Shopware\Models\Order\Order $order, $returnResult = false)
     {
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
-        $mollieOrder = $this->getMollieorder($order);
-        $paymentsResult = $this->getPaymentsResultForOrder($mollieOrder);
+        try {
+            $mollieOrder = $this->getMollieOrder($order);
+        }
+        catch (\Exception $ex) {
+            //
+        }
 
-        if ($paymentsResult['total'] > 0) {
-            // fully paid
-            if ($paymentsResult['paid'] == $paymentsResult['total'])
-                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, $returnResult);
+        if (!empty($mollieOrder)) {
+            $paymentsResult = $this->getPaymentsResultForOrder($mollieOrder);
 
-            // fully authorized
-            if ($paymentsResult['authorized'] == $paymentsResult['total'])
-                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, $returnResult);
+            if ($paymentsResult['total'] > 0) {
+                // fully paid
+                if ($paymentsResult['paid'] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, $returnResult);
 
-            // fully canceled
-            if ($paymentsResult['canceled'] == $paymentsResult['total'])
-                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
+                    if ($returnResult)
+                        return true;
+                }
+
+                // fully authorized
+                if ($paymentsResult['authorized'] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, $returnResult);
+
+                    if ($returnResult)
+                        return true;
+                }
+
+                // fully canceled
+                if ($paymentsResult['canceled'] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
+
+                    if ($returnResult)
+                        return true;
+                }
+            }
+
+            if ($returnResult)
+                return false;
         }
 
         if ($returnResult)
-            return false;
+            return true;
     }
 
     /**
