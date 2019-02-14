@@ -569,13 +569,15 @@ class PaymentService
 
         // set the status
         if ($molliePayment->isPaid())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
         elseif ($molliePayment->isPending())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
         elseif ($molliePayment->isAuthorized())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
         elseif ($molliePayment->isCanceled())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
+        elseif ($molliePayment->isOpen())
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, true);
 
         return $this->checkPaymentStatusForOrder($order, true);
     }
@@ -624,6 +626,14 @@ class PaymentService
                 // fully canceled
                 if ($paymentsResult['canceled'] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
+
+                    if ($returnResult)
+                        return true;
+                }
+
+                // fully open
+                if ($paymentsResult['open'] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, $returnResult);
 
                     if ($returnResult)
                         return true;
@@ -715,6 +725,18 @@ class PaymentService
                 return true;
         }
 
+        // the order payment is open
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_OPEN) {
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_OPEN,
+                $this->config->sendStatusMail()
+            );
+
+            if ($returnResult)
+                return true;
+        }
+
         // the order is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
             if ($type == 'order') {
@@ -777,6 +799,7 @@ class PaymentService
             'paid' => 0,
             'authorized' => 0,
             'pending' => 0,
+            'open' => 0,
             'canceled' => 0,
             'failed' => 0
         ];
@@ -794,6 +817,8 @@ class PaymentService
                     $paymentsResult['authorized']++;
                 if ($payment->isPending())
                     $paymentsResult['pending']++;
+                if ($payment->isOpen())
+                    $paymentsResult['open']++;
                 if ($payment->isCanceled())
                     $paymentsResult['canceled']++;
                 if ($payment->isFailed())

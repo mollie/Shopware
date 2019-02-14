@@ -486,6 +486,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // check if payment has failed
         if ($molliePayment->isFailed())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
+
+        // check if payment is open
+        if ($molliePayment->isOpen())
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN);
     }
 
     /**
@@ -531,6 +535,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
             return $this->redirectToFinish($order->getTemporaryId());
         }
+
+        // redirect customer to finish page on created payment
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_OPEN)
+            return $this->redirectToFinish($order->getTemporaryId());
 
         // redirect customer to shopping basket after failed payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
