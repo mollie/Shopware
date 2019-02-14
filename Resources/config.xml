@@ -103,6 +103,9 @@
             <label lang="en">Cancel failed orders automatically</label>
             <label lang="nl">Mislukte bestellingen automatisch annuleren</label>
             <value>yes</value>
+            <description lang="de">Wenn eine Bestellung wiederhergestellt wird, die alte (fehlgeschlagener) Bestellung automatisch stornieren.</description>
+            <description lang="en">Automatically cancel the old (failed) order when an order is restored.</description>
+            <description lang="nl">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
             <store>
                 <option>
                     <value>yes</value>

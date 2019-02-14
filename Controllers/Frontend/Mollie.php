@@ -524,6 +524,17 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             return $this->redirectToFinish($order->getTemporaryId());
         }
 
+        // redirect customer to shopping basket after failed payment
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
+            /** @var \MollieShopware\Components\Services\BasketService $basketService */
+            $basketService = Shopware()->Container()
+                ->get('mollie_shopware.basket_service');
+
+            $basketService->restoreBasket($order);
+
+            return $this->redirectBack('Payment failed');
+        }
+
         // if payment failed, assign error to view
         else if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED)
             $this->view->assign('sMollieError', 'Payment canceled');
