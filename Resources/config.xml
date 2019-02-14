@@ -97,6 +97,28 @@
             </store>
         </element>
 
+        <element type="select" scope="shop">
+            <name>auto_cancel_failed_orders</name>
+            <label lang="de">Fehlgeschlagene Bestellungen automatisch stornieren</label>
+            <label lang="en">Cancel failed orders automatically</label>
+            <label lang="nl">Mislukte bestellingen automatisch annuleren</label>
+            <value>yes</value>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

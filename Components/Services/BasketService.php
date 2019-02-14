@@ -115,7 +115,8 @@ class BasketService
                 );
 
                 // set payment status
-                $order->setPaymentStatus($statusCanceled);
+                if ($this->config->cancelFailedOrders())
+                    $order->setPaymentStatus($statusCanceled);
 
                 // save order
                 $this->modelManager->persist($order);

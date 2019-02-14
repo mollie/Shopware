@@ -12,7 +12,7 @@ class FrontendViewSubscriber implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'addViewDirectory',
-            'enlight_controller_action_predispatch_frontend_checkout'=>'getController',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'=>'getController',
         ];
     }
 
@@ -55,12 +55,14 @@ class FrontendViewSubscriber implements SubscriberInterface
         if (!empty($controller))
             $view = $controller->view();
 
-        if (!empty($session) && !empty($view) &&
+        if ($session !== null && $view !== null &&
             ($session->mollieError || $session->mollieStatusError)) {
 
+            echo $session->mollieError;
+
             // assign errors to view
-            $view->sMollieError = $session->mollieError;
-            $view->sMollieStatusError = $session->mollieStatusError;
+            $view->assign('sMollieError', $session->mollieError);
+            $view->assign('sMollieStatusError', $session->mollieStatusError);
 
             // unset error, so it wont show up on next page view
             $session->mollieStatusError = $session->mollieError = null;

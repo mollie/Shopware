@@ -150,6 +150,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $paymentService = Shopware()->Container()
             ->get('mollie_shopware.payment_service');
 
+        $this->view->assign('orderNumber', $order->getNumber());
+
         if ($type == 'order')
             return $this->processOrderReturn($order, $paymentService);
 
@@ -505,7 +507,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             try {
                 $this->sendConfirmationEmail($order);
-            } catch (\Exception $ex) {
+            }
+            catch (\Exception $ex) {
                 // log the error
                 Logger::log(
                     'error',
@@ -521,16 +524,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             return $this->redirectToFinish($order->getTemporaryId());
         }
 
-        // restore the order on a failed payment
-        if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
-            /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = Shopware()->Container()
-                ->get('mollie_shopware.basket_service');
-
-            $basketService->restoreBasket($order);
-
-            return $this->redirectBack('Payment failed');
-        }
+        // if payment failed, assign error to view
+        else if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED)
+            $this->view->assign('sMollieError', 'Payment canceled');
+        else
+            $this->view->assign('sMollieError', 'Payment failed');
     }
 
     /**

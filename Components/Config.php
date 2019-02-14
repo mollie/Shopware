@@ -105,4 +105,12 @@ class Config
     {
         return ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
     }
+
+    /**
+     * @return bool
+     */
+    public function cancelFailedOrders()
+    {
+        return ($this->get('auto_cancel_failed_orders', 'yes') == 'yes');
+    }
 }

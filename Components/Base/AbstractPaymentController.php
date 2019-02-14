@@ -114,7 +114,6 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
         $this->Response()->setHttpResponseCode($httpCode);
         $this->Response()->setHeader('Content-type', 'application/json', true);
         $this->Response()->setBody(json_encode($data, JSON_PRETTY_PRINT));
-
     }
 
     /**
@@ -123,10 +122,10 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     protected function redirectBack($error = null, $message = null)
     {
         if ($error !== null)
-            Shopware()->Session()->mollieError = $error;
+            Shopware()->Session()->offsetSet('mollieError', $error);
 
         if ($message !== null)
-            Shopware()->Session()->mollieErrorMessage = $message;
+            Shopware()->Session()->offsetSet('mollieErrorMessage', $message);
 
         return $this->redirect(
             Shopware()->Front()->Router()->assemble([
@@ -252,6 +251,8 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      * Persist the order model.
      *
      * @param \Shopware\Models\Order\Order $order
+     *
+     * @throws \Exception
      */
     protected function persistOrder($order)
     {
