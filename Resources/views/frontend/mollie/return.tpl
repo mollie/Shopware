@@ -7,6 +7,8 @@
         <h1>{s name="PaymentFailed" namespace="frontend/mollie/plugins"}Payment failed{/s}</h1>
     {elseif $sMollieError == 'Payment canceled'}
         <h1>{s name="PaymentCanceled" namespace="frontend/mollie/plugins"}Payment canceled{/s}</h1>
+    {elseif $sMollieError == 'Payment expired'}
+        <h1>{s name="PaymentExpired" namespace="frontend/mollie/plugins"}Payment expired{/s}</h1>
     {else}
         <h1>{$sMollieError}</h1>
     {/if}

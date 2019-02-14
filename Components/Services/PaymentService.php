@@ -452,14 +452,18 @@ class PaymentService
             throw new \Exception('Cannot generate "' . $action . '" url as type is undefined');
 
         // generate redirect url
-        $url = Shopware()->Front()->Router()->assemble([
+        $assembleData = [
             'controller'    => 'Mollie',
             'action'        => $action,
             'type'          => $type,
             'forceSecure'   => true,
-            'appendSession' => true,
-            'orderNumber'   => $order->getNumber(),
-        ]);
+            'orderNumber'   => $order->getNumber()
+        ];
+
+        if ($action == 'return')
+            $assembleData['appendSession'] = true;
+
+        $url = Shopware()->Front()->Router()->assemble($assembleData);
 
         // check if we are on local development
         $mollieLocalDevelopment = false;
@@ -574,10 +578,14 @@ class PaymentService
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
         elseif ($molliePayment->isAuthorized())
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
-        elseif ($molliePayment->isCanceled())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
         elseif ($molliePayment->isOpen())
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, true);
+        elseif ($molliePayment->isCanceled())
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
+        elseif ($molliePayment->isExpired())
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED, true);
+        elseif ($molliePayment->isFailed())
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED, true);
 
         return $this->checkPaymentStatusForOrder($order, true);
     }
@@ -717,7 +725,7 @@ class PaymentService
         if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
-                Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
+                Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED,
                 $this->config->sendStatusMail()
             );
 
@@ -747,6 +755,21 @@ class PaymentService
                 );
             }
 
+            if ($type == 'payment') {
+                $sOrder->setPaymentStatus(
+                    $order->getId(),
+                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($returnResult)
+                return true;
+        }
+
+        // the order has failed or is expired
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED ||
+            $status == PaymentStatus::MOLLIE_PAYMENT_EXPIRED) {
             if ($type == 'payment') {
                 $sOrder->setPaymentStatus(
                     $order->getId(),

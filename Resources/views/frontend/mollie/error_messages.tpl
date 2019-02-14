@@ -2,6 +2,8 @@
     {s name="YourPaymentHasFailed" namespace="frontend/mollie/plugins"}Your payment has failed. Please try again.{/s}
 {elseif $sMollieError == 'Payment canceled'}
     {s name="YourPaymentHasBeenCanceled" namespace="frontend/mollie/plugins"}Your payment has been canceled. Please try again.{/s}
+{elseif $sMollieError == 'Payment expired'}
+    {s name="YourPaymentHasExpired" namespace="frontend/mollie/plugins"}Your payment has expired. Please try again.{/s}
 {elseif $sMollieError == 'No session'}
     {s name="YourBasketCouldNotBeRestoredFromSession" namespace="frontend/mollie/plugins"}Your basket could not be restored from session.{/s}
     {s name="PleaseCheckYourBankStatementsAndContactSupport" namespace="frontend/mollie/plugins"}Please check your bank statements and contact support if you feel this is in error.{/s}

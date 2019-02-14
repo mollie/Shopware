@@ -232,9 +232,14 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      * @throws \Exception
      */
     public function startSession($sessionId) {
-        \Enlight_Components_Session::writeClose();
-        \Enlight_Components_Session::setId($sessionId);
-        \Enlight_Components_Session::start();
+        try {
+            \Enlight_Components_Session::writeClose();
+            \Enlight_Components_Session::setId($sessionId);
+            \Enlight_Components_Session::start();
+        }
+        catch (\Exception $ex) {
+            //
+        }
     }
 
     /**

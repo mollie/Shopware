@@ -12,5 +12,6 @@ class PaymentStatus
     const MOLLIE_PAYMENT_DELAYED = 'pending';
     const MOLLIE_PAYMENT_OPEN = 'open';
     const MOLLIE_PAYMENT_CANCELED = 'canceled';
+    const MOLLIE_PAYMENT_EXPIRED = 'expired';
     const MOLLIE_PAYMENT_FAILED = 'failed';
 }

@@ -102,7 +102,8 @@ class BasketService
                 }
 
                 // append internal comment
-                $order = $this->appendInternalComment($order, $commentText);
+                if (!strstr($order->getInternalComment(), $commentText))
+                    $order = $this->appendInternalComment($order, $commentText);
 
                 // recalculate order
                 $order->calculateInvoiceAmount();

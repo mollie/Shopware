@@ -255,7 +255,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         $order = null;
         $transaction = null;
-        $sessionId = $this->Request()->getParam('session-1');
         $orderNumber = $this->Request()->getParam('orderNumber');
 
         /**
@@ -316,33 +315,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             return false;
-        }
-
-        /**
-         * Check if the returned session matches the transaction's session. If there is a match,
-         * restore that session and clear the stored session from the transaction. This is done to
-         * prevent that Mollie's return URL for the confirmation is used ever again.
-         *
-         * If there is no match, log the error and move on.
-         */
-        if ($transaction->getSessionId() == $sessionId) {
-            $this->startSession($sessionId);
-            $transaction->setSessionId(null);
-            $this->getTransactionRepository()->save($transaction);
-        }
-        else {
-            $message = 'The returned session ID does not match the session ID of the transaction. ' .
-                'Therefore the customer is not automatically logged in.';
-
-            if (empty($sessionId)) {
-                $message = 'The returned transaction does not have a session ID.' .
-                    'Therefore the customer is not automatically logged in.';
-            }
-
-            Logger::log(
-                'error',
-                $message
-            );
         }
 
         return $order;
@@ -421,7 +393,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_COMPLETELY_PAID)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
 
-        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED)
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
         // check if order is paid
@@ -468,7 +440,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_COMPLETELY_PAID)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
 
-        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED)
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
         // check if payment is paid
@@ -490,6 +462,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // check if payment is canceled
         if ($molliePayment->isCanceled())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
+
+        // check if payment is expired
+        if ($molliePayment->isExpired())
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED);
 
         // check if payment has failed
         if ($molliePayment->isFailed())
@@ -561,9 +537,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             return $this->redirectBack('Payment failed');
         }
 
-        // if payment failed, assign error to view
-        else if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED)
+        // if payment canceled, expired or failed for unknown reasons, assign error to view
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED)
             $this->view->assign('sMollieError', 'Payment canceled');
+        elseif ($status == PaymentStatus::MOLLIE_PAYMENT_EXPIRED)
+            $this->view->assign('sMollieError', 'Payment expired');
         else
             $this->view->assign('sMollieError', 'Payment failed');
     }
