@@ -183,6 +183,10 @@ class MollieShopware extends Plugin
         // add extra attributes
         $this->updateAttributes();
 
+        // set config value for upgraders from version 1.3
+        if (substr($context->getPlugin()->getVersion(), 0, strlen('1.3')) == '1.3')
+            $this->writeConfig($context->getPlugin(), 'orders_api_only_where_mandatory', 'no');
+
         parent::update($context);
     }
 
@@ -389,5 +393,39 @@ class MollieShopware extends Plugin
     protected function removeAttributes()
     {
         $this->makeAttributes()->remove([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer' ] ]);
+    }
+
+    /**
+     * Write value to the config
+     *
+     * @param \Shopware\Models\Plugin\Plugin $plugin
+     * @param $key
+     * @param $value
+     * @throws \Exception
+     */
+    protected function writeConfig(\Shopware\Models\Plugin\Plugin $plugin, $key, $value)
+    {
+        try {
+            /** @var \Shopware\Components\Model\ModelManager $modelManager */
+            $modelManager = Shopware()->Container()->get('models');
+
+            /** @var \Shopware\Models\Shop\Shop[] $shops */
+            $shops = $modelManager->getRepository(\Shopware\Models\Shop\Shop::class)->findBy([]);
+
+            /** @var Plugin\ConfigWriter $configWriter */
+            $configWriter = new Plugin\ConfigWriter(Shopware()->Models());
+
+            foreach ($shops as $shop) {
+                $configWriter->saveConfigElement(
+                    $plugin,
+                    $key,
+                    $value,
+                    $shop
+                );
+            }
+        }
+        catch (\Exception) {
+            //
+        }
     }
 }
