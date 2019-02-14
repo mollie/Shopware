@@ -3,10 +3,15 @@
 Ext.define('Shopware.apps.Mollie.view.list.List', {
     override: 'Shopware.apps.Order.view.list.List',
 
+    orderStatus: {
+        COMPLETED: 2
+    },
+
     paymentStatus: {
         COMPLETELY_PAID: 12,
         RESERVED: 18,
         RE_CREDITING: 20,
+        CREDIT_ACCEPTED: 32,
         CANCELLED: 35,
     },
 
@@ -27,9 +32,10 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return Ext.create('Ext.grid.column.Action', {
             width: 80,
             items: [
-                me.createRefundOrderColumn()
+                me.createRefundOrderColumn(),
+                me.createShipOrderColumn()
             ],
-            header: me.snippets.columns.mollie_refund || 'Mollie refund',
+            header: me.snippets.columns.mollie_actions || 'Mollie actions',
         });
     },
 
@@ -59,6 +65,42 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
                     // order should not have been refunded already
                     record.data && parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID
+                ) {
+                    return '';
+                }
+
+                return 'mollie-hide';
+            }
+        }
+    },
+
+    createShipOrderColumn: function() {
+        var me = this;
+
+        return {
+            iconCls: 'sprite-truck-box-label',
+            action: 'shipOrder',
+            tooltip: me.snippets.columns.ship || 'Ship order',
+            /**
+             * Add button handler to fire the showDetail event which is handled
+             * in the list controller.
+             */
+            handler: function(view, rowIndex, colIndex, item) {
+                var store = view.getStore(),
+                    record = store.getAt(rowIndex);
+
+                me.fireEvent('shipOrder', record);
+            },
+
+            getClass: function(value, metadata, record) {
+                if(
+                    // order should be paid with a Mollie payment method
+                    me.hasOrderPaymentName(record) &&
+                    me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
+
+                    // order should not have been refunded already
+                    record.data && parseInt(record.data.status, 10) !== me.orderStatus.COMPLETED &&
+                    (parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID || parseInt(record.data.cleared, 10) === me.paymentStatus.CREDIT_ACCEPTED)
                 ) {
                     return '';
                 }

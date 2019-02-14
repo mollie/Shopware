@@ -19,6 +19,43 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var \MollieShopware\Components\Services\OrderService $orderService */
     protected $orderService;
 
+    public function shipAction()
+    {
+        try {
+            /** @var \Enlight_Controller_Request_Request $request */
+            $request = $this->Request();
+
+            /** @var \Mollie\Api\MollieApiClient $apiClient */
+            $this->apiClient = $this->container->get('mollie_shopware.api');
+
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            $this->orderService = $this->container->get('mollie_shopware.order_service');
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $this->orderService->getOrderById(
+                $request->getParam('orderId')
+            );
+
+            if (empty($order))
+                $this->returnError('Order not found');
+
+            $mollieId = $this->orderService->getMollieOrderId($order);
+
+            if (empty($mollieId))
+                $this->returnError('Order is paid as a single payment (not an order) at Mollie');
+
+            $result = $this->sendOrder($mollieId);
+
+            if ($result)
+                $this->returnSuccess('Order status set to shipped at Mollie', $result);
+            else
+                $this->returnError('Order status could not be set to shipped at Mollie');
+        }
+        catch (\Exception $ex) {
+            $this->returnError($ex->getMessage());
+        }
+    }
+
     public function refundAction()
     {
         try {
@@ -77,7 +114,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (!empty($refund))
                 $this->returnSuccess('Order successfully refunded', $refund);
         }
-        catch (Exception $ex) {
+        catch (\Exception $ex) {
             $this->returnError($ex->getMessage());
         }
     }
@@ -183,6 +220,54 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
 
         return true;
+    }
+
+
+
+    /**
+     * Ship the order
+     *
+     * @param string $mollieId
+     *
+     * @return bool|\Mollie\Api\Resources\Shipment|null
+     *
+     * @throws \Exception
+     */
+    private function sendOrder($mollieId)
+    {
+        $mollieOrder = null;
+
+        try {
+            $mollieOrder = $this->apiClient->orders->get($mollieId);
+        }
+        catch (\Exception $ex) {
+            throw new \Exception('The order could not be found at Mollie.');
+        }
+
+        // ship the order
+        if (!empty($mollieOrder)) {
+            $result = null;
+
+            if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
+                if ($mollieOrder->isCompleted()) {
+                    throw new \Exception('The order is already completed at Mollie.');
+                }
+                else {
+                    throw new \Exception('The order doesn\'t seem to be paid or authorized.');
+                }
+            }
+
+            try {
+                $result = $mollieOrder->shipAll();
+            }
+            catch (\Exception $ex) {
+                throw new \Exception('The order can\'t be shipped.');
+            }
+
+            return $result;
+        }
+
+        return false;
     }
 
     /**

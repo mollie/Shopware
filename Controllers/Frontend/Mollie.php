@@ -184,11 +184,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         try {
             $result = null;
             $type = $this->Request()->getParam('type');
+            $paymentId = $this->Request()->getParam('id');
 
-            if ($type == 'order')
+            if (substr($paymentId, 0, strlen('tr_')) != 'tr_')
+                $paymentId = null;
+
+            if ($type == 'order' && $paymentId == null)
                 $result = $paymentService->checkOrderStatus($order);
             else
-                $result = $paymentService->checkPaymentStatus($order);
+                $result = $paymentService->checkPaymentStatus($order, $paymentId);
 
             // log result
             Logger::log(
@@ -200,7 +204,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 Notifier::notifyOk(
                     'The payment status for order ' . $order->getNumber() . ' has been processed.'
                 );
-            } else {
+            }
+            else {
                 Notifier::notifyException(
                     'The payment status for order ' . $order->getNumber() . ' could not be processed.'
                 );
@@ -233,9 +238,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $basketService = Shopware()->Container()
             ->get('mollie_shopware.basket_service');
 
-        if (!empty($order)) {
+        if (!empty($order))
             $basketService->restoreBasket($order);
-        }
 
         return $this->redirectBack();
     }
@@ -493,7 +497,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      *
      * @throws \Exception
      */
-    private function processPaymentStatus(\Shopware\Models\Order\Order $order, $status, $type = 'payment')
+    private function processPaymentStatus(
+        \Shopware\Models\Order\Order $order,
+        $status,
+        $type = 'payment'
+    )
     {
         /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
         $paymentService = Shopware()->Container()

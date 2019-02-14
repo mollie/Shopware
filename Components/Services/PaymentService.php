@@ -32,6 +32,8 @@ class PaymentService
      * @param \MollieShopware\Components\Config $config
      * @param \Enlight_Components_Session_Namespace $session
      * @param array $customEnvironmentVariables
+     *
+     * @throws \Exception
      */
     public function __construct(
         \MollieShopware\Components\MollieApiFactory $apiFactory,
@@ -145,52 +147,6 @@ class PaymentService
     }
 
     /**
-     * Ship the order
-     *
-     * @param string $mollieId
-     *
-     * @return bool|\Mollie\Api\Resources\Shipment|null
-     *
-     * @throws \Exception
-     */
-    public function sendOrder($mollieId)
-    {
-        $mollieOrder = null;
-
-        try {
-            $mollieOrder = $this->apiClient->orders->get($mollieId);
-        }
-        catch (\Exception $ex) {
-            throw new \Exception('The order could not be found at Mollie.');
-        }
-
-        // ship the order
-        if (!empty($mollieOrder)) {
-            $result = null;
-
-            if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
-                if ($mollieOrder->isCompleted()) {
-                    throw new \Exception('The order is already completed at Mollie.');
-                }
-                else {
-                    throw new \Exception('The order doesn\'t seem to be paid or authorized.');
-                }
-            }
-
-            try {
-                $result = $mollieOrder->shipAll();
-            }
-            catch (\Exception $ex) {
-                throw new \Exception('The order can\'t be shipped.');
-            }
-
-            return $result;
-        }
-
-        return false;
-    }
-
-    /**
      * Get the Mollie order object
      *
      * @param \Shopware\Models\Order\Order $order
@@ -229,7 +185,7 @@ class PaymentService
      *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function getMolliePayment(\Shopware\Models\Order\Order $order)
+    public function getMolliePayment(\Shopware\Models\Order\Order $order, $paymentId = '')
     {
         /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
@@ -239,9 +195,12 @@ class PaymentService
         /** @var \MollieShopware\Models\Transaction $transaction */
         $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
 
+        if (empty($paymentId))
+            $paymentId = $transaction->getMolliePaymentId();
+
         /** @var \Mollie\Api\Resources\Payment $molliePayment */
         $molliePayment = $this->apiClient->payments->get(
-            $transaction->getMolliePaymentId()
+            $paymentId
         );
 
         return $molliePayment;
@@ -583,13 +542,13 @@ class PaymentService
 
         // set the status
         if ($mollieOrder->isPaid())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
         elseif ($mollieOrder->isAuthorized())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
         elseif ($mollieOrder->isCanceled())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true, 'order');
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true, 'order');
         elseif ($mollieOrder->isCompleted())
-            $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_COMPLETED, true, 'order');
+            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_COMPLETED, true, 'order');
 
         return false;
     }
@@ -603,10 +562,10 @@ class PaymentService
      *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function checkPaymentStatus(\Shopware\Models\Order\Order $order)
+    public function checkPaymentStatus(\Shopware\Models\Order\Order $order, $paymentId = '')
     {
         // get mollie payment
-        $molliePayment = $this->getMolliePayment($order);
+        $molliePayment = $this->getMolliePayment($order, $paymentId);
 
         // set the status
         if ($molliePayment->isPaid())
@@ -718,20 +677,12 @@ class PaymentService
         // get the order module
         $sOrder = Shopware()->Modules()->Order();
 
-        // the order is paid
-        if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID) {
+        // the order is completed
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_COMPLETED) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
                     $order->getId(),
-                    Status::PAYMENT_STATE_COMPLETELY_PAID,
-                    $this->config->sendStatusMail()
-                );
-            }
-
-            if ($type == 'payment') {
-                $sOrder->setPaymentStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_COMPLETELY_PAID,
+                    Status::ORDER_STATE_COMPLETED,
                     $this->config->sendStatusMail()
                 );
             }
@@ -740,23 +691,25 @@ class PaymentService
                 return true;
         }
 
+        // the order is paid
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID) {
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_COMPLETELY_PAID,
+                $this->config->sendStatusMail()
+            );
+
+            if ($returnResult)
+                return true;
+        }
+
         // the order is authorized
         if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
-            if ($type == 'order') {
-                $sOrder->setOrderStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
-                    $this->config->sendStatusMail()
-                );
-            }
-
-            if ($type == 'payment') {
-                $sOrder->setPaymentStatus(
-                    $order->getId(),
-                    Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
-                    $this->config->sendStatusMail()
-                );
-            }
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED,
+                $this->config->sendStatusMail()
+            );
 
             if ($returnResult)
                 return true;
@@ -767,7 +720,7 @@ class PaymentService
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
                     $order->getId(),
-                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    Status::ORDER_STATE_CANCELLED_REJECTED,
                     $this->config->sendStatusMail()
                 );
             }
