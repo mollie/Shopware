@@ -212,6 +212,33 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
+     * Route to retry making an order
+     *
+     * @throws Exception
+     */
+    public function retryAction()
+    {
+        $orderNumber = $this->Request()->getParam('orderNumber');
+
+        /** @var \MollieShopware\Components\Services\OrderService $orderService */
+        $orderService = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
+
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = $orderService->getOrderByNumber($orderNumber);
+
+        /** @var \MollieShopware\Components\Services\BasketService $basketService */
+        $basketService = Shopware()->Container()
+            ->get('mollie_shopware.basket_service');
+
+        if (!empty($order)) {
+            $basketService->restoreBasket($order);
+        }
+
+        return $this->redirectBack();
+    }
+
+    /**
      * Get the current order by orderNumber, taking into account
      * the session that started the order.
      *
