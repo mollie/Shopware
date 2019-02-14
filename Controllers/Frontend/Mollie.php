@@ -415,7 +415,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
 
         // check if order payments are canceled
-        if ($paymentService->arePaymentsForOrderCanceled($order))
+        if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED))
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
 
         return false;
