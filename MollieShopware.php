@@ -424,7 +424,7 @@ class MollieShopware extends Plugin
                 );
             }
         }
-        catch (\Exception) {
+        catch (\Exception $ex) {
             //
         }
     }
