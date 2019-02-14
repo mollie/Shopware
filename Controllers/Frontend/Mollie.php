@@ -357,6 +357,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Components\Services\PaymentService $paymentService
      *
+     * @return mixed
+     *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     private function processOrderReturn(
@@ -408,9 +410,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($mollieOrder->isCanceled())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, 'order');
 
-        // check if order has failed
-        if ($paymentService->havePaymentsForOrderFailed($order))
+        // check if order payments have failed
+        if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED))
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
+
+        // check if order payments are canceled
+        if ($paymentService->arePaymentsForOrderCanceled($order))
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
+
+        return false;
     }
 
     /**
@@ -418,6 +426,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      *
      * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Components\Services\PaymentService $paymentService
+     *
+     * @return mixed
      *
      * @throws Exception
      */
@@ -470,6 +480,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // check if payment has failed
         if ($molliePayment->isFailed())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
+
+        return false;
     }
 
     /**
@@ -478,6 +490,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @param string $status
      * @param \Shopware\Models\Order\Order $order
      * @param string $type
+     *
+     * @return mixed
      *
      * @throws \Exception
      */
@@ -544,6 +558,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->view->assign('sMollieError', 'Payment expired');
         else
             $this->view->assign('sMollieError', 'Payment failed');
+
+        $this->view->addTemplateDir(__DIR__ . '/../../Resources/views');
+
+        return false;
     }
 
     /**

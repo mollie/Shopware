@@ -64,7 +64,7 @@ class BasketService
                 $this->basketModule->clearBasket();
 
                 // set comment
-                $commentText = "Payment through Mollie failed. ";
+                $commentText = "The payment on this order failed, the customer is retrying. ";
 
                 // iterate over products and add them to the basket
                 foreach ($orderDetails as $orderDetail) {

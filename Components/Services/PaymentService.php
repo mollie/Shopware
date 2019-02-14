@@ -616,7 +616,7 @@ class PaymentService
 
             if ($paymentsResult['total'] > 0) {
                 // fully paid
-                if ($paymentsResult['paid'] == $paymentsResult['total']) {
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, $returnResult);
 
                     if ($returnResult)
@@ -624,7 +624,7 @@ class PaymentService
                 }
 
                 // fully authorized
-                if ($paymentsResult['authorized'] == $paymentsResult['total']) {
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, $returnResult);
 
                     if ($returnResult)
@@ -632,7 +632,7 @@ class PaymentService
                 }
 
                 // fully canceled
-                if ($paymentsResult['canceled'] == $paymentsResult['total']) {
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
 
                     if ($returnResult)
@@ -640,7 +640,7 @@ class PaymentService
                 }
 
                 // fully open
-                if ($paymentsResult['open'] == $paymentsResult['total']) {
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, $returnResult);
 
                     if ($returnResult)
@@ -660,12 +660,13 @@ class PaymentService
      * Check if the payments for an order failed
      *
      * @param \Shopware\Models\Order\Order $order
+     * @param string $status
      *
      * @return bool
      *
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function havePaymentsForOrderFailed(\Shopware\Models\Order\Order $order)
+    public function isOrderPaymentsStatus(\Shopware\Models\Order\Order $order, $status)
     {
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->getMollieOrder($order);
@@ -673,7 +674,7 @@ class PaymentService
 
         // fully failed
         if ($paymentsResult['total'] > 0) {
-            if ($paymentsResult['failed'] == $paymentsResult['total'])
+            if ($paymentsResult[$status] == $paymentsResult['total'])
                 return true;
         }
 
@@ -819,12 +820,13 @@ class PaymentService
     {
         $paymentsResult = [
             'total' => 0,
-            'paid' => 0,
-            'authorized' => 0,
-            'pending' => 0,
-            'open' => 0,
-            'canceled' => 0,
-            'failed' => 0
+            PaymentStatus::MOLLIE_PAYMENT_PAID => 0,
+            PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED => 0,
+            PaymentStatus::MOLLIE_PAYMENT_DELAYED => 0,
+            PaymentStatus::MOLLIE_PAYMENT_OPEN => 0,
+            PaymentStatus::MOLLIE_PAYMENT_CANCELED => 0,
+            PaymentStatus::MOLLIE_PAYMENT_FAILED => 0,
+            PaymentStatus::MOLLIE_PAYMENT_EXPIRED => 0
         ];
 
         if (!empty($mollieOrder) && $mollieOrder instanceof \Mollie\Api\Resources\Order) {
@@ -835,17 +837,19 @@ class PaymentService
 
             foreach ($payments as $payment) {
                 if ($payment->isPaid())
-                    $paymentsResult['paid']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID]++;
                 if ($payment->isAuthorized())
-                    $paymentsResult['authorized']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED]++;
                 if ($payment->isPending())
-                    $paymentsResult['pending']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_DELAYED]++;
                 if ($payment->isOpen())
-                    $paymentsResult['open']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN]++;
                 if ($payment->isCanceled())
-                    $paymentsResult['canceled']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED]++;
                 if ($payment->isFailed())
-                    $paymentsResult['failed']++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_FAILED]++;
+                if ($payment->isExpired())
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_EXPIRED]++;
             }
         }
 
