@@ -414,9 +414,17 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED))
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
 
+        // check if order payments are open
+        if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN))
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN);
+
         // check if order payments are canceled
         if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED))
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
+
+        // check if order payments are expired
+        if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED))
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED);
 
         return false;
     }
