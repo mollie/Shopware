@@ -479,6 +479,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($molliePayment->isAuthorized())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
+        // check if payment is pending
+        if ($molliePayment->isPending())
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED);
+
+        // check if payment is open
+        if ($molliePayment->isOpen())
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN);
+
         // check if payment is canceled
         if ($molliePayment->isCanceled())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
@@ -486,10 +494,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // check if payment has failed
         if ($molliePayment->isFailed())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
-
-        // check if payment is open
-        if ($molliePayment->isOpen())
-            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN);
     }
 
     /**
@@ -515,7 +519,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // send the order confirmation e-mail
         if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID ||
-            $status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
+            $status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED ||
+            $status == PaymentStatus::MOLLIE_PAYMENT_DELAYED ||
+            $status == PaymentStatus::MOLLIE_PAYMENT_OPEN) {
 
             try {
                 $this->sendConfirmationEmail($order);
@@ -538,6 +544,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // redirect customer to finish page on created payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_OPEN)
+            return $this->redirectToFinish($order->getTemporaryId());
+
+        // redirect customer to finish page on pending payment
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_DELAYED)
             return $this->redirectToFinish($order->getTemporaryId());
 
         // redirect customer to shopping basket after failed payment
