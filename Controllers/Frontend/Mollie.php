@@ -236,20 +236,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $order = $orderService->getOrderByNumber($orderNumber);
 
             if (!empty($order)) {
-                /** @var \DateInterval $dateInterval */
-                $dateInterval = (new \DateTime('now'))->diff(
-                    $order->getOrderTime()
-                );
-
-                $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
-
-                if ($differenceInMinutes <= 5) {
-                    /** @var \MollieShopware\Components\Services\BasketService $basketService */
-                    $basketService = Shopware()->Container()
-                        ->get('mollie_shopware.basket_service');
-
-                    $basketService->restoreBasket($order);
-                }
+                $this->retryOrderRestore($order);
             }
         }
         catch (\Exception $ex) {
@@ -575,11 +562,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // redirect customer to shopping basket after failed payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
-            /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = Shopware()->Container()
-                ->get('mollie_shopware.basket_service');
-
-            $basketService->restoreBasket($order);
+            $this->retryOrderRestore($order);
 
             return $this->redirectBack('Payment failed');
         }
@@ -650,6 +633,31 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             catch (\Exception $ex) {
                 Logger::log('error', $ex->getMessage(), $ex);
             }
+        }
+    }
+
+    /**
+     * Retry order restore
+     *
+     * @param \Shopware\Models\Order\Order $order
+     *
+     * @throws \Exception
+     */
+    private function retryOrderRestore(\Shopware\Models\Order\Order $order)
+    {
+        /** @var \DateInterval $dateInterval */
+        $dateInterval = (new \DateTime('now'))->diff(
+            $order->getOrderTime()
+        );
+
+        $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
+
+        if ($differenceInMinutes <= 5) {
+            /** @var \MollieShopware\Components\Services\BasketService $basketService */
+            $basketService = Shopware()->Container()
+                ->get('mollie_shopware.basket_service');
+
+            $basketService->restoreBasket($order);
         }
     }
 
