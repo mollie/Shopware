@@ -58,8 +58,6 @@ class FrontendViewSubscriber implements SubscriberInterface
         if ($session !== null && $view !== null &&
             ($session->mollieError || $session->mollieStatusError)) {
 
-            echo $session->mollieError;
-
             // assign errors to view
             $view->assign('sMollieError', $session->mollieError);
             $view->assign('sMollieStatusError', $session->mollieStatusError);

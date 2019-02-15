@@ -225,21 +225,36 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function retryAction()
     {
-        $orderNumber = $this->Request()->getParam('orderNumber');
+        try {
+            $orderNumber = $this->Request()->getParam('orderNumber');
 
-        /** @var \MollieShopware\Components\Services\OrderService $orderService */
-        $orderService = Shopware()->Container()
-            ->get('mollie_shopware.order_service');
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            $orderService = Shopware()->Container()
+                ->get('mollie_shopware.order_service');
 
-        /** @var \Shopware\Models\Order\Order $order */
-        $order = $orderService->getOrderByNumber($orderNumber);
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $orderService->getOrderByNumber($orderNumber);
 
-        /** @var \MollieShopware\Components\Services\BasketService $basketService */
-        $basketService = Shopware()->Container()
-            ->get('mollie_shopware.basket_service');
+            if (!empty($order)) {
+                /** @var \DateInterval $dateInterval */
+                $dateInterval = (new \DateTime('now'))->diff(
+                    $order->getOrderTime()
+                );
 
-        if (!empty($order))
-            $basketService->restoreBasket($order);
+                $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
+
+                if ($differenceInMinutes <= 5) {
+                    /** @var \MollieShopware\Components\Services\BasketService $basketService */
+                    $basketService = Shopware()->Container()
+                        ->get('mollie_shopware.basket_service');
+
+                    $basketService->restoreBasket($order);
+                }
+            }
+        }
+        catch (\Exception $ex) {
+            //
+        }
 
         return $this->redirectBack();
     }
@@ -255,6 +270,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         $order = null;
         $transaction = null;
+        $sessionId = $this->Request()->getParam('session-1');
         $orderNumber = $this->Request()->getParam('orderNumber');
 
         /**
@@ -315,6 +331,19 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             return false;
+        }
+
+        /**
+         * Check if the returned session matches the transaction's session. If there is a match,
+         * restore that session and clear the stored session from the transaction. This is done to
+         * prevent that Mollie's return URL for the confirmation is used ever again.
+         *
+         * If there is no match, log the error and move on.
+         */
+        if ($transaction->getSessionId() == $sessionId) {
+            $this->startSession($sessionId);
+            $transaction->setSessionId(null);
+            $this->getTransactionRepository()->save($transaction);
         }
 
         return $order;
@@ -636,5 +665,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 Logger::log('error', $ex->getMessage(), $ex);
             }
         }
+    }
+
+    /**
+     * Get total minutes from a DateInterval
+     *
+     * @param \DateInterval $int
+     * @return float|int
+     */
+    private function getDateIntervalTotalMinutes(\DateInterval $int){
+        return ($int->d * 24 * 60) + ($int->h * 60) + $int->i;
     }
 }
