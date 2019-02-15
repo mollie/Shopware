@@ -27,9 +27,7 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 
 class MollieShopware extends Plugin
 {
-    /**
-     * MollieShopware\Components\ShopwareConfig
-     */
+    /** @var \MollieShopware\Components\Config */
     protected $config;
 
     /**
