@@ -724,9 +724,14 @@ class PaymentService
 
         // the order or payment is authorized
         if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
+            $statusId = Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+
+            if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
+                $statusId = Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+
             $sOrder->setPaymentStatus(
                 $order->getId(),
-                Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED,
+                $statusId,
                 $this->config->sendStatusMail()
             );
 

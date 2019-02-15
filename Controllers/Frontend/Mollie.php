@@ -391,11 +391,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
+        $authorizedStatusId = Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+
+        if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
+            $authorizedStatusId = Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+
         // check the existing order status
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_COMPLETELY_PAID)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
 
-        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED)
+        if ($order->getPaymentStatus()->getId() == $authorizedStatusId)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
         // check if order is paid
@@ -454,11 +459,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
+        $authorizedStatusId = Status::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+
+        if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
+            $authorizedStatusId = Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+
         // check the existing order status
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_COMPLETELY_PAID)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
 
-        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED)
+        if ($order->getPaymentStatus()->getId() == $authorizedStatusId)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
         // check if payment is paid
