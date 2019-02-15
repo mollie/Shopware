@@ -11,6 +11,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         COMPLETELY_PAID: 12,
         RESERVED: 18,
         RE_CREDITING: 20,
+        CREDIT_ACCEPTED: 31,
         ORDERED: 33,
         CANCELLED: 35,
     },
@@ -100,7 +101,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
                     // order should not have been refunded already
                     record.data && parseInt(record.data.status, 10) !== me.orderStatus.COMPLETED &&
-                    (parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID || parseInt(record.data.cleared, 10) === me.paymentStatus.ORDERED)
+                    (parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID || parseInt(record.data.cleared, 10) === me.paymentStatus.ORDERED || parseInt(record.data.cleared, 10) === me.paymentStatus.CREDIT_ACCEPTED)
                 ) {
                     return '';
                 }
