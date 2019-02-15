@@ -710,7 +710,7 @@ class PaymentService
                 return true;
         }
 
-        // the order is paid
+        // the order or payment is paid
         if ($status == PaymentStatus::MOLLIE_PAYMENT_PAID) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
@@ -722,7 +722,7 @@ class PaymentService
                 return true;
         }
 
-        // the order is authorized
+        // the order or payment is authorized
         if ($status == PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
@@ -734,7 +734,19 @@ class PaymentService
                 return true;
         }
 
-        // the order payment is open
+        // the payment is delayed
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_DELAYED) {
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_DELAYED,
+                $this->config->sendStatusMail()
+            );
+
+            if ($returnResult)
+                return true;
+        }
+
+        // the payment is open
         if ($status == PaymentStatus::MOLLIE_PAYMENT_OPEN) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
@@ -746,7 +758,7 @@ class PaymentService
                 return true;
         }
 
-        // the order is canceled
+        // the order or payment is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
@@ -768,7 +780,7 @@ class PaymentService
                 return true;
         }
 
-        // the order has failed or is expired
+        // the payment has failed or is expired
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED ||
             $status == PaymentStatus::MOLLIE_PAYMENT_EXPIRED) {
             if ($type == 'payment') {
@@ -804,7 +816,7 @@ class PaymentService
         if ($paymentMethod == PaymentMethod::KBC || $paymentMethod == PaymentMethod::PAYPAL)
             $paymentParameters['description'] = 'Order ' . $order->getNumber();
 
-        if ($paymentMethod == PaymentMethod::P24)
+        if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
             $paymentParameters['billingEmail'] = $order->getCustomer()->getEmail();
 
         return $paymentParameters;
