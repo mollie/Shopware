@@ -270,7 +270,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         $order = null;
         $transaction = null;
-        $sessionId = $this->Request()->getParam('session-1');
         $orderNumber = $this->Request()->getParam('orderNumber');
 
         /**
@@ -331,19 +330,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             return false;
-        }
-
-        /**
-         * Check if the returned session matches the transaction's session. If there is a match,
-         * restore that session and clear the stored session from the transaction. This is done to
-         * prevent that Mollie's return URL for the confirmation is used ever again.
-         *
-         * If there is no match, log the error and move on.
-         */
-        if ($transaction->getSessionId() == $sessionId) {
-            $this->startSession($sessionId);
-            $transaction->setSessionId(null);
-            $this->getTransactionRepository()->save($transaction);
         }
 
         return $order;
