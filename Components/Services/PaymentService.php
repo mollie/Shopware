@@ -287,6 +287,12 @@ class PaymentService
             'locale' => $this->getLocale(),
         ];
 
+        if ($paymentMethod == PaymentMethod::KBC || $paymentMethod == PaymentMethod::PAYPAL)
+            $molliePrepared['description'] = 'Order ' . $order->getNumber();
+
+        if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
+            $molliePrepared['billingEmail'] = $order->getCustomer()->getEmail();
+
         // prepare payment parameters
         $molliePrepared = $this->preparePaymentParameters(
             $paymentMethod,
@@ -817,12 +823,6 @@ class PaymentService
     {
         if ($paymentMethod == PaymentMethod::IDEAL)
             $paymentParameters['issuer'] = $this->getIdealIssuer();
-
-        if ($paymentMethod == PaymentMethod::KBC || $paymentMethod == PaymentMethod::PAYPAL)
-            $paymentParameters['description'] = 'Order ' . $order->getNumber();
-
-        if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
-            $paymentParameters['billingEmail'] = $order->getCustomer()->getEmail();
 
         return $paymentParameters;
     }
