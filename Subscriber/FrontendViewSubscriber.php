@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4
+	// Mollie Shopware Plugin Version: 1.4.1
 
 namespace MollieShopware\Subscriber;
 
