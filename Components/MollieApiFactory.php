@@ -38,16 +38,21 @@ class MollieApiFactory
             $this->apiClient = new MollieApiClient();
             $this->apiClient->setApiKey($this->config->apikey());
 
-            // add platform name and version
-            $this->apiClient->addVersionString(
-                'Shopware/' .
-                Shopware()->Container()->getParameter('shopware.release.version')
-            );
+            try {
+                // add platform name and version
+                $this->apiClient->addVersionString(
+                    'Shopware/' .
+                    Shopware()->Container()->getParameter('shopware.release.version')
+                );
 
-            // add plugin name and version
-            $this->apiClient->addVersionString(
-                'MollieShopware/1.4.1'
-            );
+                // add plugin name and version
+                $this->apiClient->addVersionString(
+                    'MollieShopware/1.4.1'
+                );
+            }
+            catch (\Exception $ex) {
+                //
+            }
         }
 
         return $this->apiClient;
