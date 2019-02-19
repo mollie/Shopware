@@ -206,7 +206,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 );
             }
             else {
-                Notifier::notifyException(
+                Notifier::notifyOk(
                     'The payment status for order ' . $order->getNumber() . ' could not be processed.'
                 );
             }
@@ -240,7 +240,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
         }
         catch (\Exception $ex) {
-            //
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $this->redirectBack();
@@ -652,14 +656,28 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     private function retryOrderRestore(\Shopware\Models\Order\Order $order)
     {
+        /** @var \MollieShopware\Components\CurrentCustomer $currentCustomer */
+        $currentCustomer = new \MollieShopware\Components\CurrentCustomer(
+            Shopware()->Session(),
+            Shopware()->Models()
+        );
+
+        /** @var \DateTime $currentDateTime */
+        $currentDateTime = new \DateTime(
+            'now',
+            $order->getOrderTime()->getTimezone()
+        );
+
         /** @var \DateInterval $dateInterval */
-        $dateInterval = (new \DateTime('now'))->diff(
+        $dateInterval = ($currentDateTime)->diff(
             $order->getOrderTime()
         );
 
         $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
 
-        if ($differenceInMinutes <= 10) {
+        if ($differenceInMinutes <= 10 &&
+            $currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
+
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()
                 ->get('mollie_shopware.basket_service');
