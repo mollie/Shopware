@@ -809,6 +809,52 @@ class PaymentService
     }
 
     /**
+     * Ship the order
+     *
+     * @param string $mollieId
+     *
+     * @return bool|\Mollie\Api\Resources\Shipment|null
+     *
+     * @throws \Exception
+     */
+    public function sendOrder($mollieId)
+    {
+        $mollieOrder = null;
+
+        try {
+            /** @var \Mollie\Api\Resources\Order $mollieOrder */
+            $mollieOrder = $this->apiClient->orders->get($mollieId);
+        }
+        catch (\Exception $ex) {
+            throw new \Exception('Order ' . $mollieId . ' could not be found at Mollie.');
+        }
+
+        if (!empty($mollieOrder)) {
+            $result = null;
+
+            if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
+                if ($mollieOrder->isCompleted()) {
+                    throw new \Exception('The order is already completed at Mollie.');
+                }
+                else {
+                    throw new \Exception('The order doesn\'t seem to be paid or authorized.');
+                }
+            }
+
+            try {
+                $result = $mollieOrder->shipAll();
+            }
+            catch (\Exception $ex) {
+                throw new \Exception('The order can\'t be shipped.');
+            }
+
+            return $result;
+        }
+
+        return false;
+    }
+
+    /**
      * Prepare the payment parameters based on the payment method's requirements
      *
      * @param $paymentMethod

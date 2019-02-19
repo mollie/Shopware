@@ -104,7 +104,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         }
 
         if (empty($order))
-            return false;
+            return true;
 
         $mollieId = null;
 
@@ -130,7 +130,7 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService = Shopware()->Container()
                 ->get('mollie_shopware.payment_service');
 
-            $paymentService->sendOrder($order, $mollieId);
+            $paymentService->sendOrder($mollieId);
         }
         catch (\Exception $ex) {
             Logger::log(

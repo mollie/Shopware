@@ -19,6 +19,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var \MollieShopware\Components\Services\OrderService $orderService */
     protected $orderService;
 
+    /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+    protected $paymentService;
+
     public function shipAction()
     {
         try {
@@ -30,6 +33,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
+
+            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            $this->paymentService = $this->container->get('mollie_shopware.payment_service');
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->orderService->getOrderById(
@@ -44,7 +50,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (empty($mollieId))
                 $this->returnError('Order is paid as a single payment (not an order) at Mollie');
 
-            $result = $this->sendOrder($mollieId);
+            $result = $this->paymentService->sendOrder($mollieId);
 
             if ($result)
                 $this->returnSuccess('Order status set to shipped at Mollie', $result);
@@ -220,54 +226,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
 
         return true;
-    }
-
-
-
-    /**
-     * Ship the order
-     *
-     * @param string $mollieId
-     *
-     * @return bool|\Mollie\Api\Resources\Shipment|null
-     *
-     * @throws \Exception
-     */
-    private function sendOrder($mollieId)
-    {
-        $mollieOrder = null;
-
-        try {
-            $mollieOrder = $this->apiClient->orders->get($mollieId);
-        }
-        catch (\Exception $ex) {
-            throw new \Exception('The order could not be found at Mollie.');
-        }
-
-        // ship the order
-        if (!empty($mollieOrder)) {
-            $result = null;
-
-            if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
-                if ($mollieOrder->isCompleted()) {
-                    throw new \Exception('The order is already completed at Mollie.');
-                }
-                else {
-                    throw new \Exception('The order doesn\'t seem to be paid or authorized.');
-                }
-            }
-
-            try {
-                $result = $mollieOrder->shipAll();
-            }
-            catch (\Exception $ex) {
-                throw new \Exception('The order can\'t be shipped.');
-            }
-
-            return $result;
-        }
-
-        return false;
     }
 
     /**
