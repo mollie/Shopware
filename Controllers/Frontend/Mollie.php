@@ -669,7 +669,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         );
 
         /** @var \DateInterval $dateInterval */
-        $dateInterval = ($currentDateTime)->diff(
+        $dateInterval = $currentDateTime->diff(
             $order->getOrderTime()
         );
 
