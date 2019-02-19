@@ -98,6 +98,28 @@
         </element>
 
         <element type="select" scope="shop">
+            <name>orders_api_update_order_status</name>
+            <label lang="de">Bestellstatus von Mollie übernehmen</label>
+            <label lang="en">Take over order statuses from Mollie</label>
+            <label lang="nl">Order statussen vanuit Mollie overnemen</label>
+            <value>no</value>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
+        <element type="select" scope="shop">
             <name>auto_cancel_failed_orders</name>
             <label lang="de">Fehlgeschlagene Bestellungen automatisch stornieren</label>
             <label lang="en">Cancel failed orders automatically</label>
