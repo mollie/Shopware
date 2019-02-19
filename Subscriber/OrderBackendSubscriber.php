@@ -13,7 +13,7 @@ class OrderBackendSubscriber implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
-            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail',
+            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail'
         ];
     }
 
