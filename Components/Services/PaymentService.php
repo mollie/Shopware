@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.4.1
+// Mollie Shopware Plugin Version: 1.4.2
 
 namespace MollieShopware\Components\Services;
 
@@ -703,7 +703,8 @@ class PaymentService
         $sOrder = Shopware()->Modules()->Order();
 
         // the order is completed
-        if ($status == PaymentStatus::MOLLIE_PAYMENT_COMPLETED) {
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_COMPLETED &&
+            $this->config->updateOrderStatus()) {
             if ($type == 'order') {
                 $sOrder->setOrderStatus(
                     $order->getId(),
@@ -771,7 +772,7 @@ class PaymentService
 
         // the order or payment is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
-            if ($type == 'order') {
+            if ($type == 'order' && $this->config->updateOrderStatus()) {
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_CANCELLED_REJECTED,

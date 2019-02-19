@@ -1,6 +1,6 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.4.1
+// Mollie Shopware Plugin Version: 1.4.2
 
 namespace MollieShopware\Subscriber;
 
@@ -66,6 +66,78 @@ class OrderBackendSubscriber implements SubscriberInterface
                     return false;
                 }
             }
+        }
+    }
+
+    public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
+    {
+        /** @var \Enlight_Controller_Request_Request $request */
+        $request = $args->getRequest();
+
+        if ($request == null)
+            return true;
+
+        if ($request->getActionName() != 'save')
+            return true;
+
+        $orderId = $request->getParam('id');
+
+        if (empty($orderId))
+            return true;
+
+        $order = null;
+
+        try {
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            $orderService = Shopware()->Container()
+                ->get('mollie_shopware.order_service');
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $orderService->getOrderById($orderId);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        if (empty($order))
+            return false;
+
+        $mollieId = null;
+
+        try {
+            $mollieId = $orderService->getMollieOrderId($order);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        if (empty($mollieId))
+            return true;
+
+        if ($order->getOrderStatus()->getId() != \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED)
+            return true;
+
+        try {
+            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            $paymentService = Shopware()->Container()
+                ->get('mollie_shopware.payment_service');
+
+            $paymentService->sendOrder($order, $mollieId);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
     }
 }
