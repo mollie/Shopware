@@ -402,6 +402,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_COMPLETELY_PAID)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
 
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_DELAYED)
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED);
+
         if ($order->getPaymentStatus()->getId() == $authorizedStatusId)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
@@ -420,6 +423,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // check if order payments have failed
         if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED))
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
+
+        // check if order payments are delayed
+        if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED))
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED);
 
         // check if order payments are open
         if ($paymentService->isOrderPaymentsStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN))
@@ -652,7 +659,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
 
-        if ($differenceInMinutes <= 5) {
+        if ($differenceInMinutes <= 10) {
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()
                 ->get('mollie_shopware.basket_service');
