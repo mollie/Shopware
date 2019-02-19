@@ -109,6 +109,14 @@ class Config
     /**
      * @return bool
      */
+    public function updateOrderStatus()
+    {
+        return ($this->get('orders_api_update_order_status', 'no') == 'yes');
+    }
+
+    /**
+     * @return bool
+     */
     public function cancelFailedOrders()
     {
         return ($this->get('auto_cancel_failed_orders', 'yes') == 'yes');
