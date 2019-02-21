@@ -20,5 +20,4 @@ env:
 install:
 - travis_retry composer install --no-scripts --no-suggest
 script:
-- composer validate
 - find . -name '*.php' | xargs -n 1 -P4 php -l
