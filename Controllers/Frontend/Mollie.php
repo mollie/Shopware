@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.2
+// Mollie Shopware Plugin Version: 1.4.3
 
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
@@ -661,7 +661,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             Shopware()->Session(),
             Shopware()->Models()
         );
-
         /** @var \DateTime $currentDateTime */
         $currentDateTime = new \DateTime(
             'now',
@@ -677,7 +676,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($differenceInMinutes <= 10 &&
             $currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
-
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()
                 ->get('mollie_shopware.basket_service');

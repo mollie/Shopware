@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.2
+// Mollie Shopware Plugin Version: 1.4.3
 
 namespace MollieShopware\Components;
 
@@ -104,6 +104,30 @@ class Config
     public function useOrdersApiOnlyWhereMandatory()
     {
         return ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+    }
+
+    /**
+     * @return int
+     */
+    public function getAuthorizedPaymentStatusId()
+    {
+        $statusModel = new \Shopware\Models\Order\Status();
+        $paymentStatus = null;
+        $configuredStatus = $this->get('payment_authorized_status', 'ordered');
+
+        // set default payment status, considering older Shopware versions that don't have the ordered status
+        if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+        else
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+
+        // set different payment status if configured
+        if ($configuredStatus == 'preliminarily_accepted')
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+        if ($configuredStatus == 'accepted')
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED;
+
+        return $paymentStatus;
     }
 
     /**
