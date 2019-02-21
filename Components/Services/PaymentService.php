@@ -711,9 +711,8 @@ class PaymentService
         $sOrder = Shopware()->Modules()->Order();
 
         // the order is completed
-        if ($status == PaymentStatus::MOLLIE_PAYMENT_COMPLETED &&
-            $this->config->updateOrderStatus()) {
-            if ($type == 'order') {
+        if ($status == PaymentStatus::MOLLIE_PAYMENT_COMPLETED) {
+            if ($type == 'order' && $this->config->updateOrderStatus()) {
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_COMPLETED,

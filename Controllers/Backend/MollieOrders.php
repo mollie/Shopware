@@ -218,7 +218,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         if ($this->config->sendStatusMail() && $this->config->sendRefundStatusMail()) {
             $mail = Shopware()->Modules()->Order()->createStatusMail(
                 $order->getId(),
-                $paymentStatusRefunded
+                $paymentStatusRefunded->getId()
             );
 
             if ($mail)
