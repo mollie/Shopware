@@ -382,7 +382,12 @@ class MollieShopware extends Plugin
      */
     protected function updateAttributes()
     {
-        $this->makeAttributes()->create([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer', 'string', [] ] ]);
+        try {
+            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_ideal_issuer', 'string', []]]);
+        }
+        catch (\Exception $ex) {
+            //
+        }
     }
 
     /**
@@ -390,7 +395,12 @@ class MollieShopware extends Plugin
      */
     protected function removeAttributes()
     {
-        $this->makeAttributes()->remove([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer' ] ]);
+        try {
+            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_ideal_issuer']]);
+        }
+        catch (\Exception $ex) {
+            //
+        }
     }
 
     /**

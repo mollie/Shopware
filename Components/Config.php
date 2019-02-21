@@ -117,9 +117,9 @@ class Config
 
         // set default payment status, considering older Shopware versions that don't have the ordered status
         if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
-            $statusModel::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
         else
-            $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
 
         // set different payment status if configured
         if ($configuredStatus == 'preliminarily_accepted')
