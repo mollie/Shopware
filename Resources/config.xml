@@ -11,9 +11,9 @@
 
         <element type="select" scope="shop">
             <name>send_status_mail</name>
-            <label lang="de">Statusmail senden</label>
-            <label lang="en">Send status mail</label>
-            <label lang="nl">Stuur status e-mail</label>
+            <label lang="de">Statusmail für Zahlungen senden</label>
+            <label lang="en">Send payment status mail</label>
+            <label lang="nl">Stuur betaalstatus e-mail</label>
             <value>yes</value>
             <store>
                 <option>
