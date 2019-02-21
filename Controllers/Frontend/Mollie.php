@@ -676,6 +676,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($differenceInMinutes <= 10 &&
             $currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
+
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()
                 ->get('mollie_shopware.basket_service');
