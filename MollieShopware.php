@@ -276,7 +276,7 @@ class MollieShopware extends Plugin
         $position = 0;
 
         // path to template dir for extra payment-mean options
-        $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment/methods';
+        $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment';
 
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
@@ -286,11 +286,11 @@ class MollieShopware extends Plugin
             $smarty->assign('router', Shopware()->Router());
 
             // template path
-            $adTemplate = $paymentTemplateDir . '/' . strtolower($method->id) . '.tpl';
+            $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
 
             // set default template if no specific template exists
             if (!file_exists($adTemplate)) {
-                $adTemplate =  $paymentTemplateDir . '/main.tpl';
+                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
             }
 
             $additionalDescription = $smarty->fetch('file:' . $adTemplate);
@@ -305,7 +305,7 @@ class MollieShopware extends Plugin
             ];
 
             // check template exist
-            if (file_exists($paymentTemplateDir . $name . '.tpl')) {
+            if (file_exists($paymentTemplateDir . '/' . $name . '.tpl')) {
                 $option['template'] = $name . '.tpl';
             }
 
