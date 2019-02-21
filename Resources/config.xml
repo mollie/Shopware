@@ -106,9 +106,9 @@
             <store>
                 <option>
                     <value>ordered</value>
-                    <label lang="de">Die Zahlung wurde angewiesen</label>
-                    <label lang="en">The payment has been ordered</label>
-                    <label lang="nl">De betaling is geautoriseerd</label>
+                    <label lang="de">Die Zahlung wurde angewiesen (not available in Shopware 5.3)</label>
+                    <label lang="en">The payment has been ordered (nicht verfügbar in Shopware 5.3)</label>
+                    <label lang="nl">De betaling is geautoriseerd (niet beschikbaar in Shopware 5.3)</label>
                 </option>
                 <option>
                     <value>preliminarily_accepted</value>
