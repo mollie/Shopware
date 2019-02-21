@@ -5,6 +5,7 @@ php:
 - 7.0
 - 7.1
 - 7.2
+- 7.3
 - nightly
 matrix:
   fast_finish: true
@@ -20,4 +21,4 @@ install:
 - travis_retry composer install --no-scripts --no-suggest
 script:
 - composer validate --strict
-- find Components Controllers Resources Views Mollie.php '*.php' | xargs -n 1 -P4 php -l
+- find Client Commands Components Controllers Models Resources Subscriber MollieShopware.php '*.php' | xargs -n 1 -P4 php -l
