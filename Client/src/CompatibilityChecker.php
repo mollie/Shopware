@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.2
+// Mollie Shopware Plugin Version: 1.4.3
 
 namespace Mollie\Api;
 
