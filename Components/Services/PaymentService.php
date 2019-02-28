@@ -774,7 +774,7 @@ class PaymentService
 
         // the order or payment is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
-            if ($type == 'order' && $this->config->updateOrderStatus()) {
+            if ($type == 'order' && ($this->config->updateOrderStatus() || $this->config->cancelFailedOrders())) {
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_CANCELLED_REJECTED,
