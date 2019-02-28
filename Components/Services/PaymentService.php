@@ -774,18 +774,18 @@ class PaymentService
 
         // the order or payment is canceled
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
-            if ($type == 'order' && ($this->config->updateOrderStatus() || $this->config->cancelFailedOrders())) {
-                $sOrder->setOrderStatus(
-                    $order->getId(),
-                    Status::ORDER_STATE_CANCELLED_REJECTED,
-                    $this->config->sendStatusMail()
-                );
-            }
-
             if ($type == 'payment') {
                 $sOrder->setPaymentStatus(
                     $order->getId(),
                     Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($this->config->cancelFailedOrders() || ($type == 'order' && $this->config->updateOrderStatus())) {
+                $sOrder->setOrderStatus(
+                    $order->getId(),
+                    Status::ORDER_STATE_CANCELLED_REJECTED,
                     $this->config->sendStatusMail()
                 );
             }
@@ -801,6 +801,14 @@ class PaymentService
                 $sOrder->setPaymentStatus(
                     $order->getId(),
                     Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                    $this->config->sendStatusMail()
+                );
+            }
+
+            if ($this->config->cancelFailedOrders()) {
+                $sOrder->setOrderStatus(
+                    $order->getId(),
+                    Status::ORDER_STATE_CANCELLED_REJECTED,
                     $this->config->sendStatusMail()
                 );
             }
