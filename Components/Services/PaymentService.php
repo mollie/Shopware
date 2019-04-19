@@ -488,7 +488,9 @@ class PaymentService
      *
      * @return string
      */
-    private function getLocale()
+    private function getLocale(
+        \Shopware\Models\Shop\Shop $shop = null
+    )
     {
         // mollie locales
         $mollieLocales = [
@@ -513,8 +515,12 @@ class PaymentService
             'lt_LT'
         ];
 
+        // get shop
+        if (empty($shop))
+            $shop = Shopware()->Shop();
+
         // get shop locale
-        $locale = Shopware()->Shop()->getLocale()->getLocale();
+        $locale = $shop->getLocale()->getLocale();
 
         // set default locale on empty or not supported shop locale
         if (empty($locale) || !in_array($locale, $mollieLocales))

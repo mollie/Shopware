@@ -267,10 +267,13 @@ class MollieShopware extends Plugin
      */
     protected function getPaymentOptions()
     {
-        $mollie = $this->getMollieClient();
+        /** @var \Shopware\Models\Shop\Repository $shopRepo */
+        $shopRepo = Shopware()->Models()->getRepository(
+            \Shopware\Models\Shop\Shop::class
+        );
 
-        // TODO: get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
-        $methods = $mollie->methods->all(['resource' => 'orders']);
+        /** @var \Shopware\Models\Shop\Shop[] $shops */
+        $shops = $shopRepo->findAll();
 
         $options = [];
         $position = 0;
@@ -278,38 +281,78 @@ class MollieShopware extends Plugin
         // path to template dir for extra payment-mean options
         $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment';
 
-        foreach ($methods as $key => $method) {
-            $name = 'mollie_' . $method->id;
+        foreach ($shops as $shop) {
+            $methods = [];
 
-            $smarty = new Smarty;
-            $smarty->assign('method', $method);
-            $smarty->assign('router', Shopware()->Router());
-
-            // template path
-            $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
-
-            // set default template if no specific template exists
-            if (!file_exists($adTemplate)) {
-                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
+            try {
+                $mollie = $this->getMollieClient($shop);
+                $methods = $mollie->methods->all([
+                    'resource' => 'orders',
+                    'locale' => $shop->getLocale()->getLocale()
+                ]);
+            }
+            catch (\Exception $ex) {
+                // log the error
+                Logger::log(
+                    'error',
+                    $ex->getMessage(),
+                    $ex
+                );
             }
 
-            $additionalDescription = $smarty->fetch('file:' . $adTemplate);
+            foreach ($methods as $key => $method) {
+                $name = 'mollie_' . $method->id;
+                $nameWithLocale = $name . '_' . strtolower($shop->getLocale()->getLocale());
 
-            $option = [
-                'name' => $name,
-                'description' => $method->description,
-                'action' => 'frontend/Mollie',
-                'active' => 1,
-                'position' => $position,
-                'additionalDescription' => $additionalDescription
-            ];
+                $smarty = new Smarty;
+                $smarty->assign('method', $method);
+                $smarty->assign('router', Shopware()->Router());
 
-            // check template exist
-            if (file_exists($paymentTemplateDir . '/' . $name . '.tpl')) {
-                $option['template'] = $name . '.tpl';
+                // template path
+                $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
+
+                // set default template if no specific template exists
+                if (!file_exists($adTemplate)) {
+                    $adTemplate = $paymentTemplateDir . '/methods/main.tpl';
+                }
+
+                $additionalDescription = $smarty->fetch('file:' . $adTemplate);
+
+                $foundOption = -1;
+
+                if (count($options)) {
+                    for ($i = 0; $i < count($options); $i++) {
+                        if (isset($options[$i]['name']) &&
+                            $options[$i]['name'] == $nameWithLocale) {
+                            $foundOption = $i;
+                        }
+                    }
+                }
+
+                if ($foundOption > -1) {
+                    $options[$foundOption]['shops'][] = $shop;
+                }
+                else {
+                    $option = [
+                        'name' => $nameWithLocale,
+                        'description' => $method->description,
+                        'action' => 'frontend/Mollie',
+                        'active' => 1,
+                        'position' => $position,
+                        'additionalDescription' => $additionalDescription,
+                        'shops' => [
+                            $shop
+                        ]
+                    ];
+
+                    // check template exist
+                    if (file_exists($paymentTemplateDir . '/' . $name . '.tpl')) {
+                        $option['template'] = $name . '.tpl';
+                    }
+
+                    $options[] = $option;
+                }
             }
-
-            $options[] = $option;
         }
 
         return $options;
@@ -318,13 +361,13 @@ class MollieShopware extends Plugin
     /**
      * @return \Mollie\Api\MollieApiClient
      */
-    protected function getMollieClient()
+    protected function getMollieClient(\Shopware\Models\Shop\Shop $shop = null)
     {
         $this->requireDependencies();
 
         $render= $this->container->get('shopware.plugin.cached_config_reader');
 
-        $config = new Config($render);
+        $config = new Config($render, $shop);
         $factory = new MollieApiFactory($config);
         return $factory->create();
     }

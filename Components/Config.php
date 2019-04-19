@@ -11,12 +11,19 @@ class Config
     /** @var \Shopware\Components\Plugin\ConfigReader */
     protected $configReader;
 
+    /** @var \Shopware\Models\Shop\DetachedShop */
+    protected $shop;
+
     /** @var array */
     protected $data = null;
 
-    public function __construct(\Shopware\Components\Plugin\ConfigReader $configReader)
+    public function __construct(
+        \Shopware\Components\Plugin\ConfigReader $configReader,
+        \Shopware\Models\Shop\Shop $shop = null
+    )
     {
         $this->configReader = $configReader;
+        $this->shop = $shop;
     }
 
     /**
@@ -31,7 +38,10 @@ class Config
     {
         if (empty($this->data)) {
             try {
-                $shop = Shopware()->Shop();
+                if (!empty($this->shop))
+                    $shop = $this->shop;
+                else
+                    $shop = Shopware()->Shop();
             }
             catch(ServiceNotFoundException $ex) {
                 $shop = null;
