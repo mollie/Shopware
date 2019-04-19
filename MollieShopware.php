@@ -285,11 +285,11 @@ class MollieShopware extends Plugin
             $methods = [];
 
             try {
+                /** @var \Mollie\Api\MollieApiClient $mollie */
                 $mollie = $this->getMollieClient($shop);
-                $methods = $mollie->methods->all([
-                    'resource' => 'orders',
-                    'locale' => $shop->getLocale()->getLocale()
-                ]);
+
+                /** @var \Mollie\Api\Resources\Method[] $methods */
+                $methods = $mollie->methods->all();
             }
             catch (\Exception $ex) {
                 // log the error
@@ -302,7 +302,6 @@ class MollieShopware extends Plugin
 
             foreach ($methods as $key => $method) {
                 $name = 'mollie_' . $method->id;
-                $nameWithLocale = $name . '_' . strtolower($shop->getLocale()->getLocale());
 
                 $smarty = new Smarty;
                 $smarty->assign('method', $method);
@@ -323,7 +322,7 @@ class MollieShopware extends Plugin
                 if (count($options)) {
                     for ($i = 0; $i < count($options); $i++) {
                         if (isset($options[$i]['name']) &&
-                            $options[$i]['name'] == $nameWithLocale) {
+                            $options[$i]['name'] == $name) {
                             $foundOption = $i;
                         }
                     }
@@ -334,7 +333,7 @@ class MollieShopware extends Plugin
                 }
                 else {
                     $option = [
-                        'name' => $nameWithLocale,
+                        'name' => $name,
                         'description' => $method->description,
                         'action' => 'frontend/Mollie',
                         'active' => 1,
