@@ -145,4 +145,12 @@ class Config
     {
         return ($this->get('auto_cancel_failed_orders', 'yes') == 'yes');
     }
+
+    /**
+     * @return bool
+     */
+    public function createOrderBeforePayment()
+    {
+        return ($this->get('create_order_before_payment', 'yes') == 'yes');
+    }
 }

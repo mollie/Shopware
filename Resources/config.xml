@@ -172,6 +172,31 @@
             </store>
         </element>
 
+        <element type="select" scope="shop">
+            <name>create_order_before_payment</name>
+            <label lang="de">Bestellung erstellen bevor Abschluss der Zahlung</label>
+            <label lang="en">Create order before finishing the payment</label>
+            <label lang="nl">Order aanmaken vóór het afronden van de betaling</label>
+            <value>yes</value>
+            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
+            <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
+            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

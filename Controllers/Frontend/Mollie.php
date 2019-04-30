@@ -691,7 +691,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @param \DateInterval $int
      * @return float|int
      */
-    private function getDateIntervalTotalMinutes(\DateInterval $int){
+    private function getDateIntervalTotalMinutes(\DateInterval $int) {
         return ($int->d * 24 * 60) + ($int->h * 60) + $int->i;
     }
 }
