@@ -4,8 +4,6 @@
 
 namespace MollieShopware\Components;
 
-use Shopware\Models\Customer\Customer as CustomerModel;
-
 class CurrentCustomer
 {
     /** @var \Enlight_Components_Session_Namespace */
