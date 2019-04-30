@@ -32,9 +32,16 @@ class OrderLines
     /**
      * @var integer $orderId
      *
-     * @ORM\Column(name="order_id", type="integer", nullable=false)
+     * @ORM\Column(name="order_id", type="integer", nullable=true)
      */
     private $orderId;
+
+    /**
+     * @var integer $orderId
+     *
+     * @ORM\Column(name="transaction_id", type="integer", nullable=true)
+     */
+    private $transactionId;
 
     /**
      * Set the ID for the order line
@@ -97,4 +104,23 @@ class OrderLines
         return $this->orderId;
     }
 
+    /**
+     * Set the transaction ID for the order line
+     *
+     * @param $orderId
+     */
+    public function setTransactionId($transactionId)
+    {
+        $this->transactionId = $transactionId;
+    }
+
+    /**
+     * Get the transaction ID for the order line
+     *
+     * @return int
+     */
+    public function getTransactionId()
+    {
+        return $this->transactionId;
+    }
 }
