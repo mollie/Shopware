@@ -130,6 +130,83 @@ class BasketService
     }
 
     /**
+     * Get positions from basket
+     *
+     * @return array
+     * @throws \Exception
+     */
+    function getBasketLines()
+    {
+        $items = [];
+
+        try {
+            /** @var \Shopware\Models\Order\Repository $basketRepo */
+            $basketRepo = Shopware()->Models()->getRepository(
+                \Shopware\Models\Order\Basket::class
+            );
+
+            /** @var \Shopware\Models\Order\Basket[] $basketItems */
+            $basketItems = $basketRepo->find([
+                'sessionId' => Shopware()->Session()->offsetGet('sessionId')
+            ]);
+
+            foreach ($basketItems as $basketItem) {
+                // get the unit price
+                $unitPrice = round($basketItem->getPrice(), 2);
+
+                // get net price
+                $netPrice = $basketItem->getNetPrice();
+
+                // get total amount
+                $totalAmount = $unitPrice * $basketItem->getQuantity();
+
+                // get vat amount
+                $vatAmount = $basketItem->getPrice() - $basketItem->getNetPrice();
+
+                // build the order line array
+                $orderLine = [
+                    'name' => $basketItem->getArticleName(),
+                    'type' => 'physical',
+                    'quantity' => $basketItem->getQuantity(),
+                    'unit_price' => $unitPrice,
+                    'net_price' => $netPrice,
+                    'total_amount' => $totalAmount,
+                    'vat_rate' => $vatAmount == 0 ? 0 : $basketItem->getTaxRate(),
+                    'vat_amount' => $vatAmount,
+                ];
+
+                // set the order line type
+                if (strstr($basketItem->getOrderNumber(), 'surcharge'))
+                    $orderLine['type'] = 'surcharge';
+
+                if (strstr($basketItem->getOrderNumber(), 'discount'))
+                    $orderLine['type'] = 'discount';
+
+                if ($basketItem->getEsdArticle() > 0)
+                    $orderLine['type'] = 'digital';
+
+                if ($basketItem->getMode() == 2)
+                    $orderLine['type'] = 'discount';
+
+                if ($unitPrice < 0)
+                    $orderLine['type'] = 'discount';
+
+                // add the order line to items
+                $items[] = $orderLine;
+            }
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $items;
+    }
+
+    /**
      * Get a voucher by it's id
      *
      * @param int $voucherId
