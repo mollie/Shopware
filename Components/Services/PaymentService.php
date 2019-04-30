@@ -449,7 +449,7 @@ class PaymentService
      *
      * @throws \Exception
      */
-    private function prepareRedirectUrl(\Shopware\Models\Order\Order $order, $action = 'return', $type = 'order')
+    private function prepareRedirectUrl($number, $action = 'return', $type = 'order', $isTemporary = false)
     {
         // check for errors
         if (!in_array($action, ['return', 'notify']))
@@ -462,9 +462,13 @@ class PaymentService
             'controller'    => 'Mollie',
             'action'        => $action,
             'type'          => $type,
-            'forceSecure'   => true,
-            'orderNumber'   => $order->getNumber()
+            'forceSecure'   => true
         ];
+
+        if (!$isTemporary)
+            $assembleData['orderNumber'] = $number;
+        else
+            $assembleData['transactionNumber'] = $number;
 
         if ($action == 'return')
             $assembleData['appendSession'] = true;
