@@ -42,6 +42,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         // @todo: check if basket exists!!
 
+        // variables
+        $orderNumber = null;
+        $orderDetails = null;
+
+        /** @var \MollieShopware\Components\Config $config */
+        $config = Shopware()->Container()->get('mollie_shopware.config');
+
         /**
          * Create an instance of the PaymentService. The PaymentService is used
          * to handle transactions.
@@ -66,61 +73,69 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          */
         $transaction = $paymentService->createTransaction();
 
-        /**
-         * Save our current order in the database. This returns an order
-         * number which we can use in our payment description.
-         *
-         * We do NOT send a thank you email at this point. Payment status
-         * remains OPEN for now.
-         *
-         * @var string $orderNumber
-         */
-        $orderNumber = $this->saveOrder(
-            $transaction->getTransactionId(),
-            $signature,
-            Status::PAYMENT_STATE_OPEN,
-            false
-        );
+        // prepare transaction
+        $transaction = $this->prepareTransaction($transaction, $signature);
 
-        /**
-         * Create an OrderService instance. The OrderService is used to retrieve orders,
-         * order lines for mollie, etc.
-         *
-         * @var \MollieShopware\Components\Services\OrderService $orderService
-         */
-        $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+        // store the transaction
+        Shopware()->Models()->persist($transaction);
+        Shopware()->Models()->flush();
 
-        /**
-         * Get the order by order number from the OrderService.
-         *
-         * @var \Shopware\Models\Order\Order $order */
-        $order = $orderService->getOrderByNumber($orderNumber);
-
-        /**
-         * Check if the order is set, otherwise log an throw an error. The error is thrown
-         * to also tell the customer that something went wrong.
-         */
-        if (empty($order)) {
-            Logger::log(
-                'error',
-                'The order with order number ' . $orderNumber . ' could not be found.',
-                null,
-                true
+        if ($config->createOrderBeforePayment()) {
+            /**
+             * Save our current order in the database. This returns an order
+             * number which we can use in our payment description.
+             *
+             * We do NOT send a thank you email at this point. Payment status
+             * remains OPEN for now.
+             *
+             * @var string $orderNumber
+             */
+            $orderNumber = $this->saveOrder(
+                $transaction->getTransactionId(),
+                $signature,
+                Status::PAYMENT_STATE_OPEN,
+                false
             );
-        }
 
-        /**
-         * Get the order lines of the order from the OrderService.
-         *
-         * @var array
-         */
-        $orderDetails = $orderService->getOrderLines($order);
+            // Store order number on transaction
+            $transaction->setOrderNumber($orderNumber);
+
+            /**
+             * Create an OrderService instance. The OrderService is used to retrieve orders,
+             * order lines for mollie, etc.
+             *
+             * @var \MollieShopware\Components\Services\OrderService $orderService
+             */
+            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+
+            /**
+             * Get the order by order number from the OrderService.
+             *
+             * @var \Shopware\Models\Order\Order $order
+             */
+            $order = $orderService->getOrderByNumber($orderNumber);
+
+            /**
+             * Check if the order is set, otherwise log an throw an error. The error is thrown
+             * to also tell the customer that something went wrong.
+             */
+            if (empty($order)) {
+                Logger::log(
+                    'error',
+                    'The order with order number ' . $orderNumber . ' could not be found.',
+                    null,
+                    true
+                );
+            } else {
+                // store order id on transaction
+                $transaction->setOrderId($order->getId());
+            }
+        }
 
         return $this->redirect(
             $paymentService->startTransaction(
-                $order,
-                $transaction,
-                $orderDetails
+                $this->getPaymentShortName(),
+                $transaction
             )
         );
     }
@@ -250,6 +265,67 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return $this->redirectBack();
     }
 
+    private function prepareTransaction(\MollieShopware\Models\Transaction $transaction, $basketSignature)
+    {
+        try {
+            // variables
+            $transactionItems = new \Doctrine\Common\Collections\ArrayCollection();
+
+            // get currency
+            $currency = method_exists($this, 'getCurrencyShortName') ? $this->getCurrencyShortName() : 'EUR';
+
+            // get customer
+            $customer = $this->getCurrentCustomer();
+
+            // build transaction
+            $transaction->setBasketSignature($basketSignature);
+            $transaction->setLocale($this->getLocale());
+            $transaction->setCurrency($currency);
+            $transaction->setTotalAmount($this->getAmount());
+
+            if (!empty($customer)) {
+                $transaction->setCustomer($customer);
+                $transaction->setCustomerId($customer->getId());
+            }
+
+            /** @var \MollieShopware\Components\Services\BasketService $basketService */
+            $basketService = Shopware()->Container()
+                ->get('mollie_shopware.basket_service');
+
+            foreach ($basketService->getBasketLines($this->getUser()) as $basketLine) {
+                // create transaction item
+                $transactionItem = new \MollieShopware\Models\TransactionItem();
+
+                // set transaction item variables
+                $transactionItem->setTransaction($transaction);
+                $transactionItem->setName($basketLine['name']);
+                $transactionItem->setType($basketLine['type']);
+                $transactionItem->setQuantity($basketLine['quantity']);
+                $transactionItem->setUnitPrice($basketLine['unit_price']);
+                $transactionItem->setNetPrice($basketLine['net_price']);
+                $transactionItem->setTotalAmount($basketLine['total_amount']);
+                $transactionItem->setVatRate($basketLine['vat_rate']);
+                $transactionItem->setVatAmount($basketLine['vat_amount']);
+
+                // add transaction item to collection
+                $transactionItems->add($transactionItem);
+            }
+
+            // set transactions items
+            if ($transactionItems->count())
+                $transaction->setItems($transactionItems);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $transaction;
+    }
+
     /**
      * Get the current order by orderNumber, taking into account
      * the session that started the order.
@@ -355,6 +431,74 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 500
             );
         }
+    }
+
+    /**
+     * Get the locale for this payment
+     *
+     * @return string
+     */
+    private function getLocale()
+    {
+        // mollie locales
+        $mollieLocales = [
+            'en_US',
+            'nl_NL',
+            'fr_FR',
+            'it_IT',
+            'de_DE',
+            'de_AT',
+            'de_CH',
+            'es_ES',
+            'ca_ES',
+            'nb_NO',
+            'pt_PT',
+            'sv_SE',
+            'fi_FI',
+            'da_DK',
+            'is_IS',
+            'hu_HU',
+            'pl_PL',
+            'lv_LV',
+            'lt_LT'
+        ];
+
+        // get shop locale
+        $locale = Shopware()->Shop()->getLocale()->getLocale();
+
+        // set default locale on empty or not supported shop locale
+        if (empty($locale) || !in_array($locale, $mollieLocales))
+            $locale = 'en_US';
+
+        return $locale;
+    }
+
+    /**
+     * Get the current customer
+     *
+     * @return \Shopware\Models\Customer\Customer|null
+     */
+    private function getCurrentCustomer()
+    {
+        $currentCustomer = null;
+
+        try {
+            $currentCustomerClass = new \MollieShopware\Components\CurrentCustomer(
+                Shopware()->Session(),
+                Shopware()->Models()
+            );
+
+            $currentCustomer = $currentCustomerClass->getCurrent();
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $currentCustomer;
     }
 
     /**

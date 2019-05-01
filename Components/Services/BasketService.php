@@ -135,7 +135,7 @@ class BasketService
      * @return array
      * @throws \Exception
      */
-    function getBasketLines()
+    function getBasketLines($userData = array())
     {
         $items = [];
 
@@ -146,7 +146,7 @@ class BasketService
             );
 
             /** @var \Shopware\Models\Order\Basket[] $basketItems */
-            $basketItems = $basketRepo->find([
+            $basketItems = $basketRepo->findBy([
                 'sessionId' => Shopware()->Session()->offsetGet('sessionId')
             ]);
 
@@ -156,6 +156,23 @@ class BasketService
 
                 // get net price
                 $netPrice = $basketItem->getNetPrice();
+
+                // add tax if net order
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['show_net']) &&
+                    !empty($userData['additional']['show_net'])
+                ) {
+                    $netPrice = $unitPrice;
+                    $unitPrice = $unitPrice * (($basketItem->getTaxRate() + 100) / 100);
+                }
+
+                // clear tax if order is tax free
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['charge_vat']) &&
+                    !empty($userData['additional']['charge_vat'])
+                ) {
+                    $unitPrice = $netPrice;
+                }
 
                 // get total amount
                 $totalAmount = $unitPrice * $basketItem->getQuantity();

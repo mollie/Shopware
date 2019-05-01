@@ -38,6 +38,20 @@ class Transaction
     /**
      * @var string
      *
+     * @ORM\Column(name="order_number", type="string", nullable=true)
+     */
+    private $orderNumber;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="basket_signature", type="string", nullable=true)
+     */
+    private $basketSignature;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="mollie_id", type="string", nullable=true)
      */
     private $mollieId;
@@ -104,7 +118,7 @@ class Transaction
     /**
      * @return string
      *
-     * @ORM\Column(name="total_amount", type="integer", nullable=true)
+     * @ORM\Column(name="total_amount", type="float", nullable=true)
      */
     private $totalAmount;
 
@@ -136,6 +150,26 @@ class Transaction
     public function setOrderId($orderId)
     {
         $this->orderId = $orderId;
+    }
+
+    public function getOrderNumber()
+    {
+        return $this->orderNumber;
+    }
+
+    public function setOrderNumber($orderNumber)
+    {
+        $this->orderNumber = $orderNumber;
+    }
+
+    public function getBasketSignature()
+    {
+        return $this->basketSignature;
+    }
+
+    public function setBasketSignature($basketSignature)
+    {
+        $this->basketSignature = $basketSignature;
     }
 
     public function getMollieId()
@@ -181,7 +215,7 @@ class Transaction
     /**
      * @return \Doctrine\Common\Collections\ArrayCollection
      */
-    public function getItems(): \Doctrine\Common\Collections\ArrayCollection
+    public function getItems()
     {
         return $this->items;
     }

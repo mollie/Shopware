@@ -4,6 +4,7 @@
 
 namespace MollieShopware;
 
+use MollieShopware\Models\TransactionItem;
 use Smarty;
 
 use Enlight_Event_EventArgs;
@@ -336,8 +337,11 @@ class MollieShopware extends Plugin
     {
         try {
             $schema = new Schema($this->container->get('models'));
-            $schema->update([Transaction::class]);
-            $schema->update([OrderLines::class]);
+            $schema->update([
+                Transaction::class,
+                TransactionItem::class,
+                OrderLines::class
+            ]);
         }
         catch (\Exception $ex) {
             Logger::log(
@@ -356,6 +360,8 @@ class MollieShopware extends Plugin
         try {
             $schema = new Schema($this->container->get('models'));
             $schema->remove(Transaction::class);
+            $schema->remove(TransactionItem::class);
+            $schema->remove(OrderLines::class);
         }
         catch (\Exception $ex) {
             Logger::log(

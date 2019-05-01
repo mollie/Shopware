@@ -24,7 +24,7 @@ class TransactionItem
     /**
      * @var int
      *
-     * @ORM\Column(name="transaction_id", type="integer", nullable=false)
+     * @ORM\Column(name="transaction_id", type="integer", nullable=true)
      */
     private $transactionId;
 
@@ -60,35 +60,35 @@ class TransactionItem
     /**
      * @var int
      *
-     * @ORM\Column(name="unitprice", type="integer", nullable=true)
+     * @ORM\Column(name="unitprice", type="float", nullable=true)
      */
     private $unitPrice;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="netprice", type="integer", nullable=true)
+     * @ORM\Column(name="netprice", type="float", nullable=true)
      */
     private $netPrice;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="total_amount", type="integer", nullable=true)
+     * @ORM\Column(name="total_amount", type="float", nullable=true)
      */
     private $totalAmount;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="vat_rate", type="integer", nullable=true)
+     * @ORM\Column(name="vat_rate", type="decimal", nullable=true)
      */
     private $vatRate;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="vat_amount", type="integer", nullable=true)
+     * @ORM\Column(name="vat_amount", type="float", nullable=true)
      */
     private $vatAmount;
 
