@@ -63,6 +63,51 @@ class Transaction
      */
     private $ordermailVariables;
 
+    /**
+     * INVERSE SIDE
+     *
+     * @var \Doctrine\Common\Collections\ArrayCollection<\MollieShopware\Models\TransactionItem>
+     *
+     * @ORM\OneToMany(targetEntity="\MollieShopware\Models\TransactionItem", mappedBy="transaction", orphanRemoval=true, cascade={"persist"})
+     */
+    private $items;
+
+    /**
+     * @return string
+     *
+     * @ORM\Column(name="locale", type="string", nullable=true)
+     */
+    private $locale;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="customer_id", type="integer", nullable=true)
+     */
+    private $customerId;
+
+    /**
+     * @var \Shopware\Models\Customer\Customer
+     *
+     * @ORM\ManyToOne(targetEntity="\Shopware\Models\Customer\Customer")
+     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id")
+     */
+    protected $customer;
+
+    /**
+     * @return string
+     *
+     * @ORM\Column(name="currency", type="string", nullable=true)
+     */
+    private $currency;
+
+    /**
+     * @return string
+     *
+     * @ORM\Column(name="total_amount", type="integer", nullable=true)
+     */
+    private $totalAmount;
+
     public function getId()
     {
         return $this->id;
@@ -131,5 +176,113 @@ class Transaction
     public function getOrdermailVariables()
     {
         return $this->ordermailVariables;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getItems(): \Doctrine\Common\Collections\ArrayCollection
+    {
+        return $this->items;
+    }
+
+    /**
+     * @param \Doctrine\Common\Collections\ArrayCollection $items
+     * @return Transaction
+     */
+    public function setItems(\Doctrine\Common\Collections\ArrayCollection $items)
+    {
+        $this->items = $items;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLocale()
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param mixed $locale
+     * @return Transaction
+     */
+    public function setLocale($locale)
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCustomerId()
+    {
+        return $this->customerId;
+    }
+
+    /**
+     * @param int $customerId
+     * @return Transaction
+     */
+    public function setCustomerId(int $customerId)
+    {
+        $this->customerId = $customerId;
+        return $this;
+    }
+
+    /**
+     * @return \Shopware\Models\Customer\Customer
+     */
+    public function getCustomer()
+    {
+        return $this->customer;
+    }
+
+    /**
+     * @param \Shopware\Models\Customer\Customer $customer
+     * @return Transaction
+     */
+    public function setCustomer(\Shopware\Models\Customer\Customer $customer)
+    {
+        $this->customer = $customer;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param mixed $currency
+     * @return Transaction
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTotalAmount()
+    {
+        return $this->totalAmount;
+    }
+
+    /**
+     * @param mixed $totalAmount
+     * @return Transaction
+     */
+    public function setTotalAmount($totalAmount)
+    {
+        $this->totalAmount = $totalAmount;
+        return $this;
     }
 }
