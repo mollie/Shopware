@@ -306,6 +306,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transaction->setCurrency($currency);
             $transaction->setTotalAmount($this->getAmount());
 
+            // set transaction as net order
+            if (isset($this->getUser()['additional']) &&
+                (!isset($this->getUser()['additional']['show_net']) ||
+                    empty($this->getUser()['additional']['show_net']))
+            ) {
+                $transaction->setNet(true);
+            }
+
+            // set transaction as tax free
+            if (isset($this->getUser()['additional']) &&
+                (!isset($this->getUser()['additional']['charge_vat']) ||
+                    empty($this->getUser()['additional']['charge_vat']))
+            ) {
+                $transaction->setTaxFree(true);
+            }
+
+            // set the customer
             if (!empty($customer)) {
                 $transaction->setCustomer($customer);
                 $transaction->setCustomerId($customer->getId());
@@ -334,20 +351,26 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $transactionItems->add($transactionItem);
             }
 
-            // set transaction as net order
-            if (isset($this->getUser()['additional']) &&
-                (!isset($this->getUser()['additional']['show_net']) ||
-                empty($this->getUser()['additional']['show_net']))
-            ) {
-                $transaction->setNet(true);
-            }
+            // shipping costs
+            $shippingCosts = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts();
 
-            // set transaction as tax free
-            if (isset($this->getUser()['additional']) &&
-                (!isset($this->getUser()['additional']['charge_vat']) ||
-                empty($this->getUser()['additional']['charge_vat']))
-            ) {
-                $transaction->setTaxFree(true);
+            if (is_array($shippingCosts) && count($shippingCosts)) {
+                // create shipping item
+                $shippingItem = new \MollieShopware\Models\TransactionItem();
+
+                // set shipping item variables
+                $shippingItem->setTransaction($transaction);
+                $shippingItem->setName('Shipping fee');
+                $shippingItem->setType('shipping_fee');
+                $shippingItem->setQuantity(1);
+                $shippingItem->setUnitPrice($shippingCosts['brutto']);
+                $shippingItem->setNetPrice($shippingCosts['netto']);
+                $shippingItem->setTotalAmount($shippingCosts['value']);
+                $shippingItem->setVatRate($shippingCosts['tax']);
+                $shippingItem->setVatAmount($shippingCosts['brutto'] - $shippingCosts['netto']);
+
+                // add shipping item to collection
+                $transactionItems->add($shippingItem);
             }
 
             // set transactions items
