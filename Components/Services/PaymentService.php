@@ -384,12 +384,6 @@ class PaymentService
 
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
-            /** @var \MollieShopware\Components\Services\OrderService $orderService */
-            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
-
-            /** @var \Shopware\Models\Order\Order $order */
-            $order = $orderService->getOrderByNumber($transaction->getOrderNumber());
-
             // get order lines
             $orderLines = $this->getOrderlines($transaction);
 
@@ -587,8 +581,8 @@ class PaymentService
         else
             $assembleData['transactionNumber'] = $number;
 
-        if ($action == 'return')
-            $assembleData['appendSession'] = true;
+//        if ($action == 'return')
+//            $assembleData['appendSession'] = true;
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 

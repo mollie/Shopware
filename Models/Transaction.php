@@ -87,6 +87,20 @@ class Transaction
     private $items;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="taxfree", type="boolean", nullable=true)
+     */
+    private $taxFree;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="net", type="boolean", nullable=true)
+     */
+    private $net;
+
+    /**
      * @return string
      *
      * @ORM\Column(name="locale", type="string", nullable=true)
@@ -231,6 +245,42 @@ class Transaction
     }
 
     /**
+     * @return bool
+     */
+    public function getTaxFree()
+    {
+        return $this->taxFree;
+    }
+
+    /**
+     * @param bool $taxFree
+     * @return Transaction
+     */
+    public function setTaxFree($taxFree)
+    {
+        $this->taxFree = $taxFree;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getNet()
+    {
+        return $this->net;
+    }
+
+    /**
+     * @param bool $net
+     * @return Transaction
+     */
+    public function setNet($net)
+    {
+        $this->net = $net;
+        return $this;
+    }
+
+    /**
      * @return mixed
      */
     public function getLocale()
@@ -260,7 +310,7 @@ class Transaction
      * @param int $customerId
      * @return Transaction
      */
-    public function setCustomerId(int $customerId)
+    public function setCustomerId($customerId)
     {
         $this->customerId = $customerId;
         return $this;

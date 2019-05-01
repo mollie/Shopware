@@ -149,15 +149,24 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         /** @var string $type */
         $type = $this->Request()->getParam('type');
 
-        /** @var \Shopware\Models\Order\Order $order */
-        $order = $this->getOrder();
+        /** @var string $transactionNumber */
+        $transactionNumber = $this->Request()->getParam('transactionNumber');
 
-        if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
+        try {
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $this->getOrder();
+
+            if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
+                if (!empty($transactionNumber)) {
+                    $order = $this->getOrderFromTransaction($transactionNumber);
+                }
+            }
+        }
+        catch (\Exception $ex) {
             Logger::log(
                 'error',
-                'The order couldn\'t be retrieved.',
-                null,
-                true
+                $ex->getMessage(),
+                $ex
             );
         }
 
@@ -172,6 +181,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($type == 'payment')
             return $this->processPaymentReturn($order, $paymentService);
+
+        // something went wrong because nothing is returned until now
+        Logger::log(
+            'error',
+            'The order couldn\'t be retrieved.',
+            null,
+            true
+        );
     }
 
     /**
@@ -188,6 +205,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         try {
             $order = $this->getOrder();
+
+            if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
+                if (!empty($transactionNumber)) {
+                    $order = $this->getOrderFromTransaction($transactionNumber);
+                }
+            }
         }
         catch(\Exception $ex) {
             Notifier::notifyException(
@@ -397,6 +420,60 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             return false;
+        }
+
+        return $order;
+    }
+
+    private function getOrderFromTransaction($transactionNumber)
+    {
+        $order = null;
+
+        try {
+            /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+            $transactionRepo = Shopware()->Models()->getRepository(
+                \MollieShopware\Models\Transaction::class
+            );
+
+            /** @var \MollieShopware\Models\Transaction $transaction */
+            $transaction = $transactionRepo->findOneBy([
+                'transactionId' => $transactionNumber
+            ]);
+
+            if (!empty($transaction)) {
+                $orderNumber = $transaction->getOrderNumber();
+
+                if (empty($orderNumber)) {
+                    $orderNumber = $this->saveOrder(
+                        $transaction->getTransactionId(),
+                        $transaction->getBasketSignature(),
+                        Status::PAYMENT_STATE_OPEN,
+                        false
+                    );
+                }
+
+                /** @var \MollieShopware\Components\Services\OrderService $orderService */
+                $orderService = Shopware()->Container()
+                    ->get('mollie_shopware.order_service');
+
+                /** @var \Shopware\Models\Order\Order $order */
+                $order = $orderService->getOrderByNumber($orderNumber);
+
+                if (!empty($order)) {
+                    $transaction->setOrderNumber($order->getNumber());
+                    $transaction->setOrderId($order->getId());
+
+                    Shopware()->Models()->persist($transaction);
+                    Shopware()->Models()->flush();
+                }
+            }
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
         }
 
         return $order;
