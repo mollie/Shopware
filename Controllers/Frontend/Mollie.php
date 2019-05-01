@@ -334,6 +334,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $transactionItems->add($transactionItem);
             }
 
+            // set transaction as net order
+            if (isset($this->getUser()['additional']) &&
+                (!isset($this->getUser()['additional']['show_net']) ||
+                empty($this->getUser()['additional']['show_net']))
+            ) {
+                $transaction->setNet(true);
+            }
+
+            // set transaction as tax free
+            if (isset($this->getUser()['additional']) &&
+                (!isset($this->getUser()['additional']['charge_vat']) ||
+                empty($this->getUser()['additional']['charge_vat']))
+            ) {
+                $transaction->setTaxFree(true);
+            }
+
             // set transactions items
             if ($transactionItems->count())
                 $transaction->setItems($transactionItems);

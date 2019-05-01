@@ -91,14 +91,14 @@ class Transaction
      *
      * @ORM\Column(name="taxfree", type="boolean", nullable=true)
      */
-    private $taxFree;
+    private $taxFree = false;
 
     /**
      * @var bool
      *
      * @ORM\Column(name="net", type="boolean", nullable=true)
      */
-    private $net;
+    private $net = false;
 
     /**
      * @return string
