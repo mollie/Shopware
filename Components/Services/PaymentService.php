@@ -420,8 +420,6 @@ class PaymentService
             );
         }
 
-        file_put_contents(__DIR__ . '/mollieprepared.txt', print_r($molliePrepared, true));
-
         return $molliePrepared;
     }
 

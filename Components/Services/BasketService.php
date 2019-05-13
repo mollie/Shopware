@@ -178,7 +178,15 @@ class BasketService
                 $totalAmount = $unitPrice * $basketItem->getQuantity();
 
                 // get vat amount
-                $vatAmount = $unitPrice - $basketItem->getNetPrice();
+                $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
+
+                // clear vat amount if order is tax free
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['charge_vat']) &&
+                    !empty($userData['additional']['charge_vat'])
+                ) {
+                    $vatAmount = 0;
+                }
 
                 // build the order line array
                 $orderLine = [
