@@ -506,14 +506,13 @@ class PaymentService
                 \Shopware\Models\Plugin\Plugin::class
             );
 
-            /** @var \Shopware\Models\Plugin\Plugin[] $plugins */
-            $plugins = $pluginRepo->findAll();
+            /** @var \Shopware\Models\Plugin\Plugin $plugins */
+            $plugin = $pluginRepo->findOneBy([
+                'name' => 'SwagSecurity'
+            ]);
 
-            foreach ($plugins as $plugin) {
-                if (strtolower($plugin->getName()) == 'swagsecurity') {
-                    $isActive = $plugin->getActive();
-                }
-            }
+            if (!empty($plugin))
+                $isActive = $plugin->getActive();
         }
         catch (\Exception $ex) {
             Logger::log(
