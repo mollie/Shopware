@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Promise;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Promise;
 
 use Exception;
 use Generator;
@@ -40,7 +40,7 @@ use Throwable;
  * @return Promise
  * @link https://github.com/petkaantonov/bluebird/blob/master/API.md#generators inspiration
  */
-final class Coroutine implements \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\PromiseInterface
+final class Coroutine implements \_PhpScoper5cd2cac49fa56\GuzzleHttp\Promise\PromiseInterface
 {
     /**
      * @var PromiseInterface|null
@@ -57,7 +57,7 @@ final class Coroutine implements \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\Pro
     public function __construct(callable $generatorFn)
     {
         $this->generator = $generatorFn();
-        $this->result = new \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\Promise(function () {
+        $this->result = new \_PhpScoper5cd2cac49fa56\GuzzleHttp\Promise\Promise(function () {
             while (isset($this->currentPromise)) {
                 $this->currentPromise->wait();
             }

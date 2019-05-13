@@ -2,7 +2,7 @@
 
 // Mollie Shopware Plugin Version: 1.4.4.1
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5cd2cac49fa56;
 
 /*
  * List orders using the Mollie API.
@@ -20,9 +20,9 @@ try {
      */
     echo '<ul>';
     $latestOrders = $mollie->orders->page();
-    \_PhpScoper5c52a41b78b7a\printOrders($latestOrders);
+    \_PhpScoper5cd2cac49fa56\printOrders($latestOrders);
     $previousOrders = $latestOrders->next();
-    \_PhpScoper5c52a41b78b7a\printOrders($previousOrders);
+    \_PhpScoper5cd2cac49fa56\printOrders($previousOrders);
     echo '</ul>';
 } catch (\Mollie\Api\Exceptions\ApiException $e) {
     echo "API call failed: " . \htmlspecialchars($e->getMessage());

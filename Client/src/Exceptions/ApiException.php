@@ -4,7 +4,7 @@
 
 namespace Mollie\Api\Exceptions;
 
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7\Response;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7\Response;
 use Throwable;
 class ApiException extends \Exception
 {
@@ -28,7 +28,7 @@ class ApiException extends \Exception
      * @param \Throwable|null $previous
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function __construct($message = "", $code = 0, $field = null, \_PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7\Response $response = null, \Throwable $previous = null)
+    public function __construct($message = "", $code = 0, $field = null, \_PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7\Response $response = null, \Throwable $previous = null)
     {
         if (!empty($field)) {
             $this->field = (string) $field;

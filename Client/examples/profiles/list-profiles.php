@@ -2,7 +2,7 @@
 
 // Mollie Shopware Plugin Version: 1.4.4.1
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5cd2cac49fa56;
 
 /*
  * Using OAuth access token to list profiles of an account.

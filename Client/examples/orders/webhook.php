@@ -2,7 +2,7 @@
 
 // Mollie Shopware Plugin Version: 1.4.4.1
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5cd2cac49fa56;
 
 /*
  * Handle an order status change using the Mollie API.
@@ -23,7 +23,7 @@ try {
     /*
      * Update the order in the database.
      */
-    \_PhpScoper5c52a41b78b7a\database_write($orderId, $order->status);
+    \_PhpScoper5cd2cac49fa56\database_write($orderId, $order->status);
     if ($order->isPaid() || $order->isAuthorized()) {
         /*
          * The order is paid or authorized

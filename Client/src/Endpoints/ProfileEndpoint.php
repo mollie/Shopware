@@ -8,7 +8,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\CurrentProfile;
 use Mollie\Api\Resources\Profile;
 use Mollie\Api\Resources\ProfileCollection;
-class ProfileEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class ProfileEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "profiles";
     protected $resourceClass = \Mollie\Api\Resources\Profile::class;

@@ -1,9 +1,9 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Handler;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Handler;
 
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7;
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\RequestInterface;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7;
+use _PhpScoper5cd2cac49fa56\Psr\Http\Message\RequestInterface;
 /**
  * HTTP handler that uses cURL easy handles as a transport layer.
  *
@@ -24,9 +24,9 @@ class CurlHandler
      */
     public function __construct(array $options = [])
     {
-        $this->factory = isset($options['handle_factory']) ? $options['handle_factory'] : new \_PhpScoper5c52a41b78b7a\GuzzleHttp\Handler\CurlFactory(3);
+        $this->factory = isset($options['handle_factory']) ? $options['handle_factory'] : new \_PhpScoper5cd2cac49fa56\GuzzleHttp\Handler\CurlFactory(3);
     }
-    public function __invoke(\_PhpScoper5c52a41b78b7a\Psr\Http\Message\RequestInterface $request, array $options)
+    public function __invoke(\_PhpScoper5cd2cac49fa56\Psr\Http\Message\RequestInterface $request, array $options)
     {
         if (isset($options['delay'])) {
             \usleep($options['delay'] * 1000);
@@ -34,6 +34,6 @@ class CurlHandler
         $easy = $this->factory->create($request, $options);
         \curl_exec($easy->handle);
         $easy->errno = \curl_errno($easy->handle);
-        return \_PhpScoper5c52a41b78b7a\GuzzleHttp\Handler\CurlFactory::finish($this, $easy, $this->factory);
+        return \_PhpScoper5cd2cac49fa56\GuzzleHttp\Handler\CurlFactory::finish($this, $easy, $this->factory);
     }
 }

@@ -410,7 +410,7 @@ class Payment extends \Mollie\Api\Resources\BaseResource
     public function chargebacks()
     {
         if (!isset($this->_links->chargebacks->href)) {
-            return new \Mollie\Api\Resources\ChargebackCollection(0, null);
+            return new \Mollie\Api\Resources\ChargebackCollection($this->client, 0, null);
         }
         $result = $this->client->performHttpCallToFullUrl(\Mollie\Api\MollieApiClient::HTTP_GET, $this->_links->chargebacks->href);
         return \Mollie\Api\Resources\ResourceFactory::createCursorResourceCollection($this->client, $result->_embedded->chargebacks, \Mollie\Api\Resources\Chargeback::class, $result->_links);

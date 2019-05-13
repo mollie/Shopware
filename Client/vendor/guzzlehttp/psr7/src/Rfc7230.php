@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7;
 
 final class Rfc7230
 {

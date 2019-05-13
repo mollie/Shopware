@@ -12,10 +12,10 @@
         "sofort",
         "sofortbanking",
         "sepa",
-        "bitcoin",
         "paypal",
         "paysafecard",
         "podiumcadeaukaart",
+        "przelewy24",
         "banktransfer",
         "direct debit",
         "belfius",
@@ -70,7 +70,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "_PhpScoper5c52a41b78b7a\\Tests\\": "tests"
+            "_PhpScoper5cd2cac49fa56\\Tests\\": "tests"
         }
     },
     "scripts": {

@@ -4,16 +4,17 @@
 
 namespace Mollie\Api;
 
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\Client;
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\ClientInterface;
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\Exception\GuzzleException;
-use _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7\Request;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\Client;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\ClientInterface;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\Exception\GuzzleException;
+use _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7\Request;
 use Mollie\Api\Endpoints\ChargebackEndpoint;
 use Mollie\Api\Endpoints\CustomerEndpoint;
 use Mollie\Api\Endpoints\CustomerPaymentsEndpoint;
 use Mollie\Api\Endpoints\InvoiceEndpoint;
 use Mollie\Api\Endpoints\MandateEndpoint;
 use Mollie\Api\Endpoints\MethodEndpoint;
+use Mollie\Api\Endpoints\OnboardingEndpoint;
 use Mollie\Api\Endpoints\OrderEndpoint;
 use Mollie\Api\Endpoints\OrderLineEndpoint;
 use Mollie\Api\Endpoints\OrderPaymentEndpoint;
@@ -32,14 +33,14 @@ use Mollie\Api\Endpoints\ShipmentEndpoint;
 use Mollie\Api\Endpoints\SubscriptionEndpoint;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\ResponseInterface;
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface;
+use _PhpScoper5cd2cac49fa56\Psr\Http\Message\ResponseInterface;
+use _PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface;
 class MollieApiClient
 {
     /**
      * Version of our client.
      */
-    const CLIENT_VERSION = '2.6.1';
+    const CLIENT_VERSION = '2.9.2';
     /**
      * Endpoint of the remote API.
      */
@@ -138,6 +139,12 @@ class MollieApiClient
      */
     public $invoices;
     /**
+     * RESTful Onboarding resource.
+     *
+     * @var OnboardingEndpoint
+     */
+    public $onboarding;
+    /**
      * RESTful Order resource.
      *
      * @var OrderEndpoint
@@ -220,15 +227,15 @@ class MollieApiClient
      *
      * @throws IncompatiblePlatform
      */
-    public function __construct(\_PhpScoper5c52a41b78b7a\GuzzleHttp\ClientInterface $httpClient = null)
+    public function __construct(\_PhpScoper5cd2cac49fa56\GuzzleHttp\ClientInterface $httpClient = null)
     {
-        $this->httpClient = $httpClient ? $httpClient : new \_PhpScoper5c52a41b78b7a\GuzzleHttp\Client([\_PhpScoper5c52a41b78b7a\GuzzleHttp\RequestOptions::VERIFY => \_PhpScoper5c52a41b78b7a\Composer\CaBundle\CaBundle::getBundledCaBundlePath(), \_PhpScoper5c52a41b78b7a\GuzzleHttp\RequestOptions::TIMEOUT => self::TIMEOUT]);
+        $this->httpClient = $httpClient ? $httpClient : new \_PhpScoper5cd2cac49fa56\GuzzleHttp\Client([\_PhpScoper5cd2cac49fa56\GuzzleHttp\RequestOptions::VERIFY => \_PhpScoper5cd2cac49fa56\Composer\CaBundle\CaBundle::getBundledCaBundlePath(), \_PhpScoper5cd2cac49fa56\GuzzleHttp\RequestOptions::TIMEOUT => self::TIMEOUT]);
         $compatibilityChecker = new \Mollie\Api\CompatibilityChecker();
         $compatibilityChecker->checkCompatibility();
         $this->initializeEndpoints();
         $this->addVersionString("Mollie/" . self::CLIENT_VERSION);
         $this->addVersionString("PHP/" . \phpversion());
-        $this->addVersionString("Guzzle/" . \_PhpScoper5c52a41b78b7a\GuzzleHttp\ClientInterface::VERSION);
+        $this->addVersionString("Guzzle/" . \_PhpScoper5cd2cac49fa56\GuzzleHttp\ClientInterface::VERSION);
     }
     public function initializeEndpoints()
     {
@@ -243,6 +250,7 @@ class MollieApiClient
         $this->invoices = new \Mollie\Api\Endpoints\InvoiceEndpoint($this);
         $this->permissions = new \Mollie\Api\Endpoints\PermissionEndpoint($this);
         $this->profiles = new \Mollie\Api\Endpoints\ProfileEndpoint($this);
+        $this->onboarding = new \Mollie\Api\Endpoints\OnboardingEndpoint($this);
         $this->organizations = new \Mollie\Api\Endpoints\OrganizationEndpoint($this);
         $this->orders = new \Mollie\Api\Endpoints\OrderEndpoint($this);
         $this->orderLines = new \Mollie\Api\Endpoints\OrderLineEndpoint($this);
@@ -327,9 +335,6 @@ class MollieApiClient
      * Perform an http call. This method is used by the resource specific classes. Please use the $payments property to
      * perform operations on payments.
      *
-     * @see $payments
-     * @see $isuers
-     *
      * @param string $httpMethod
      * @param string $apiMethod
      * @param string|null|resource|StreamInterface $httpBody
@@ -372,10 +377,10 @@ class MollieApiClient
         if (\function_exists("php_uname")) {
             $headers['X-Mollie-Client-Info'] = \php_uname();
         }
-        $request = new \_PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7\Request($httpMethod, $url, $headers, $httpBody);
+        $request = new \_PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7\Request($httpMethod, $url, $headers, $httpBody);
         try {
             $response = $this->httpClient->send($request, ['http_errors' => \false]);
-        } catch (\_PhpScoper5c52a41b78b7a\GuzzleHttp\Exception\GuzzleException $e) {
+        } catch (\_PhpScoper5cd2cac49fa56\GuzzleHttp\Exception\GuzzleException $e) {
             throw \Mollie\Api\Exceptions\ApiException::createFromGuzzleException($e);
         }
         if (!$response) {
@@ -390,7 +395,7 @@ class MollieApiClient
      * @return object|null
      * @throws ApiException
      */
-    private function parseResponseBody(\_PhpScoper5c52a41b78b7a\Psr\Http\Message\ResponseInterface $response)
+    private function parseResponseBody(\_PhpScoper5cd2cac49fa56\Psr\Http\Message\ResponseInterface $response)
     {
         $body = (string) $response->getBody();
         if (empty($body)) {

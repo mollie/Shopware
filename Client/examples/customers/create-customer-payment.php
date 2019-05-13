@@ -2,7 +2,7 @@
 
 // Mollie Shopware Plugin Version: 1.4.4.1
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5cd2cac49fa56;
 
 /*
  * How to create a new customer in the Mollie API.
@@ -41,7 +41,7 @@ try {
     /*
      * In this example we store the order with its payment status in a database.
      */
-    \_PhpScoper5c52a41b78b7a\database_write($orderId, $payment->status);
+    \_PhpScoper5cd2cac49fa56\database_write($orderId, $payment->status);
     /*
      * Send the customer off to complete the payment.
      * This request should always be a GET, thus we enforce 303 http response code

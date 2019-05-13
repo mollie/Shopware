@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Promise;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Promise;
 
 /**
  * A promise that has been rejected.
@@ -8,7 +8,7 @@ namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Promise;
  * Thenning off of this promise will invoke the onRejected callback
  * immediately and ignore other callbacks.
  */
-class RejectedPromise implements \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\PromiseInterface
+class RejectedPromise implements \_PhpScoper5cd2cac49fa56\GuzzleHttp\Promise\PromiseInterface
 {
     private $reason;
     public function __construct($reason)
@@ -26,7 +26,7 @@ class RejectedPromise implements \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\Pro
         }
         $queue = queue();
         $reason = $this->reason;
-        $p = new \_PhpScoper5c52a41b78b7a\GuzzleHttp\Promise\Promise([$queue, 'run']);
+        $p = new \_PhpScoper5cd2cac49fa56\GuzzleHttp\Promise\Promise([$queue, 'run']);
         $queue->add(static function () use($p, $reason, $onRejected) {
             if ($p->getState() === self::PENDING) {
                 try {

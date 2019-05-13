@@ -1,8 +1,8 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7;
 
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface;
+use _PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface;
 /**
  * Stream decorator trait
  * @property StreamInterface stream
@@ -12,7 +12,7 @@ trait StreamDecoratorTrait
     /**
      * @param StreamInterface $stream Stream to decorate
      */
-    public function __construct(\_PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface $stream)
+    public function __construct(\_PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface $stream)
     {
         $this->stream = $stream;
     }

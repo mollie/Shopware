@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Exception;
+namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Exception;
 
 /**
  * @method string getMessage()
