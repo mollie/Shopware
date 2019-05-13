@@ -130,6 +130,7 @@ class PaymentService
             ->getRepository('\MollieShopware\Models\Transaction');
 
         $transaction->setOrderId($order->getId());
+        $transaction->setSessionId(Shopware()->Session()->offsetGet('sessionId'));
 
         if (!empty($mollieOrder)) {
             $transaction->setMollieId($mollieOrder->id);
