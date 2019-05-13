@@ -9,7 +9,6 @@ class PaymentMethod
     const BANCONTACT = "bancontact";
     const BANKTRANSFER = "banktransfer";
     const BELFIUS = "belfius";
-    const BITCOIN = "bitcoin";
     const CREDITCARD = "creditcard";
     const DIRECTDEBIT = "directdebit";
     const EPS = "eps";
