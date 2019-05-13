@@ -466,8 +466,10 @@ class PaymentService
             'orderNumber'   => $order->getNumber()
         ];
 
-        if ($action == 'return')
+        if ($action == 'return') {
             $assembleData['__session'] = Shopware()->Session()->offsetGet('sessionId');
+            $assembleData['__shop'] = Shopware()->Shop()->getId();
+        }
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 
