@@ -467,7 +467,7 @@ class PaymentService
         ];
 
         if ($action == 'return')
-            $assembleData['appendSession'] = true;
+            $assembleData['__session'] = Shopware()->Session()->offsetGet('sessionId');
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 
