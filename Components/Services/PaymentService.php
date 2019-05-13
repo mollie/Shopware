@@ -468,8 +468,13 @@ class PaymentService
         ];
 
         if ($action == 'return') {
-            $assembleData['__session'] = Shopware()->Session()->offsetGet('sessionId');
-            $assembleData['__shop'] = Shopware()->Shop()->getId();
+            $assembleData['appendSession'] = true;
+
+            if ($this->isSecurityPluginActive()) {
+                $assembleData['appendSession'] = false;
+                $assembleData['__session'] = Shopware()->Session()->offsetGet('sessionId');
+                $assembleData['__shop'] = Shopware()->Shop()->getId();
+            }
         }
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
@@ -484,6 +489,41 @@ class PaymentService
             return 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($url);
 
         return $url;
+    }
+
+    /**
+     * Get whether the Shopware Security Plugin is active
+     *
+     * @return bool
+     */
+    private function isSecurityPluginActive()
+    {
+        $isActive = false;
+
+        try {
+            /** @var \Shopware\Components\Model\ModelRepository $pluginRepo */
+            $pluginRepo = Shopware()->Models()->getRepository(
+                \Shopware\Models\Plugin\Plugin::class
+            );
+
+            /** @var \Shopware\Models\Plugin\Plugin[] $plugins */
+            $plugins = $pluginRepo->findAll();
+
+            foreach ($plugins as $plugin) {
+                if (strtolower($plugin->getName()) == 'swagsecurity') {
+                    $isActive = $plugin->getActive();
+                }
+            }
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $isActive;
     }
 
     /**
