@@ -22,7 +22,7 @@ class Transaction
     private $id;
 
     /**
-     * @var integer
+     * @var string
      *
      * @ORM\Column(name="transaction_id", type="string", nullable=true)
      */

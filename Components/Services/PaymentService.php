@@ -388,7 +388,11 @@ class PaymentService
             $orderLines = $this->getOrderlines($transaction);
 
             // set order parameters
-            $molliePrepared['orderNumber'] = $transaction->getOrderNumber() ?: $transaction->getTransactionId();
+            $molliePrepared['orderNumber'] = strval($transaction->getOrderNumber());
+
+            if (empty($molliePrepared['orderNumber']))
+                $molliePrepared['orderNumber'] = strval($transaction->getTransactionId());
+
             $molliePrepared['lines'] = $orderLines;
             $molliePrepared['billingAddress'] = $this->getAddress(
                 $transaction->getCustomer()->getDefaultBillingAddress(),
@@ -415,6 +419,8 @@ class PaymentService
                 $molliePrepared
             );
         }
+
+        file_put_contents(__DIR__ . '/mollieprepared.txt', print_r($molliePrepared, true));
 
         return $molliePrepared;
     }

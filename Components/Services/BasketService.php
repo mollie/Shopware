@@ -178,7 +178,7 @@ class BasketService
                 $totalAmount = $unitPrice * $basketItem->getQuantity();
 
                 // get vat amount
-                $vatAmount = $basketItem->getPrice() - $basketItem->getNetPrice();
+                $vatAmount = $unitPrice - $basketItem->getNetPrice();
 
                 // build the order line array
                 $orderLine = [
