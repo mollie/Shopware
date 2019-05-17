@@ -4,6 +4,7 @@
 
 namespace MollieShopware\Components\Services;
 
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use Shopware\Models\Order\Status;
