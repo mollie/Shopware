@@ -323,6 +323,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             return false;
         }
 
+        /**
+         * Log the user in by it's session
+         */
+        $sessionId = $this->Request()->getParam('__session');
+
+        if (!empty($sessionId))
+            $this->restoreSession($sessionId, $order, $transaction);
+
         return $order;
     }
 
@@ -686,12 +694,38 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
+     * Log the user in by it's session
+     *
+     * @param \MollieShopware\Models\Transaction $transaction
+     */
+    private function restoreSession(
+        $sessionId,
+        \Shopware\Models\Order\Order $order,
+        \MollieShopware\Models\Transaction $transaction
+    )
+    {
+        try {
+            if ($sessionId == $transaction->getSessionId() &&
+                $order->getOrderTime()->getTimestamp() > strtotime('-5 minutes')
+            ) {
+                \Enlight_Components_Session::writeClose();
+                \Enlight_Components_Session::setId($sessionId);
+                \Enlight_Components_Session::start();
+            }
+        }
+        catch (\Exception $ex) {
+            //
+        }
+    }
+
+    /**
      * Get total minutes from a DateInterval
      *
      * @param \DateInterval $int
      * @return float|int
      */
-    private function getDateIntervalTotalMinutes(\DateInterval $int){
+    private function getDateIntervalTotalMinutes(\DateInterval $int)
+    {
         return ($int->d * 24 * 60) + ($int->h * 60) + $int->i;
     }
 }
