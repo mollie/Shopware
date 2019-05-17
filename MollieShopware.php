@@ -270,9 +270,8 @@ class MollieShopware extends Plugin
         $mollie = $this->getMollieClient();
 
         // TODO: get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
-        $methods = $mollie->methods->all([
-            'resource' => 'orders',
-            'includeWallets' => 'applepay'
+        $methods = $mollie->methods->allActive([
+            'resource' => 'orders'
         ]);
 
         $options = [];
