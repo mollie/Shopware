@@ -696,6 +696,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     /**
      * Log the user in by it's session
      *
+     * @param mixed $sessionId
+     * @param \Shopware\Models\Order\Order $order
      * @param \MollieShopware\Models\Transaction $transaction
      */
     private function restoreSession(
