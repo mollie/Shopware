@@ -24,9 +24,5 @@ class PaymentMethod
     const KLARNA_PAY_LATER = "klarnapaylater";
     const KLARNA_SLICE_IT = "klarnasliceit";
     const P24 = "przelewy24";
-
-    /**
-     * @deprecated 2019-05-01
-     */
-    const BITCOIN = "bitcoin";
+    const APPLE_PAY = "applepay";
 }
