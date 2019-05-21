@@ -8,7 +8,7 @@
     {block name='frontend_checkout_payment_fieldset_template'}
     {$smarty.block.parent}
 </div>
-    {if $payment_mean.name|lower == 'mollie_banktransfer'}
+    {if $payment_mean.name|lower == 'mollie_applepay'}
         <script>
             if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
                 // Apple Pay is not available
