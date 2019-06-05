@@ -7,7 +7,6 @@ class PaymentMethod
     const BANCONTACT = "bancontact";
     const BANKTRANSFER = "banktransfer";
     const BELFIUS = "belfius";
-    const BITCOIN = "bitcoin";
     const CREDITCARD = "creditcard";
     const DIRECTDEBIT = "directdebit";
     const EPS = "eps";
@@ -23,4 +22,5 @@ class PaymentMethod
     const KLARNA_PAY_LATER = "klarnapaylater";
     const KLARNA_SLICE_IT = "klarnasliceit";
     const P24 = "przelewy24";
+    const APPLE_PAY = "applepay";
 }
