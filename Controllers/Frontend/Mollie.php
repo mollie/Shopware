@@ -504,7 +504,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ]);
 
             if (!empty($transaction)) {
+                // get the order number
                 $orderNumber = $transaction->getOrderNumber();
+
+                // get the transaction ID
                 $transactionId = $transaction->getMolliePaymentId();
 
                 if (empty($transactionId))
@@ -513,6 +516,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 if (empty($transactionId))
                     $transactionId = $transaction->getTransactionId();
 
+                // if order doesn't exist, save the order and retrieve an order number
                 if (empty($orderNumber)) {
                     $orderNumber = $this->saveOrder(
                         $transactionId,
@@ -520,6 +524,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                         Status::PAYMENT_STATE_OPEN,
                         false
                     );
+
+                    // update the order number at Mollie
+                    $this->updateMollieOrderNumber($transaction);
                 }
 
                 /** @var \MollieShopware\Components\Services\OrderService $orderService */
@@ -646,6 +653,34 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         return $currentCustomer;
+    }
+
+    private function updateMollieOrderNumber(
+        \MollieShopware\Models\Transaction $transaction
+    )
+    {
+        if (strlen($transaction->getMollieId())) {
+            /** @var \Mollie\Api\MollieApiClient $mollieApi */
+            $mollieApi = $this->container->get('mollie_shopware.api');
+
+            try {
+                /** @var \Mollie\Api\Resources\Order $mollieOrder */
+                $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
+
+                // set the new order number
+                $mollieOrder->orderNumber = $transaction->getOrderNumber();
+
+                // store the new order number
+                $mollieOrder->update();
+            }
+            catch (\Exception $ex) {
+                Logger::log(
+                    'error',
+                    $ex->getMessage(),
+                    $ex
+                );
+            }
+        }
     }
 
     /**
