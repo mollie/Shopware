@@ -325,8 +325,7 @@ class PaymentService
     )
     {
         // variables
-        $molliePrepared = [];
-        $basketData = Shopware()->Modules()->Basket()->sGetBasketData();
+        $molliePrepared = null;
         $paymentParameters = [];
 
         // get webhook and redirect URLs
@@ -382,13 +381,23 @@ class PaymentService
             'payment' => $paymentParameters,
         ];
 
+        // get transaction id
+        $transactionId = $transaction->getMolliePaymentId();
+
+        if (empty($transactionId))
+            $transactionId = $transaction->getMollieId();
+
+        if (empty($transactionId))
+            $transactionId = $transaction->getTransactionId();
+
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
             // get order lines
             $orderLines = $this->getOrderLines($transaction);
 
             // set order parameters
-            $molliePrepared['orderNumber'] = strval($transaction->getOrderNumber());
+            $molliePrepared['orderNumber'] = strval(strlen($transaction->getOrderNumber()) ? 'Order ' .
+                $transaction->getOrderNumber() : 'Transaction ' . $transactionId);
 
             if (empty($molliePrepared['orderNumber']))
                 $molliePrepared['orderNumber'] = strval($transaction->getTransactionId());
@@ -406,18 +415,9 @@ class PaymentService
             $molliePrepared['webhookUrl'] = $orderWebhookUrl;
             $molliePrepared['metadata'] = [];
         } else {
-            // get transaction id
-            $transactionId = $transaction->getMolliePaymentId();
-
-            if (empty($transactionId))
-                $transactionId = $transaction->getMollieId();
-
-            if (empty($transactionId))
-                $transactionId = $transaction->getTransactionId();
-
             // add description
-            $molliePrepared['description'] = !empty($transaction->getOrderNumber()) ? 'Order ' .
-                $transaction->getOrderNumber() : 'Transaction ' . $transactionId;
+            $molliePrepared['description'] = strval(strlen($transaction->getOrderNumber()) ? 'Order ' .
+                $transaction->getOrderNumber() : 'Transaction ' . $transactionId);
 
             // add billing e-mail address
             if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
