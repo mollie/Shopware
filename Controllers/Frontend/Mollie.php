@@ -358,16 +358,38 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 // create shipping item
                 $shippingItem = new \MollieShopware\Models\TransactionItem();
 
+                // get shipping tax rate
+                $shippingTaxRate = floatval($shippingCosts['tax']);
+
+                // get shipping the unit price
+                $shippingUnitPrice = round(floatval($shippingCosts['brutto']), 2);
+
+                // get shipping net price
+                $shippingNetPrice = floatval($shippingCosts['netto']);
+
+                // clear shipping tax if order is tax free
+                if ($transaction->getTaxFree() === true) {
+                    $shippingUnitPrice = $shippingNetPrice;
+                }
+
+                // get shipping vat amount
+                $shippingVatAmount = $shippingUnitPrice * ($shippingTaxRate / ($shippingTaxRate + 100));
+
+                // clear shipping vat amount if order is tax free
+                if ($transaction->getTaxFree() === true) {
+                    $shippingVatAmount = 0;
+                }
+
                 // set shipping item variables
                 $shippingItem->setTransaction($transaction);
                 $shippingItem->setName('Shipping fee');
                 $shippingItem->setType('shipping_fee');
                 $shippingItem->setQuantity(1);
-                $shippingItem->setUnitPrice($shippingCosts['brutto']);
-                $shippingItem->setNetPrice($shippingCosts['netto']);
-                $shippingItem->setTotalAmount($shippingCosts['value']);
-                $shippingItem->setVatRate($shippingCosts['tax']);
-                $shippingItem->setVatAmount($shippingCosts['brutto'] - $shippingCosts['netto']);
+                $shippingItem->setUnitPrice($shippingUnitPrice);
+                $shippingItem->setNetPrice($shippingNetPrice);
+                $shippingItem->setTotalAmount($shippingUnitPrice);
+                $shippingItem->setVatRate($shippingVatAmount == 0 ? 0 : $shippingTaxRate);
+                $shippingItem->setVatAmount($shippingVatAmount);
 
                 // add shipping item to collection
                 $transactionItems->add($shippingItem);
