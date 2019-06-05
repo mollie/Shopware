@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace MollieShopware\Components\Base;
 
 use Shopware_Controllers_Frontend_Payment;

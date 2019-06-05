@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace MollieShopware\Models;
 
 use Shopware\Components\Model\ModelRepository;

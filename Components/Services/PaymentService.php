@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Constants\PaymentMethod;

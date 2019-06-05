@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
     protected $model = \MollieShopware\Models\Transaction::class;

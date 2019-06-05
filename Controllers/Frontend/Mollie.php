@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
 use MollieShopware\Components\Constants\PaymentStatus;

@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
