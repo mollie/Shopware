@@ -385,7 +385,7 @@ class PaymentService
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
             // get order lines
-            $orderLines = $this->getOrderlines($transaction);
+            $orderLines = $this->getOrderLines($transaction);
 
             // set order parameters
             $molliePrepared['orderNumber'] = strval($transaction->getOrderNumber());
@@ -430,15 +430,9 @@ class PaymentService
      *
      * @return array
      */
-    private function getOrderlines(\MollieShopware\Models\Transaction $transaction)
+    private function getOrderLines(\MollieShopware\Models\Transaction $transaction)
     {
         $orderlines = [];
-        $invoiceShippingTaxRate = null;
-
-//        if (method_exists($order, 'getInvoiceShippingTaxRate'))
-//            $invoiceShippingTaxRate = $order->getInvoiceShippingTaxRate();
-//        else
-//            $invoiceShippingTaxRate = $this->getInvoiceShippingTaxRate($order);
 
         /** @var \MollieShopware\Models\TransactionItem $item */
         foreach($transaction->getItems() as $item)
@@ -456,30 +450,6 @@ class PaymentService
                 'productUrl' => null,
             ];
         }
-
-        // @todo Add shipping costs
-
-//        // get shipping amount
-//        $shippingUnitPrice = $order->getInvoiceShipping();
-//        $shippingNetPrice = $order->getInvoiceShippingNet();
-//        $shippingVatAmount = $shippingUnitPrice - $shippingNetPrice;
-//
-//        // clear shipping tax if order is tax free
-//        if ($order->getTaxFree()) {
-//            $shippingVatAmount = 0;
-//            $shippingUnitPrice = $shippingNetPrice;
-//        }
-//
-//        // add shipping costs to items
-//        $orderlines[] = [
-//            'type' => 'shipping_fee',
-//            'name' => 'Shipping fee',
-//            'quantity' => 1,
-//            'unitPrice' => $this->getPriceArray($order->getCurrency(), $shippingUnitPrice),
-//            'totalAmount' => $this->getPriceArray($order->getCurrency(), $shippingUnitPrice),
-//            'vatRate' => number_format($shippingVatAmount == 0 ? 0 : $invoiceShippingTaxRate, 2, '.', ''),
-//            'vatAmount' => $this->getPriceArray($order->getCurrency(), $shippingVatAmount),
-//        ];
 
         return $orderlines;
     }
