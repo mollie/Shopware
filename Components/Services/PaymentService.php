@@ -381,26 +381,14 @@ class PaymentService
             'payment' => $paymentParameters,
         ];
 
-        // get transaction id
-        $transactionId = $transaction->getMolliePaymentId();
-
-        if (empty($transactionId))
-            $transactionId = $transaction->getMollieId();
-
-        if (empty($transactionId))
-            $transactionId = $transaction->getTransactionId();
-
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
             // get order lines
             $orderLines = $this->getOrderLines($transaction);
 
             // set order parameters
-            $molliePrepared['orderNumber'] = strval(strlen($transaction->getOrderNumber()) ? 'Order ' .
-                $transaction->getOrderNumber() : 'Transaction ' . $transactionId);
-
-            if (empty($molliePrepared['orderNumber']))
-                $molliePrepared['orderNumber'] = strval($transaction->getTransactionId());
+            $molliePrepared['orderNumber'] = strlen($transaction->getOrderNumber()) ?
+                strval($transaction->getOrderNumber()) : strval($transaction->getTransactionId());
 
             $molliePrepared['lines'] = $orderLines;
             $molliePrepared['billingAddress'] = $this->getAddress(
@@ -416,8 +404,8 @@ class PaymentService
             $molliePrepared['metadata'] = [];
         } else {
             // add description
-            $molliePrepared['description'] = strval(strlen($transaction->getOrderNumber()) ? 'Order ' .
-                $transaction->getOrderNumber() : 'Transaction ' . $transactionId);
+            $molliePrepared['description'] = strlen($transaction->getOrderNumber()) ? 'Order ' .
+                strval($transaction->getOrderNumber()) : 'Transaction ' . strval($transaction->getTransactionId());
 
             // add billing e-mail address
             if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
