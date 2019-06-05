@@ -506,7 +506,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
                 if (empty($orderNumber)) {
                     $orderNumber = $this->saveOrder(
-                        $transaction->getTransactionId(),
+                        $transaction->getMolliePaymentId(),
                         $transaction->getBasketSignature(),
                         Status::PAYMENT_STATE_OPEN,
                         false
