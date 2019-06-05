@@ -40,7 +40,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function directAction()
     {
-        // @todo: check if basket exists!!
+        if (!Shopware()->Modules()->Basket()->sCountBasket())
+            $this->redirectBack();
 
         // variables
         $orderNumber = null;
