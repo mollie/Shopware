@@ -21,8 +21,8 @@ function handle_dir($directory, $exclude = [], $version){
             }
             else{
 
-                if (substr($file, -4) === '.php'){
-                    handle_file($directory . $file, $version);
+                if ('MollieApiFactory.php'){
+                    handle_api_factory($directory . $file, $version);
                 }
 
                 if ($file === 'plugin.xml'){
@@ -40,27 +40,15 @@ function handle_dir($directory, $exclude = [], $version){
 
 }
 
-function handle_file($filename, $version){
+function handle_api_factory($filename, $version){
 
     $contents = file_get_contents($filename);
 
 
     $replace = '<?php' . "\n\n// Mollie Shopware Plugin Version: $version\r\n\r\n";
 
-    if (preg_match('/<\?php\s*\/\/ Mollie Shopware Plugin Version: ([0-9\.]+)\s*/', $contents, $match)){
-
-    }
-    else{
-
-        if (preg_match('/^<\?php\s+/', $contents, $match)){
-
-
-        }
-        else{
-            return false;
-        }
-
-    }
+    if (!preg_match('/MollieShopware\/[0-9\.]+)\s*/', $contents, $match))
+        return false;
 
     $contents = str_replace($match[0], $replace, $contents);
 
