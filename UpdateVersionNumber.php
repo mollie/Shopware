@@ -45,9 +45,9 @@ function handle_api_factory($filename, $version){
     $contents = file_get_contents($filename);
 
 
-    $replace = '<?php' . "\n\n// Mollie Shopware Plugin Version: $version\r\n\r\n";
+    $replace = 'MollieShopware/' . $version;
 
-    if (!preg_match('/MollieShopware\/[0-9\.]+)\s*/', $contents, $match))
+    if (!preg_match('/MollieShopware\/[0-9\.]+\s*/', $contents, $match))
         return false;
 
     $contents = str_replace($match[0], $replace, $contents);
