@@ -549,46 +549,6 @@ class PaymentService
     }
 
     /**
-     * Get the locale for this payment
-     *
-     * @return string
-     */
-    private function getLocale()
-    {
-        // mollie locales
-        $mollieLocales = [
-            'en_US',
-            'nl_NL',
-            'fr_FR',
-            'it_IT',
-            'de_DE',
-            'de_AT',
-            'de_CH',
-            'es_ES',
-            'ca_ES',
-            'nb_NO',
-            'pt_PT',
-            'sv_SE',
-            'fi_FI',
-            'da_DK',
-            'is_IS',
-            'hu_HU',
-            'pl_PL',
-            'lv_LV',
-            'lt_LT'
-        ];
-
-        // get shop locale
-        $locale = Shopware()->Shop()->getLocale()->getLocale();
-
-        // set default locale on empty or not supported shop locale
-        if (empty($locale) || !in_array($locale, $mollieLocales))
-            $locale = 'en_US';
-
-        return $locale;
-    }
-
-    /**
      * Get the id of the chosen ideal issuer from database
      *
      * @return string
@@ -991,33 +951,5 @@ class PaymentService
         }
 
         return $paymentsResult;
-    }
-
-    /**
-     * Get the current customer
-     *
-     * @return \Shopware\Models\Customer\Customer|null
-     */
-    private function getCurrentCustomer()
-    {
-        $currentCustomer = null;
-
-        try {
-            $currentCustomerClass = new \MollieShopware\Components\CurrentCustomer(
-                Shopware()->Session(),
-                Shopware()->Models()
-            );
-
-            $currentCustomer = $currentCustomerClass->getCurrent();
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
-        }
-
-        return $currentCustomer;
     }
 }
