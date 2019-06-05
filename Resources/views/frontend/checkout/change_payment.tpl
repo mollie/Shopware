@@ -1,7 +1,7 @@
 {extends file="parent:frontend/checkout/change_payment.tpl"}
 
 {block name='frontend_checkout_payment_fieldset_input_radio'}
-<div class="payment_mean block{$payment_mean.name|lower}{if $payment_mean.name|lower == 'mollie_applepay'} is--hidden{/if}" id="payment_{$payment_mean.name|lower}">
+<div class="payment_mean block {$payment_mean.name|lower}{if $payment_mean.name|lower == 'mollie_applepay'} is--hidden{/if}" id="payment_{$payment_mean.name|lower}">
     {$smarty.block.parent}
     {/block}
 
