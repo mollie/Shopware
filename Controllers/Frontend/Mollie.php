@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.6
+// Mollie Shopware Plugin Version: 1.4.7
 
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
