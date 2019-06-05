@@ -455,30 +455,6 @@ class PaymentService
     }
 
     /**
-     * Get the invoice shipping taxrate
-     *
-     * @param \Shopware\Models\Order\Order $order
-     *
-     * @return float|int
-     */
-    private function getInvoiceShippingTaxRate(\Shopware\Models\Order\Order $order)
-    {
-        // vars
-        $invoiceShippingGross = $order->getInvoiceShipping();
-        $invoiceShippingNet = $order->getInvoiceShippingNet();
-
-        // no tax
-        if ($invoiceShippingGross === $invoiceShippingNet)
-            return 0;
-
-        // get tax amount
-        $invoiceShippingTaxAmount = $invoiceShippingGross - $invoiceShippingNet;
-        $invoiceShippingTaxRate = round((($invoiceShippingTaxAmount / $invoiceShippingNet) * 100) * 2) / 2;
-
-        return $invoiceShippingTaxRate;
-    }
-
-    /**
      * Get price in currency/value array
      *
      * @param $currency
