@@ -218,9 +218,6 @@ class MollieShopware extends Plugin
      */
     public function activate(ActivateContext $context)
     {
-        // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
-
         // update db tables
         $this->updateDbTables();
 
@@ -236,6 +233,9 @@ class MollieShopware extends Plugin
         foreach ($paymentOptions as $key => $options) {
             $installer->createOrUpdate($context->getPlugin(), $options);
         }
+
+        // clear config cache
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         parent::activate($context);
     }
