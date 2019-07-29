@@ -145,4 +145,12 @@ class Config
     {
         return ($this->get('auto_cancel_failed_orders', 'yes') == 'yes');
     }
+
+    /**
+     * @return int
+     */
+    public function getShippedStatus()
+    {
+        return (int) $this->get('klarna_shipped_status', -1);
+    }
 }

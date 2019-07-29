@@ -125,6 +125,14 @@
             </store>
         </element>
 
+        <element type="combo" scope="shop">
+            <name>klarna_shipped_status</name>
+            <label lang="de">Status für ausgelieferte Bestellungen (Klarna Pay Later)</label>
+            <label lang="en">Status for shipped orders (Klarna Pay Later)</label>
+            <label lang="nl">Status voor verzonden bestellingen (Klarna Pay Later)</label>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+
         <element type="select" scope="shop">
             <name>orders_api_update_order_status</name>
             <label lang="de">Bestellstatus von Mollie übernehmen</label>

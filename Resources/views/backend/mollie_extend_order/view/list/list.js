@@ -5,11 +5,13 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
     orderStatus: {
         OPEN: 0,
+        IN_PROCESS: 1,
         COMPLETED: 2
     },
 
     paymentStatus: {
         COMPLETELY_PAID: 12,
+        OPEN: 17,
         RESERVED: 18,
         RE_CREDITING: 20,
         CREDIT_ACCEPTED: 31,
@@ -100,13 +102,13 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
                     me.hasOrderPaymentName(record) &&
                     me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
 
-                    // order should not have been refunded already
-                    record.data && parseInt(record.data.status, 10) == me.orderStatus.OPEN
+                    // payment status should not be open
+                    record.data && parseInt(record.data.cleared, 10) !== me.paymentStatus.OPEN
                 ) {
-                    return 'mollie-hide';
+                    return '';
                 }
 
-                return '';
+                return 'mollie-hide';
             }
         }
     },
