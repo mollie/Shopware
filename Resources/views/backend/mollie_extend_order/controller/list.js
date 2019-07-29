@@ -44,9 +44,6 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
                         var result = JSON.parse(res.responseText);
                         if( !result.success ) throw new Error(result.message);
 
-                        // update status on record
-                        record.set('status', 2);
-
                         Shopware.Notification.createGrowlMessage(
                             me.snippets.successTitle,
                             me.snippets.changeStatus.successMessage,
