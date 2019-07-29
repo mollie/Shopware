@@ -64,6 +64,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if ($mollieOrder->isCanceled())
                 $this->returnError('The order is canceled at Mollie.');
 
+            if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0)
+                $this->returnError('The order is already shipping at Mollie.');
+
             $result = $mollieOrder->shipAll();
 
             if ($result) {
