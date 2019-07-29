@@ -1,6 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.8
+// Mollie Shopware Plugin Version: 1.4.9
 
 namespace _PhpScoper5cd2cac49fa56;
 
