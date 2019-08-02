@@ -153,4 +153,12 @@ class Config
     {
         return (int) $this->get('klarna_shipped_status', -1);
     }
+
+    /**
+     * @return string
+     */
+    public function resetInvoiceAndShipping()
+    {
+        return ($this->get('reset_invoice_shipping', 'no') == 'yes');
+    }
 }

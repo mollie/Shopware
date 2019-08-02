@@ -180,6 +180,28 @@
             </store>
         </element>
 
+        <element type="select" scope="shop">
+            <name>reset_invoice_shipping</name>
+            <label lang="de">Gesamtbetrag und Versand bei stornierter Bestellungen löschen</label>
+            <label lang="en">Clear invoice amount and shipping on canceled order</label>
+            <label lang="nl">Besteltotaal en verzending leegmaken bij geannuleerde bestelling</label>
+            <value>no</value>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

@@ -95,10 +95,6 @@ class BasketService
                             $orderDetail->getQuantity()
                         );
                     }
-
-                    // reset ordered quantity
-                    if ($this->config->autoResetStock())
-                        $this->resetOrderDetailQuantity($orderDetail);
                 }
 
                 // append internal comment

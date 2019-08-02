@@ -831,6 +831,9 @@ class PaymentService
                     Status::ORDER_STATE_CANCELLED_REJECTED,
                     $this->config->sendStatusMail()
                 );
+
+                if ($this->config->autoResetStock())
+                    $this->resetStock($order);
             }
 
             if ($returnResult)
@@ -854,6 +857,9 @@ class PaymentService
                     Status::ORDER_STATE_CANCELLED_REJECTED,
                     $this->config->sendStatusMail()
                 );
+
+                if ($this->config->autoResetStock())
+                    $this->resetStock($order);
             }
 
             if ($returnResult)
@@ -971,5 +977,36 @@ class PaymentService
         }
 
         return $paymentsResult;
+    }
+
+    /**
+     * Reset stock on an order
+     *
+     * @param \Shopware\Models\Order\Order $order
+     * @throws \Exception
+     */
+    private function resetStock(\Shopware\Models\Order\Order $order) {
+        // Reset shipping and invoice amount
+        if ($this->config->resetInvoiceAndShipping()) {
+            $order->setInvoiceShipping(0);
+            $order->setInvoiceShippingNet(0);
+            $order->setInvoiceAmount(0);
+            $order->setInvoiceAmountNet(0);
+        }
+
+        // Cancel failed orders
+        if ($this->config->autoResetStock()) {
+            /** @var \MollieShopware\Components\Services\BasketService $basketService */
+            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+
+            // Reset order quantity
+            foreach ($order->getDetails() as $orderDetail) {
+                $basketService->resetOrderDetailQuantity($orderDetail);
+            }
+        }
+
+        // Store order
+        Shopware()->Models()->persist($order);
+        Shopware()->Models()->flush();
     }
 }
