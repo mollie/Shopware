@@ -218,16 +218,15 @@ class BasketService
         $orderDetail->setQuantity(0);
 
         // build order detail repository
-        $orderDetailRepo = Shopware()->Models()->getRepository(
+        $articleDetailRepo = Shopware()->Models()->getRepository(
             \Shopware\Models\Article\Detail::class
         );
 
         try {
-            $article = $orderDetailRepo->findOneBy([
+            $article = $articleDetailRepo->findOneBy([
                 'number' => $orderDetail->getArticleNumber()
             ]);
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             // write exception to log
             Logger::log(
                 'error',
