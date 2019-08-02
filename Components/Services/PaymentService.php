@@ -986,22 +986,22 @@ class PaymentService
      * @throws \Exception
      */
     private function resetStock(\Shopware\Models\Order\Order $order) {
-        // Reset shipping and invoice amount
-        if ($this->config->resetInvoiceAndShipping()) {
-            $order->setInvoiceShipping(0);
-            $order->setInvoiceShippingNet(0);
-            $order->setInvoiceAmount(0);
-            $order->setInvoiceAmountNet(0);
-        }
-
-        // Cancel failed orders
         if ($this->config->autoResetStock()) {
+            // Cancel failed orders
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
 
             // Reset order quantity
             foreach ($order->getDetails() as $orderDetail) {
                 $basketService->resetOrderDetailQuantity($orderDetail);
+            }
+
+            // Reset shipping and invoice amount
+            if ($this->config->resetInvoiceAndShipping()) {
+                $order->setInvoiceShipping(0);
+                $order->setInvoiceShippingNet(0);
+                $order->setInvoiceAmount(0);
+                $order->setInvoiceAmountNet(0);
             }
         }
 
