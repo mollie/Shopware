@@ -550,11 +550,20 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
                 // if order doesn't exist, save the order and retrieve an order number
                 if (empty($orderNumber) && $createOrder === true) {
+                    $sendStatusMail = false;
+
+                    /** @var \MollieShopware\Components\Config $config */
+                    $config = $this->container->get('mollie_shopware.config');
+
+                    if ($config !== null) {
+                        $sendStatusMail = $config->sendStatusMail();
+                    }
+
                     $orderNumber = $this->saveOrder(
                         $transactionId,
                         $transaction->getBasketSignature(),
                         Status::PAYMENT_STATE_OPEN,
-                        false
+                        $sendStatusMail
                     );
 
                     // update the order number at Mollie
