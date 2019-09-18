@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
@@ -39,7 +37,7 @@ abstract class EndpointAbstract
      * @param array $filters
      * @return string
      */
-    private function buildQueryString(array $filters)
+    protected function buildQueryString(array $filters)
     {
         if (empty($filters)) {
             return "";
@@ -132,15 +130,6 @@ abstract class EndpointAbstract
      */
     protected abstract function getResourceObject();
     /**
-     * Get the collection object that is used by this API endpoint. Every API endpoint uses one type of collection object.
-     *
-     * @param int $count
-     * @param object[] $_links
-     *
-     * @return BaseCollection
-     */
-    protected abstract function getResourceCollectionObject($count, $_links);
-    /**
      * @param string $resourcePath
      */
     public function setResourcePath($resourcePath)
@@ -173,7 +162,7 @@ abstract class EndpointAbstract
             return null;
         }
         try {
-            $encoded = \_PhpScoper5c52a41b78b7a\GuzzleHttp\json_encode($body);
+            $encoded = \_PhpScoper5ce26f1fe2920\GuzzleHttp\json_encode($body);
         } catch (\InvalidArgumentException $e) {
             throw new \Mollie\Api\Exceptions\ApiException("Error encoding parameters into JSON: '" . $e->getMessage() . "'.");
         }

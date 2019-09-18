@@ -526,25 +526,26 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 /** @var \Mollie\Api\MollieApiClient $mollieApi */
                 $mollieApi = $this->container->get('mollie_shopware.api');
 
-                // @todo Check payment status
-                if ($transaction->getMollieId() !== '') {
-                    /** @var \Mollie\Api\Resources\Order $mollieOrder */
-                    $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
+                if ($mollieApi !== null) {
+                    if ((string)$transaction->getMollieId() !== '') {
+                        /** @var \Mollie\Api\Resources\Order $mollieOrder */
+                        $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
 
-                    if ($mollieOrder !== null &&
-                        $mollieOrder->isCanceled() === false) {
-                        $createOrder = true;
+                        if ($mollieOrder !== null &&
+                            $mollieOrder->isCanceled() === false) {
+                            $createOrder = true;
+                        }
                     }
-                }
 
-                if ($transaction->getMolliePaymentId() !== '') {
-                    /** @var \Mollie\Api\Resources\Payment $molliePayment */
-                    $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
+                    if ((string)$transaction->getMolliePaymentId() !== '') {
+                        /** @var \Mollie\Api\Resources\Payment $molliePayment */
+                        $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
 
-                    if ($molliePayment !== null &&
-                        $molliePayment->isCanceled() === false &&
-                        $molliePayment->isFailed() === false) {
-                        $createOrder = true;
+                        if ($molliePayment !== null &&
+                            $molliePayment->isCanceled() === false &&
+                            $molliePayment->isFailed() === false) {
+                            $createOrder = true;
+                        }
                     }
                 }
 
@@ -567,7 +568,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     );
 
                     // update the order number at Mollie
-                    $this->updateMollieOrderNumber($transaction);
+                    $this->updateMollieOrderNumber($transaction, $orderNumber);
                 }
 
                 /** @var \MollieShopware\Components\Services\OrderService $orderService */
@@ -697,7 +698,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     private function updateMollieOrderNumber(
-        \MollieShopware\Models\Transaction $transaction
+        \MollieShopware\Models\Transaction $transaction,
+        $orderNumber
     )
     {
         if (strlen($transaction->getMollieId())) {
@@ -709,7 +711,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
 
                 // set the new order number
-                $mollieOrder->orderNumber = $transaction->getOrderNumber();
+                $mollieOrder->orderNumber = $orderNumber;
 
                 // store the new order number
                 $mollieOrder->update();

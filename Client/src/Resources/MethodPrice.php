@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Resources;
 
 class MethodPrice extends \Mollie\Api\Resources\BaseResource

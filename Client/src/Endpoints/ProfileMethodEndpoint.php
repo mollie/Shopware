@@ -1,14 +1,12 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
 use Mollie\Api\Resources\Profile;
 use Mollie\Api\Resources\ResourceFactory;
-class ProfileMethodEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class ProfileMethodEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "profiles_methods";
     /**

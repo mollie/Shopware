@@ -1,13 +1,11 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Invoice;
 use Mollie\Api\Resources\InvoiceCollection;
-class InvoiceEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class InvoiceEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "invoices";
     /**

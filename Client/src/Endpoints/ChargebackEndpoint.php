@@ -1,13 +1,11 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Chargeback;
 use Mollie\Api\Resources\ChargebackCollection;
-class ChargebackEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class ChargebackEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "chargebacks";
     /**

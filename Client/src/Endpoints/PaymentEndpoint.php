@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
@@ -9,7 +7,7 @@ use Mollie\Api\Resources\Payment;
 use Mollie\Api\Resources\PaymentCollection;
 use Mollie\Api\Resources\Refund;
 use Mollie\Api\Resources\ResourceFactory;
-class PaymentEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class PaymentEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "payments";
     /**

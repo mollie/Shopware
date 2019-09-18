@@ -1,11 +1,13 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Types;
 
 class PaymentMethod
 {
+    /**
+     * @link https://www.mollie.com/en/payments/applepay
+     */
+    const APPLEPAY = "applepay";
     /**
      * @link https://www.mollie.com/en/payments/bancontact
      */
@@ -19,7 +21,7 @@ class PaymentMethod
      */
     const BELFIUS = "belfius";
     /**
-     * @link https://www.mollie.com/en/payments/bitcoin
+     * @deprecated 2019-05-01
      */
     const BITCOIN = "bitcoin";
     /**
@@ -55,6 +57,14 @@ class PaymentMethod
      */
     const KBC = "kbc";
     /**
+     * @link https://www.mollie.com/en/payments/klarna-pay-later
+     */
+    const KLARNA_PAY_LATER = "klarnapaylater";
+    /**
+     * @link https://www.mollie.com/en/payments/klarna-slice-it
+     */
+    const KLARNA_SLICE_IT = "klarnasliceit";
+    /**
      * @link https://www.mollie.com/en/payments/paypal
      */
     const PAYPAL = "paypal";
@@ -62,6 +72,10 @@ class PaymentMethod
      * @link https://www.mollie.com/en/payments/paysafecard
      */
     const PAYSAFECARD = "paysafecard";
+    /**
+     * @link https://www.mollie.com/en/payments/przelewy24
+     */
+    const PRZELEWY24 = 'przelewy24';
     /**
      * @deprecated
      * @link https://www.mollie.com/en/payments/gift-cards
@@ -71,12 +85,4 @@ class PaymentMethod
      * @link https://www.mollie.com/en/payments/sofort
      */
     const SOFORT = "sofort";
-    /**
-     * @link https://www.mollie.com/en/payments/klarna-pay-later
-     */
-    const KLARNA_PAY_LATER = "klarnapaylater";
-    /**
-     * @link https://www.mollie.com/en/payments/klarna-slice-it
-     */
-    const KLARNA_SLICE_IT = "klarnasliceit";
 }

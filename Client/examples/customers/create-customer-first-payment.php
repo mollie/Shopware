@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * How to create a first payment to allow recurring payments later.
@@ -49,7 +47,7 @@ try {
     /*
      * In this example we store the order with its payment status in a database.
      */
-    \_PhpScoper5c52a41b78b7a\database_write($orderId, $payment->status);
+    \_PhpScoper5ce26f1fe2920\database_write($orderId, $payment->status);
     /*
      * Send the customer off to complete the payment.
      * This request should always be a GET, thus we enforce 303 http response code

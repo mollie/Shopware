@@ -376,7 +376,6 @@ class PaymentService
             'webhookUrl' => $paymentWebhookUrl,
             'locale' => $transaction->getLocale(),
             'method' => $paymentMethod,
-            'payment' => $paymentParameters,
         ];
 
         // add extra parameters depending on using the Orders API or the Payments API
@@ -386,7 +385,7 @@ class PaymentService
 
             // set order parameters
             $molliePrepared['orderNumber'] = strlen($transaction->getOrderNumber()) ?
-                strval($transaction->getOrderNumber()) : strval($transaction->getTransactionId());
+                (string) $transaction->getOrderNumber() : (string) $transaction->getTransactionId();
 
             $molliePrepared['lines'] = $orderLines;
             $molliePrepared['billingAddress'] = $this->getAddress(
@@ -399,6 +398,7 @@ class PaymentService
             );
             $molliePrepared['redirectUrl'] = $orderRedirectUrl;
             $molliePrepared['webhookUrl'] = $orderWebhookUrl;
+            $molliePrepared['payment'] = $paymentParameters;
             $molliePrepared['metadata'] = [];
         } else {
             // add description

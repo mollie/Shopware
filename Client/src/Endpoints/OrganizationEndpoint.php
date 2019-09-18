@@ -1,14 +1,12 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\Organization;
 use Mollie\Api\Resources\OrganizationCollection;
-class OrganizationEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class OrganizationEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "organizations";
     /**

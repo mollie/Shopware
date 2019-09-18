@@ -20,7 +20,7 @@
     },
     "autoload": {
         "psr-4": {
-            "_PhpScoper5c52a41b78b7a\\GuzzleHttp\\Promise\\": "src\/"
+            "_PhpScoper5ce26f1fe2920\\GuzzleHttp\\Promise\\": "src\/"
         },
         "files": [
             "src\/functions_include.php"

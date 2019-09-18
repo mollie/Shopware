@@ -1,14 +1,14 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7;
+namespace _PhpScoper5ce26f1fe2920\GuzzleHttp\Psr7;
 
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface;
+use _PhpScoper5ce26f1fe2920\Psr\Http\Message\StreamInterface;
 /**
  * PHP stream implementation.
  *
  * @var $stream
  */
-class Stream implements \_PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface
+class Stream implements \_PhpScoper5ce26f1fe2920\Psr\Http\Message\StreamInterface
 {
     private $stream;
     private $size;

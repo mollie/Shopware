@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Resources;
 
 class ProfileCollection extends \Mollie\Api\Resources\CursorCollection

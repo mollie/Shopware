@@ -2,6 +2,7 @@
 
 namespace MollieShopware;
 
+use Mollie\Api\MollieApiClient;
 use MollieShopware\Models\TransactionItem;
 use Smarty;
 
@@ -218,7 +219,12 @@ class MollieShopware extends Plugin
         /** @var \Shopware\Components\Plugin\PaymentInstaller $installer */
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
-        $paymentOptions = $this->getPaymentOptions();
+        try {
+            $paymentOptions = $this->getPaymentOptions();
+        } catch (\Exception $e) {
+            file_put_contents(__DIR__ . '/errors.txt', $e->getMessage(), FILE_APPEND);
+            throw $e;
+        }
 
         foreach ($paymentOptions as $key => $options) {
             $installer->createOrUpdate($context->getPlugin(), $options);
@@ -271,7 +277,7 @@ class MollieShopware extends Plugin
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
 
-            $smarty = new Smarty;
+            $smarty = new Smarty();
             $smarty->assign('method', $method);
             $smarty->assign('router', Shopware()->Router());
 
@@ -280,7 +286,7 @@ class MollieShopware extends Plugin
 
             // set default template if no specific template exists
             if (!file_exists($adTemplate)) {
-                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
+                $adTemplate = $paymentTemplateDir . '/methods/main.tpl';
             }
 
             $additionalDescription = $smarty->fetch('file:' . $adTemplate);
@@ -310,13 +316,30 @@ class MollieShopware extends Plugin
      */
     protected function getMollieClient()
     {
+        // Variables
+        $client = null;
+
+        // Require dependencies
         $this->requireDependencies();
 
-        $render= $this->container->get('shopware.plugin.cached_config_reader');
+        /** @var Plugin\ConfigReader $configReader */
+        $configReader = $this->container
+            ->get('shopware.plugin.cached_config_reader');
 
-        $config = new Config($render);
+        /** @var Config $config */
+        $config = new Config($configReader);
+
+        /** @var MollieApiFactory $factory */
         $factory = new MollieApiFactory($config);
-        return $factory->create();
+
+        /** @var MollieApiClient $client */
+        try {
+            $client = $factory->create();
+        } catch (\Exception $e) {
+            //
+        }
+
+        return $client;
     }
 
     /**

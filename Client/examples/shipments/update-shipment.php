@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * Update shipment tracking information using the Mollie API.

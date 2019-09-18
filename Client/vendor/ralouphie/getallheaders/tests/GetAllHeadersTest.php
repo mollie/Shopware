@@ -1,8 +1,8 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
-class GetAllHeadersTest extends \_PhpScoper5c52a41b78b7a\PHPUnit_Framework_TestCase
+class GetAllHeadersTest extends \_PhpScoper5ce26f1fe2920\PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider testWorksData
@@ -12,7 +12,7 @@ class GetAllHeadersTest extends \_PhpScoper5c52a41b78b7a\PHPUnit_Framework_TestC
         foreach ($server as $key => $val) {
             $_SERVER[$key] = $val;
         }
-        $result = \_PhpScoper5c52a41b78b7a\getallheaders();
+        $result = \_PhpScoper5ce26f1fe2920\getallheaders();
         $this->assertEquals($expected, $result, "Error testing {$test_type} works.");
     }
     public function testWorksData()

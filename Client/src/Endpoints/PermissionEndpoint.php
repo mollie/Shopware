@@ -1,13 +1,11 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Permission;
 use Mollie\Api\Resources\PermissionCollection;
-class PermissionEndpoint extends \Mollie\Api\Endpoints\EndpointAbstract
+class PermissionEndpoint extends \Mollie\Api\Endpoints\CollectionEndpointAbstract
 {
     protected $resourcePath = "permissions";
     /**

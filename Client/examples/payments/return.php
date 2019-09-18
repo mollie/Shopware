@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * How to show a return page to the customer.
@@ -15,7 +13,7 @@ namespace _PhpScoper5c52a41b78b7a;
  * Please use a real database like MySQL in production code.
  */
 require_once "../functions.php";
-$status = \_PhpScoper5c52a41b78b7a\database_read($_GET["order_id"]);
+$status = \_PhpScoper5ce26f1fe2920\database_read($_GET["order_id"]);
 /*
  * Determine the url parts to these example files.
  */

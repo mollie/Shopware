@@ -1,13 +1,13 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\GuzzleHttp\Psr7;
+namespace _PhpScoper5ce26f1fe2920\GuzzleHttp\Psr7;
 
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\ResponseInterface;
-use _PhpScoper5c52a41b78b7a\Psr\Http\Message\StreamInterface;
+use _PhpScoper5ce26f1fe2920\Psr\Http\Message\ResponseInterface;
+use _PhpScoper5ce26f1fe2920\Psr\Http\Message\StreamInterface;
 /**
  * PSR-7 response implementation.
  */
-class Response implements \_PhpScoper5c52a41b78b7a\Psr\Http\Message\ResponseInterface
+class Response implements \_PhpScoper5ce26f1fe2920\Psr\Http\Message\ResponseInterface
 {
     use MessageTrait;
     /** @var array Map of standard HTTP status code/reason phrases */

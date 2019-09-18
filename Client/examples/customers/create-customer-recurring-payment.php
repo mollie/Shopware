@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * How to create an on-demand recurring payment.
@@ -47,7 +45,7 @@ try {
     /*
      * In this example we store the order with its payment status in a database.
      */
-    \_PhpScoper5c52a41b78b7a\database_write($orderId, $payment->status);
+    \_PhpScoper5ce26f1fe2920\database_write($orderId, $payment->status);
     /*
      * The payment will be either pending or paid immediately. The customer
      * does not have to perform any payment steps.

@@ -1,8 +1,8 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a;
+namespace _PhpScoper5ce26f1fe2920;
 
 // Don't redefine the functions if included multiple times.
-if (!\function_exists('_PhpScoper5c52a41b78b7a\\GuzzleHttp\\uri_template')) {
+if (!\function_exists('_PhpScoper5ce26f1fe2920\\GuzzleHttp\\uri_template')) {
     require __DIR__ . '/functions.php';
 }

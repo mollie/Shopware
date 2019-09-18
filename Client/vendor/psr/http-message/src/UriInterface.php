@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5c52a41b78b7a\Psr\Http\Message;
+namespace _PhpScoper5ce26f1fe2920\Psr\Http\Message;
 
 /**
  * Value object representing a URI.

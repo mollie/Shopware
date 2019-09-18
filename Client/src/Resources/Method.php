@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.4
-
 namespace Mollie\Api\Resources;
 
 class Method extends \Mollie\Api\Resources\BaseResource
@@ -18,6 +16,20 @@ class Method extends \Mollie\Api\Resources\BaseResource
      * @var string
      */
     public $description;
+    /**
+     * An object containing value and currency. It represents the minimum payment amount required to use this
+     * payment method.
+     *
+     * @var object
+     */
+    public $minimumAmount;
+    /**
+     * An object containing value and currency. It represents the maximum payment amount allowed when using this
+     * payment method.
+     *
+     * @var object
+     */
+    public $maximumAmount;
     /**
      * The $image->size1x and $image->size2x to display the payment method logo.
      *
