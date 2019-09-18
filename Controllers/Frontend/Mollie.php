@@ -4,6 +4,7 @@ use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Base\AbstractPaymentController;
+use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
@@ -156,7 +157,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->getOrder();
 
-            if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
+            if ($order === null || !$order instanceof \Shopware\Models\Order\Order) {
                 if (!empty($transactionNumber)) {
                     $order = $this->getOrderFromTransaction($transactionNumber);
                 }
@@ -175,7 +176,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             ->get('mollie_shopware.payment_service');
 
         if ($order !== null) {
+            // Assign the order number to view
             $this->view->assign('orderNumber', $order->getNumber());
+
+            // Update the transaction ID
+            if ($order !== null) {
+                $this->updateTransactionId($order);
+            }
         }
 
         if ($type === 'order' && $order !== null) {
@@ -231,13 +238,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $type = $this->Request()->getParam('type');
             $paymentId = $this->Request()->getParam('id');
 
-            if (substr($paymentId, 0, strlen('tr_')) != 'tr_')
-                $paymentId = null;
+            // Update the transaction ID
+            if ($order !== null) {
+                $this->updateTransactionId($order);
+            }
 
-            if ($type == 'order' && $paymentId == null)
+            if (strpos($paymentId, 'tr_') !== 0) {
+                $paymentId = null;
+            }
+
+            // Check the order or payment status
+            if ($order !== null && $type === 'order' && $paymentId === null) {
                 $result = $paymentService->checkOrderStatus($order);
-            else
+            }
+            else if ($order !== null && $paymentId !== null) {
                 $result = $paymentService->checkPaymentStatus($order, $paymentId);
+            }
 
             // log result
             Logger::log(
@@ -245,7 +261,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'Webhook for order ' . $order->getNumber() . ' has been called.'
             );
 
-            if ($result) {
+            if ($result !== null) {
                 Notifier::notifyOk(
                     'The payment status for order ' . $order->getNumber() . ' has been processed.'
                 );
@@ -417,6 +433,54 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return $transaction;
     }
 
+    private function updateTransactionId(Order $order)
+    {
+        // Variables
+        $transaction = null;
+
+        /**
+         * Get the transaction from the TransactionRepository, or log an error
+         * when the transaction can't be retrieved.
+         */
+        try {
+            /** @var \MollieShopware\Models\Transaction $transaction */
+            $transaction = $this->getTransactionRepository()->findOneBy([
+                'transactionId' => $order->getTransactionId()
+            ]);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        if ($transaction !== null) {
+            $transactionId = null;
+
+            if ((string) $transaction->getMolliePaymentId() !== '') {
+                $order->setTransactionId($transaction->getMolliePaymentId());
+            }
+
+            if ((string) $transaction->getMollieId() !== '') {
+                $order->setTransactionId($transaction->getMollieId());
+            }
+
+            try {
+                /** @var \Shopware\Components\Model\ModelManager $modelManager */
+                $modelManager = Shopware()->Models();
+
+                if ($modelManager !== null) {
+                    $modelManager->persist($order);
+                    $modelManager->flush($order);
+                }
+            } catch (\Exception $e) {
+                //
+            }
+        }
+    }
+
     /**
      * Get the current order by orderNumber, taking into account
      * the session that started the order.
@@ -505,7 +569,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->findOneBy([
-                'transactionId' => $transactionNumber
+                'basketSignature' => $transactionNumber
             ]);
 
             if (!empty($transaction)) {
@@ -579,11 +643,21 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $order = $orderService->getOrderByNumber($orderNumber);
 
                 if (!empty($order)) {
-                    $transaction->setOrderNumber($order->getNumber());
-                    $transaction->setOrderId($order->getId());
+                    /** @var \Shopware\Components\Model\ModelManager $modelManager */
+                    $modelManager = Shopware()->Models();
 
-                    Shopware()->Models()->persist($transaction);
-                    Shopware()->Models()->flush();
+                    if ($modelManager !== null) {
+                        // Store order number and ID on transaction
+                        $transaction->setOrderNumber($order->getNumber());
+                        $transaction->setOrderId($order->getId());
+
+                        try {
+                            $modelManager->persist($transaction);
+                            $modelManager->flush($transaction);
+                        } catch (\Exception $e) {
+                            //
+                        }
+                    }
                 }
             }
         }
