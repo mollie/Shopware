@@ -47,7 +47,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $orderDetails = null;
 
         /** @var \MollieShopware\Components\Config $config */
-        $config = Shopware()->Container()->get('mollie_shopware.config');
+        $config = $this->container->get('mollie_shopware.config');
 
         /**
          * Create an instance of the PaymentService. The PaymentService is used
@@ -55,7 +55,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
          *
          * @var \MollieShopware\Components\Services\PaymentService $paymentService
          */
-        $paymentService = Shopware()->Container()
+        $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
 
         /**
@@ -106,7 +106,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
              *
              * @var \MollieShopware\Components\Services\OrderService $orderService
              */
-            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+            $orderService = $this->container->get('mollie_shopware.order_service');
 
             /**
              * Get the order by order number from the OrderService.
@@ -171,16 +171,20 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-        $paymentService = Shopware()->Container()
+        $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
 
-        $this->view->assign('orderNumber', $order->getNumber());
+        if ($order !== null) {
+            $this->view->assign('orderNumber', $order->getNumber());
+        }
 
-        if ($type == 'order')
+        if ($type === 'order' && $order !== null) {
             return $this->processOrderReturn($order, $paymentService);
+        }
 
-        if ($type == 'payment')
+        if ($type === 'payment' && $order !== null) {
             return $this->processPaymentReturn($order, $paymentService);
+        }
 
         // something went wrong because nothing is returned until now
         Logger::log(
@@ -200,13 +204,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $order = null;
 
         /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-        $paymentService = Shopware()->Container()
+        $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
 
         try {
             $order = $this->getOrder();
 
             if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
+                /** @var string $transactionNumber */
+                $transactionNumber = $this->Request()->getParam('transactionNumber');
+
                 if (!empty($transactionNumber)) {
                     $order = $this->getOrderFromTransaction($transactionNumber);
                 }
@@ -267,7 +274,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $orderNumber = $this->Request()->getParam('orderNumber');
 
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
-            $orderService = Shopware()->Container()
+            $orderService = $this->container
                 ->get('mollie_shopware.order_service');
 
             /** @var \Shopware\Models\Order\Order $order */
@@ -329,7 +336,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = Shopware()->Container()
+            $basketService = $this->container
                 ->get('mollie_shopware.basket_service');
 
             foreach ($basketService->getBasketLines($this->getUser()) as $basketLine) {
@@ -514,8 +521,35 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 if (empty($transactionId))
                     $transactionId = $transaction->getTransactionId();
 
+                $createOrder = false;
+
+                /** @var \Mollie\Api\MollieApiClient $mollieApi */
+                $mollieApi = $this->container->get('mollie_shopware.api');
+
+                // @todo Check payment status
+                if ($transaction->getMollieId() !== '') {
+                    /** @var \Mollie\Api\Resources\Order $mollieOrder */
+                    $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
+
+                    if ($mollieOrder !== null &&
+                        $mollieOrder->isCanceled() === false) {
+                        $createOrder = true;
+                    }
+                }
+
+                if ($transaction->getMolliePaymentId() !== '') {
+                    /** @var \Mollie\Api\Resources\Payment $molliePayment */
+                    $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
+
+                    if ($molliePayment !== null &&
+                        $molliePayment->isCanceled() === false &&
+                        $molliePayment->isFailed() === false) {
+                        $createOrder = true;
+                    }
+                }
+
                 // if order doesn't exist, save the order and retrieve an order number
-                if (empty($orderNumber)) {
+                if (empty($orderNumber) && $createOrder === true) {
                     $orderNumber = $this->saveOrder(
                         $transactionId,
                         $transaction->getBasketSignature(),
@@ -528,7 +562,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 }
 
                 /** @var \MollieShopware\Components\Services\OrderService $orderService */
-                $orderService = Shopware()->Container()
+                $orderService = $this->container
                     ->get('mollie_shopware.order_service');
 
                 /** @var \Shopware\Models\Order\Order $order */
@@ -857,7 +891,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     )
     {
         /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-        $paymentService = Shopware()->Container()
+        $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
 
         $paymentService->setPaymentStatus($order, $status, false, $type);
@@ -1002,7 +1036,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
 
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = Shopware()->Container()
+            $basketService = $this->container
                 ->get('mollie_shopware.basket_service');
 
             $basketService->restoreBasket($order);
