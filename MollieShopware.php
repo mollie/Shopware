@@ -4,8 +4,6 @@
 
 namespace MollieShopware;
 
-use Smarty;
-
 use Enlight_Event_EventArgs;
 
 use MollieShopware\Models\Transaction;
@@ -281,12 +279,15 @@ class MollieShopware extends Plugin
         // path to template dir for extra payment-mean options
         $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment';
 
+        /** @var \Enlight_Template_Manager $templateManager */
+        $templateManager = $this->container->get('template');
+        $templateManager->addTemplateDir(__DIR__ . '/Resources/views');
+
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
 
-            $smarty = new Smarty;
-            $smarty->assign('method', $method);
-            $smarty->assign('router', Shopware()->Router());
+            $templateManager->assign('method', $method);
+            $templateManager->assign('router', Shopware()->Router());
 
             // template path
             $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
@@ -296,7 +297,7 @@ class MollieShopware extends Plugin
                 $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
             }
 
-            $additionalDescription = $smarty->fetch('file:' . $adTemplate);
+            $additionalDescription = $templateManager->fetch('file:' . $adTemplate);
 
             $option = [
                 'name' => $name,
