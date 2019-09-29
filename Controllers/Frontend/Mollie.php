@@ -186,6 +186,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
+        if ($order === null) {
+            return $this->redirectBack('Payment failed');
+        }
+
         /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
         $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
@@ -218,8 +222,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         Logger::log(
             'error',
             'The order couldn\'t be retrieved.',
-            null,
-            true
+            null
         );
 
         $this->redirectBack('Payment failed');
@@ -259,31 +262,32 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         try {
             $result = null;
 
-            // Update the transaction ID
             if ($order !== null) {
+                // Update the transaction ID
                 $this->updateTransactionId($order);
-            }
 
-            // Check the order or payment status
-            if ($transactionNumber !== null) {
-                $result = $paymentService->updateOrderStatus($order, $transactionNumber);
-            }
+                // Check the order or payment status
+                if ($transactionNumber !== null) {
+                    $result = $paymentService->updateOrderStatus($order, $transactionNumber);
+                }
 
-            // log result
-            Logger::log(
-                'info',
-                'Webhook for order ' . $order->getNumber() . ' has been called.'
-            );
-
-            if ($result !== null) {
-                Notifier::notifyOk(
-                    'The payment status for order ' . $order->getNumber() . ' has been processed.'
+                // log result
+                Logger::log(
+                    'info',
+                    'Webhook for order ' . $order->getNumber() . ' has been called.'
                 );
-            }
-            else {
-                Notifier::notifyOk(
-                    'The payment status for order ' . $order->getNumber() . ' could not be processed.'
-                );
+
+                if ($result !== null) {
+                    Notifier::notifyOk(
+                        'The payment status for order ' . $order->getNumber() . ' has been processed.'
+                    );
+                } else {
+                    Notifier::notifyOk(
+                        'The payment status for order ' . $order->getNumber() . ' could not be processed.'
+                    );
+                }
+            } else {
+                return $this->redirectBack('Payment failed');
             }
         }
         catch (\Exception $ex) {
@@ -872,6 +876,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         if ($order->getPaymentStatus()->getId() == $authorizedStatusId)
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED);
 
+        if ($order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED)
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED);
+
+        if ($order->getPaymentStatus()->getId() == Status::ORDER_STATE_CANCELLED_REJECTED)
+            return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED);
+
         // check if order is paid
         if ($mollieOrder->isPaid())
             return $this->processPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID);
@@ -1008,7 +1018,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $status == PaymentStatus::MOLLIE_PAYMENT_OPEN) {
 
             try {
-                $this->sendConfirmationEmail($order);
+                $config = $this->getConfig();
+
+                if ($config !== null && $config->createOrderBeforePayment() === true) {
+                    $this->sendConfirmationEmail($order);
+                }
             }
             catch (\Exception $ex) {
                 // log the error
@@ -1036,8 +1050,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // redirect customer to shopping basket after failed payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
-            $this->retryOrderRestore($order);
-
+//            $this->retryOrderRestore($order);
             return $this->redirectBack('Payment failed');
         }
 
@@ -1156,5 +1169,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     private function getDateIntervalTotalMinutes(\DateInterval $int) {
         return ($int->d * 24 * 60) + ($int->h * 60) + $int->i;
+    }
+
+    /**
+     * @return \MollieShopware\Components\Config
+     */
+    private function getConfig() {
+        return Shopware()->container()->get('mollie_shopware.config');
     }
 }

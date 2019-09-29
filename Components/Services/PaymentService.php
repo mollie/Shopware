@@ -700,6 +700,14 @@ class PaymentService
                         return true;
                 }
 
+                // fully failed
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_FAILED] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED, $returnResult);
+
+                    if ($returnResult)
+                        return true;
+                }
+
                 // fully canceled
                 if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
