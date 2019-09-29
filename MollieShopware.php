@@ -4,10 +4,6 @@ namespace MollieShopware;
 
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Models\TransactionItem;
-use Smarty;
-
-use Enlight_Event_EventArgs;
-
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Components\Schema;
@@ -15,9 +11,6 @@ use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Logger;
-use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
-use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
-
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -37,7 +30,6 @@ class MollieShopware extends Plugin
     {
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
-            'Shopware_Console_Add_Command' => 'requireDependencies',
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
             'Enlight_Controller_Front_RouteStartup' => [ 'fixLanguageShopPush', -10 ],
         ];
@@ -274,6 +266,10 @@ class MollieShopware extends Plugin
         // path to template dir for extra payment-mean options
         $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment';
 
+        /** @var \Enlight_Template_Manager $templateManager */
+        $templateManager = $this->container->get('template');
+        $templateManager->addTemplateDir(__DIR__ . '/Resources/views');
+
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
 
@@ -289,7 +285,7 @@ class MollieShopware extends Plugin
                 $adTemplate = $paymentTemplateDir . '/methods/main.tpl';
             }
 
-            $additionalDescription = $smarty->fetch('file:' . $adTemplate);
+            $additionalDescription = $templateManager->fetch('file:' . $adTemplate);
 
             $option = [
                 'name' => $name,
