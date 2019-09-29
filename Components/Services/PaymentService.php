@@ -573,6 +573,9 @@ class PaymentService
         // get mollie payment
         $mollieOrder = $this->getMollieOrder($order);
 
+        /** @var array $paymentsResult */
+        $paymentsResult = $this->getPaymentsResultForOrder($mollieOrder);
+
         // set the status
         if ($mollieOrder->isPaid())
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
@@ -582,6 +585,28 @@ class PaymentService
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true, 'order');
         elseif ($mollieOrder->isCompleted())
             return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_COMPLETED, true, 'order');
+
+        if ($paymentsResult['total'] > 0) {
+            // fully paid
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID] == $paymentsResult['total']) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+            }
+
+            // fully authorized
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED] == $paymentsResult['total']) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+            }
+
+            // fully canceled
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED] == $paymentsResult['total']) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true, 'order');
+            }
+
+            // fully open
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN] == $paymentsResult['total']) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_COMPLETED, true, 'order');
+            }
+        }
 
         return false;
     }
