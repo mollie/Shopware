@@ -328,28 +328,28 @@ class PaymentService
 
         // get webhook and redirect URLs
         $paymentRedirectUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getBasketSignature(),
+            $transaction->getOrderNumber() ?: $transaction->getId(),
             'return',
             'payment',
             !empty($transaction->getOrderNumber()) ? false : true
         );
 
         $paymentWebhookUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getBasketSignature(),
+            $transaction->getOrderNumber() ?: $transaction->getId(),
             'notify',
             'payment',
             !empty($transaction->getOrderNumber()) ? false : true
         );
 
         $orderRedirectUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getBasketSignature(),
+            $transaction->getOrderNumber() ?: $transaction->getId(),
             'return',
             'order',
             !empty($transaction->getOrderNumber()) ? false : true
         );
 
         $orderWebhookUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getBasketSignature(),
+            $transaction->getOrderNumber() ?: $transaction->getId(),
         'notify',
             'order',
             !empty($transaction->getOrderNumber()) ? false : true

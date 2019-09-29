@@ -568,9 +568,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             /** @var \MollieShopware\Models\Transaction $transaction */
-            $transaction = $transactionRepo->findOneBy([
-                'basketSignature' => $transactionNumber
-            ]);
+            $transaction = $transactionRepo->find($transactionNumber);
 
             if (!empty($transaction)) {
                 // get the order number
