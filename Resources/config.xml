@@ -125,6 +125,14 @@
             </store>
         </element>
 
+        <element type="combo" scope="shop">
+            <name>klarna_shipped_status</name>
+            <label lang="de">Status für ausgelieferte Bestellungen (Klarna Pay Later)</label>
+            <label lang="en">Status for shipped orders (Klarna Pay Later)</label>
+            <label lang="nl">Status voor verzonden bestellingen (Klarna Pay Later)</label>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+
         <element type="select" scope="shop">
             <name>orders_api_update_order_status</name>
             <label lang="de">Bestellstatus von Mollie übernehmen</label>
@@ -156,6 +164,28 @@
             <description lang="de">Wenn eine Bestellung wiederhergestellt wird, die alte (fehlgeschlagener) Bestellung automatisch stornieren.</description>
             <description lang="en">Automatically cancel the old (failed) order when an order is restored.</description>
             <description lang="nl">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+        </element>
+
+        <element type="select" scope="shop">
+            <name>reset_invoice_shipping</name>
+            <label lang="de">Gesamtbetrag und Versand bei stornierter Bestellungen löschen</label>
+            <label lang="en">Clear invoice amount and shipping on canceled order</label>
+            <label lang="nl">Besteltotaal en verzending leegmaken bij geannuleerde bestelling</label>
+            <value>no</value>
             <store>
                 <option>
                     <value>yes</value>

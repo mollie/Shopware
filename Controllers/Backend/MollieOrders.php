@@ -48,12 +48,34 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (empty($mollieId))
                 $this->returnError('Order is paid as a single payment (not an order) at Mollie');
 
-            $result = $this->paymentService->sendOrder($mollieId);
+            $mollieOrder = $this->apiClient->orders->get($mollieId);
 
-            if ($result)
+            if (empty($mollieOrder))
+                $this->returnError('Could not find order at Mollie, are you sure it is paid through the Orders API?');
+            if ($mollieOrder->isPending())
+                $this->returnError('The order is pending at Mollie.');
+            if ($mollieOrder->isExpired())
+                $this->returnError('The order is expired at Mollie.');
+            if ($mollieOrder->isCanceled())
+                $this->returnError('The order is canceled at Mollie.');
+            if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0)
+                $this->returnError('The order is already shipping at Mollie.');
+
+            $result = $mollieOrder->shipAll();
+
+            if ($result) {
+                if ($this->config->getShippedStatus() > -1) {
+                    Shopware()->Modules()->Order()->setOrderStatus(
+                        $order->getId(),
+                        $this->config->getShippedStatus(),
+                        $this->config->sendStatusMail()
+                    );
+                }
+
                 $this->returnSuccess('Order status set to shipped at Mollie', $result);
-            else
+            } else {
                 $this->returnError('Order status could not be set to shipped at Mollie');
+            }
         }
         catch (\Exception $ex) {
             $this->returnError($ex->getMessage());
