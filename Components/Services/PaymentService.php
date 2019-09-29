@@ -4,6 +4,8 @@ namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Status;
 
 class PaymentService
@@ -56,7 +58,7 @@ class PaymentService
      */
     public function createTransaction()
     {
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
             \MollieShopware\Models\Transaction::class
         );
@@ -123,7 +125,7 @@ class PaymentService
                 if (!empty($order))
                     $item->setOrderId($order->getId());
 
-                $item->setTransactionId($transaction->getTransactionId());
+                $item->setTransactionId($transaction->getId());
                 $item->setMollieOrderlineId($line->id);
 
                 // save item
@@ -134,8 +136,7 @@ class PaymentService
             // prepare the payment for mollie
             $molliePaymentPrepared = $this->prepareRequest(
                 $paymentMethod,
-                $transaction,
-                false
+                $transaction
             );
 
             /** @var \Mollie\Api\Resources\Payment $molliePayment */
@@ -144,7 +145,7 @@ class PaymentService
             );
         }
 
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')
             ->getRepository('\MollieShopware\Models\Transaction');
 
@@ -157,7 +158,7 @@ class PaymentService
         }
 
         if (!empty($molliePayment)) {
-            $transaction->setMolliePaymentId(($molliePayment->id));
+            $transaction->setMolliePaymentId($molliePayment->id);
             $checkoutUrl = $molliePayment->getCheckoutUrl();
         }
 
@@ -225,7 +226,7 @@ class PaymentService
             );
         }
 
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')
             ->getRepository('\MollieShopware\Models\Transaction');
 
@@ -257,7 +258,7 @@ class PaymentService
      */
     public function getMollieOrder(\Shopware\Models\Order\Order $order)
     {
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
             \MollieShopware\Models\Transaction::class
         );
@@ -287,7 +288,7 @@ class PaymentService
      */
     public function getMolliePayment(\Shopware\Models\Order\Order $order, $paymentId = '')
     {
-        /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+        /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository(
             \MollieShopware\Models\Transaction::class
         );
@@ -327,35 +328,17 @@ class PaymentService
         $paymentParameters = [];
 
         // get webhook and redirect URLs
-        $paymentRedirectUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getId(),
-            'return',
-            'payment',
-            !empty($transaction->getOrderNumber()) ? false : true
+        $redirectUrl = $this->prepareRedirectUrl(
+            $transaction->getId(),
+            'return'
         );
 
-        $paymentWebhookUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getId(),
-            'notify',
-            'payment',
-            !empty($transaction->getOrderNumber()) ? false : true
+        $webhookUrl = $this->prepareRedirectUrl(
+            $transaction->getId(),
+            'notify'
         );
 
-        $orderRedirectUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getId(),
-            'return',
-            'order',
-            !empty($transaction->getOrderNumber()) ? false : true
-        );
-
-        $orderWebhookUrl = $this->prepareRedirectUrl(
-            $transaction->getOrderNumber() ?: $transaction->getId(),
-        'notify',
-            'order',
-            !empty($transaction->getOrderNumber()) ? false : true
-        );
-
-        $paymentParameters['webhookUrl'] = $paymentWebhookUrl;
+        $paymentParameters['webhookUrl'] = $webhookUrl;
 
         if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_')
             $paymentMethod = substr($paymentMethod, strlen('mollie_'));
@@ -372,8 +355,8 @@ class PaymentService
                 $transaction->getCurrency(),
                 round($transaction->getTotalAmount(), 2)
             ),
-            'redirectUrl' => $paymentRedirectUrl,
-            'webhookUrl' => $paymentWebhookUrl,
+            'redirectUrl' => $redirectUrl,
+            'webhookUrl' => $webhookUrl,
             'locale' => $transaction->getLocale(),
             'method' => $paymentMethod,
         ];
@@ -387,7 +370,7 @@ class PaymentService
 
             // set order parameters
             $molliePrepared['orderNumber'] = strlen($transaction->getOrderNumber()) ?
-                $transaction->getOrderNumber() : $paymentDescription;
+                (string) $transaction->getOrderNumber() : $paymentDescription;
 
             $molliePrepared['lines'] = $orderLines;
             $molliePrepared['billingAddress'] = $this->getAddress(
@@ -398,8 +381,6 @@ class PaymentService
                 $transaction->getCustomer()->getDefaultShippingAddress(),
                 $transaction->getCustomer()
             );
-            $molliePrepared['redirectUrl'] = $orderRedirectUrl;
-            $molliePrepared['webhookUrl'] = $orderWebhookUrl;
             $molliePrepared['payment'] = $paymentParameters;
             $molliePrepared['metadata'] = [];
         } else {
@@ -508,26 +489,19 @@ class PaymentService
      *
      * @throws \Exception
      */
-    private function prepareRedirectUrl($number, $action = 'return', $type = 'order', $isTemporary = false)
+    private function prepareRedirectUrl($number, $action = 'return')
     {
         // check for errors
         if (!in_array($action, ['return', 'notify']))
             throw new \Exception('Cannot generate "' . $action . '" url as method is undefined');
-        if (!in_array($type, ['order', 'payment']))
-            throw new \Exception('Cannot generate "' . $action . '" url as type is undefined');
 
         // generate redirect url
         $assembleData = [
             'controller'    => 'Mollie',
             'action'        => $action,
-            'type'          => $type,
+            'transactionNumber' => $number,
             'forceSecure'   => true
         ];
-
-        if (!$isTemporary)
-            $assembleData['orderNumber'] = $number;
-        else
-            $assembleData['transactionNumber'] = $number;
 
 //        if ($action == 'return')
 //            $assembleData['appendSession'] = true;
@@ -557,6 +531,33 @@ class PaymentService
         $idealService = Shopware()->container()->get('mollie_shopware.ideal_service');
 
         return $idealService->getSelectedIssuer();
+    }
+
+    /**
+     * Update the status of an order
+     *
+     * @param \Shopware\Models\Order\Order $order
+     * @param $transactionId
+     * @return bool
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function updateOrderStatus(\Shopware\Models\Order\Order $order, $transactionId)
+    {
+        $paymentId = null;
+
+        /** @var TransactionRepository $transactionRepo */
+        $transactionRepo = Shopware()->container()->get('models')->getRepository(
+            \MollieShopware\Models\Transaction::class
+        );
+
+        /** @var Transaction $transaction */
+        $transaction = $transactionRepo->find($transactionId);
+
+        if ($transaction !== null) {
+            $paymentId = $transaction->getMolliePaymentId();
+        }
+
+        return $this->checkPaymentStatus($order, $paymentId);
     }
 
     /**
@@ -623,23 +624,29 @@ class PaymentService
     public function checkPaymentStatus(\Shopware\Models\Order\Order $order, $paymentId = '')
     {
         // get mollie payment
-        $molliePayment = $this->getMolliePayment($order, $paymentId);
+        try {
+            $molliePayment = $this->getMolliePayment($order, $paymentId);
+        } catch (\Exception $e) {
+            //
+        }
 
-        // set the status
-        if ($molliePayment->isPaid())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
-        elseif ($molliePayment->isPending())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
-        elseif ($molliePayment->isAuthorized())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
-        elseif ($molliePayment->isOpen())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, true);
-        elseif ($molliePayment->isCanceled())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
-        elseif ($molliePayment->isExpired())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED, true);
-        elseif ($molliePayment->isFailed())
-            return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED, true);
+        if ($molliePayment !== null) {
+            // set the status
+            if ($molliePayment->isPaid())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+            elseif ($molliePayment->isPending())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
+            elseif ($molliePayment->isAuthorized())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
+            elseif ($molliePayment->isOpen())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_OPEN, true);
+            elseif ($molliePayment->isCanceled())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, true);
+            elseif ($molliePayment->isExpired())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED, true);
+            elseif ($molliePayment->isFailed())
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_FAILED, true);
+        }
 
         return $this->checkPaymentStatusForOrder($order, true);
     }

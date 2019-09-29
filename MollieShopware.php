@@ -214,13 +214,12 @@ class MollieShopware extends Plugin
         try {
             $paymentOptions = $this->getPaymentOptions();
         } catch (\Exception $e) {
-            file_put_contents(__DIR__ . '/errors.txt', $e->getMessage(), FILE_APPEND);
             throw $e;
         }
 
         foreach ($paymentOptions as $key => $options) {
             $installer->createOrUpdate($context->getPlugin(), $options);
-        }
+            }
 
         parent::activate($context);
     }
@@ -273,9 +272,8 @@ class MollieShopware extends Plugin
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
 
-            $smarty = new Smarty();
-            $smarty->assign('method', $method);
-            $smarty->assign('router', Shopware()->Router());
+            $templateManager->assign('method', $method);
+            $templateManager->assign('router', Shopware()->Router());
 
             // template path
             $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';

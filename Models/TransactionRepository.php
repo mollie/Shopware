@@ -60,7 +60,7 @@ class TransactionRepository extends ModelRepository
     {
         try {
             $this->getEntityManager()->persist($transaction);
-            $this->getEntityManager()->flush();
+            $this->getEntityManager()->flush($transaction);
         }
         catch (\Exception $ex) {
             Logger::log(
