@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace Mollie\Api\Resources;
 
 class MandateCollection extends \Mollie\Api\Resources\CursorCollection

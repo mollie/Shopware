@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
-namespace _PhpScoper5cd2cac49fa56;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * Example 32 - Create a shipment for part of an order using the Mollie API.

@@ -1,8 +1,8 @@
 <?php
 
-namespace _PhpScoper5cd2cac49fa56\GuzzleHttp\Psr7;
+namespace _PhpScoper5ce26f1fe2920\GuzzleHttp\Psr7;
 
-use _PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface;
+use _PhpScoper5ce26f1fe2920\Psr\Http\Message\StreamInterface;
 /**
  * Provides a buffer stream that can be written to to fill a buffer, and read
  * from to remove bytes from the buffer.
@@ -11,7 +11,7 @@ use _PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface;
  * what the configured high water mark of the stream is, or the maximum
  * preferred size of the buffer.
  */
-class BufferStream implements \_PhpScoper5cd2cac49fa56\Psr\Http\Message\StreamInterface
+class BufferStream implements \_PhpScoper5ce26f1fe2920\Psr\Http\Message\StreamInterface
 {
     private $hwm;
     private $buffer = '';

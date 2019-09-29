@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
@@ -95,6 +93,10 @@ class BasketService
                             $orderDetail->getQuantity()
                         );
                     }
+
+                    // reset ordered quantity
+                    if ($this->config->autoResetStock())
+                        $this->resetOrderDetailQuantity($orderDetail);
                 }
 
                 // append internal comment
@@ -123,6 +125,108 @@ class BasketService
 
         // refresh the basket
         $this->basketModule->sRefreshBasket();
+    }
+
+    /**
+     * Get positions from basket
+     *
+     * @return array
+     * @throws \Exception
+     */
+    function getBasketLines($userData = array())
+    {
+        $items = [];
+
+        try {
+            /** @var \Shopware\Models\Order\Repository $basketRepo */
+            $basketRepo = Shopware()->Models()->getRepository(
+                \Shopware\Models\Order\Basket::class
+            );
+
+            /** @var \Shopware\Models\Order\Basket[] $basketItems */
+            $basketItems = $basketRepo->findBy([
+                'sessionId' => Shopware()->Session()->offsetGet('sessionId')
+            ]);
+
+            foreach ($basketItems as $basketItem) {
+                // get the unit price
+                $unitPrice = round($basketItem->getPrice(), 2);
+
+                // get net price
+                $netPrice = $basketItem->getNetPrice();
+
+                // add tax if net order
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['show_net']) &&
+                    !empty($userData['additional']['show_net'])
+                ) {
+                    $netPrice = $unitPrice;
+                    $unitPrice = $unitPrice * (($basketItem->getTaxRate() + 100) / 100);
+                }
+
+                // clear tax if order is tax free
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['charge_vat']) &&
+                    !empty($userData['additional']['charge_vat'])
+                ) {
+                    $unitPrice = $netPrice;
+                }
+
+                // get total amount
+                $totalAmount = $unitPrice * $basketItem->getQuantity();
+
+                // get vat amount
+                $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
+
+                // clear vat amount if order is tax free
+                if (isset($userData['additional']) &&
+                    isset($userData['additional']['charge_vat']) &&
+                    !empty($userData['additional']['charge_vat'])
+                ) {
+                    $vatAmount = 0;
+                }
+
+                // build the order line array
+                $orderLine = [
+                    'name' => $basketItem->getArticleName(),
+                    'type' => 'physical',
+                    'quantity' => $basketItem->getQuantity(),
+                    'unit_price' => $unitPrice,
+                    'net_price' => $netPrice,
+                    'total_amount' => $totalAmount,
+                    'vat_rate' => $vatAmount == 0 ? 0 : $basketItem->getTaxRate(),
+                    'vat_amount' => $vatAmount,
+                ];
+
+                // set the order line type
+                if (strstr($basketItem->getOrderNumber(), 'surcharge'))
+                    $orderLine['type'] = 'surcharge';
+
+                if (strstr($basketItem->getOrderNumber(), 'discount'))
+                    $orderLine['type'] = 'discount';
+
+                if ($basketItem->getEsdArticle() > 0)
+                    $orderLine['type'] = 'digital';
+
+                if ($basketItem->getMode() == 2)
+                    $orderLine['type'] = 'discount';
+
+                if ($unitPrice < 0)
+                    $orderLine['type'] = 'discount';
+
+                // add the order line to items
+                $items[] = $orderLine;
+            }
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $items;
     }
 
     /**
@@ -218,15 +322,16 @@ class BasketService
         $orderDetail->setQuantity(0);
 
         // build order detail repository
-        $articleDetailRepo = Shopware()->Models()->getRepository(
+        $orderDetailRepo = Shopware()->Models()->getRepository(
             \Shopware\Models\Article\Detail::class
         );
 
         try {
-            $article = $articleDetailRepo->findOneBy([
+            $article = $orderDetailRepo->findOneBy([
                 'number' => $orderDetail->getArticleNumber()
             ]);
-        } catch (\Exception $ex) {
+        }
+        catch (\Exception $ex) {
             // write exception to log
             Logger::log(
                 'error',

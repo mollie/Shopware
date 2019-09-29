@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Resources\Customer;

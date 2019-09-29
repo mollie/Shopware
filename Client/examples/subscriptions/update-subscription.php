@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
-namespace _PhpScoper5cd2cac49fa56;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * Updating an existing subscription via the Mollie API.

@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware\Components;
 
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -122,9 +120,9 @@ class Config
             $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
 
         // set different payment status if configured
-        if ($configuredStatus == 'preliminarily_accepted')
+        if ($configuredStatus === 'preliminarily_accepted')
             $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
-        if ($configuredStatus == 'accepted')
+        if ($configuredStatus === 'accepted')
             $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED;
 
         return $paymentStatus;
@@ -135,7 +133,7 @@ class Config
      */
     public function updateOrderStatus()
     {
-        return ($this->get('orders_api_update_order_status', 'no') == 'yes');
+        return ($this->get('orders_api_update_order_status', 'no') === 'yes');
     }
 
     /**
@@ -143,7 +141,7 @@ class Config
      */
     public function cancelFailedOrders()
     {
-        return ($this->get('auto_cancel_failed_orders', 'yes') == 'yes');
+        return ($this->get('auto_cancel_failed_orders', 'yes') === 'yes');
     }
 
     /**
@@ -153,12 +151,19 @@ class Config
     {
         return (int) $this->get('klarna_shipped_status', -1);
     }
-
     /**
      * @return string
      */
     public function resetInvoiceAndShipping()
     {
-        return ($this->get('reset_invoice_shipping', 'no') == 'yes');
+        return ($this->get('reset_invoice_shipping', 'no') === 'yes');
+    }
+
+    /**
+     * @return bool
+     */
+    public function createOrderBeforePayment()
+    {
+        return ($this->get('create_order_before_payment', 'yes') === 'yes');
     }
 }

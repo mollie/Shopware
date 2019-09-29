@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware\Components;
 
 use Mollie\Api\MollieApiClient;
@@ -47,7 +45,7 @@ class MollieApiFactory
 
                 // add plugin name and version
                 $this->apiClient->addVersionString(
-                    'MollieShopware/1.4.10'
+                    'MollieShopware/1.5.0'
                 );
             }
             catch (\Exception $ex) {

@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace Mollie\Api\Resources;
 
 use Mollie\Api\MollieApiClient;
@@ -374,7 +372,7 @@ class Order extends \Mollie\Api\Resources\BaseResource
         if (!isset($this->_links->self->href)) {
             return $this;
         }
-        $body = \json_encode(array("billingAddress" => $this->billingAddress, "shippingAddress" => $this->shippingAddress));
+        $body = \json_encode(array("billingAddress" => $this->billingAddress, "shippingAddress" => $this->shippingAddress, "orderNumber" => $this->orderNumber));
         $result = $this->client->performHttpCallToFullUrl(\Mollie\Api\MollieApiClient::HTTP_PATCH, $this->_links->self->href, $body);
         return \Mollie\Api\Resources\ResourceFactory::createFromApiResult($result, new \Mollie\Api\Resources\Order($this->client));
     }

@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace Mollie\Api\Endpoints;
 
 use Mollie\Api\Exceptions\ApiException;
@@ -164,7 +162,7 @@ abstract class EndpointAbstract
             return null;
         }
         try {
-            $encoded = \_PhpScoper5cd2cac49fa56\GuzzleHttp\json_encode($body);
+            $encoded = \_PhpScoper5ce26f1fe2920\GuzzleHttp\json_encode($body);
         } catch (\InvalidArgumentException $e) {
             throw new \Mollie\Api\Exceptions\ApiException("Error encoding parameters into JSON: '" . $e->getMessage() . "'.");
         }

@@ -1,8 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
-namespace _PhpScoper5cd2cac49fa56;
+namespace _PhpScoper5ce26f1fe2920;
 
 /*
  * Example 10 -  Using OAuth access token to prepare a new payment.
@@ -38,7 +36,7 @@ try {
     /*
      * In this example we store the order with its payment status in a database.
      */
-    \_PhpScoper5cd2cac49fa56\database_write($orderId, $payment->status);
+    \_PhpScoper5ce26f1fe2920\database_write($orderId, $payment->status);
     /*
      * Send the customer off to complete the payment.
      * This request should always be a GET, thus we enforce 303 http response code

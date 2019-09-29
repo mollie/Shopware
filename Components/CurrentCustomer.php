@@ -1,10 +1,6 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware\Components;
-
-use Shopware\Models\Customer\Customer as CustomerModel;
 
 class CurrentCustomer
 {

@@ -1,13 +1,9 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware;
 
-use Smarty;
-
-use Enlight_Event_EventArgs;
-
+use Mollie\Api\MollieApiClient;
+use MollieShopware\Models\TransactionItem;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Components\Schema;
@@ -15,9 +11,6 @@ use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Logger;
-use MollieShopware\Commands\Mollie\GetIdealBanksCommand;
-use MollieShopware\Commands\Mollie\GetPaymentMethodsCommand;
-
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -37,7 +30,6 @@ class MollieShopware extends Plugin
     {
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
-            'Shopware_Console_Add_Command' => 'requireDependencies',
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
             'Enlight_Controller_Front_RouteStartup' => [ 'fixLanguageShopPush', -10 ],
         ];
@@ -106,18 +98,6 @@ class MollieShopware extends Plugin
     public function registerController()
     {
         return $this->getPath() . '/Controllers/Frontend/Mollie.php';
-    }
-
-    /**
-     * Register Console commands
-     *
-     * @param \Shopware\Components\Console\Application $application
-     */
-    public function registerCommands(\Shopware\Components\Console\Application $application)
-    {
-        $application->add(new GetPaymentMethodsCommand());
-        $application->add(new GetIdealBanksCommand());
-        return parent::registerCommands($application);
     }
 
     /**
@@ -218,6 +198,9 @@ class MollieShopware extends Plugin
      */
     public function activate(ActivateContext $context)
     {
+        // clear config cache
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+
         // update db tables
         $this->updateDbTables();
 
@@ -228,14 +211,15 @@ class MollieShopware extends Plugin
         /** @var \Shopware\Components\Plugin\PaymentInstaller $installer */
         $installer = $this->container->get('shopware.plugin_payment_installer');
 
-        $paymentOptions = $this->getPaymentOptions();
+        try {
+            $paymentOptions = $this->getPaymentOptions();
+        } catch (\Exception $e) {
+            throw $e;
+        }
 
         foreach ($paymentOptions as $key => $options) {
             $installer->createOrUpdate($context->getPlugin(), $options);
-        }
-
-        // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
+            }
 
         parent::activate($context);
     }
@@ -281,22 +265,25 @@ class MollieShopware extends Plugin
         // path to template dir for extra payment-mean options
         $paymentTemplateDir = __DIR__ . '/Resources/views/frontend/plugins/payment';
 
+        /** @var \Enlight_Template_Manager $templateManager */
+        $templateManager = $this->container->get('template');
+        $templateManager->addTemplateDir(__DIR__ . '/Resources/views');
+
         foreach ($methods as $key => $method) {
             $name = 'mollie_' . $method->id;
 
-            $smarty = new Smarty;
-            $smarty->assign('method', $method);
-            $smarty->assign('router', Shopware()->Router());
+            $templateManager->assign('method', $method);
+            $templateManager->assign('router', Shopware()->Router());
 
             // template path
             $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
 
             // set default template if no specific template exists
             if (!file_exists($adTemplate)) {
-                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
+                $adTemplate = $paymentTemplateDir . '/methods/main.tpl';
             }
 
-            $additionalDescription = $smarty->fetch('file:' . $adTemplate);
+            $additionalDescription = $templateManager->fetch('file:' . $adTemplate);
 
             $option = [
                 'name' => $name,
@@ -323,13 +310,30 @@ class MollieShopware extends Plugin
      */
     protected function getMollieClient()
     {
+        // Variables
+        $client = null;
+
+        // Require dependencies
         $this->requireDependencies();
 
-        $render= $this->container->get('shopware.plugin.cached_config_reader');
+        /** @var Plugin\ConfigReader $configReader */
+        $configReader = $this->container
+            ->get('shopware.plugin.cached_config_reader');
 
-        $config = new Config($render);
+        /** @var Config $config */
+        $config = new Config($configReader);
+
+        /** @var MollieApiFactory $factory */
         $factory = new MollieApiFactory($config);
-        return $factory->create();
+
+        /** @var MollieApiClient $client */
+        try {
+            $client = $factory->create();
+        } catch (\Exception $e) {
+            //
+        }
+
+        return $client;
     }
 
     /**
@@ -339,8 +343,11 @@ class MollieShopware extends Plugin
     {
         try {
             $schema = new Schema($this->container->get('models'));
-            $schema->update([Transaction::class]);
-            $schema->update([OrderLines::class]);
+            $schema->update([
+                Transaction::class,
+                TransactionItem::class,
+                OrderLines::class
+            ]);
         }
         catch (\Exception $ex) {
             Logger::log(
@@ -359,6 +366,8 @@ class MollieShopware extends Plugin
         try {
             $schema = new Schema($this->container->get('models'));
             $schema->remove(Transaction::class);
+            $schema->remove(TransactionItem::class);
+            $schema->remove(OrderLines::class);
         }
         catch (\Exception $ex) {
             Logger::log(

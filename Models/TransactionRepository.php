@@ -1,7 +1,5 @@
 <?php
 
-// Mollie Shopware Plugin Version: 1.4.10
-
 namespace MollieShopware\Models;
 
 use MollieShopware\Components\Logger;
@@ -62,7 +60,7 @@ class TransactionRepository extends ModelRepository
     {
         try {
             $this->getEntityManager()->persist($transaction);
-            $this->getEntityManager()->flush();
+            $this->getEntityManager()->flush($transaction);
         }
         catch (\Exception $ex) {
             Logger::log(

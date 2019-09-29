@@ -70,7 +70,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "_PhpScoper5cd2cac49fa56\\Tests\\": "tests"
+            "_PhpScoper5ce26f1fe2920\\Tests\\": "tests"
         }
     },
     "scripts": {
