@@ -3,6 +3,8 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
+use Shopware\Models\Order\Basket;
+use Shopware\Models\Order\Repository;
 
 class BasketService
 {
@@ -138,58 +140,34 @@ class BasketService
         $items = [];
 
         try {
-            /** @var \Shopware\Models\Order\Repository $basketRepo */
+            /** @var Repository $basketRepo */
             $basketRepo = Shopware()->Models()->getRepository(
-                \Shopware\Models\Order\Basket::class
+                Basket::class
             );
 
-            /** @var \Shopware\Models\Order\Basket[] $basketItems */
+            /** @var Basket[] $basketItems */
             $basketItems = $basketRepo->findBy([
                 'sessionId' => Shopware()->Session()->offsetGet('sessionId')
             ]);
 
             foreach ($basketItems as $basketItem) {
-                // get the unit price
                 $unitPrice = round($basketItem->getPrice(), 2);
-
-                // get net price
                 $netPrice = $basketItem->getNetPrice();
-
-                // add tax if net order
-                if (isset($userData['additional']) &&
-                    isset($userData['additional']['show_net']) &&
-                    !empty($userData['additional']['show_net'])
-                ) {
-                    $netPrice = $unitPrice;
-                    $unitPrice = $unitPrice * (($basketItem->getTaxRate() + 100) / 100);
-                }
-
-                // clear tax if order is tax free
-                if (isset($userData['additional']) &&
-                    isset($userData['additional']['charge_vat']) &&
-                    !empty($userData['additional']['charge_vat'])
-                ) {
-                    $unitPrice = $netPrice;
-                }
-
-                // get total amount
                 $totalAmount = $unitPrice * $basketItem->getQuantity();
+                $vatAmount = 0;
 
-                // get vat amount
-                $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
-
-                // clear vat amount if order is tax free
-                if (isset($userData['additional']) &&
-                    isset($userData['additional']['charge_vat']) &&
-                    !empty($userData['additional']['charge_vat'])
-                ) {
-                    $vatAmount = 0;
+                if (isset($userData['additional']['charge_vat'], $userData['additional']['show_net']) &&
+                    $userData['additional']['charge_vat'] &&
+                    false === $userData['additional']['show_net']) {
+                    $unitPrice *= ($basketItem->getTaxRate() + 100) / 100;
+                    $totalAmount = $unitPrice * $basketItem->getQuantity();
+                    $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
                 }
 
                 // build the order line array
                 $orderLine = [
                     'name' => $basketItem->getArticleName(),
-                    'type' => 'physical',
+                    'type' => $this->getOrderType($basketItem, $unitPrice),
                     'quantity' => $basketItem->getQuantity(),
                     'unit_price' => $unitPrice,
                     'net_price' => $netPrice,
@@ -197,22 +175,6 @@ class BasketService
                     'vat_rate' => $vatAmount == 0 ? 0 : $basketItem->getTaxRate(),
                     'vat_amount' => $vatAmount,
                 ];
-
-                // set the order line type
-                if (strstr($basketItem->getOrderNumber(), 'surcharge'))
-                    $orderLine['type'] = 'surcharge';
-
-                if (strstr($basketItem->getOrderNumber(), 'discount'))
-                    $orderLine['type'] = 'discount';
-
-                if ($basketItem->getEsdArticle() > 0)
-                    $orderLine['type'] = 'digital';
-
-                if ($basketItem->getMode() == 2)
-                    $orderLine['type'] = 'discount';
-
-                if ($unitPrice < 0)
-                    $orderLine['type'] = 'discount';
 
                 // add the order line to items
                 $items[] = $orderLine;
@@ -227,6 +189,36 @@ class BasketService
         }
 
         return $items;
+    }
+
+    /**
+     * @param Basket $basket
+     * @param float $unitPrice
+     */
+    private function getOrderType($basketItem, $unitPrice)
+    {
+        // set the order line type
+        if (strpos($basketItem->getOrderNumber(), 'surcharge') !== false) {
+            return 'surcharge';
+        }
+
+        if (strpos($basketItem->getOrderNumber(), 'discount') !== false) {
+            return 'discount';
+        }
+
+        if ($basketItem->getEsdArticle() > 0) {
+            return 'digital';
+        }
+
+        if ($basketItem->getMode() == 2) {
+            return 'discount';
+        }
+
+        if ($unitPrice < 0) {
+            return 'discount';
+        }
+
+        return 'physical';
     }
 
     /**
