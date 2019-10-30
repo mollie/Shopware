@@ -361,7 +361,7 @@ class PaymentService
             'method' => $paymentMethod,
         ];
 
-        $paymentDescription = time() . $transaction->getId() . substr($transaction->getBasketSignature(), -4);
+        $paymentDescription = (string) (time() . $transaction->getId() . substr($transaction->getBasketSignature(), -4));
 
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
