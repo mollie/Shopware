@@ -589,6 +589,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transaction = $transactionRepo->find($transactionNumber);
 
             if (!empty($transaction)) {
+                // check whether the payment was canceled
+                if ($this->getConfig() !== null &&
+                    $this->getConfig()->createOrderBeforePayment() === false) {
+                    if ($this->getOrderCanceledOrFailed($transaction) === true) {
+                        return null;
+                    }
+                }
+
                 // get the order number
                 $orderNumber = $transaction->getOrderNumber();
 
@@ -765,6 +773,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * Get the current customer
      *
      * @return \Shopware\Models\Customer\Customer|null
+     * @throws Exception
      */
     private function getCurrentCustomer()
     {
@@ -1050,17 +1059,42 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         // redirect customer to shopping basket after failed payment
         if ($status == PaymentStatus::MOLLIE_PAYMENT_FAILED) {
-//            $this->retryOrderRestore($order);
+            if ($this->getConfig() !== null &&
+                $this->getConfig()->createOrderBeforePayment() === true) {
+                try {
+                    $this->retryOrderRestore($order);
+                } catch (\Exception $e) {
+                    //
+                }
+            }
+
             return $this->redirectBack('Payment failed');
         }
 
         // if payment canceled, expired or failed for unknown reasons, assign error to view
+        $errorMessage = '';
+
         if ($status == PaymentStatus::MOLLIE_PAYMENT_CANCELED)
-            $this->view->assign('sMollieError', 'Payment canceled');
+            $errorMessage = 'Payment canceled';
         elseif ($status == PaymentStatus::MOLLIE_PAYMENT_EXPIRED)
-            $this->view->assign('sMollieError', 'Payment expired');
+            $errorMessage = 'Payment expired';
         else
-            $this->view->assign('sMollieError', 'Payment failed');
+            $errorMessage = 'Payment failed';
+
+        if ($errorMessage !== '') {
+            $this->view->assign('sMollieError', $errorMessage);
+
+            if ($this->getConfig() !== null &&
+                $this->getConfig()->createOrderBeforePayment() === true) {
+                try {
+                    $this->retryOrderRestore($order);
+                } catch (\Exception $e) {
+                    //
+                }
+            }
+
+            return $this->redirectBack($errorMessage);
+        }
 
         $this->view->addTemplateDir(__DIR__ . '/../../Resources/views');
 
@@ -1162,6 +1196,91 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
+     * @param Transaction $transaction
+     * @return bool
+     */
+    private function getOrderCanceledOrFailed($transaction)
+    {
+        /** @var \Mollie\Api\MollieApiClient $mollieApi */
+        $mollieApi = $this->getMollieApi();
+
+        $mollieOrder = null;
+        $molliePayment = null;
+
+        if ($mollieApi !== null) {
+            // Get whether an order is canceled or has failed
+            if ((string) $transaction->getMollieId() !== '') {
+                try {
+                    /** @var \Mollie\Api\Resources\Order $mollieOrder */
+                    $mollieOrder = $mollieApi->orders->get($transaction->getMollieId(), [
+                        'embed' => 'payments'
+                    ]);
+                } catch (\Exception $e) {
+                    //
+                }
+
+                if ($mollieOrder !== null) {
+                    if ($mollieOrder->isCanceled() === true) {
+                        return true;
+                    }
+
+                    if ($mollieOrder->payments() !== null) {
+                        return $this->getPaymentCollectionCanceledOrFailed($mollieOrder->payments());
+                    }
+                }
+            }
+
+            // Get whether a payment is canceled or has failed
+            if ((string) $transaction->getMolliePaymentId() !== '') {
+                try {
+                    $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
+                } catch (\Exception $e) {
+                    //
+                }
+
+                if ($molliePayment !== null) {
+                    if ($molliePayment->isCanceled() === true || $molliePayment->isFailed() === true) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \Mollie\Api\Resources\PaymentCollection $payments
+     * @return bool
+     */
+    private function getPaymentCollectionCanceledOrFailed(\Mollie\Api\Resources\PaymentCollection $payments)
+    {
+        $paymentsTotal = $payments->count();
+        $canceledPayments = 0;
+        $failedPayments = 0;
+
+        if ($paymentsTotal > 0) {
+            /** @var \Mollie\Api\Resources\Payment $payment */
+            foreach ($payments as $payment) {
+                if ($payment->isCanceled() === true) {
+                    $canceledPayments++;
+                }
+                if ($payment->isFailed() === true) {
+                    $failedPayments++;
+                }
+            }
+
+            if ($canceledPayments > 0 || $failedPayments > 0) {
+                if (($canceledPayments + $failedPayments) === $paymentsTotal) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get total minutes from a DateInterval
      *
      * @param \DateInterval $int
@@ -1176,5 +1295,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     private function getConfig() {
         return Shopware()->container()->get('mollie_shopware.config');
+    }
+
+    /**
+     * @return \Mollie\Api\MollieApiClient
+     */
+    private function getMollieApi()
+    {
+        return Shopware()->Container()->get('mollie_shopware.api');
     }
 }
