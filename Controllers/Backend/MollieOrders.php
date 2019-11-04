@@ -26,6 +26,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \Enlight_Controller_Request_Request $request */
             $request = $this->Request();
 
+            /** @var \MollieShopware\Components\Config $config */
+            $this->config = $this->container->get('mollie_shopware.config');
+
             /** @var \Mollie\Api\MollieApiClient $apiClient */
             $this->apiClient = $this->container->get('mollie_shopware.api');
 
@@ -49,22 +52,27 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order is paid as a single payment (not an order) at Mollie');
 
             $mollieOrder = $this->apiClient->orders->get($mollieId);
+            $errorMessage = '';
 
             if (empty($mollieOrder))
-                $this->returnError('Could not find order at Mollie, are you sure it is paid through the Orders API?');
+                $errorMessage = 'Could not find order at Mollie, are you sure it is paid through the Orders API?';
             if ($mollieOrder->isPending())
-                $this->returnError('The order is pending at Mollie.');
+                $errorMessage = 'The order is pending at Mollie.';
             if ($mollieOrder->isExpired())
-                $this->returnError('The order is expired at Mollie.');
+                $errorMessage = 'The order is expired at Mollie.';
             if ($mollieOrder->isCanceled())
-                $this->returnError('The order is canceled at Mollie.');
+                $errorMessage = 'The order is canceled at Mollie.';
             if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0)
-                $this->returnError('The order is already shipping at Mollie.');
+                $errorMessage = 'The order is already shipping at Mollie.';
+
+            if ((string) $errorMessage !== '') {
+                $this->returnError($errorMessage);
+            }
 
             $result = $mollieOrder->shipAll();
 
             if ($result) {
-                if ($this->config->getShippedStatus() > -1) {
+                if ((int) $this->config->getShippedStatus() > 0) {
                     Shopware()->Modules()->Order()->setOrderStatus(
                         $order->getId(),
                         $this->config->getShippedStatus(),
@@ -72,7 +80,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     );
                 }
 
-                $this->returnSuccess('Order status set to shipped at Mollie', $result);
+                $this->returnSuccess('Order status set to shipped at Mollie', true);
             } else {
                 $this->returnError('Order status could not be set to shipped at Mollie');
             }
@@ -258,7 +266,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     {
         $this->returnJson([
             'success' => true,
-            'message' => $message,
+            'message' => addslashes($message),
             'data' => $data
         ]);
     }
@@ -272,7 +280,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     {
         $this->returnJson([
             'success' => false,
-            'message' => $message,
+            'message' => addslashes($message),
         ]);
     }
 

@@ -30,23 +30,28 @@ class PaymentService
      *
      * @param \MollieShopware\Components\MollieApiFactory $apiFactory
      * @param \MollieShopware\Components\Config $config
-     * @param \Enlight_Components_Session_Namespace $session
      * @param array $customEnvironmentVariables
      *
-     * @throws \Exception
+     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
      */
     public function __construct(
         \MollieShopware\Components\MollieApiFactory $apiFactory,
         \MollieShopware\Components\Config $config,
-        \Enlight_Components_Session_Namespace $session,
         array $customEnvironmentVariables
     )
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
-        $this->session = $session;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
+
+        try {
+            /** @var \Enlight_Components_Session_Namespace session */
+            $this->session = Shopware()->Session();
+        } catch (\Exception $e) {
+            //
+        }
     }
 
     /**

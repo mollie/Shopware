@@ -23,7 +23,7 @@ class Config
      * @param string $key
      * @param string $default
      *
-     * @return array
+     * @return mixed
      */
     public function get($key = null, $default = null)
     {
