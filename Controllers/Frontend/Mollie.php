@@ -503,13 +503,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * Get the current order by orderNumber, taking into account
      * the session that started the order.
      *
+     * This function still exists for backwards compatibility.
+     *
      * @return null | boolean | \Shopware\Models\Order\Order
      * @throws \Exception
      */
     private function getOrder()
     {
         $order = null;
-        $transaction = null;
         $orderNumber = $this->Request()->getParam('orderNumber');
 
         /**
@@ -528,48 +529,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $ex->getMessage(),
                 $ex
             );
-        }
-
-        /**
-         * Check if the order is set, otherwise log an error.
-         */
-        if (empty($order)) {
-            Logger::log(
-                'error',
-                'The order with number ' . $orderNumber . ' could not be retrieved.'
-            );
-
-            return false;
-        }
-
-        /**
-         * Get the transaction from the TransactionRepository, or log an error
-         * when the transaction can't be retrieved.
-         */
-        try {
-            /** @var \MollieShopware\Models\Transaction $transaction */
-            $transaction = $this->getTransactionRepository()->findOneBy([
-                'transactionId' => $order->getTransactionId()
-            ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
-        }
-
-        /**
-         * Check if the transaction is set, otherwise log an error.
-         */
-        if (empty($transaction)) {
-            Logger::log(
-                'error',
-                'The transaction for order ' . $orderNumber . ' could not be found.'
-            );
-
-            return false;
         }
 
         return $order;
