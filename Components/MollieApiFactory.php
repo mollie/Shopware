@@ -45,7 +45,7 @@ class MollieApiFactory
 
                 // add plugin name and version
                 $this->apiClient->addVersionString(
-                    'MollieShopware/1.5.1'
+                    'MollieShopware/1.5.2'
                 );
             }
             catch (\Exception $ex) {
