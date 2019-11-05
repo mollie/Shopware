@@ -1135,9 +1135,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             if (is_array($variables)) {
                 try {
                     $sOrder->sUserData = $variables;
+
+                    if (isset($variables['additional']['charge_vat']) && $variables['additional']['charge_vat'] === false) {
+                        $sOrder->sNet = true;
+                    }
+
                     $sOrder->sendMail($variables);
-                }
-                catch (\Exception $ex) {
+                } catch (\Exception $ex) {
                     Logger::log('error', $ex->getMessage(), $ex);
                 }
             }
