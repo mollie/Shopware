@@ -19,9 +19,6 @@ class PaymentService
     /** @var \MollieShopware\Components\Config $config */
     protected $config;
 
-    /** @var \Enlight_Components_Session_Namespace $session */
-    protected $session;
-
     /** @var array */
     protected $customEnvironmentVariables;
 
@@ -45,13 +42,6 @@ class PaymentService
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
-
-        try {
-            /** @var \Enlight_Components_Session_Namespace session */
-            $this->session = Shopware()->Session();
-        } catch (\Exception $e) {
-            //
-        }
     }
 
     /**
