@@ -143,6 +143,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transaction
         );
 
+        if (is_array($checkoutUrl)) {
+            return $this->redirectBack($checkoutUrl['error'], $checkoutUrl['message']);
+        }
+
         return $this->redirect(
             $checkoutUrl
         );

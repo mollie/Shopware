@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components\Services;
 
+use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
@@ -68,7 +69,7 @@ class PaymentService
      * @param \MollieShopware\Models\Transaction $transaction
      * @param array $orderDetails
      *
-     * @return null|string
+     * @return null|string|array
      *
      * @throws \Mollie\Api\Exceptions\ApiException|\Exception
      */
@@ -147,17 +148,47 @@ class PaymentService
         if (!empty($order))
             $transaction->setOrderId($order->getId());
 
+        $error = '';
+        $errorMessage = '';
+
         if (!empty($mollieOrder)) {
             $transaction->setMollieId($mollieOrder->id);
-            $checkoutUrl = $mollieOrder->getCheckoutUrl();
+
+            try {
+                $checkoutUrl = $mollieOrder->getCheckoutUrl();
+            } catch (ApiException $e) {
+                $response = $e->getResponse();
+
+                if ($response !== null) {
+                    $error = $response->getStatusCode();
+                    $errorMessage = $response->getReasonPhrase();
+                }
+            }
         }
 
         if (!empty($molliePayment)) {
             $transaction->setMolliePaymentId($molliePayment->id);
-            $checkoutUrl = $molliePayment->getCheckoutUrl();
+
+            try {
+                $checkoutUrl = $molliePayment->getCheckoutUrl();
+            } catch (ApiException $e) {
+                $response = $e->getResponse();
+
+                if ($response !== null) {
+                    $error = $response->getStatusCode();
+                    $errorMessage = $response->getReasonPhrase();
+                }
+            }
         }
 
         $transactionRepo->save($transaction);
+
+        if ((string) $errorMessage !== '') {
+            return [
+                'error' => $error,
+                'message' => $errorMessage
+            ];
+        }
 
         return $checkoutUrl;
     }
