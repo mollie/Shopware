@@ -522,10 +522,21 @@ class PaymentService
      */
     protected function getIdealIssuer()
     {
-        /** @var \MollieShopware\Components\Services\IdealService $idealService */
-        $idealService = Shopware()->container()->get('mollie_shopware.ideal_service');
-
+        /** @var IdealService $idealService */
+        $idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
         return $idealService->getSelectedIssuer();
+    }
+
+    /**
+     * Returns the token for a credit card payment.
+     *
+     * @return string
+     */
+    protected function getCreditCardToken()
+    {
+        /** @var CreditCardService $creditCardService */
+        $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
+        return $creditCardService->getCardToken();
     }
 
     /**
@@ -706,6 +717,14 @@ class PaymentService
                 // fully canceled
                 if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED] == $paymentsResult['total']) {
                     $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_CANCELED, $returnResult);
+
+                    if ($returnResult)
+                        return true;
+                }
+
+                // fully expired
+                if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_EXPIRED] == $paymentsResult['total']) {
+                    $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_EXPIRED, $returnResult);
 
                     if ($returnResult)
                         return true;
@@ -940,8 +959,13 @@ class PaymentService
         $paymentMethod,
         array $paymentParameters)
     {
-        if ($paymentMethod == PaymentMethod::IDEAL)
+        if ((string) $paymentMethod === PaymentMethod::IDEAL) {
             $paymentParameters['issuer'] = $this->getIdealIssuer();
+        }
+
+        if ((string) $paymentMethod === PaymentMethod::CREDITCARD) {
+            $paymentParameters['cardToken'] = $this->getCreditCardToken();
+        }
 
         return $paymentParameters;
     }
@@ -998,7 +1022,7 @@ class PaymentService
      * @param \Shopware\Models\Order\Order $order
      * @throws \Exception
      */
-    private function resetStock(\Shopware\Models\Order\Order $order) {
+    public function resetStock(\Shopware\Models\Order\Order $order) {
         if ($this->config->autoResetStock()) {
             // Cancel failed orders
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
@@ -1015,8 +1039,9 @@ class PaymentService
                 $order->setInvoiceAmountNet(0);
             }
         }
+
         // Store order
         Shopware()->Models()->persist($order);
-        Shopware()->Models()->flush();
+        Shopware()->Models()->flush($order);
     }
 }

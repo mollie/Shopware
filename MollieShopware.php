@@ -41,8 +41,8 @@ class MollieShopware extends Plugin
     public function requireDependencies()
     {
         // Load composer libraries
-        if (file_exists($this->getPath() . '/Client/vendor/autoload.php')) {
-            require_once $this->getPath() . '/Client/vendor/autoload.php';
+        if (file_exists($this->getPath() . '/Client/vendor/scoper-autoload.php')) {
+            require_once $this->getPath() . '/Client/vendor/scoper-autoload.php';
         }
 
         // Load guzzle functions
@@ -136,7 +136,7 @@ class MollieShopware extends Plugin
         // The user should put in an API key between install and activation
 
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // create database tables
         $this->updateDbTables();
@@ -153,7 +153,7 @@ class MollieShopware extends Plugin
     public function update(UpdateContext $context)
     {
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // create database tables
         $this->updateDbTables();
@@ -199,7 +199,7 @@ class MollieShopware extends Plugin
     public function activate(ActivateContext $context)
     {
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // update db tables
         $this->updateDbTables();
@@ -400,6 +400,13 @@ class MollieShopware extends Plugin
         catch (\Exception $ex) {
             //
         }
+
+        try {
+            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_credit_card_token', 'string', []]]);
+        }
+        catch (\Exception $ex) {
+            //
+        }
     }
 
     /**
@@ -409,6 +416,13 @@ class MollieShopware extends Plugin
     {
         try {
             $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_ideal_issuer']]);
+        }
+        catch (\Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_credit_card_token']]);
         }
         catch (\Exception $ex) {
             //

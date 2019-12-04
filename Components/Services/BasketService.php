@@ -121,7 +121,7 @@ class BasketService
 
                 // save order
                 $this->modelManager->persist($order);
-                $this->modelManager->flush();
+                $this->modelManager->flush($order);
             }
         }
 

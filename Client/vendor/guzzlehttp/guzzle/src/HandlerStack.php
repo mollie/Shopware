@@ -1,8 +1,8 @@
 <?php
 
-namespace _PhpScoper5ce26f1fe2920\GuzzleHttp;
+namespace _PhpScoperd1ad3ba9842f\GuzzleHttp;
 
-use _PhpScoper5ce26f1fe2920\Psr\Http\Message\RequestInterface;
+use _PhpScoperd1ad3ba9842f\Psr\Http\Message\RequestInterface;
 /**
  * Creates a composed Guzzle handler function by stacking middlewares on top of
  * an HTTP handler function.
@@ -35,10 +35,10 @@ class HandlerStack
     public static function create(callable $handler = null)
     {
         $stack = new self($handler ?: choose_handler());
-        $stack->push(\_PhpScoper5ce26f1fe2920\GuzzleHttp\Middleware::httpErrors(), 'http_errors');
-        $stack->push(\_PhpScoper5ce26f1fe2920\GuzzleHttp\Middleware::redirect(), 'allow_redirects');
-        $stack->push(\_PhpScoper5ce26f1fe2920\GuzzleHttp\Middleware::cookies(), 'cookies');
-        $stack->push(\_PhpScoper5ce26f1fe2920\GuzzleHttp\Middleware::prepareBody(), 'prepare_body');
+        $stack->push(\_PhpScoperd1ad3ba9842f\GuzzleHttp\Middleware::httpErrors(), 'http_errors');
+        $stack->push(\_PhpScoperd1ad3ba9842f\GuzzleHttp\Middleware::redirect(), 'allow_redirects');
+        $stack->push(\_PhpScoperd1ad3ba9842f\GuzzleHttp\Middleware::cookies(), 'cookies');
+        $stack->push(\_PhpScoperd1ad3ba9842f\GuzzleHttp\Middleware::prepareBody(), 'prepare_body');
         return $stack;
     }
     /**
@@ -54,7 +54,7 @@ class HandlerStack
      * @param RequestInterface $request
      * @param array            $options
      */
-    public function __invoke(\_PhpScoper5ce26f1fe2920\Psr\Http\Message\RequestInterface $request, array $options)
+    public function __invoke(\_PhpScoperd1ad3ba9842f\Psr\Http\Message\RequestInterface $request, array $options)
     {
         $handler = $this->resolve();
         return $handler($request, $options);
@@ -180,7 +180,7 @@ class HandlerStack
         return $this->cached;
     }
     /**
-     * @param $name
+     * @param string $name
      * @return int
      */
     private function findByName($name)
@@ -195,10 +195,10 @@ class HandlerStack
     /**
      * Splices a function into the middleware list at a specific position.
      *
-     * @param          $findName
-     * @param          $withName
+     * @param string   $findName
+     * @param string   $withName
      * @param callable $middleware
-     * @param          $before
+     * @param bool     $before
      */
     private function splice($findName, $withName, callable $middleware, $before)
     {

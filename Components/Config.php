@@ -166,4 +166,20 @@ class Config
     {
         return ($this->get('create_order_before_payment', 'yes') === 'yes');
     }
+
+    /**
+     * @return bool
+     */
+    public function enableCreditCardComponent()
+    {
+        return (bool) $this->get('enable_credit_card_component', true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function enableCreditCardComponentStyling()
+    {
+        return (bool) $this->get('enable_credit_card_component_styling', true);
+    }
 }

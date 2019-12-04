@@ -1,11 +1,11 @@
 <?php
 
-namespace _PhpScoper5ce26f1fe2920\GuzzleHttp\Handler;
+namespace _PhpScoperd1ad3ba9842f\GuzzleHttp\Handler;
 
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Promise as P;
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Promise\Promise;
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Psr7;
-use _PhpScoper5ce26f1fe2920\Psr\Http\Message\RequestInterface;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Promise as P;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Promise\Promise;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Psr7;
+use _PhpScoperd1ad3ba9842f\Psr\Http\Message\RequestInterface;
 /**
  * Returns an asynchronous response using curl_multi_* functions.
  *
@@ -34,8 +34,14 @@ class CurlMultiHandler
      */
     public function __construct(array $options = [])
     {
-        $this->factory = isset($options['handle_factory']) ? $options['handle_factory'] : new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlFactory(50);
-        $this->selectTimeout = isset($options['select_timeout']) ? $options['select_timeout'] : 1;
+        $this->factory = isset($options['handle_factory']) ? $options['handle_factory'] : new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlFactory(50);
+        if (isset($options['select_timeout'])) {
+            $this->selectTimeout = $options['select_timeout'];
+        } elseif ($selectTimeout = \getenv('GUZZLE_CURL_SELECT_TIMEOUT')) {
+            $this->selectTimeout = $selectTimeout;
+        } else {
+            $this->selectTimeout = 1;
+        }
     }
     public function __get($name)
     {
@@ -51,11 +57,11 @@ class CurlMultiHandler
             unset($this->_mh);
         }
     }
-    public function __invoke(\_PhpScoper5ce26f1fe2920\Psr\Http\Message\RequestInterface $request, array $options)
+    public function __invoke(\_PhpScoperd1ad3ba9842f\Psr\Http\Message\RequestInterface $request, array $options)
     {
         $easy = $this->factory->create($request, $options);
         $id = (int) $easy->handle;
-        $promise = new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Promise\Promise([$this, 'execute'], function () use($id) {
+        $promise = new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Promise\Promise([$this, 'execute'], function () use($id) {
             return $this->cancel($id);
         });
         $this->addRequest(['easy' => $easy, 'deferred' => $promise]);
@@ -68,7 +74,7 @@ class CurlMultiHandler
     {
         // Add any delayed handles if needed.
         if ($this->delays) {
-            $currentTime = \microtime(\true);
+            $currentTime = \_PhpScoperd1ad3ba9842f\GuzzleHttp\_current_time();
             foreach ($this->delays as $id => $delay) {
                 if ($currentTime >= $delay) {
                     unset($this->delays[$id]);
@@ -77,7 +83,7 @@ class CurlMultiHandler
             }
         }
         // Step through the task queue which may add additional requests.
-        \_PhpScoper5ce26f1fe2920\GuzzleHttp\Promise\queue()->run();
+        \_PhpScoperd1ad3ba9842f\GuzzleHttp\Promise\queue()->run();
         if ($this->active && \curl_multi_select($this->_mh, $this->selectTimeout) === -1) {
             // Perform a usleep if a select returns -1.
             // See: https://bugs.php.net/bug.php?id=61141
@@ -92,7 +98,7 @@ class CurlMultiHandler
      */
     public function execute()
     {
-        $queue = \_PhpScoper5ce26f1fe2920\GuzzleHttp\Promise\queue();
+        $queue = \_PhpScoperd1ad3ba9842f\GuzzleHttp\Promise\queue();
         while ($this->handles || !$queue->isEmpty()) {
             // If there are no transfers, then sleep for the next delay
             if (!$this->active && $this->delays) {
@@ -109,7 +115,7 @@ class CurlMultiHandler
         if (empty($easy->options['delay'])) {
             \curl_multi_add_handle($this->_mh, $easy->handle);
         } else {
-            $this->delays[$id] = \microtime(\true) + $easy->options['delay'] / 1000;
+            $this->delays[$id] = \_PhpScoperd1ad3ba9842f\GuzzleHttp\_current_time() + $easy->options['delay'] / 1000;
         }
     }
     /**
@@ -143,12 +149,12 @@ class CurlMultiHandler
             $entry = $this->handles[$id];
             unset($this->handles[$id], $this->delays[$id]);
             $entry['easy']->errno = $done['result'];
-            $entry['deferred']->resolve(\_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlFactory::finish($this, $entry['easy'], $this->factory));
+            $entry['deferred']->resolve(\_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlFactory::finish($this, $entry['easy'], $this->factory));
         }
     }
     private function timeToNext()
     {
-        $currentTime = \microtime(\true);
+        $currentTime = \_PhpScoperd1ad3ba9842f\GuzzleHttp\_current_time();
         $nextTime = \PHP_INT_MAX;
         foreach ($this->delays as $time) {
             if ($time < $nextTime) {

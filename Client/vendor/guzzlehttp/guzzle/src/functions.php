@@ -1,11 +1,11 @@
 <?php
 
-namespace _PhpScoper5ce26f1fe2920\GuzzleHttp;
+namespace _PhpScoperd1ad3ba9842f\GuzzleHttp;
 
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlHandler;
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlMultiHandler;
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\Proxy;
-use _PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\StreamHandler;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlHandler;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlMultiHandler;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\Proxy;
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\StreamHandler;
 /**
  * Expands a URI template
  *
@@ -18,12 +18,12 @@ function uri_template($template, array $variables)
 {
     if (\extension_loaded('uri_template')) {
         // @codeCoverageIgnoreStart
-        return \_PhpScoper5ce26f1fe2920\uri_template($template, $variables);
+        return \_PhpScoperd1ad3ba9842f\uri_template($template, $variables);
         // @codeCoverageIgnoreEnd
     }
     static $uriTemplate;
     if (!$uriTemplate) {
-        $uriTemplate = new \_PhpScoper5ce26f1fe2920\GuzzleHttp\UriTemplate();
+        $uriTemplate = new \_PhpScoperd1ad3ba9842f\GuzzleHttp\UriTemplate();
     }
     return $uriTemplate->expand($template, $variables);
 }
@@ -93,14 +93,14 @@ function choose_handler()
 {
     $handler = null;
     if (\function_exists('curl_multi_exec') && \function_exists('curl_exec')) {
-        $handler = \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\Proxy::wrapSync(new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlMultiHandler(), new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlHandler());
+        $handler = \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\Proxy::wrapSync(new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlMultiHandler(), new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlHandler());
     } elseif (\function_exists('curl_exec')) {
-        $handler = new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlHandler();
+        $handler = new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlHandler();
     } elseif (\function_exists('curl_multi_exec')) {
-        $handler = new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\CurlMultiHandler();
+        $handler = new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\CurlMultiHandler();
     }
     if (\ini_get('allow_url_fopen')) {
-        $handler = $handler ? \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\Proxy::wrapStreaming($handler, new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\StreamHandler()) : new \_PhpScoper5ce26f1fe2920\GuzzleHttp\Handler\StreamHandler();
+        $handler = $handler ? \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\Proxy::wrapStreaming($handler, new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\StreamHandler()) : new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Handler\StreamHandler();
     } elseif (!$handler) {
         throw new \RuntimeException('GuzzleHttp requires cURL, the ' . 'allow_url_fopen ini setting, or a custom HTTP handler.');
     }
@@ -115,7 +115,7 @@ function default_user_agent()
 {
     static $defaultAgent = '';
     if (!$defaultAgent) {
-        $defaultAgent = 'GuzzleHttp/' . \_PhpScoper5ce26f1fe2920\GuzzleHttp\Client::VERSION;
+        $defaultAgent = 'GuzzleHttp/' . \_PhpScoperd1ad3ba9842f\GuzzleHttp\Client::VERSION;
         if (\extension_loaded('curl') && \function_exists('curl_version')) {
             $defaultAgent .= ' curl/' . \curl_version()['version'];
         }
@@ -262,14 +262,14 @@ function is_host_in_noproxy($host, array $noProxyArray)
  * @param int    $options Bitmask of JSON decode options.
  *
  * @return mixed
- * @throws \InvalidArgumentException if the JSON cannot be decoded.
+ * @throws Exception\InvalidArgumentException if the JSON cannot be decoded.
  * @link http://www.php.net/manual/en/function.json-decode.php
  */
 function json_decode($json, $assoc = \false, $depth = 512, $options = 0)
 {
     $data = \json_decode($json, $assoc, $depth, $options);
     if (\JSON_ERROR_NONE !== \json_last_error()) {
-        throw new \InvalidArgumentException('json_decode error: ' . \json_last_error_msg());
+        throw new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Exception\InvalidArgumentException('json_decode error: ' . \json_last_error_msg());
     }
     return $data;
 }
@@ -281,14 +281,25 @@ function json_decode($json, $assoc = \false, $depth = 512, $options = 0)
  * @param int    $depth   Set the maximum depth. Must be greater than zero.
  *
  * @return string
- * @throws \InvalidArgumentException if the JSON cannot be encoded.
+ * @throws Exception\InvalidArgumentException if the JSON cannot be encoded.
  * @link http://www.php.net/manual/en/function.json-encode.php
  */
 function json_encode($value, $options = 0, $depth = 512)
 {
     $json = \json_encode($value, $options, $depth);
     if (\JSON_ERROR_NONE !== \json_last_error()) {
-        throw new \InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
+        throw new \_PhpScoperd1ad3ba9842f\GuzzleHttp\Exception\InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
     }
     return $json;
+}
+/**
+ * Wrapper for the hrtime() or microtime() functions
+ * (depending on the PHP version, one of the two is used)
+ *
+ * @return float|mixed UNIX timestamp
+ * @internal
+ */
+function _current_time()
+{
+    return \function_exists('hrtime') ? \hrtime(\true) / 1000000000.0 : \microtime(\true);
 }

@@ -227,6 +227,22 @@
             </store>
         </element>
 
+        <element type="boolean">
+            <name>enable_credit_card_component</name>
+            <label lang="de">Kreditkartenkomponente aktivieren</label>
+            <label lang="en">Enable credit card component</label>
+            <label lang="nl">Credit card component activeren</label>
+            <value>true</value>
+        </element>
+
+        <element type="boolean">
+            <name>enable_credit_card_component_styling</name>
+            <label lang="de">Styling für die Kreditkartenkomponente aktivieren</label>
+            <label lang="en">Enable styling for credit card component</label>
+            <label lang="nl">Voeg styling toe aan credit card component</label>
+            <value>true</value>
+        </element>
+
 <!--         <element type="textarea" scope="shop">
             <name>extra_metadata</name>
             <label lang="de">Zusätzliche Metadaten</label>

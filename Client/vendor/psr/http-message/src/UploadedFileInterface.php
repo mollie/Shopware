@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5ce26f1fe2920\Psr\Http\Message;
+namespace _PhpScoperd1ad3ba9842f\Psr\Http\Message;
 
 /**
  * Value object representing a file uploaded through an HTTP request.

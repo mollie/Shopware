@@ -1,0 +1,58 @@
+.mollie-components-credit-card {
+  .unitize(max-width, 465);
+  label {
+    display: block;
+    font-weight: bold;
+    .unitize(margin-top, 10);
+  }
+  .block-group {
+    .b1 {
+      width: 49%;
+      float: left;
+    }
+
+    .b2 {
+      width: 49%;
+      float: right;
+    }
+  }
+  .intro-text {
+    .unitize(margin-top, 10);
+  }
+  .tag-line {
+    .unitize(margin-top, 10);
+    .logo {
+      display: inline-block;
+      .unitize(max-height, 18);
+      .unitize(max-width, 50);
+    }
+  }
+  .error-message {
+    color: #ff233a;
+  }
+  .input--field.mollie {
+    .border-radius();
+    .unitize(min-height, 34);
+    background: #fff;
+    color: lighten(@text-color, 15%);
+    text-align: left;
+    transition: all .05s ease;
+    box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.1),
+                0px 1px 3px 0px rgba(0,0,0,0.1),
+                0px 0px 0px 1px rgba(0,0,0,0.05);
+
+    &:active {
+      box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.1),
+                  0px 2px 6px 0px rgba(0,0,0,0.1),
+                  0px 0px 0px 1px rgba(0,0,0,0.05);
+      border: 2px solid #07f;
+    }
+
+    &.error {
+      background: #fff0f0;
+      box-shadow: 0px 1px 1px 0px rgba(255,51,68,0.1),
+                  0px 1px 3px 0px rgba(255,51,68,0.1),
+                  0px 0px 0px 1px rgba(255,51,68,0.05);
+    }
+  }
+}

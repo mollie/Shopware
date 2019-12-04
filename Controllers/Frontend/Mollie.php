@@ -1,5 +1,8 @@
 <?php
 
+use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Profile;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -135,11 +138,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
         }
 
+        $checkoutUrl = $paymentService->startTransaction(
+            $this->getPaymentShortName(),
+            $transaction
+        );
+
         return $this->redirect(
-            $paymentService->startTransaction(
-                $this->getPaymentShortName(),
-                $transaction
-            )
+            $checkoutUrl
         );
     }
 
@@ -539,6 +544,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $order = null;
 
         try {
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            $orderService = $this->container
+                ->get('mollie_shopware.order_service');
+
+            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            $paymentService = $this->container->get('mollie_shopware.payment_service');
+
             /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
             $transactionRepo = Shopware()->Models()->getRepository(
                 \MollieShopware\Models\Transaction::class
@@ -550,8 +562,48 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             if (!empty($transaction)) {
                 // check whether the payment was canceled
                 if ($this->getConfig() !== null &&
-                    $this->getConfig()->createOrderBeforePayment() === false) {
-                    if ($this->getOrderCanceledOrFailed($transaction) === true) {
+                    $this->getOrderCanceledOrFailed($transaction) === true) {
+
+                    if ($this->getConfig()->createOrderBeforePayment() === false) {
+                        return null;
+                    }
+
+                    if ($this->getConfig()->createOrderBeforePayment() === true) {
+                        if ($transaction->getOrderId() > 0) {
+                            try {
+                                // Cancel payment
+                                Shopware()->Modules()->Order()->setPaymentStatus(
+                                    $transaction->getOrderId(),
+                                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+                                );
+
+                                if ($this->getConfig()->cancelFailedOrders() === true) {
+                                    // Cancel order
+                                    Shopware()->Modules()->Order()->setOrderStatus(
+                                        $transaction->getOrderId(),
+                                        Status::ORDER_STATE_CANCELLED_REJECTED
+                                    );
+
+                                    if ($paymentService !== null) {
+                                        $paymentService->resetStock(
+                                            $orderService->getOrderById($transaction->getOrderId())
+                                        );
+                                    }
+                                }
+                            } catch (\Exception $e) {
+                                //
+                            }
+
+                            try {
+                                // Restore order
+                                $this->retryOrderRestore(
+                                    $orderService->getOrderById($transaction->getOrderId())
+                                );
+                            } catch (\Exception $e) {
+                                //
+                            }
+                        }
+
                         return null;
                     }
                 }
@@ -600,11 +652,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 if (empty($orderNumber) && $createOrder === true) {
                     $sendStatusMail = false;
 
-                    /** @var \MollieShopware\Components\Config $config */
-                    $config = $this->container->get('mollie_shopware.config');
-
-                    if ($config !== null) {
-                        $sendStatusMail = $config->sendStatusMail();
+                    if ($this->getConfig() !== null) {
+                        $sendStatusMail = $this->getConfig()->sendStatusMail();
                     }
 
                     $orderNumber = $this->saveOrder(
@@ -617,10 +666,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     // update the order number at Mollie
                     $this->updateMollieOrderNumber($transaction, $orderNumber);
                 }
-
-                /** @var \MollieShopware\Components\Services\OrderService $orderService */
-                $orderService = $this->container
-                    ->get('mollie_shopware.order_service');
 
                 /** @var \Shopware\Models\Order\Order $order */
                 $order = $orderService->getOrderByNumber($orderNumber);
@@ -686,6 +731,50 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 500
             );
         }
+    }
+
+    /**
+     * Returns the components ES6 script for the current profile and locale.
+     */
+    public function componentsAction()
+    {
+        $mollieProfile = null;
+        $mollieProfileId = '';
+        $mollieTestMode = false;
+
+        /** @var MollieApiClient $apiClient */
+        $apiClient = Shopware()->Container()->get('mollie_shopware.api');
+
+        /** @var \MollieShopware\Components\Config $config */
+        $config = Shopware()->Container()->get('mollie_shopware.config');
+
+        if ($apiClient !== null) {
+            /** @var Profile $mollieProfile */
+            try {
+                $mollieProfile = $apiClient->profiles->get('me');
+            } catch (ApiException $e) {
+                //
+            }
+        }
+
+        if ($config !== null) {
+            $mollieTestMode = (strpos($config->apiKey(), 'test') === 0);
+        }
+
+        if ($mollieProfile !== null) {
+            $mollieProfileId = $mollieProfile->id;
+        }
+
+        header('Content-Type: text/javascript');
+
+        $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
+        $script = str_replace('[mollie_profile_id]', $mollieProfileId, $script);
+        $script = str_replace('[mollie_locale]', $this->getLocale(), $script);
+        $script = str_replace('[mollie_testmode]', $mollieTestMode === true ? 'true' : 'false', $script);
+
+        echo $script;
+
+        exit;
     }
 
     /**
@@ -1134,21 +1223,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             Shopware()->Session(),
             Shopware()->Models()
         );
-        /** @var \DateTime $currentDateTime */
-        $currentDateTime = new \DateTime(
-            'now',
-            $order->getOrderTime()->getTimezone()
-        );
 
-        /** @var \DateInterval $dateInterval */
-        $dateInterval = $currentDateTime->diff(
-            $order->getOrderTime()
-        );
-
-        $differenceInMinutes = $this->getDateIntervalTotalMinutes($dateInterval);
-
-        if ($differenceInMinutes <= 10 &&
-            $currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
+        if ($currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
 
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
             $basketService = $this->container
@@ -1187,6 +1263,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                         return true;
                     }
 
+                    if ($mollieOrder->isExpired() === true) {
+                        return true;
+                    }
+
                     if ($mollieOrder->payments() !== null) {
                         return $this->getPaymentCollectionCanceledOrFailed($mollieOrder->payments());
                     }
@@ -1202,7 +1282,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 }
 
                 if ($molliePayment !== null) {
-                    if ($molliePayment->isCanceled() === true || $molliePayment->isFailed() === true) {
+                    if ($molliePayment->isCanceled() === true ||
+                        $molliePayment->isFailed() === true ||
+                        $molliePayment->isExpired() === true) {
                         return true;
                     }
                 }
@@ -1221,6 +1303,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $paymentsTotal = $payments->count();
         $canceledPayments = 0;
         $failedPayments = 0;
+        $expiredPayments = 0;
 
         if ($paymentsTotal > 0) {
             /** @var \Mollie\Api\Resources\Payment $payment */
@@ -1231,10 +1314,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 if ($payment->isFailed() === true) {
                     $failedPayments++;
                 }
+                if ($payment->isExpired() === true) {
+                    $expiredPayments++;
+                }
             }
 
-            if ($canceledPayments > 0 || $failedPayments > 0) {
-                if (($canceledPayments + $failedPayments) === $paymentsTotal) {
+            if ($canceledPayments > 0 || $failedPayments > 0 || $expiredPayments > 0) {
+                if (($canceledPayments + $failedPayments + $expiredPayments) === $paymentsTotal) {
                     return true;
                 }
             }

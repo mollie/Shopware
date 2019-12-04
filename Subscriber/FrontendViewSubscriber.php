@@ -2,44 +2,86 @@
 
 namespace MollieShopware\Subscriber;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Enlight\Event\SubscriberInterface;
+use Enlight_Event_EventArgs;
+use MollieShopware\Components\Config;
+use Shopware\Components\Theme\LessDefinition;
 
 class FrontendViewSubscriber implements SubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return [
+            'Enlight_Controller_Action_PreDispatch' => 'addComponentsVariables',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'addViewDirectory',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'=>'getController',
+            'Theme_Compiler_Collect_Plugin_Less' => 'addLessFiles'
         ];
     }
 
     /**
      * Add plugin view dir to Smarty
      *
-     * @param \Enlight_Event_EventArgs $args
+     * @param Enlight_Event_EventArgs $args
      */
-    public function addViewDirectory(\Enlight_Event_EventArgs $args)
+    public function addComponentsVariables(Enlight_Event_EventArgs $args)
     {
         /** @var \Enlight_Controller_Action $controller */
-        $controller = $args->getSubject();
+        $controller = null;
 
         /** @var \Enlight_View $view */
         $view = null;
 
-        if (!empty($controller))
-            $view = $controller->View();
+        if (method_exists($args, 'getSubject')) {
+            $controller = $args->getSubject();
+        }
 
-        if (!empty($view))
+        if ($controller !== null) {
+            $view = $controller->View();
+        }
+
+        /** @var Config $config */
+        $config = Shopware()->Container()->get('mollie_shopware.config');
+
+        if ($config !== null && $view !== null) {
+            $view->assign('sMollieEnableComponent', $config->enableCreditCardComponent());
+            $view->assign('sMollieEnableComponentStyling', $config->enableCreditCardComponentStyling());
+        }
+    }
+
+    /**
+     * Add plugin view dir to Smarty
+     *
+     * @param Enlight_Event_EventArgs $args
+     */
+    public function addViewDirectory(Enlight_Event_EventArgs $args)
+    {
+        /** @var \Enlight_Controller_Action $controller */
+        $controller = null;
+
+        /** @var \Enlight_View $view */
+        $view = null;
+
+        if (method_exists($args, 'getSubject')) {
+            $controller = $args->getSubject();
+        }
+
+        if ($controller !== null) {
+            $view = $controller->View();
+        }
+
+        if ($view !== null) {
             $view->addTemplateDir(__DIR__ . '/../Resources/views');
+        }
     }
 
     /**
      * Get error messages from session and assign them to the frontend view
      *
-     * @param \Enlight_Event_EventArgs $args
+     * @param Enlight_Event_EventArgs $args
      */
-    public function getController(\Enlight_Event_EventArgs $args)
+    public function getController(Enlight_Event_EventArgs $args)
     {
         /** @var \Enlight_Components_Session_Namespace $session */
         $session = Shopware()->Session();
@@ -63,5 +105,25 @@ class FrontendViewSubscriber implements SubscriberInterface
             // unset error, so it wont show up on next page view
             $session->mollieStatusError = $session->mollieError = null;
         }
+    }
+
+    /**
+     * Provides the needed Less files
+     *
+     * @param Enlight_Event_EventArgs $args
+     * @return ArrayCollection
+     */
+    public function addLessFiles(Enlight_Event_EventArgs $args)
+    {
+        $lessFiles = [];
+        $lessFiles[] = __DIR__ . '/../Resources/views/frontend/_public/src/less/components.less';
+
+        $less = new LessDefinition(
+            [], // configuration
+            $lessFiles, // less files to compile
+            __DIR__
+        );
+
+        return new ArrayCollection([$less]);
     }
 }

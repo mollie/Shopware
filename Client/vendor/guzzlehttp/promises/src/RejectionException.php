@@ -1,6 +1,6 @@
 <?php
 
-namespace _PhpScoper5ce26f1fe2920\GuzzleHttp\Promise;
+namespace _PhpScoperd1ad3ba9842f\GuzzleHttp\Promise;
 
 /**
  * A special exception that is thrown when waiting on a rejected promise.
