@@ -232,7 +232,7 @@
             <label lang="de">Kreditkartenkomponente aktivieren</label>
             <label lang="en">Enable credit card component</label>
             <label lang="nl">Credit card component activeren</label>
-            <value>true</value>
+            <value>false</value>
         </element>
 
         <element type="boolean">
