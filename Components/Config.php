@@ -172,7 +172,7 @@ class Config
      */
     public function enableCreditCardComponent()
     {
-        return (bool) $this->get('enable_credit_card_component', false);
+        return (bool) $this->get('enable_credit_card_component', true);
     }
 
     /**

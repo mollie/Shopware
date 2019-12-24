@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
+use Shopware\Models\Article\Detail;
 use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Repository;
 
@@ -319,6 +320,7 @@ class BasketService
         );
 
         try {
+            /** @var Detail $article */
             $article = $orderDetailRepo->findOneBy([
                 'number' => $orderDetail->getArticleNumber()
             ]);
@@ -333,10 +335,15 @@ class BasketService
         }
 
         // restore stock
-        if (!empty($article)) {
+        if ($article !== null) {
             $article->setInStock($article->getInStock() + $orderedQuantity);
 
-            Shopware()->Models()->persist($article);
+            try {
+                $this->modelManager->persist($article);
+                $this->modelManager->flush($article);
+            } catch(\Exception $e) {
+                //
+            }
         }
 
         return $orderDetail;

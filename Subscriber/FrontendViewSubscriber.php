@@ -116,6 +116,7 @@ class FrontendViewSubscriber implements SubscriberInterface
     public function addLessFiles(Enlight_Event_EventArgs $args)
     {
         $lessFiles = [];
+        $lessFiles[] = __DIR__ . '/../Resources/views/frontend/_public/src/less/checkout.less';
         $lessFiles[] = __DIR__ . '/../Resources/views/frontend/_public/src/less/components.less';
 
         $less = new LessDefinition(

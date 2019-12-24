@@ -36,7 +36,7 @@ class CreditCardTokenSubscriber implements SubscriberInterface
         // get credit card token
         $creditCardToken = Shopware()->Front()->Request()->getPost('mollie_shopware_credit_card_token');
 
-        // write issuer id to database
+        // write card token to database
         $this->creditCardService->setCardToken($creditCardToken);
 
         return $query;

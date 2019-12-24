@@ -190,6 +190,15 @@ class PaymentService
             ];
         }
 
+        // Reset card token on customer attribute
+        try {
+            /** @var \MollieShopware\Components\Services\CreditCardService $creditCardService */
+            $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
+            $creditCardService->setCardToken('');
+        } catch (\Exception $e) {
+            //
+        }
+
         return $checkoutUrl;
     }
 
@@ -995,7 +1004,10 @@ class PaymentService
         }
 
         if ((string) $paymentMethod === PaymentMethod::CREDITCARD) {
-            $paymentParameters['cardToken'] = $this->getCreditCardToken();
+            if ($this->config->enableCreditCardComponent() === true &&
+                (string) $this->getCreditCardToken() !== '') {
+                $paymentParameters['cardToken'] = $this->getCreditCardToken();
+            }
         }
 
         return $paymentParameters;
