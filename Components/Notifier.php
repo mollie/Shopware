@@ -11,11 +11,12 @@ class Notifier
      * @param $error
      * @throws \Exception
      */
-    public static function notifyException($error) {
+    public static function notifyException($error, $exception = null) {
         // log the error
         Logger::log(
             'error',
-            $error
+            $error,
+            $exception
         );
 
         // return the error json

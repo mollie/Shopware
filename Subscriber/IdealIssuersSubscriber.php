@@ -47,6 +47,8 @@ class IdealIssuersSubscriber implements SubscriberInterface
             $view->assign('mollieIssues', true);
         }
 
+        $this->updateIssuer();
+
         $view->addTemplateDir(__DIR__ . '/../Resources/views');
     }
 
@@ -62,12 +64,23 @@ class IdealIssuersSubscriber implements SubscriberInterface
         // get query
         $query = $args->getReturn();
 
-        // get issuer
-        $issuer = Shopware()->Front()->Request()->getPost('mollie-ideal-issuer');
-
-        // write issuer id to database
-        $this->idealService->setSelectedIssuer($issuer);
+        $this->updateIssuer();
 
         return $query;
+    }
+
+    private function updateIssuer()
+    {
+        try {
+            // get issuer
+            $issuer = Shopware()->Front()->Request()->getPost('mollie-ideal-issuer');
+
+            // write issuer id to database
+            if ((string)$issuer !== '') {
+                $this->idealService->setSelectedIssuer($issuer);
+            }
+        } catch (\Exception $e) {
+            //
+        }
     }
 }

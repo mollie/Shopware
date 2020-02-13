@@ -84,7 +84,7 @@ class IdealService
         $attributes->setMollieShopwareIdealIssuer($issuer);
 
         $this->modelManager->persist($attributes);
-        $this->modelManager->flush();
+        $this->modelManager->flush($attributes);
 
         return $issuer;
     }

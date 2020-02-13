@@ -2,6 +2,8 @@
 
 namespace MollieShopware\Components;
 
+require_once __DIR__ . '/../Client/vendor/autoload.php';
+
 use Mollie\Api\MollieApiClient;
 
 class MollieApiFactory
@@ -32,6 +34,8 @@ class MollieApiFactory
      */
     public function create()
     {
+        $this->requireDependencies();
+
         if (empty($this->apiClient)) {
             $this->apiClient = new MollieApiClient();
             $this->apiClient->setApiKey($this->config->apikey());
@@ -45,7 +49,7 @@ class MollieApiFactory
 
                 // add plugin name and version
                 $this->apiClient->addVersionString(
-                    'MollieShopware/1.5.5'
+                    'MollieShopware/1.5.6'
                 );
             }
             catch (\Exception $ex) {
@@ -54,5 +58,33 @@ class MollieApiFactory
         }
 
         return $this->apiClient;
+    }
+
+    public function requireDependencies()
+    {
+        // Load composer libraries
+        if (file_exists(__DIR__ . '/../Client/vendor/scoper-autoload.php')) {
+            require_once __DIR__ . '/../Client/vendor/scoper-autoload.php';
+        }
+
+        // Load guzzle functions
+        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/guzzle/src/functions_include.php')) {
+            require_once __DIR__ . '/../Client/vendor/guzzlehttp/guzzle/src/functions_include.php';
+        }
+
+        // Load promises functions
+        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/promises/src/functions_include.php')) {
+            require_once __DIR__ . '/../Client/vendor/guzzlehttp/promises/src/functions_include.php';
+        }
+
+        // Load psr7 functions
+        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/psr7/src/functions_include.php')) {
+            require_once __DIR__ . '/../Client/vendor/guzzlehttp/psr7/src/functions_include.php';
+        }
+
+        // Load client
+        if (file_exists(__DIR__ . '/../Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php')) {
+            require_once __DIR__ . '/../Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php';
+        }
     }
 }

@@ -1,11 +1,12 @@
 {namespace name='frontend/plugins/payment/mollie_creditcard'}
 
 {if $payment_mean.name|lower === 'mollie_creditcard' && $payment_mean.id eq $sFormData.payment && $sMollieEnableComponent}
+<script src="https://js.mollie.com/v1/mollie.js"></script>
 <div class="mollie-components-credit-card" id="mollie_components_credit_card">
     <input type="hidden" name="mollie_shopware_credit_card_token" id="cardToken" value="" />
     <div class="block-group">
         <div class="intro-text">
-            <span>{$sPayment}{s namespace="frontend/mollie/plugins" name="CreditCardHeadLine"}Enter your card information{/s}</span>
+            <span>{s namespace="frontend/mollie/plugins" name="CreditCardHeadLine"}Enter your card information{/s}</span>
         </div>
     </div>
     <div class="block-group">

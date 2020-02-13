@@ -55,6 +55,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         /** @var \MollieShopware\Components\Config $config */
         $config = $this->container->get('mollie_shopware.config');
 
+        /** @var int $paymentId */
+        $paymentId = $this->getPaymentId();
+
         /**
          * Create an instance of the PaymentService. The PaymentService is used
          * to handle transactions.
@@ -158,6 +161,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function returnAction()
     {
+        $transaction = null;
+
         /** @var string $transactionNumber */
         $transactionNumber = $this->Request()->getParam('transactionNumber');
 
@@ -180,19 +185,19 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         try {
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->getOrder();
-
-            if ($order === null || !$order instanceof \Shopware\Models\Order\Order) {
-                if (!empty($transactionNumber)) {
-                    $order = $this->getOrderFromTransaction($transactionNumber);
-                }
-            }
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Logger::log(
                 'error',
                 $e->getMessage(),
                 $e
             );
+        }
+
+        if (
+            $transactionNumber !== ''
+            && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
+        ) {
+            $order = $this->getOrderFromTransaction($transactionNumber);
         }
 
         if ($order === null) {
@@ -208,10 +213,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->view->assign('orderNumber', $order->getNumber());
 
             // Update the transaction ID
-            $this->updateTransactionId($order);
+            $this->updateTransactionId($order, $transaction);
         }
 
-        if ($transaction !== null && (string) $transaction->getOrderNumber() !== '') {
+        if (
+            $transaction !== null
+            && (string) $transaction->getOrderNumber() !== ''
+            && (string) $transaction->getMolliePaymentId() === '')
+        {
             $result = $this->processOrderReturn($order, $paymentService);
 
             if ($result !== false) {
@@ -219,7 +228,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
         }
 
-        if ($transaction !== null && (string) $transaction->getMolliePaymentId() !== '') {
+        if (
+            $transaction !== null
+            && (string) $transaction->getMolliePaymentId() !== ''
+        ) {
             $result = $this->processPaymentReturn($order, $paymentService);
 
             if ($result !== false) {
@@ -230,7 +242,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         // something went wrong because nothing is returned until now
         Logger::log(
             'error',
-            'The order couldn\'t be retrieved.',
+            'Return action: The order couldn\'t be retrieved.',
             null
         );
 
@@ -254,17 +266,19 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         try {
             $order = $this->getOrder();
-
-            if (empty($order) || $order == false || !$order instanceof \Shopware\Models\Order\Order) {
-                if (!empty($transactionNumber)) {
-                    $order = $this->getOrderFromTransaction($transactionNumber);
-                }
-            }
         }
-        catch(\Exception $ex) {
+        catch(\Exception $e) {
             Notifier::notifyException(
-                $ex->getMessage()
+                $e->getMessage(),
+                $e
             );
+        }
+
+        if (
+            $transactionNumber !== ''
+            && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
+        ) {
+            $order = $this->getOrderFromTransaction($transactionNumber);
         }
 
         // check the payment status for the order and notify the user.
@@ -296,12 +310,15 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     );
                 }
             } else {
-                return $this->redirectBack('Payment failed');
+                Notifier::notifyException(
+                    'Order not found'
+                );
             }
         }
-        catch (\Exception $ex) {
+        catch (\Exception $e) {
             Notifier::notifyException(
-                $ex->getMessage()
+                $e->getMessage(),
+                $e
             );
         }
     }
@@ -460,27 +477,25 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return $transaction;
     }
 
-    private function updateTransactionId(Order $order)
+    private function updateTransactionId(Order $order, $transaction = null)
     {
-        // Variables
-        $transaction = null;
-
-        /**
-         * Get the transaction from the TransactionRepository, or log an error
-         * when the transaction can't be retrieved.
-         */
-        try {
-            /** @var \MollieShopware\Models\Transaction $transaction */
-            $transaction = $this->getTransactionRepository()->findOneBy([
-                'transactionId' => $order->getTransactionId()
-            ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+        if ($transaction === null) {
+            /**
+             * Get the transaction from the TransactionRepository, or log an error
+             * when the transaction can't be retrieved.
+             */
+            try {
+                /** @var \MollieShopware\Models\Transaction $transaction */
+                $transaction = $this->getTransactionRepository()->findOneBy([
+                    'transactionId' => $order->getTransactionId()
+                ]);
+            } catch (\Exception $ex) {
+                Logger::log(
+                    'error',
+                    $ex->getMessage(),
+                    $ex
+                );
+            }
         }
 
         if ($transaction !== null) {
@@ -488,6 +503,30 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             if ((string) $transaction->getMolliePaymentId() !== '') {
                 $order->setTransactionId($transaction->getMolliePaymentId());
+
+                $config = $this->getConfig();
+
+                if (
+                    $config !== null
+                    && $config->getTransactionNumberType() === $config::TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD
+                ) {
+                    $mollieApi = $this->getMollieApi();
+
+                    if ($mollieApi !== null) {
+                        $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
+                        $transactionNumber = $transaction->getMolliePaymentId();
+
+                        if (isset($molliePayment->details->paypalReference)) {
+                            $transactionNumber = $molliePayment->details->paypalReference;
+                        }
+
+                        if (isset($molliePayment->details->transferReference)) {
+                            $transactionNumber = $molliePayment->details->transferReference;
+                        }
+
+                        $order->setTransactionId($transactionNumber);
+                    }
+                }
             }
 
             if ((string) $transaction->getMollieId() !== '') {
@@ -522,22 +561,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $order = null;
         $orderNumber = $this->Request()->getParam('orderNumber');
 
-        /**
-         * Get the order from the OrderRepository, or log an error
-         * when the order can't be retrieved.
-         */
-        try {
+        if (
+            (string) $orderNumber !== ''
+            && $this->getOrderRepository() !== null
+        ) {
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->getOrderRepository()->findOneBy([
                 'number' => $orderNumber,
             ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
         }
 
         return $order;
@@ -546,161 +577,172 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     private function getOrderFromTransaction($transactionNumber)
     {
         $order = null;
+        $transaction = null;
+        $transactionRepo = null;
 
-        try {
-            /** @var \MollieShopware\Components\Services\OrderService $orderService */
-            $orderService = $this->container
-                ->get('mollie_shopware.order_service');
+        /** @var \Shopware\Components\Model\ModelManager $modelManager */
+        $modelManager = $this->container
+            ->get('models');
 
-            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-            $paymentService = $this->container->get('mollie_shopware.payment_service');
+        /** @var \MollieShopware\Components\Services\OrderService $orderService */
+        $orderService = $this->container
+            ->get('mollie_shopware.order_service');
 
+        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+        $paymentService = $this->container
+            ->get('mollie_shopware.payment_service');
+
+        if ($modelManager !== null) {
             /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
-            $transactionRepo = Shopware()->Models()->getRepository(
+            $transactionRepo = $modelManager->getRepository(
                 \MollieShopware\Models\Transaction::class
             );
+        }
 
+        if ($transactionRepo !== null) {
             /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->find($transactionNumber);
+        }
 
-            if (!empty($transaction)) {
-                // check whether the payment was canceled
-                if ($this->getConfig() !== null &&
-                    $this->getOrderCanceledOrFailed($transaction) === true) {
+        if ($transaction !== null) {
 
-                    if ($this->getConfig()->createOrderBeforePayment() === false) {
-                        return null;
-                    }
+            // check whether the payment was canceled
+            if ($this->getConfig() !== null &&
+                $this->getOrderCanceledOrFailed($transaction) === true) {
 
-                    if ($this->getConfig()->createOrderBeforePayment() === true) {
-                        if ($transaction->getOrderId() > 0) {
-                            try {
-                                // Cancel payment
-                                Shopware()->Modules()->Order()->setPaymentStatus(
+                if ($this->getConfig()->createOrderBeforePayment() === false) {
+                    return null;
+                }
+
+                if ($this->getConfig()->createOrderBeforePayment() === true) {
+                    if ($transaction->getOrderId() > 0) {
+                        $modules = Shopware()->Modules();
+
+                        if ($modules !== null) {
+                            // Cancel payment
+                            $modules->Order()->setPaymentStatus(
+                                $transaction->getOrderId(),
+                                Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+                            );
+
+                            if ($this->getConfig()->cancelFailedOrders() === true) {
+                                // Cancel order
+                                $modules->Order()->setOrderStatus(
                                     $transaction->getOrderId(),
-                                    Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+                                    Status::ORDER_STATE_CANCELLED_REJECTED
                                 );
 
-                                if ($this->getConfig()->cancelFailedOrders() === true) {
-                                    // Cancel order
-                                    Shopware()->Modules()->Order()->setOrderStatus(
-                                        $transaction->getOrderId(),
-                                        Status::ORDER_STATE_CANCELLED_REJECTED
-                                    );
-
-                                    if ($paymentService !== null) {
+                                if ($paymentService !== null) {
+                                    try {
                                         $paymentService->resetStock(
                                             $orderService->getOrderById($transaction->getOrderId())
                                         );
+                                    } catch (\Exception $e) {
+                                        //
                                     }
                                 }
-                            } catch (\Exception $e) {
-                                //
-                            }
-
-                            try {
-                                // Restore order
-                                $this->retryOrderRestore(
-                                    $orderService->getOrderById($transaction->getOrderId())
-                                );
-                            } catch (\Exception $e) {
-                                //
                             }
                         }
-
-                        return null;
-                    }
-                }
-
-                // get the order number
-                $orderNumber = $transaction->getOrderNumber();
-
-                // get the transaction ID
-                $transactionId = $transaction->getMolliePaymentId();
-
-                if (empty($transactionId))
-                    $transactionId = $transaction->getMollieId();
-
-                if (empty($transactionId))
-                    $transactionId = $transaction->getTransactionId();
-
-                $createOrder = false;
-
-                /** @var \Mollie\Api\MollieApiClient $mollieApi */
-                $mollieApi = $this->container->get('mollie_shopware.api');
-
-                if ($mollieApi !== null) {
-                    if ((string)$transaction->getMollieId() !== '') {
-                        /** @var \Mollie\Api\Resources\Order $mollieOrder */
-                        $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
-
-                        if ($mollieOrder !== null &&
-                            $mollieOrder->isCanceled() === false) {
-                            $createOrder = true;
-                        }
-                    }
-
-                    if ((string)$transaction->getMolliePaymentId() !== '') {
-                        /** @var \Mollie\Api\Resources\Payment $molliePayment */
-                        $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
-
-                        if ($molliePayment !== null &&
-                            $molliePayment->isCanceled() === false &&
-                            $molliePayment->isFailed() === false) {
-                            $createOrder = true;
-                        }
-                    }
-                }
-
-                // if order doesn't exist, save the order and retrieve an order number
-                if (empty($orderNumber) && $createOrder === true) {
-                    $sendStatusMail = false;
-
-                    if ($this->getConfig() !== null) {
-                        $sendStatusMail = $this->getConfig()->sendStatusMail();
-                    }
-
-                    $orderNumber = $this->saveOrder(
-                        $transactionId,
-                        $transaction->getBasketSignature(),
-                        Status::PAYMENT_STATE_OPEN,
-                        $sendStatusMail
-                    );
-
-                    // update the order number at Mollie
-                    $this->updateMollieOrderNumber($transaction, $orderNumber);
-                }
-
-                /** @var \Shopware\Models\Order\Order $order */
-                $order = $orderService->getOrderByNumber($orderNumber);
-
-                if (!empty($order)) {
-                    $this->updateTransactionId($order);
-
-                    /** @var \Shopware\Components\Model\ModelManager $modelManager */
-                    $modelManager = Shopware()->Models();
-
-                    if ($modelManager !== null) {
-                        // Store order number and ID on transaction
-                        $transaction->setOrderNumber($order->getNumber());
-                        $transaction->setOrderId($order->getId());
 
                         try {
-                            $modelManager->persist($transaction);
-                            $modelManager->flush($transaction);
-                        } catch (\Exception $e) {
+                            // Restore order
+                            $this->retryOrderRestore(
+                                $orderService->getOrderById($transaction->getOrderId())
+                            );
+                        } catch (Exception $e) {
                             //
                         }
                     }
+
+                    return null;
                 }
             }
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+
+            // get the order number
+            $orderNumber = $transaction->getOrderNumber();
+
+            // get the transaction ID
+            $transactionId = $transaction->getMolliePaymentId();
+
+            if (empty($transactionId))
+                $transactionId = $transaction->getMollieId();
+
+            if (empty($transactionId))
+                $transactionId = $transaction->getTransactionId();
+
+            $createOrder = false;
+
+            /** @var \Mollie\Api\MollieApiClient $mollieApi */
+            $mollieApi = $this->container->get('mollie_shopware.api');
+
+            if ($mollieApi !== null) {
+                if ((string) $transaction->getMollieId() !== '') {
+                    /** @var \Mollie\Api\Resources\Order $mollieOrder */
+                    $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
+
+                    if ($mollieOrder !== null &&
+                        $mollieOrder->isCanceled() === false) {
+                        $createOrder = true;
+                    }
+                }
+
+                if ((string)$transaction->getMolliePaymentId() !== '') {
+                    /** @var \Mollie\Api\Resources\Payment $molliePayment */
+                    $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
+
+                    if ($molliePayment !== null &&
+                        $molliePayment->isCanceled() === false &&
+                        $molliePayment->isFailed() === false) {
+                        $createOrder = true;
+                    }
+                }
+            }
+
+            // if order doesn't exist, save the order and retrieve an order number
+            if (empty($orderNumber) && $createOrder === true) {
+                $sendStatusMail = false;
+
+                if ($this->getConfig() !== null) {
+                    $sendStatusMail = $this->getConfig()->sendStatusMail();
+                }
+
+                $orderNumber = $this->saveOrder(
+                    $transactionId,
+                    $transaction->getBasketSignature(),
+                    Status::PAYMENT_STATE_OPEN,
+                    $sendStatusMail
+                );
+
+                // update the order number at Mollie
+                $this->updateMollieOrderNumber($transaction, $orderNumber);
+            }
+
+            try {
+                /** @var \Shopware\Models\Order\Order $order */
+                $order = $orderService->getOrderByNumber($orderNumber);
+            } catch (\Exception $e) {
+                //
+            }
+
+            if ($order !== null) {
+                $this->updateTransactionId($order, $transaction);
+
+                /** @var \Shopware\Components\Model\ModelManager $modelManager */
+                $modelManager = Shopware()->Models();
+
+                if ($modelManager !== null) {
+                    // Store order number and ID on transaction
+                    $transaction->setOrderNumber($order->getNumber());
+                    $transaction->setOrderId($order->getId());
+
+                    try {
+                        $modelManager->persist($transaction);
+                        $modelManager->flush($transaction);
+                    } catch (\Exception $e) {
+                        //
+                    }
+                }
+            }
         }
 
         return $order;
@@ -855,7 +897,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $orderNumber
     )
     {
-        if (strlen($transaction->getMollieId())) {
+        if ((string) $transaction->getMollieId() !== '') {
             /** @var \Mollie\Api\MollieApiClient $mollieApi */
             $mollieApi = $this->container->get('mollie_shopware.api');
 
@@ -864,7 +906,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $mollieOrder = $mollieApi->orders->get($transaction->getMollieId());
 
                 // set the new order number
-                $mollieOrder->orderNumber = $orderNumber;
+                $mollieOrder->orderNumber = (string) $orderNumber;
 
                 // store the new order number
                 $mollieOrder->update();
@@ -900,7 +942,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         } catch (\Exception $e) {
             Logger::log(
                 'error',
-                'The order couldn\'t be retrieved.',
+                'Process order return: The order couldn\'t be retrieved.',
                 $e
             );
         }
@@ -997,7 +1039,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         catch (\Exception $e) {
             Logger::log(
                 'error',
-                'The payment couldn\'t be retrieved.',
+                'Process payment return: The payment couldn\'t be retrieved.',
                 $e
             );
         }

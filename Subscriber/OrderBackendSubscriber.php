@@ -3,6 +3,8 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use MollieShopware\Components\Config;
+use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Logger;
 
 class OrderBackendSubscriber implements SubscriberInterface
@@ -56,9 +58,8 @@ class OrderBackendSubscriber implements SubscriberInterface
                     try {
                         $transaction->setOrdermailVariables(json_encode($variables));
                         $transactionRepo->save($transaction);
-                    }
-                    catch (\Exception $ex) {
-                        Logger::log('error', $ex->getMessage(), $ex);
+                    } catch (\Exception $e) {
+                        LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
                     }
 
                     return false;
@@ -72,16 +73,19 @@ class OrderBackendSubscriber implements SubscriberInterface
         /** @var \Enlight_Controller_Request_Request $request */
         $request = $args->getRequest();
 
-        if ($request == null)
+        if ($request === null) {
             return true;
+        }
 
-        if ($request->getActionName() != 'save')
+        if ($request->getActionName() !== 'save') {
             return true;
+        }
 
         $orderId = $request->getParam('id');
 
-        if (empty($orderId))
+        if (empty($orderId)) {
             return true;
+        }
 
         $order = null;
 
@@ -92,36 +96,38 @@ class OrderBackendSubscriber implements SubscriberInterface
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $orderService->getOrderById($orderId);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+        } catch (\Exception $e) {
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
-        if (empty($order))
+        if ($order === null) {
             return true;
+        }
 
         $mollieId = null;
 
         try {
             $mollieId = $orderService->getMollieOrderId($order);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+        } catch (\Exception $e) {
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
-        if (empty($mollieId))
+        if (empty($mollieId)) {
             return true;
+        }
 
-        if ($order->getOrderStatus()->getId() != \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED)
+        /** @var Config $config */
+        $config = Shopware()->Container()->get('mollie_shopware.config');
+
+        $orderStatusId = \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED;
+
+        if ($config !== null) {
+            $orderStatusId = $config->getKlarnaShipOnStatus();
+        }
+
+        if ($order->getOrderStatus()->getId() !== $orderStatusId) {
             return true;
+        }
 
         try {
             /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
@@ -129,13 +135,8 @@ class OrderBackendSubscriber implements SubscriberInterface
                 ->get('mollie_shopware.payment_service');
 
             $paymentService->sendOrder($mollieId);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+        } catch (\Exception $e) {
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
     }
 }

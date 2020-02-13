@@ -6,10 +6,24 @@
 
     <services>
 
+        <service id="mollie_shopware.klarna_shipping_command" class="MollieShopware\Command\KlarnaShippingCommand">
+            <tag name="console.command" command="mollie:ship:klarna" />
+            <argument type="service" id="mollie_shopware.config" />
+            <argument type="service" id="models" />
+            <argument type="service" id="mollie_shopware.api" />
+        </service>
+
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
             <argument type="service" id="mollie_shopware.api_factory" />
             <argument type="service" id="mollie_shopware.config" />
             <argument>%shopware.custom%</argument>
+        </service>
+
+        <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService">
+            <argument type="service" id="models" />
+            <argument type="service" id="mollie_shopware.api" />
+            <argument type="service" id="shopware.plugin_payment_installer" />
+            <argument type="service" id="template" />
         </service>
 
         <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService">

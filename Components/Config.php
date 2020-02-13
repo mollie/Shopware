@@ -6,6 +6,9 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
 {
+    const TRANSACTION_NUMBER_TYPE_MOLLIE = 'mollie';
+    const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
+
     /** @var \Shopware\Components\Plugin\ConfigReader */
     protected $configReader;
 
@@ -105,6 +108,14 @@ class Config
     }
 
     /**
+     * @return string
+     */
+    public function getTransactionNumberType()
+    {
+        return (string) $this->get('transaction_number_type', self::TRANSACTION_NUMBER_TYPE_MOLLIE);
+    }
+
+    /**
      * @return int
      */
     public function getAuthorizedPaymentStatusId()
@@ -147,10 +158,19 @@ class Config
     /**
      * @return int
      */
+    public function getKlarnaShipOnStatus()
+    {
+        return (int) $this->get('klarna_ship_on_status', \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED);
+    }
+
+    /**
+     * @return int
+     */
     public function getShippedStatus()
     {
         return (int) $this->get('klarna_shipped_status', -1);
     }
+
     /**
      * @return string
      */

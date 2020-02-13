@@ -181,6 +181,17 @@ class PaymentService
             }
         }
 
+        try {
+            // Store payment method in the transaction
+            $transaction->setPaymentMethod($paymentMethod);
+
+            // Set shipped to false
+            $transaction->setIsShipped(false);
+        } catch (\Exception $e) {
+            //
+        }
+
+        // Store transaction
         $transactionRepo->save($transaction);
 
         if ((string) $errorMessage !== '') {

@@ -134,6 +134,20 @@ class Transaction
      */
     private $totalAmount;
 
+    /**
+     * @return string
+     *
+     * @ORM\Column(name="payment_method", type="string", nullable=true)
+     */
+    private $paymentMethod;
+
+    /**
+     * @return bool
+     *
+     * @ORM\Column(name="is_shipped", type="boolean", nullable=true)
+     */
+    private $isShipped;
+
     public function getId()
     {
         return $this->id;
@@ -365,6 +379,42 @@ class Transaction
     public function setTotalAmount($totalAmount)
     {
         $this->totalAmount = $totalAmount;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentMethod()
+    {
+        return (string) $this->paymentMethod;
+    }
+
+    /**
+     * @param $paymentMethod
+     * @return $this
+     */
+    public function setPaymentMethod($paymentMethod)
+    {
+        $this->paymentMethod = $paymentMethod;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsShipped()
+    {
+        return (bool) $this->isShipped;
+    }
+
+    /**
+     * @param $isShipped
+     * @return Transaction
+     */
+    public function setIsShipped($isShipped)
+    {
+        $this->isShipped = $isShipped;
         return $this;
     }
 }
