@@ -4,3 +4,4 @@ releases
 /*.sh
 /scoper.inc.php
 /UpdateVersionNumber.php
+/composer.json

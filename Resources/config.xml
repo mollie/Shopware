@@ -126,11 +126,41 @@
         </element>
 
         <element type="combo" scope="shop">
-            <name>klarna_shipped_status</name>
-            <label lang="de">Status für ausgelieferte Bestellungen (Klarna Pay Later)</label>
-            <label lang="en">Status for shipped orders (Klarna Pay Later)</label>
-            <label lang="nl">Status voor verzonden bestellingen (Klarna Pay Later)</label>
+            <name>klarna_ship_on_status</name>
+            <label lang="de">Status, bei dem die Bestellung als gesendet markiert ist (Klarna Pay Later)</label>
+            <label lang="en">Status on which order is marked as sent (Klarna Pay Later)</label>
+            <label lang="nl">Status waarop bestelling wordt gemarkeerd als verzonden (Klarna Pay Later)</label>
             <store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+
+        <element type="combo" scope="shop">
+            <name>klarna_shipped_status</name>
+            <label lang="de">Order status für ausgelieferte Bestellungen (Klarna Pay Later)</label>
+            <label lang="en">Order status for shipped orders (Klarna Pay Later)</label>
+            <label lang="nl">Bestelstatus voor verzonden bestellingen (Klarna Pay Later)</label>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+        </element>
+
+        <element type="select" scope="shop">
+            <name>transaction_number_type</name>
+            <label lang="de">Wählen Sie die Transaktionsnummer, die auf Bestellungen angezeigt wird</label>
+            <label lang="en">Choose the transaction number that is visible on orders</label>
+            <label lang="nl">Kies het transactienummer dat zichtbaar is op orders</label>
+            <value>mollie</value>
+            <store>
+                <option>
+                    <value>mollie</value>
+                    <label lang="de">Mollie</label>
+                    <label lang="en">Mollie</label>
+                    <label lang="nl">Mollie</label>
+                </option>
+                <option>
+                    <value>payment_method</value>
+                    <label lang="de">Zahlungsart</label>
+                    <label lang="en">Payment Method</label>
+                    <label lang="nl">Betaalmethode</label>
+                </option>
+            </store>
         </element>
 
         <element type="select" scope="shop">
@@ -242,23 +272,6 @@
             <label lang="nl">Voeg styling toe aan credit card component</label>
             <value>true</value>
         </element>
-
-<!--         <element type="textarea" scope="shop">
-            <name>extra_metadata</name>
-            <label lang="de">Zusätzliche Metadaten</label>
-            <label lang="en">Extra metadata</label>
-            <label lang="nl">Extra metadata</label>
-            <value>
-                <![CDATA[
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <metadata>
-                        <Customer>
-                            
-                        </Customer>
-                    </metadata>
-                ]]>
-            </value>
-        </element> -->
 
     </elements>
 </config>

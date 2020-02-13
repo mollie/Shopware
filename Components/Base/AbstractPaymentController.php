@@ -176,24 +176,27 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      */
     protected function getPaymentId()
     {
+        $paymentId = null;
         $user = $this->getUser();
+        $userId = $this->getUserId();
 
         if (!empty($user['additional']['payment']['id'])) {
-            return $user['additional']['payment']['id'];
+            $paymentId = $user['additional']['payment']['id'];
         }
 
         if (!empty($user['additional']['user']['paymentID'])) {
-            return $user['additional']['user']['paymentID'];
+            $paymentId = $user['additional']['user']['paymentID'];
         }
 
-        $userId = $this->getUserId();
-
-        if (empty($userId)) {
-            return null;
+        if ($paymentId === null && $userId !== null) {
+            $connection = $this->container->get('models')->getConnection();
+            $paymentId = $connection->fetchColumn('SELECT paymentID FROM s_user WHERE id = :userId', ['userId' => $userId]);
         }
 
-        $connection = $this->container->get('models')->getConnection();
-        return $connection->fetchColumn('SELECT paymentID FROM s_user WHERE id = :userId', [ 'userId' => $userId ]);
+        $user['additional']['payment']['id'] = $paymentId;
+        $user['additional']['user']['paymentID'] = $paymentId;
+
+        return $paymentId;
     }
 
     /**
