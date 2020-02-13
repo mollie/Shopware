@@ -1,29 +1,21 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components;
-
-use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Customer\Customer as CustomerModel;
-use Enlight_Components_Session_Namespace;
 
 class CurrentCustomer
 {
-    /**
-     * @var Enlight_Components_Session_Namespace
-     */
+    /** @var \Enlight_Components_Session_Namespace */
     protected $session;
 
-    /**
-     * @var Shopware\Components\Model\ModelManager
-     */
-    protected $em;
+    /** @var \Shopware\Components\Model\ModelManager */
+    protected $modelManager;
 
-    public function __construct(Enlight_Components_Session_Namespace $session, ModelManager $em)
+    public function __construct(
+        \Enlight_Components_Session_Namespace $session,
+        \Shopware\Components\Model\ModelManager $modelManager)
     {
         $this->session = $session;
-        $this->em = $em;
+        $this->modelManager = $modelManager;
     }
 
     /**
@@ -37,22 +29,28 @@ class CurrentCustomer
     }
 
     /**
-     * @return Shopware\Models\Customer\Customer
+     * Get the current customer
+     *
+     * @return \Shopware\Models\Customer\Customer|null
      */
     public function getCurrent()
     {
         $userId = $this->getCurrentId();
 
-        if (empty($userId)) {
+        if (empty($userId))
             return null;
-        }
 
-        return $this->em
-            ->getRepository(CustomerModel::class)
-            ->find($userId);
+        /** @var \Shopware\Models\Customer\Customer $customer */
+        $customer = $this->modelManager->getRepository(
+            \Shopware\Models\Customer\Customer::class
+        )->find($userId);
+
+        return $customer;
     }
 
     /**
+     * Get attributes array for current customer
+     *
      * @return array
      */
     public function getCurrentArray()
@@ -79,6 +77,8 @@ class CurrentCustomer
     }
 
     /**
+     * Get whether the current customer is logged in
+     *
      * @return boolean
      */
     public function isLoggedIn()

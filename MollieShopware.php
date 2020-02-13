@@ -1,42 +1,29 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware;
 
+use Enlight_Template_Manager;
+use Exception;
+use Mollie\Api\MollieApiClient;
+use MollieShopware\Components\Config;
+use MollieShopware\Components\MollieApiFactory;
+use MollieShopware\Components\Services\PaymentMethodService;
+use MollieShopware\Models\TransactionItem;
+use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
-use Shopware\Components\Console\Application;
+use MollieShopware\Components\Schema;
+use MollieShopware\Components\Attributes;
+use MollieShopware\Components\Logger;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
-use Shopware\Models\Payment\Payment;
-use MollieShopware\Commands\GetIdealBanksCommand;
-use MollieShopware\Commands\GetPaymentMethodsCommand;
-use Smarty;
-use Enlight_Event_EventArgs;
-use Enlight_Controller_EventArgs;
-use MollieShopware\Components\ShopwareConfig;
-use MollieShopware\Components\Schema;
-use MollieShopware\Models\PaymentSession;
-use MollieShopware\Models\Transaction;
-use MollieShopware\Components\Url;
-use MollieShopware\Components\RequestLogger;
-use MollieShopware\Components\Attributes;
-use MollieShopware\Components\Config;
-use MollieShopware\Components\MollieApiFactory;
-
-require 'vendor-edited/autoload.php';
 
 class MollieShopware extends Plugin
 {
-    /**
-     * MollieShopware\Components\ShopwareConfig
-     */
-    protected $config;
-
     /**
      * Return Shopware events subscribed to
      */
@@ -44,15 +31,7 @@ class MollieShopware extends Plugin
     {
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
-            //'Shopware_Console_Add_Command' => 'registerCommands',
-
-            // 'Enlight_Controller_Dispatcher_ControllerPath_Frontend_Mollie' => 'registerController',
-
-            // extend some backend ext.js files
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
-
-            // Call event with a negative position to run before
-            // engine/Shopware/Plugins/Default/Core/Router/Bootstrap.php
             'Enlight_Controller_Front_RouteStartup' => [ 'fixLanguageShopPush', -10 ],
         ];
     }
@@ -62,10 +41,29 @@ class MollieShopware extends Plugin
      */
     public function requireDependencies()
     {
-
         // Load composer libraries
-        if (file_exists($this->getPath() . '/vendor/autoload.php')) {
-            require_once $this->getPath() . '/vendor/autoload.php';
+        if (file_exists($this->getPath() . '/Client/vendor/scoper-autoload.php')) {
+            require_once $this->getPath() . '/Client/vendor/scoper-autoload.php';
+        }
+
+        // Load guzzle functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php';
+        }
+
+        // Load promises functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php';
+        }
+
+        // Load psr7 functions
+        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php')) {
+            require_once $this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php';
+        }
+
+        // Load client
+        if (file_exists($this->getPath() . '/Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php')) {
+            require_once $this->getPath() . '/Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php';
         }
     }
 
@@ -83,10 +81,11 @@ class MollieShopware extends Plugin
      * (engine\Library\Enlight\Controller\Front.php)
      * where the Request has been populated.
      *
-     * @param  Enlight_Controller_EventArgs $args
+     * @param \Enlight_Controller_EventArgs $args
      */
-    public function fixLanguageShopPush(Enlight_Controller_EventArgs $args)
+    public function fixLanguageShopPush(\Enlight_Controller_EventArgs $args)
     {
+        /** @var \Enlight_Controller_Request_Request $request */
         $request = $args->getRequest();
 
         if ($request->getQuery('__shop')) {
@@ -97,30 +96,25 @@ class MollieShopware extends Plugin
     /**
      * Register Mollie controller
      */
-    public function registerController(Enlight_Event_EventArgs $args)
+    public function registerController()
     {
         return $this->getPath() . '/Controllers/Frontend/Mollie.php';
     }
 
     /**
-     * Register Console commands
-     */
-    public function registerCommands(Application $application)
-    {
-        $application->add(new GetPaymentMethodsCommand());
-        $application->add(new GetIdealBanksCommand());
-        return parent::__construct($application);
-    }
-
-
-    /**
      * Inject some backend ext.js extensions for the order module
+     *
+     * @param \Enlight_Event_EventArgs $args
      */
-    public function onOrderPostDispatch(Enlight_Event_EventArgs $args)
+    public function onOrderPostDispatch(\Enlight_Event_EventArgs $args)
     {
         /** @var \Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
         $view = $controller->View();
+
+        /** @var \Enlight_Controller_Request_Request $request */
         $request = $controller->Request();
 
         $view->addTemplateDir(__DIR__ . '/Resources/views');
@@ -143,16 +137,13 @@ class MollieShopware extends Plugin
         // The user should put in an API key between install and activation
 
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // create database tables
         $this->updateDbTables();
 
         // add extra attributes
         $this->updateAttributes();
-
-        // make sure incrementer exists
-        $this->initMollieQuoteNumberIncrementer();
 
         parent::install($context);
     }
@@ -163,7 +154,7 @@ class MollieShopware extends Plugin
     public function update(UpdateContext $context)
     {
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // create database tables
         $this->updateDbTables();
@@ -171,8 +162,9 @@ class MollieShopware extends Plugin
         // add extra attributes
         $this->updateAttributes();
 
-        // make sure incrementer exists
-        $this->initMollieQuoteNumberIncrementer();
+        // set config value for upgraders from version 1.3
+        if (substr($context->getPlugin()->getVersion(), 0, strlen('1.3')) == '1.3')
+            $this->writeConfig($context->getPlugin(), 'orders_api_only_where_mandatory', 'no');
 
         parent::update($context);
     }
@@ -184,7 +176,14 @@ class MollieShopware extends Plugin
     {
         // Don't remove payment methods but set them to inactive.
         // So orders paid still reference an existing payment method
-        $this->deactivatePayments();
+
+        /** @var PaymentMethodService $paymentMethodService */
+        $paymentMethodService = $this->getPaymentMethodService();
+
+        if ($paymentMethodService !== null) {
+            // Deactivate all Mollie payment methods
+            $paymentMethodService->deactivatePaymentMethods();
+        }
 
         // remove extra attributes
         $this->removeAttributes();
@@ -197,123 +196,48 @@ class MollieShopware extends Plugin
      */
     public function deactivate(DeactivateContext $context)
     {
-        $this->deactivatePayments();
+        /** @var PaymentMethodService $paymentMethodService */
+        $paymentMethodService = $this->getPaymentMethodService();
+
+        if ($paymentMethodService !== null) {
+            // Deactivate all Mollie payment methods
+            $paymentMethodService->deactivatePaymentMethods();
+        }
 
         parent::deactivate($context);
     }
 
     /**
-     * @param ActivateContext $contextOrderLines
+     * @param ActivateContext $context
      */
     public function activate(ActivateContext $context)
     {
         // clear config cache
-        $context->scheduleClearCache(InstallContext::CACHE_LIST_DEFAULT);
+        $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
         // update db tables
         $this->updateDbTables();
 
-        // first set all payment methods to inactive
-        // $this->setActiveFlag($context->getPlugin()->getPayments(), false);
-        $this->deactivatePayments();
+        /** @var null|array $methods */
+        $methods = null;
 
-        /** @var \Shopware\Components\Plugin\PaymentInstaller $installer */
-        $installer = $this->container->get('shopware.plugin_payment_installer');
+        /** @var PaymentMethodService $paymentMethodService */
+        $paymentMethodService = $this->getPaymentMethodService();
 
-        $paymentOptions = $this->getPaymentOptions();
+        if ($paymentMethodService !== null) {
+            // Deactivate all Mollie payment methods
+            $paymentMethodService->deactivatePaymentMethods();
 
-        foreach ($paymentOptions as $key => $options) {
-            $installer->createOrUpdate($context->getPlugin(), $options);
+            // Get all active payment methods from Mollie
+            $methods = $paymentMethodService->getPaymentMethodsFromMollie();
+        }
+
+        // Install the payment methods from Mollie
+        if ($methods !== null) {
+            $paymentMethodService->installPaymentMethod($context->getPlugin()->getName(), $methods);
         }
 
         parent::activate($context);
-    }
-
-    /**
-     * Deactivate all Mollie payment methods
-     */
-    protected function deactivatePayments()
-    {
-        $em = $this->container->get('models');
-
-        $qb = $em->createQueryBuilder();
-
-        $query = $qb->update('Shopware\Models\Payment\Payment', 'p')
-            ->set('p.active', '?1')
-            ->where($qb->expr()->like('p.name', '?2'))
-            ->setParameter(1, false)
-            ->setParameter(2, 'mollie_%')
-            ->getQuery();
-
-        $query->execute();
-    }
-
-    /**
-     * Get the current payment methods via the Mollie API
-     * @return array[] $options
-     */
-    protected function getPaymentOptions()
-    {
-        $mollie = $this->getMollieClient();
-
-        // TODO: get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
-        $methods = $mollie->methods->all(['resource' => 'orders']);
-
-        $options = [];
-        $position = 0;
-
-        // path to template dir for extra payment-mean options
-        $paymentTemplateDir = __DIR__ . '/Views/frontend/plugins/payment';
-
-        foreach ($methods as $key => $method) {
-            $name = 'mollie_' . $method->id;
-
-            $smarty = new Smarty;
-            $smarty->assign('method', $method);
-            $smarty->assign('router', Shopware()->Router());
-
-            // template path
-            $adTemplate = $paymentTemplateDir . '/methods/' . strtolower($method->id) . '.tpl';
-
-            // set default template if no specific template exists
-            if (!file_exists($adTemplate)) {
-                $adTemplate =  $paymentTemplateDir . '/methods/main.tpl';
-            }
-
-            $additionalDescription = $smarty->fetch('file:' . $adTemplate);
-
-            $option = [
-                'name' => $name,
-                'description' => $method->description,
-                'action' => 'frontend/Mollie',
-                'active' => 1,
-                'position' => $position,
-                'additionalDescription' => $additionalDescription
-            ];
-
-            // check template exist
-            if (file_exists($paymentTemplateDir . '/' . $name . '.tpl')) {
-                $option['template'] = $name . '.tpl';
-            }
-
-            $options[] = $option;
-        }
-
-        return $options;
-    }
-
-    /**
-     * @return Mollie_API_Client
-     */
-    protected function getMollieClient()
-    {
-        require_once $this->getPath() . '/vendor/autoload.php';
-
-        $render= $this->container->get('shopware.plugin.cached_config_reader');
-
-        $config = new Config($render);
-        $factory = new MollieApiFactory($config);
-        return $factory->create();
     }
 
     /**
@@ -321,9 +245,21 @@ class MollieShopware extends Plugin
      */
     protected function updateDbTables()
     {
-        $schema = new Schema($this->container->get('models'));
-        $schema->update([ Transaction::class ]);
-        $schema->update([ OrderLines::class ]);
+        try {
+            $schema = new Schema($this->container->get('models'));
+            $schema->update([
+                Transaction::class,
+                TransactionItem::class,
+                OrderLines::class
+            ]);
+        }
+        catch (Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
     }
 
     /**
@@ -331,8 +267,19 @@ class MollieShopware extends Plugin
      */
     protected function removeDBTables()
     {
-        $schema = new Schema($this->container->get('models'));
-        $schema->remove(Transaction::class);
+        try {
+            $schema = new Schema($this->container->get('models'));
+            $schema->remove(Transaction::class);
+            $schema->remove(TransactionItem::class);
+            $schema->remove(OrderLines::class);
+        }
+        catch (Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
     }
 
     /**
@@ -351,7 +298,19 @@ class MollieShopware extends Plugin
      */
     protected function updateAttributes()
     {
-        $this->makeAttributes()->create([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer', 'string', [] ] ]);
+        try {
+            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_ideal_issuer', 'string', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_credit_card_token', 'string', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
     }
 
     /**
@@ -359,31 +318,133 @@ class MollieShopware extends Plugin
      */
     protected function removeAttributes()
     {
-        $this->makeAttributes()->remove([ [ 's_user_attributes', 'mollie_shopware_ideal_issuer' ] ]);
+        try {
+            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_ideal_issuer']]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_credit_card_token']]);
+        }
+        catch (Exception $ex) {
+            //
+        }
     }
 
     /**
-     * To match a payment in Mollie with an order in Shopware,
-     * a number is generated.
+     * Write value to the config
      *
-     * To make sure the number has not been used before,
-     * it is generated via the NumberRangeIncrementer.
-     * This method inits the number for the incrementer.
+     * @param \Shopware\Models\Plugin\Plugin $plugin
+     * @param $key
+     * @param $value
+     * @throws Exception
      */
-    protected function initMollieQuoteNumberIncrementer()
+    protected function writeConfig(\Shopware\Models\Plugin\Plugin $plugin, $key, $value)
     {
-        $db = $this->container->get('db');
+        try {
+            /** @var \Shopware\Components\Model\ModelManager $modelManager */
+            $modelManager = Shopware()->Container()->get('models');
 
-        $name = 'mollie_quoteNumber';
+            /** @var \Shopware\Models\Shop\Shop[] $shops */
+            $shops = $modelManager->getRepository(\Shopware\Models\Shop\Shop::class)->findBy([]);
 
-        $rows = $db->executeQuery('SELECT * FROM s_order_number WHERE name = :name', [ 'name' => $name ])->fetchAll();
+            /** @var Plugin\ConfigWriter $configWriter */
+            $configWriter = new Plugin\ConfigWriter(Shopware()->Models());
 
-        if (count($rows) < 1) {
-            $db->executeQuery('INSERT INTO `s_order_number` (`number`, `name`, `desc`) VALUES (:number, :name, :description)', [
-                'number' => 10000000,
-                'name' => $name,
-                'description' => 'Invoice number for Mollie'
-            ]);
+            foreach ($shops as $shop) {
+                $configWriter->saveConfigElement(
+                    $plugin,
+                    $key,
+                    $value,
+                    $shop
+                );
+            }
         }
+        catch (Exception $ex) {
+            //
+        }
+    }
+
+    /**
+     * Returns an instance of the Mollie API client.
+     *
+     * @return MollieApiClient
+     */
+    protected function getMollieApiClient()
+    {
+        /** @var Config $config */
+        $config = null;
+
+        /** @var Plugin\ConfigReader $configReader */
+        $configReader = $this->container->get('shopware.plugin.cached_config_reader');
+
+        /** @var MollieApiFactory $factory */
+        $factory = null;
+
+        /** @var MollieApiClient $mollieApiClient */
+        $mollieApiClient = null;
+
+        // Get the config
+        if ($configReader !== null) {
+            $config = new Config($configReader);
+        }
+
+        // Get the Mollie API factory service
+        if ($config !== null) {
+            $factory = new MollieApiFactory($config);
+        }
+
+        // Create the Mollie API client
+        if ($factory !== null) {
+            try {
+                $mollieApiClient = $factory->create();
+            } catch (Exception $e) {
+                //
+            }
+        }
+
+        return $mollieApiClient;
+    }
+
+    /**
+     * Returns an instance of the payment method service.
+     *
+     * @return PaymentMethodService
+     */
+    protected function getPaymentMethodService()
+    {
+        /** @var ModelManager $modelManager */
+        $modelManager = $this->container->get('models');
+
+        /** @var MollieApiClient $mollieApiClient */
+        $mollieApiClient = $this->getMollieApiClient();
+
+        /** @var Plugin\PaymentInstaller $paymentInstaller */
+        $paymentInstaller = $this->container->get('shopware.plugin_payment_installer');
+
+        /** @var PaymentMethodService $paymentMethodService */
+        $paymentMethodService = null;
+
+        /** @var Enlight_Template_Manager $templateManager */
+        $templateManager = $this->container->get('template');
+
+        // Create an instance of the payment method service
+        if (
+            $modelManager !== null
+            && $mollieApiClient !== null
+            && $paymentInstaller !== null
+            && $templateManager !== null
+        ) {
+            $paymentMethodService = new PaymentMethodService(
+                $modelManager,
+                $mollieApiClient,
+                $paymentInstaller,
+                $templateManager
+            );
+        }
+
+        return $paymentMethodService;
     }
 }

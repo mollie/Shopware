@@ -1,7 +1,5 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Models;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -32,41 +30,95 @@ class OrderLines
     /**
      * @var integer $orderId
      *
-     * @ORM\Column(name="order_id", type="integer", nullable=false)
+     * @ORM\Column(name="order_id", type="integer", nullable=true)
      */
     private $orderId;
 
+    /**
+     * @var integer $orderId
+     *
+     * @ORM\Column(name="transaction_id", type="integer", nullable=true)
+     */
+    private $transactionId;
 
+    /**
+     * Set the ID for the order line
+     *
+     * @param $id
+     */
     public function setId($id)
     {
         $this->id = $id;
     }
 
+    /**
+     * Get the ID of the order line
+     *
+     * @return int
+     */
     public function getId()
     {
         return $this->id;
     }
 
 
+    /**
+     * Set Mollie's order line ID
+     *
+     * @param $mollieOrderlineId
+     */
     public function setMollieOrderlineId($mollieOrderlineId)
     {
         $this->mollieOrderlineId = $mollieOrderlineId;
     }
 
+    /**
+     * Get Mollie's order line ID
+     *
+     * @return int
+     */
     public function getMollieOrderlineId()
     {
         return $this->mollieOrderlineId;
     }
 
-
+    /**
+     * Set the order ID for the order line
+     *
+     * @param $orderId
+     */
     public function setOrderId($orderId)
     {
         $this->orderId = $orderId;
     }
 
+    /**
+     * Get the order ID for the order line
+     *
+     * @return int
+     */
     public function getOrderId()
     {
         return $this->orderId;
     }
 
+    /**
+     * Set the transaction ID for the order line
+     *
+     * @param $orderId
+     */
+    public function setTransactionId($transactionId)
+    {
+        $this->transactionId = $transactionId;
+    }
+
+    /**
+     * Get the transaction ID for the order line
+     *
+     * @return int
+     */
+    public function getTransactionId()
+    {
+        return $this->transactionId;
+    }
 }

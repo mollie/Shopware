@@ -1,7 +1,5 @@
 {
     "require": {
-        "mollie/mollie-api-php": "dev-orders-api"
-    },
-
-    "minimum-stability": "dev"
+        "mollie/mollie-api-php": "^2.0"
+    }
 }

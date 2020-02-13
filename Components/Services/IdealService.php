@@ -1,67 +1,71 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components\Services;
-
-use Mollie\Api\Types\PaymentMethod;
-use Mollie\Api\MollieApiClient;
-use MollieShopware\Components\CurrentCustomer;
-use Shopware\Components\Model\ModelManager;
 
 class IdealService
 {
-    /**
-     * @var MollieApiClient
-     */
+    /** @var \Mollie\Api\MollieApiClient */
     protected $mollieApi;
 
-    /**
-     * @var CurrentCustomer
-     */
+    /** @var \MollieShopware\Components\CurrentCustomer */
     protected $customer;
 
-    /**
-     * @var \Shopware\Components\Model\ModelManager
-     */
-    protected $em;
+    /** @var \Shopware\Components\Model\ModelManager */
+    protected $modelManager;
 
-    public function __construct(MollieApiClient $mollieApi, CurrentCustomer $customer, ModelManager $em)
+    /**
+     * IdealService constructor.
+     * @param \Mollie\Api\MollieApiClient $mollieApi
+     * @param \MollieShopware\Components\CurrentCustomer $customer
+     * @param \Shopware\Components\Model\ModelManager $modelManager
+     */
+    public function __construct(
+        \Mollie\Api\MollieApiClient $mollieApi,
+        \MollieShopware\Components\CurrentCustomer $customer,
+        \Shopware\Components\Model\ModelManager$modelManager
+    )
     {
         $this->mollieApi = $mollieApi;
         $this->customer = $customer;
-        $this->em = $em;
+        $this->modelManager = $modelManager;
     }
 
+    /**
+     * Get a list of iDeal issuers
+     *
+     * @return array
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
     public function getIssuers()
     {
-
-        $payment_methods = $this->mollieApi->methods->all(['include'=>'issuers']);
-
+        $paymentMethods = $this->mollieApi->methods->all(['include'=>'issuers']);
         $idealIssuers = [];
 
-        foreach($payment_methods as $paymentMethod) {
+        foreach($paymentMethods as $paymentMethod) {
 
-            if ($paymentMethod->id === 'ideal'){
+            if ($paymentMethod->id === 'ideal') {
                 $issuers = $paymentMethod->issuers();
 
                 foreach ($issuers as $key => $issuer) {
-
-                    if ($issuer->id === $this->getSelectedIssuer()) {
+                    if ($issuer->id === $this->getSelectedIssuer())
                         $issuer->isSelected = true;
-                    }
 
                     $idealIssuers[] = $issuer;
                 }
             }
         }
 
-
         return $idealIssuers;
     }
 
     /**
      * Set the id of the chosen ideal issuer in the database
+     *
+     * @param string $issuer
+     *
+     * @return string
+     *
+     * @throws \Exception
      */
     public function setSelectedIssuer($issuer)
     {
@@ -79,34 +83,35 @@ class IdealService
 
         $attributes->setMollieShopwareIdealIssuer($issuer);
 
-        $this->em->persist($attributes);
-        $this->em->flush();
+        $this->modelManager->persist($attributes);
+        $this->modelManager->flush($attributes);
 
         return $issuer;
     }
 
     /**
      * Get the id of the chosen ideal issuer from database
+     *
+     * @return string
      */
     public function getSelectedIssuer()
     {
+        /** @var \Shopware\Models\Customer\Customer $customer */
         $customer = $this->customer->getCurrent();
 
-        if (empty($customer)) {
+        if (empty($customer))
             return '';
-        }
 
         $attributes = $customer->getAttribute();
 
-        if (!empty($attributes)) {
+        if (!empty($attributes))
             return $attributes->getMollieShopwareIdealIssuer();
-        }
 
         /**
          * In B2b a contact customer doesn't have attributes,
          * so take the attributes of the debtor user it belongs to
          */
-        $issuer = $this->em->getConnection()->fetchColumn('
+        $issuer = $this->modelManager->getConnection()->fetchColumn('
             SELECT s_user_attributes.mollie_shopware_ideal_issuer FROM s_user
             JOIN s_user_attributes ON (s_user.id = s_user_attributes.userID)
             WHERE s_user.customernumber = ?

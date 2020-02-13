@@ -1,13 +1,9 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components\Base;
 
 use Shopware_Controllers_Frontend_Payment;
 use Shopware\Components\CSRFWhitelistAware;
-use MollieShopware\Models\Transaction;
-use Exception;
 
 abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
@@ -34,48 +30,6 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     public function getWhitelistedCSRFActions()
     {
         return [];
-    }
-
-    /**
-     * Generate a new quoteNumber
-     *
-     * @return string
-     */
-    public function getQuoteNumber()
-    {
-        if (empty($this->quoteNumber)) {
-            $incrementer = $this->container->get('shopware.number_range_incrementer');
-            $this->quoteNumber = $incrementer->increment('mollie_quoteNumber');
-        }
-
-        return $this->quoteNumber;
-    }
-
-    /**
-     * Create a token from the order data
-     *
-     * @return string Token
-     */
-    protected function generateToken($quoteNumber = '')
-    {
-        $amount = $this->getAmount();
-
-        $user = $this->getUser();
-        $billing = $user['billingaddress'];
-        $customerId = $billing['customernumber'];
-
-        return md5(implode('|', [ $quoteNumber, $amount, $customerId ]));
-    }
-
-    /**
-     * Check received token is valid
-     *
-     * @param string $token
-     * @return bool
-     */
-    protected function checkToken($token)
-    {
-        return hash_equals($this->generateToken(), $token);
     }
 
     /**
@@ -138,7 +92,8 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
                 $basket = $this->loadBasketFromSignature($signature);
                 $this->verifyBasketSignature($signature, $basket);
                 return true;
-            } catch (Exception $e) {
+            }
+            catch (\Exception $e) {
                 return false;
             }
         }
@@ -157,26 +112,39 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
         $this->Response()->setHttpResponseCode($httpCode);
         $this->Response()->setHeader('Content-type', 'application/json', true);
         $this->Response()->setBody(json_encode($data, JSON_PRETTY_PRINT));
-
     }
 
     /**
      * Redirect back to the checkout
      */
-    protected function redirectBack($error_message = null)
+    protected function redirectBack($error = null, $message = null)
     {
-        if ($error_message !== null){
-            Shopware()->Session()->mollieError = $error_message;
-        }
-        $this->redirect([ 'controller' => 'checkout', 'action' => 'confirm' ]);
+        if ($error !== null)
+            Shopware()->Session()->offsetSet('mollieError', $error);
+
+        if ($message !== null)
+            Shopware()->Session()->offsetSet('mollieErrorMessage', $message);
+
+        return $this->redirect(
+            Shopware()->Front()->Router()->assemble([
+                'controller' => 'checkout',
+                'action' => 'confirm'
+            ])
+        );
     }
 
     /**
      * Redirect to success page
      */
-    protected function redirectToFinish()
+    protected function redirectToFinish($uniqueId = '')
     {
-        $this->redirect(['controller' => 'checkout', 'action' => 'finish']);
+        return $this->redirect(
+            Shopware()->Front()->Router()->assemble([
+                'controller' => 'checkout',
+                'action' => 'finish',
+                'sUniqueID' => $uniqueId
+            ])
+        );
     }
 
     /**
@@ -208,24 +176,39 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      */
     protected function getPaymentId()
     {
+        $paymentId = null;
         $user = $this->getUser();
+        $userId = $this->getUserId();
 
         if (!empty($user['additional']['payment']['id'])) {
-            return $user['additional']['payment']['id'];
+            $paymentId = $user['additional']['payment']['id'];
         }
 
         if (!empty($user['additional']['user']['paymentID'])) {
-            return $user['additional']['user']['paymentID'];
+            $paymentId = $user['additional']['user']['paymentID'];
         }
 
-        $userId = $this->getUserId();
-
-        if (empty($userId)) {
-            return null;
+        if ($paymentId === null && $userId !== null) {
+            $connection = $this->container->get('models')->getConnection();
+            $paymentId = $connection->fetchColumn('SELECT paymentID FROM s_user WHERE id = :userId', ['userId' => $userId]);
         }
 
-        $connection = $this->container->get('models')->getConnection();
-        return $connection->fetchColumn('SELECT paymentID FROM s_user WHERE id = :userId', [ 'userId' => $userId ]);
+        $user['additional']['payment']['id'] = $paymentId;
+        $user['additional']['user']['paymentID'] = $paymentId;
+
+        return $paymentId;
+    }
+
+    /**
+     * Get the Order Repository
+     *
+     * @return \Shopware\Models\Order\Repository
+     */
+    public function getOrderRepository()
+    {
+        return $this->container->get('models')->getRepository(
+            \Shopware\Models\Order\Order::class
+        );
     }
 
     /**
@@ -233,9 +216,31 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      *
      * @return \MollieShopware\Models\TransactionRepository
      */
-    public function getTransactionRepo()
+    public function getTransactionRepository()
     {
-        return $this->container->get('models')->getRepository(Transaction::class);
+        return $this->container->get('models')->getRepository(
+            \MollieShopware\Models\Transaction::class
+        );
+    }
+
+    /**
+     * Start a session with a given sessiond ID.
+     *
+     * Close the current session, set the ID to the given sessionId
+     * and start the session.
+     *
+     * @param $sessionId
+     * @throws \Exception
+     */
+    public function startSession($sessionId) {
+        try {
+            \Enlight_Components_Session::writeClose();
+            \Enlight_Components_Session::setId($sessionId);
+            \Enlight_Components_Session::start();
+        }
+        catch (\Exception $ex) {
+            //
+        }
     }
 
     /**
@@ -246,5 +251,29 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     protected function hasSession()
     {
         return !empty($this->container->get('session')->sOrderVariables['sUserData']['additional']['user']['customernumber']);
+    }
+
+    /**
+     * Persist the order model.
+     *
+     * @param \Shopware\Models\Order\Order $order
+     *
+     * @throws \Exception
+     */
+    protected function persistOrder($order)
+    {
+        Shopware()->Models()->persist($order);
+        Shopware()->Models()->flush();
+    }
+
+    /**
+     * Wrapper function for persistbasket, which is declared protected
+     * and cannot be called from outside.
+     *
+     * @return string
+     */
+    protected function doPersistBasket()
+    {
+        return parent::persistBasket();
     }
 }

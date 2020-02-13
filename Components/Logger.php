@@ -1,7 +1,5 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components;
 
 class Logger

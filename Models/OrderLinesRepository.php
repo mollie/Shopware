@@ -1,41 +1,38 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Models;
 
 use Shopware\Components\Model\ModelRepository;
-use MollieShopware\Models\Transaction;
-use Exception;
-use DateTime;
-use Shopware\Models\Order\Order;
 
 class OrderLinesRepository extends ModelRepository
 {
-
+    /**
+     * Save the order line
+     *
+     * @param OrderLines $mollieOrderLines
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
     public function save(OrderLines $mollieOrderLines)
     {
-
+        /** @var \Doctrine\ORM\EntityManager $entityManager */
         $entityManager = $this->getEntityManager();
+
         $entityManager->persist($mollieOrderLines);
         $entityManager->flush();
-
     }
 
     /**
      * Gets an array of remote IDs for the order's order lines
      * which can be directly used in Mollie's Shipment API
      *
-     * @param Order $order
+     * @param \Shopware\Models\Order\Order $order
      * @return array
      */
-    public function getShipmentLines(Order $order)
+    public function getShipmentLines(\Shopware\Models\Order\Order $order)
     {
-
-        /**
-         * @var OrderLines $item
-         */
         $result = [];
+
+        /** @var OrderLines[] $items */
         $items = $this->findBy(['orderId' => $order->getId()]);
 
         foreach($items as $item) {
@@ -45,7 +42,5 @@ class OrderLinesRepository extends ModelRepository
         }
 
         return $result;
-
     }
-
 }

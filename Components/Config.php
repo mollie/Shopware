@@ -1,25 +1,21 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components;
 
-use Shopware\Components\Plugin\ConfigReader;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
 {
-    /**
-     * @var Shopware\Components\Plugin\ConfigReader
-     */
+    const TRANSACTION_NUMBER_TYPE_MOLLIE = 'mollie';
+    const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
+
+    /** @var \Shopware\Components\Plugin\ConfigReader */
     protected $configReader;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $data = null;
 
-    public function __construct(ConfigReader $configReader)
+    public function __construct(\Shopware\Components\Plugin\ConfigReader $configReader)
     {
         $this->configReader = $configReader;
     }
@@ -27,17 +23,18 @@ class Config
     /**
      * Get the Shopware config for a Shopware shop
      *
-     * @param  int $shopId
-     * @return array
+     * @param string $key
+     * @param string $default
+     *
+     * @return mixed
      */
     public function get($key = null, $default = null)
     {
-        if (is_null($this->data)) {
-
-            try{
+        if (empty($this->data)) {
+            try {
                 $shop = Shopware()->Shop();
             }
-            catch(ServiceNotFoundException $e){
+            catch(ServiceNotFoundException $ex) {
                 $shop = null;
             }
 
@@ -47,7 +44,7 @@ class Config
             $this->data = $this->configReader->getByPluginName($name, $shop);
         }
 
-        if (!is_null($key)) {
+        if (!empty($key)) {
             return isset($this->data[$key]) ? $this->data[$key] : $default;
         }
 
@@ -55,6 +52,8 @@ class Config
     }
 
     /**
+     * Get the API key
+     *
      * @return string
      */
     public function apiKey()
@@ -98,5 +97,109 @@ class Config
     public function extraMetaData()
     {
         return $this->get('extra_metadata', '<metadata><Customer></Customer></metadata>');
+    }
+
+    /**
+     * @return bool
+     */
+    public function useOrdersApiOnlyWhereMandatory()
+    {
+        return ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+    }
+
+    /**
+     * @return string
+     */
+    public function getTransactionNumberType()
+    {
+        return (string) $this->get('transaction_number_type', self::TRANSACTION_NUMBER_TYPE_MOLLIE);
+    }
+
+    /**
+     * @return int
+     */
+    public function getAuthorizedPaymentStatusId()
+    {
+        $statusModel = new \Shopware\Models\Order\Status();
+        $paymentStatus = null;
+        $configuredStatus = $this->get('payment_authorized_status', 'ordered');
+
+        // set default payment status, considering older Shopware versions that don't have the ordered status
+        if (defined('\Shopware\Models\Order\Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED'))
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED;
+        else
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+
+        // set different payment status if configured
+        if ($configuredStatus === 'preliminarily_accepted')
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
+        if ($configuredStatus === 'accepted')
+            $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED;
+
+        return $paymentStatus;
+    }
+
+    /**
+     * @return bool
+     */
+    public function updateOrderStatus()
+    {
+        return ($this->get('orders_api_update_order_status', 'no') === 'yes');
+    }
+
+    /**
+     * @return bool
+     */
+    public function cancelFailedOrders()
+    {
+        return ($this->get('auto_cancel_failed_orders', 'yes') === 'yes');
+    }
+
+    /**
+     * @return int
+     */
+    public function getKlarnaShipOnStatus()
+    {
+        return (int) $this->get('klarna_ship_on_status', \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED);
+    }
+
+    /**
+     * @return int
+     */
+    public function getShippedStatus()
+    {
+        return (int) $this->get('klarna_shipped_status', -1);
+    }
+
+    /**
+     * @return string
+     */
+    public function resetInvoiceAndShipping()
+    {
+        return ($this->get('reset_invoice_shipping', 'no') === 'yes');
+    }
+
+    /**
+     * @return bool
+     */
+    public function createOrderBeforePayment()
+    {
+        return ($this->get('create_order_before_payment', 'yes') === 'yes');
+    }
+
+    /**
+     * @return bool
+     */
+    public function enableCreditCardComponent()
+    {
+        return (bool) $this->get('enable_credit_card_component', true);
+    }
+
+    /**
+     * @return bool
+     */
+    public function enableCreditCardComponentStyling()
+    {
+        return (bool) $this->get('enable_credit_card_component_styling', true);
     }
 }

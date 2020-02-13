@@ -1,44 +1,51 @@
 <?php
 
-	// Mollie Shopware Plugin Version: 1.3.12
-
 namespace MollieShopware\Components;
 
 use Doctrine\ORM\Tools\SchemaTool;
-use Shopware\Components\Model\ModelManager;
-
-/**
- * https://github.com/bcremer/SwagModelTest/blob/master/SwagModelTest.php
- */
 
 class Schema
 {
-    /**
-     * @var \Shopware\Components\Model\ModelManager
-     */
-    protected $em;
+    /** @var \Shopware\Components\Model\ModelManager */
+    protected $modelManager;
 
-    public function __construct(ModelManager $models)
+    /**
+     * Schema constructor.
+     *
+     * @param \Shopware\Components\Model\ModelManager $modelManager
+     */
+    public function __construct(\Shopware\Components\Model\ModelManager $modelManager)
     {
-        $this->em = $models;
-        $this->schemaTool = $schemaTool;
+        $this->modelManager = $modelManager;
     }
 
+    /**
+     * Create the schema
+     *
+     * @param $className
+     * @throws \Doctrine\ORM\Tools\ToolsException
+     */
     public function create($className)
     {
-        $tool = new SchemaTool($this->em);
+        $tool = new SchemaTool($this->modelManager);
 
-        $classes = [ $this->em->getClassMetadata($className) ];
+        $classes = [ $this->modelManager->getClassMetadata($className) ];
 
         $tool->createSchema($classes);
     }
 
+    /**
+     * Update the schema
+     *
+     * @param $classes
+     * @return array
+     */
     public function getUpdateSchemaSql($classes)
     {
-        $tool = new SchemaTool($this->em);
+        $tool = new SchemaTool($this->modelManager);
 
         // get the metadata of the class
-        $classesMeta = array_map(function($className) { return $this->em->getClassMetadata($className); }, $classes);
+        $classesMeta = array_map(function($className) { return $this->modelManager->getClassMetadata($className); }, $classes);
 
         // get the table names for the classes
         $tableNames = array_map(function($cl) { return $cl->getTableName(); }, $classesMeta);
@@ -63,10 +70,17 @@ class Schema
         return $filteredSqls;
     }
 
+    /**
+     * Update
+     *
+     * @param $classes
+     *
+     * @throws \Exception
+     */
     public function update($classes)
     {
         $updateSchemaSql = $this->getUpdateSchemaSql($classes);
-        $conn = $this->em->getConnection();
+        $conn = $this->modelManager->getConnection();
 
         foreach( $updateSchemaSql as $sql )
         {
@@ -74,11 +88,16 @@ class Schema
         }
     }
 
+    /**
+     * Remove
+     *
+     * @param $className
+     */
     public function remove($className)
     {
-        $tool = new SchemaTool($this->em);
+        $tool = new SchemaTool($this->modelManager);
 
-        $classes = [ $this->em->getClassMetadata($className) ];
+        $classes = [ $this->modelManager->getClassMetadata($className) ];
 
         $tool->dropSchema($classes);
     }

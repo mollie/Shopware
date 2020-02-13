@@ -3,10 +3,19 @@
 Ext.define('Shopware.apps.Mollie.view.list.List', {
     override: 'Shopware.apps.Order.view.list.List',
 
+    orderStatus: {
+        OPEN: 0,
+        IN_PROCESS: 1,
+        COMPLETED: 2
+    },
+
     paymentStatus: {
         COMPLETELY_PAID: 12,
+        OPEN: 17,
         RESERVED: 18,
         RE_CREDITING: 20,
+        CREDIT_ACCEPTED: 31,
+        ORDERED: 33,
         CANCELLED: 35,
     },
 
@@ -27,9 +36,10 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return Ext.create('Ext.grid.column.Action', {
             width: 80,
             items: [
-                me.createRefundOrderColumn()
+                me.createRefundOrderColumn(),
+                me.createShipOrderColumn()
             ],
-            header: me.snippets.columns.mollie_refund || 'Mollie refund',
+            header: me.snippets.columns.mollie_actions || 'Mollie actions',
         });
     },
 
@@ -39,26 +49,61 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         return {
             iconCls: 'sprite-money-coin',
             action: 'editOrder',
-            tooltip: me.snippets.columns.refund,
+            tooltip: me.snippets.columns.refund || 'Refund order',
             /**
              * Add button handler to fire the showDetail event which is handled
              * in the list controller.
              */
             handler: function(view, rowIndex, colIndex, item) {
                 var store = view.getStore(),
-                        record = store.getAt(rowIndex);
+                    record = store.getAt(rowIndex);
 
                 me.fireEvent('refundOrder', record);
             },
 
             getClass: function(value, metadata, record) {
                 if(
-                    // order should be paid with a Buckaroo payment method
+                    // order should be paid with a Mollie payment method
                     me.hasOrderPaymentName(record) &&
                     me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
 
                     // order should not have been refunded already
                     record.data && parseInt(record.data.cleared, 10) === me.paymentStatus.COMPLETELY_PAID
+                ) {
+                    return '';
+                }
+
+                return 'mollie-hide';
+            }
+        }
+    },
+
+    createShipOrderColumn: function() {
+        var me = this;
+
+        return {
+            iconCls: 'sprite-truck-box-label',
+            action: 'shipOrder',
+            tooltip: me.snippets.columns.ship || 'Ship order',
+            /**
+             * Add button handler to fire the showDetail event which is handled
+             * in the list controller.
+             */
+            handler: function(view, rowIndex, colIndex, item) {
+                var store = view.getStore(),
+                    record = store.getAt(rowIndex);
+
+                me.fireEvent('shipOrder', record);
+            },
+
+            getClass: function(value, metadata, record) {
+                if(
+                    // order should be paid with a Mollie payment method
+                    me.hasOrderPaymentName(record) &&
+                    me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
+
+                    // payment status should not be open
+                    record.data && parseInt(record.data.cleared, 10) !== me.paymentStatus.OPEN
                 ) {
                     return '';
                 }
