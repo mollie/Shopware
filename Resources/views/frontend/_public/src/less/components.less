@@ -1,0 +1,64 @@
+.mollie-components-credit-card {
+  .unitize(max-width, 465);
+  label {
+    display: block;
+    font-weight: bold;
+    .unitize(margin-top, 10);
+  }
+  .block-group {
+    .b1 {
+      width: 48%;
+      float: left;
+    }
+
+    .b2 {
+      width: 48%;
+      float: right;
+    }
+  }
+  .intro-text {
+    .unitize(margin-top, 10);
+  }
+  .tag-line {
+    .unitize(margin-top, 10);
+    .logo {
+      display: inline-block;
+      .unitize(max-height, 18);
+      .unitize(max-width, 50);
+    }
+  }
+  .error-message {
+    color: #ff233a;
+    .unitize(margin-bottom, 5);
+  }
+  .input--field.mollie {
+    .border-radius();
+    .unitize(min-height, 34);
+    .unitize(margin-bottom, 5);
+    background: #fff;
+    color: lighten(@text-color, 15%);
+    text-align: left;
+    box-shadow: inset 0px 0px 0px 0px transparent,
+    0px 1px 1px 0px rgba(0, 0, 0, 0.1), 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.05);
+    transition: all 0.05s ease;
+
+    &.is-focused {
+      box-shadow: inset 0px 0px 0px 2px #07f, 0px 1px 1px 0px rgba(0, 0, 0, 0.1),
+      0px 2px 6px 0px rgba(0, 0, 0, 0.1), 0px 0px 0px 1px rgba(0, 0, 0, 0.05);
+    }
+
+    &.error {
+      background-color: #fff0f0;
+      box-shadow: 0px 0px 0px 1px #f33, 0px 1px 1px 0px rgba(0, 0, 0, 0.1),
+      0px 2px 6px 0px rgba(0, 0, 0, 0.1), 0px 0px 0px 1px rgba(0, 0, 0, 0.05);
+    }
+
+    &:active {
+      box-shadow: 0px 1px 1px 0px rgba(0,0,0,0.1),
+                  0px 2px 6px 0px rgba(0,0,0,0.1),
+                  0px 0px 0px 1px rgba(0,0,0,0.05);
+      border: 2px solid #07f;
+    }
+  }
+}
