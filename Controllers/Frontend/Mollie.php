@@ -897,7 +897,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $orderNumber
     )
     {
-        if ((string) $transaction->getMollieId() !== null) {
+        if ((string) $transaction->getMollieId() !== '') {
             /** @var \Mollie\Api\MollieApiClient $mollieApi */
             $mollieApi = $this->container->get('mollie_shopware.api');
 
