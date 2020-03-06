@@ -135,8 +135,7 @@ class PaymentMethodService
             // Retrieve existing information so it doesn't get overwritten
             if (isset($method[self::PAYMENT_METHOD_NAME], $method[self::PAYMENT_METHOD_ACTION])) {
                 $existingMethod = $this->getPaymentMethod([
-                    'name' => $method[self::PAYMENT_METHOD_NAME],
-                    'action' => $method[self::PAYMENT_METHOD_ACTION]
+                    self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME]
                 ]);
             }
 
