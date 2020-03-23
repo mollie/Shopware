@@ -16,7 +16,8 @@ class FrontendViewSubscriber implements SubscriberInterface
             'Enlight_Controller_Action_PreDispatch' => 'addComponentsVariables',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'addViewDirectory',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'=>'getController',
-            'Theme_Compiler_Collect_Plugin_Less' => 'addLessFiles'
+            'Theme_Compiler_Collect_Plugin_Javascript' => 'onCollectJavascript',
+            'Theme_Compiler_Collect_Plugin_Less' => 'onCollectLess',
         ];
     }
 
@@ -108,12 +109,29 @@ class FrontendViewSubscriber implements SubscriberInterface
     }
 
     /**
-     * Provides the needed Less files
+     * Collects javascript files.
      *
      * @param Enlight_Event_EventArgs $args
      * @return ArrayCollection
      */
-    public function addLessFiles(Enlight_Event_EventArgs $args)
+    public function onCollectJavascript(Enlight_Event_EventArgs $args)
+    {
+        // Create new array collection to add src files
+        $collection = new ArrayCollection();
+
+        // Add the javascript files to the collection
+        $collection->add(__DIR__ . '/../Resources/views/frontend/_public/src/js/applepay.js');
+
+        return $collection;
+    }
+
+    /**
+     * Collects Less files
+     *
+     * @param Enlight_Event_EventArgs $args
+     * @return ArrayCollection
+     */
+    public function onCollectLess(Enlight_Event_EventArgs $args)
     {
         $lessFiles = [];
         $lessFiles[] = __DIR__ . '/../Resources/views/frontend/_public/src/less/checkout.less';

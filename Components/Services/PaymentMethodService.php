@@ -22,8 +22,10 @@ class PaymentMethodService
     const PAYMENT_METHOD_ACTIVE = 'active';
     const PAYMENT_METHOD_ADDITIONAL_DESCRIPTION = 'additionalDescription';
     const PAYMENT_METHOD_DESCRIPTION = 'description';
+    const PAYMENT_METHOD_COUNTRIES = 'countries';
     const PAYMENT_METHOD_NAME = 'name';
     const PAYMENT_METHOD_POSITION = 'position';
+    const PAYMENT_METHOD_SURCHARGE = 'surcharge';
     const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../Resources/views/frontend/plugins/payment';
 
     /** @var ModelManager */
@@ -135,15 +137,17 @@ class PaymentMethodService
             // Retrieve existing information so it doesn't get overwritten
             if (isset($method[self::PAYMENT_METHOD_NAME], $method[self::PAYMENT_METHOD_ACTION])) {
                 $existingMethod = $this->getPaymentMethod([
-                    self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME]
+                    self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME],
                 ]);
             }
 
             // Set existing data on method
             if ($existingMethod !== null) {
                 $method[self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION] = (string) $existingMethod->getAdditionalDescription();
+                $method[self::PAYMENT_METHOD_COUNTRIES] = $existingMethod->getCountries();
                 $method[self::PAYMENT_METHOD_DESCRIPTION] = (string) $existingMethod->getDescription();
                 $method[self::PAYMENT_METHOD_POSITION] = $existingMethod->getPosition();
+                $method[self::PAYMENT_METHOD_SURCHARGE] = $existingMethod->getSurcharge();
             }
 
             // Install the payment method in Shopware
