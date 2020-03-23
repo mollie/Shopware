@@ -42,7 +42,7 @@ class Subscription extends BaseResource
     public $status;
 
     /**
-     * @var object
+     * @var \stdClass
      */
     public $amount;
 
@@ -67,6 +67,16 @@ class Subscription extends BaseResource
     public $method;
 
     /**
+     * @var string|null
+     */
+    public $mandateId;
+
+    /**
+     * @var array|null
+     */
+    public $metadata;
+
+    /**
      * UTC datetime the subscription canceled in ISO-8601 format.
      *
      * @var string|null
@@ -83,12 +93,12 @@ class Subscription extends BaseResource
     /**
      * Contains an optional 'webhookUrl'.
      *
-     * @var object|null
+     * @var \stdClass|null
      */
     public $webhookUrl;
 
     /**
-     * @var object[]
+     * @var \stdClass
      */
     public $_links;
 
@@ -108,6 +118,9 @@ class Subscription extends BaseResource
             "startDate" => $this->startDate,
             "webhookUrl" => $this->webhookUrl,
             "description" => $this->description,
+            "mandateId" => $this->mandateId,
+            "metadata" => $this->metadata,
+            "interval" => $this->interval,
         ]);
 
         $result = $this->client->performHttpCallToFullUrl(
@@ -180,8 +193,39 @@ class Subscription extends BaseResource
         if (!isset($this->_links->self->href)) {
             return $this;
         }
-        $result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_DELETE, $this->_links->self->href);
+
+        $body = null;
+        if($this->client->usesOAuth()) {
+            $body = json_encode([
+                "testmode" => $this->mode === "test" ? true : false
+            ]);
+        }
+
+        $result = $this->client->performHttpCallToFullUrl(
+            MollieApiClient::HTTP_DELETE,
+            $this->_links->self->href,
+            $body
+        );
 
         return ResourceFactory::createFromApiResult($result, new Subscription($this->client));
+    }
+
+    public function payments()
+    {
+        if (!isset($this->_links->payments->href)) {
+            return new PaymentCollection($this->client, 0, null);
+        }
+
+        $result = $this->client->performHttpCallToFullUrl(
+            MollieApiClient::HTTP_GET,
+            $this->_links->payments->href
+        );
+
+        return ResourceFactory::createCursorResourceCollection(
+            $this->client,
+            $result->_embedded->payments,
+            Payment::class,
+            $result->_links
+        );
     }
 }

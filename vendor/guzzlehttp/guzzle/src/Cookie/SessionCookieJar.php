@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Cookie;
+namespace GuzzleHttp\Cookie;
 
 /**
  * Persists cookies in the client session
@@ -22,6 +22,7 @@ class SessionCookieJar extends CookieJar
      */
     public function __construct($sessionKey, $storeSessionCookies = false)
     {
+        parent::__construct();
         $this->sessionKey = $sessionKey;
         $this->storeSessionCookies = $storeSessionCookies;
         $this->load();

@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Promise;
+namespace GuzzleHttp\Promise;
 
 /**
  * Exception thrown when too many errors occur in the some() or any() methods.

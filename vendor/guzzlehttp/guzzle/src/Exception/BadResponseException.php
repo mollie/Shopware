@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Exception;
+namespace GuzzleHttp\Exception;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;

@@ -7,7 +7,7 @@ use Mollie\Api\Resources\Customer;
 use Mollie\Api\Resources\Mandate;
 use Mollie\Api\Resources\MandateCollection;
 
-class MandateEndpoint extends EndpointAbstract
+class MandateEndpoint extends CollectionEndpointAbstract
 {
     protected $resourcePath = "customers_mandates";
 
@@ -18,20 +18,20 @@ class MandateEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Mandate($this->api);
+        return new Mandate($this->client);
     }
 
     /**
      * Get the collection object that is used by this API endpoint. Every API endpoint uses one type of collection object.
      *
      * @param int $count
-     * @param object[] $_links
+     * @param \stdClass $_links
      *
      * @return MandateCollection
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new MandateCollection($this->api, $count, $_links);
+        return new MandateCollection($this->client, $count, $_links);
     }
 
     /**
@@ -39,11 +39,25 @@ class MandateEndpoint extends EndpointAbstract
      * @param array $options
      * @param array $filters
      *
-     * @return Mandate
+     * @return \Mollie\Api\Resources\Mandate
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function createFor(Customer $customer, array $options = [], array $filters = [])
     {
-        $this->parentId = $customer->id;
+        return $this->createForId($customer->id, $options, $filters);
+    }
+
+    /**
+     * @param string $customerId
+     * @param array $options
+     * @param array $filters
+     *
+     * @return \Mollie\Api\Resources\BaseResource|\Mollie\Api\Resources\Mandate
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function createForId($customerId, array $options = [], array $filters = [])
+    {
+        $this->parentId = $customerId;
 
         return parent::rest_create($options, $filters);
     }
@@ -53,11 +67,25 @@ class MandateEndpoint extends EndpointAbstract
      * @param string $mandateId
      * @param array $parameters
      *
-     * @return Mandate
+     * @return \Mollie\Api\Resources\BaseResource|\Mollie\Api\Resources\Mandate
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function getFor(Customer $customer, $mandateId, array $parameters = [])
     {
-        $this->parentId = $customer->id;
+        return $this->getForId($customer->id, $mandateId, $parameters);
+    }
+
+    /**
+     * @param string $customerId
+     * @param string $mandateId
+     * @param array $parameters
+     * 
+     * @return \Mollie\Api\Resources\BaseResource
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function getForId($customerId, $mandateId, array $parameters = [])
+    {
+        $this->parentId = $customerId;
 
         return parent::rest_read($mandateId, $parameters);
     }
@@ -68,11 +96,26 @@ class MandateEndpoint extends EndpointAbstract
      * @param int $limit
      * @param array $parameters
      *
-     * @return MandateCollection
+     * @return \Mollie\Api\Resources\BaseCollection|\Mollie\Api\Resources\MandateCollection
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function listFor(Customer $customer, $from = null, $limit = null, array $parameters = [])
     {
-        $this->parentId = $customer->id;
+        return $this->listForId($customer->id, $from, $limit, $parameters);
+    }
+
+    /**
+     * @param string $customerId
+     * @param null $from
+     * @param null $limit
+     * @param array $parameters
+     *
+     * @return \Mollie\Api\Resources\BaseCollection|\Mollie\Api\Resources\MandateCollection
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function listForId($customerId, $from = null, $limit = null, array $parameters = [])
+    {
+        $this->parentId = $customerId;
 
         return parent::rest_list($from, $limit, $parameters);
     }
@@ -80,13 +123,28 @@ class MandateEndpoint extends EndpointAbstract
     /**
      * @param Customer $customer
      * @param string $mandateId
+     * @param array $data
      *
      * @return null
+     * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function revokeFor(Customer $customer, $mandateId)
+    public function revokeFor(Customer $customer, $mandateId, $data = [])
     {
-        $this->parentId = $customer->id;
+        return $this->revokeForId($customer->id, $mandateId, $data);
+    }
 
-        return parent::rest_delete($mandateId);
+    /**
+     * @param string $customerId
+     * @param string $mandateId
+     * @param array $data
+     *
+     * @return null
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function revokeForId($customerId, $mandateId, $data = [])
+    {
+        $this->parentId = $customerId;
+
+        return parent::rest_delete($mandateId, $data);
     }
 }

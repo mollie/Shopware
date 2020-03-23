@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Promise;
+namespace GuzzleHttp\Promise;
 
 /**
  * Interface used with classes that return a promise.

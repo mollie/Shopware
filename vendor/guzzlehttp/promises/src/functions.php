@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Promise;
+namespace GuzzleHttp\Promise;
 
 /**
  * Get the global task queue used for promise resolution.
@@ -10,7 +10,7 @@ namespace GuzzleHttpV6\Promise;
  *
  * <code>
  * while ($eventLoop->isRunning()) {
- *     GuzzleHttpV6\Promise\queue()->run();
+ *     GuzzleHttp\Promise\queue()->run();
  * }
  * </code>
  *
@@ -169,7 +169,7 @@ function inspect(PromiseInterface $promise)
  * @param PromiseInterface[] $promises Traversable of promises to wait upon.
  *
  * @return array
- * @see GuzzleHttpV6\Promise\inspect for the inspection state array format.
+ * @see GuzzleHttp\Promise\inspect for the inspection state array format.
  */
 function inspect_all($promises)
 {
@@ -213,14 +213,13 @@ function unwrap($promises)
  * rejects, the returned promise is rejected with the rejection reason.
  *
  * @param mixed $promises Promises or values.
- * @param bool $recursive - If true, resolves new promises that might have been added to the stack during its own resolution.
  *
  * @return PromiseInterface
  */
-function all($promises, $recursive = false)
+function all($promises)
 {
     $results = [];
-    $promise = each(
+    return each(
         $promises,
         function ($value, $idx) use (&$results) {
             $results[$idx] = $value;
@@ -232,19 +231,6 @@ function all($promises, $recursive = false)
         ksort($results);
         return $results;
     });
-
-    if (true === $recursive) {
-        $promise = $promise->then(function ($results) use ($recursive, &$promises) {
-            foreach ($promises AS $promise) {
-                if (\GuzzleHttpV6\Promise\PromiseInterface::PENDING === $promise->getState()) {
-                    return all($promises, $recursive);
-                }
-            }
-            return $results;
-        });
-    }
-
-    return $promise;
 }
 
 /**
@@ -255,7 +241,7 @@ function all($promises, $recursive = false)
  * fulfilled with an array that contains the fulfillment values of the winners
  * in order of resolution.
  *
- * This promise is rejected with a {@see GuzzleHttpV6\Promise\AggregateException}
+ * This prommise is rejected with a {@see GuzzleHttp\Promise\AggregateException}
  * if the number of fulfilled promises is less than the desired $count.
  *
  * @param int   $count    Total number of promises.
@@ -318,7 +304,7 @@ function any($promises)
  * @param mixed $promises Promises or values.
  *
  * @return PromiseInterface
- * @see GuzzleHttpV6\Promise\inspect for the inspection state array format.
+ * @see GuzzleHttp\Promise\inspect for the inspection state array format.
  */
 function settle($promises)
 {

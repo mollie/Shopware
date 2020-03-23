@@ -2,25 +2,34 @@
 
 namespace Mollie\Api;
 
-use GuzzleHttpV6\Client;
-use GuzzleHttpV6\ClientInterface;
-use GuzzleHttpV6\Exception\GuzzleException;
-use GuzzleHttpV6\Psr7\Request;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use Mollie\Api\Endpoints\ChargebackEndpoint;
 use Mollie\Api\Endpoints\CustomerEndpoint;
 use Mollie\Api\Endpoints\CustomerPaymentsEndpoint;
 use Mollie\Api\Endpoints\InvoiceEndpoint;
 use Mollie\Api\Endpoints\MandateEndpoint;
 use Mollie\Api\Endpoints\MethodEndpoint;
+use Mollie\Api\Endpoints\OnboardingEndpoint;
 use Mollie\Api\Endpoints\OrderEndpoint;
 use Mollie\Api\Endpoints\OrderLineEndpoint;
+use Mollie\Api\Endpoints\OrderPaymentEndpoint;
 use Mollie\Api\Endpoints\OrderRefundEndpoint;
+use Mollie\Api\Endpoints\PaymentCaptureEndpoint;
+use Mollie\Api\Endpoints\OrganizationEndpoint;
+use Mollie\Api\Endpoints\PaymentChargebackEndpoint;
 use Mollie\Api\Endpoints\PaymentEndpoint;
 use Mollie\Api\Endpoints\PaymentRefundEndpoint;
+use Mollie\Api\Endpoints\PermissionEndpoint;
 use Mollie\Api\Endpoints\ProfileEndpoint;
+use Mollie\Api\Endpoints\ProfileMethodEndpoint;
 use Mollie\Api\Endpoints\RefundEndpoint;
 use Mollie\Api\Endpoints\SettlementsEndpoint;
 use Mollie\Api\Endpoints\ShipmentEndpoint;
 use Mollie\Api\Endpoints\SubscriptionEndpoint;
+use Mollie\Api\Endpoints\WalletEndpoint;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Psr\Http\Message\ResponseInterface;
@@ -31,7 +40,7 @@ class MollieApiClient
     /**
      * Version of our client.
      */
-    const CLIENT_VERSION = "2.0.11";
+    const CLIENT_VERSION = "2.16.0";
 
     /**
      * Endpoint of the remote API.
@@ -57,6 +66,11 @@ class MollieApiClient
     const HTTP_NO_CONTENT = 204;
 
     /**
+     * Default response timeout (in seconds).
+     */
+    const TIMEOUT = 10;
+
+    /**
      * @var ClientInterface
      */
     protected $httpClient;
@@ -79,6 +93,11 @@ class MollieApiClient
      * @var MethodEndpoint
      */
     public $methods;
+
+    /**
+     * @var ProfileMethodEndpoint
+     */
+    public $profileMethods;
 
     /**
      * RESTful Customers resource.
@@ -119,11 +138,32 @@ class MollieApiClient
     public $profiles;
 
     /**
+     * RESTful Organization resource.
+     *
+     * @var OrganizationEndpoint
+     */
+    public $organizations;
+
+    /**
+     * RESTful Permission resource.
+     *
+     * @var PermissionEndpoint
+     */
+    public $permissions;
+
+    /**
      * RESTful Invoice resource.
      *
      * @var InvoiceEndpoint
      */
     public $invoices;
+
+    /**
+     * RESTful Onboarding resource.
+     *
+     * @var OnboardingEndpoint
+     */
+    public $onboarding;
 
     /**
      * RESTful Order resource.
@@ -138,6 +178,13 @@ class MollieApiClient
      * @var OrderLineEndpoint
      */
     public $orderLines;
+
+    /**
+     * RESTful OrderPayment resource.
+     *
+     * @var OrderPaymentEndpoint
+     */
+    public $orderPayments;
 
     /**
      * RESTful Shipment resource.
@@ -161,11 +208,39 @@ class MollieApiClient
     public $paymentRefunds;
 
     /**
+     * RESTful Payment Captures resource.
+     *
+     * @var PaymentCaptureEndpoint
+     */
+    public $paymentCaptures;
+
+    /**
+     * RESTful Chargebacks resource.
+     *
+     * @var ChargebackEndpoint
+     */
+    public $chargebacks;
+
+    /**
+     * RESTful Payment Chargebacks resource.
+     *
+     * @var PaymentChargebackEndpoint
+     */
+    public $paymentChargebacks;
+
+    /**
      * RESTful Order Refunds resource.
      *
      * @var OrderRefundEndpoint
      */
     public $orderRefunds;
+
+    /**
+     * Manages Wallet requests
+     *
+     * @var WalletEndpoint
+     */
+    public $wallets;
 
     /**
      * @var string
@@ -183,7 +258,6 @@ class MollieApiClient
      * @var array
      */
     protected $versionStrings = [];
-
     /**
      * @var int
      */
@@ -199,7 +273,8 @@ class MollieApiClient
         $this->httpClient = $httpClient ?
             $httpClient :
             new Client([
-                \GuzzleHttpV6\RequestOptions::VERIFY => \Composer\CaBundle\CaBundle::getBundledCaBundlePath()
+                \GuzzleHttp\RequestOptions::VERIFY => \Composer\CaBundle\CaBundle::getBundledCaBundlePath(),
+                \GuzzleHttp\RequestOptions::TIMEOUT => self::TIMEOUT,
             ]);
 
         $compatibilityChecker = new CompatibilityChecker();
@@ -216,19 +291,28 @@ class MollieApiClient
     {
         $this->payments = new PaymentEndpoint($this);
         $this->methods = new MethodEndpoint($this);
+        $this->profileMethods = new ProfileMethodEndpoint($this);
         $this->customers = new CustomerEndpoint($this);
         $this->settlements = new SettlementsEndpoint($this);
         $this->subscriptions = new SubscriptionEndpoint($this);
         $this->customerPayments = new CustomerPaymentsEndpoint($this);
         $this->mandates = new MandateEndpoint($this);
         $this->invoices = new InvoiceEndpoint($this);
+        $this->permissions = new PermissionEndpoint($this);
         $this->profiles = new ProfileEndpoint($this);
+        $this->onboarding = new OnboardingEndpoint($this);
+        $this->organizations = new OrganizationEndpoint($this);
         $this->orders = new OrderEndpoint($this);
         $this->orderLines = new OrderLineEndpoint($this);
+        $this->orderPayments = new OrderPaymentEndpoint($this);
         $this->orderRefunds = new OrderRefundEndpoint($this);
         $this->shipments = new ShipmentEndpoint($this);
         $this->refunds = new RefundEndpoint($this);
         $this->paymentRefunds = new PaymentRefundEndpoint($this);
+        $this->paymentCaptures = new PaymentCaptureEndpoint($this);
+        $this->chargebacks = new ChargebackEndpoint($this);
+        $this->paymentChargebacks = new PaymentChargebackEndpoint($this);
+        $this->wallets = new WalletEndpoint($this);
     }
 
     /**
@@ -313,14 +397,11 @@ class MollieApiClient
      * Perform an http call. This method is used by the resource specific classes. Please use the $payments property to
      * perform operations on payments.
      *
-     * @see $payments
-     * @see $isuers
-     *
      * @param string $httpMethod
      * @param string $apiMethod
      * @param string|null|resource|StreamInterface $httpBody
      *
-     * @return object
+     * @return \stdClass
      * @throws ApiException
      *
      * @codeCoverageIgnore
@@ -342,7 +423,7 @@ class MollieApiClient
      * @param string $url
      * @param string|null|resource|StreamInterface $httpBody
      *
-     * @return object|null
+     * @return \stdClass|null
      * @throws ApiException
      *
      * @codeCoverageIgnore
@@ -374,7 +455,7 @@ class MollieApiClient
         try {
             $response = $this->httpClient->send($request, ['http_errors' => false]);
         } catch (GuzzleException $e) {
-            throw new ApiException($e->getMessage(), $e->getCode(), $e);
+            throw ApiException::createFromGuzzleException($e);
         }
 
         if (!$response) {
@@ -388,12 +469,12 @@ class MollieApiClient
      * Parse the PSR-7 Response body
      *
      * @param ResponseInterface $response
-     * @return object|null
+     * @return \stdClass|null   
      * @throws ApiException
      */
     private function parseResponseBody(ResponseInterface $response)
     {
-        $body = $response->getBody()->getContents();
+        $body = (string) $response->getBody();
         if (empty($body)) {
             if ($response->getStatusCode() === self::HTTP_NO_CONTENT) {
                 return null;
@@ -409,22 +490,7 @@ class MollieApiClient
         }
 
         if ($response->getStatusCode() >= 400) {
-            $field = null;
-            if (!empty($object->field)) {
-                $field = $object->field;
-            }
-
-            $documentationUrl = null;
-            if (!empty($object->_links) && !empty($object->_links->documentation)) {
-                $documentationUrl = $object->_links->documentation->href;
-            }
-
-            throw new ApiException(
-                "Error executing API call ({$object->status}: {$object->title}): {$object->detail}",
-                $response->getStatusCode(),
-                $field,
-                $documentationUrl
-            );
+            throw ApiException::createFromResponse($response);
         }
 
         return $object;

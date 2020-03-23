@@ -19,7 +19,7 @@ abstract class EndpointAbstract
     /**
      * @var MollieApiClient
      */
-    protected $api;
+    protected $client;
 
     /**
      * @var string
@@ -36,14 +36,14 @@ abstract class EndpointAbstract
      */
     public function __construct(MollieApiClient $api)
     {
-        $this->api = $api;
+        $this->client = $api;
     }
 
     /**
      * @param array $filters
      * @return string
      */
-    private function buildQueryString(array $filters)
+    protected function buildQueryString(array $filters)
     {
         if (empty($filters)) {
             return "";
@@ -70,7 +70,7 @@ abstract class EndpointAbstract
      */
     protected function rest_create(array $body, array $filters)
     {
-        $result = $this->api->performHttpCall(
+        $result = $this->client->performHttpCall(
             self::REST_CREATE,
             $this->getResourcePath() . $this->buildQueryString($filters),
             $this->parseRequestBody($body)
@@ -94,7 +94,7 @@ abstract class EndpointAbstract
         }
 
         $id = urlencode($id);
-        $result = $this->api->performHttpCall(
+        $result = $this->client->performHttpCall(
             self::REST_READ,
             "{$this->getResourcePath()}/{$id}" . $this->buildQueryString($filters)
         );
@@ -118,7 +118,7 @@ abstract class EndpointAbstract
         }
 
         $id = urlencode($id);
-        $result = $this->api->performHttpCall(
+        $result = $this->client->performHttpCall(
             self::REST_DELETE,
             "{$this->getResourcePath()}/{$id}",
             $this->parseRequestBody($body)
@@ -141,13 +141,13 @@ abstract class EndpointAbstract
      * @return BaseCollection
      * @throws ApiException
      */
-    protected function rest_list($from = null, $limit = null, array $filters)
+    protected function rest_list($from = null, $limit = null, array $filters = [])
     {
         $filters = array_merge(["from" => $from, "limit" => $limit], $filters);
 
         $apiPath = $this->getResourcePath() . $this->buildQueryString($filters);
 
-        $result = $this->api->performHttpCall(self::REST_LIST, $apiPath);
+        $result = $this->client->performHttpCall(self::REST_LIST, $apiPath);
 
         /** @var BaseCollection $collection */
         $collection = $this->getResourceCollectionObject($result->count, $result->_links);
@@ -165,16 +165,6 @@ abstract class EndpointAbstract
      * @return BaseResource
      */
     abstract protected function getResourceObject();
-
-    /**
-     * Get the collection object that is used by this API endpoint. Every API endpoint uses one type of collection object.
-     *
-     * @param int $count
-     * @param object[] $_links
-     *
-     * @return BaseCollection
-     */
-    abstract protected function getResourceCollectionObject($count, $_links);
 
     /**
      * @param string $resourcePath
@@ -208,16 +198,16 @@ abstract class EndpointAbstract
      * @return null|string
      * @throws ApiException
      */
-    private function parseRequestBody(array $body)
+    protected function parseRequestBody(array $body)
     {
         if (empty($body)) {
             return null;
         }
 
         try {
-            $encoded = \GuzzleHttpV6\json_encode($body);
+            $encoded = \GuzzleHttp\json_encode($body);
         } catch (\InvalidArgumentException $e) {
-            throw new ApiException("Error encoding parameters into JSON: '" . $e->getMessage() . "'.");
+            throw new ApiException("Error encoding parameters into JSON: '".$e->getMessage()."'.");
         }
 
         return $encoded;

@@ -4,12 +4,12 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitf311833959a436da0bbc91c164c5dc25
+class ComposerStaticInit7a6e0582cab5590bda809157d9b0207f
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
     );
 
@@ -24,9 +24,9 @@ class ComposerStaticInitf311833959a436da0bbc91c164c5dc25
         ),
         'G' => 
         array (
-            'GuzzleHttpV6\\Psr7\\' => 16,
-            'GuzzleHttpV6\\Promise\\' => 19,
-            'GuzzleHttpV6\\' => 11,
+            'GuzzleHttp\\Psr7\\' => 16,
+            'GuzzleHttp\\Promise\\' => 19,
+            'GuzzleHttp\\' => 11,
         ),
         'C' => 
         array (
@@ -43,15 +43,15 @@ class ComposerStaticInitf311833959a436da0bbc91c164c5dc25
         array (
             0 => __DIR__ . '/..' . '/mollie/mollie-api-php/src',
         ),
-        'GuzzleHttpV6\\Psr7\\' => 
+        'GuzzleHttp\\Psr7\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'GuzzleHttpV6\\Promise\\' => 
+        'GuzzleHttp\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'GuzzleHttpV6\\' => 
+        'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
@@ -64,8 +64,8 @@ class ComposerStaticInitf311833959a436da0bbc91c164c5dc25
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitf311833959a436da0bbc91c164c5dc25::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitf311833959a436da0bbc91c164c5dc25::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7a6e0582cab5590bda809157d9b0207f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7a6e0582cab5590bda809157d9b0207f::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }

@@ -25,10 +25,15 @@ class Mandate extends BaseResource
     /**
      * @var string
      */
+    public $mode;
+
+    /**
+     * @var string
+     */
     public $method;
 
     /**
-     * @var object|null
+     * @var \stdClass|null
      */
     public $details;
 
@@ -55,7 +60,7 @@ class Mandate extends BaseResource
     public $signatureDate;
 
     /**
-     * @var object
+     * @var \stdClass
      */
     public $_links;
 
@@ -94,7 +99,18 @@ class Mandate extends BaseResource
             return $this;
         }
 
-        $result = $this->client->performHttpCallToFullUrl(MollieApiClient::HTTP_DELETE, $this->_links->self->href);
+        $body = null;
+        if($this->client->usesOAuth()) {
+            $body = json_encode([
+                "testmode" => $this->mode === "test" ? true : false
+            ]);
+        }
+
+        $result = $this->client->performHttpCallToFullUrl(
+            MollieApiClient::HTTP_DELETE,
+            $this->_links->self->href,
+            $body
+        );
 
         return $result;
     }

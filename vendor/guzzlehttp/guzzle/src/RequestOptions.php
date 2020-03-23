@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6;
+namespace GuzzleHttp;
 
 /**
  * This class contains a list of built-in Guzzle request options.
@@ -22,7 +22,7 @@ final class RequestOptions
      * - strict: (bool, default=false) Set to true to use strict redirects
      *   meaning redirect POST requests with POST requests vs. doing what most
      *   browsers do which is redirect POST requests with GET requests
-     * - referer: (bool, default=true) Set to false to disable the Referer
+     * - referer: (bool, default=false) Set to true to enable the Referer
      *   header.
      * - protocols: (array, default=['http', 'https']) Allowed redirect
      *   protocols.
@@ -58,11 +58,11 @@ final class RequestOptions
     const CERT = 'cert';
 
     /**
-     * cookies: (bool|GuzzleHttpV6\Cookie\CookieJarInterface, default=false)
+     * cookies: (bool|GuzzleHttp\Cookie\CookieJarInterface, default=false)
      * Specifies whether or not cookies are used in a request or what cookie
      * jar to use or what cookies to send. This option only works if your
      * handler has the `cookie` middleware. Valid values are `false` and
-     * an instance of {@see GuzzleHttpV6\Cookie\CookieJarInterface}.
+     * an instance of {@see GuzzleHttp\Cookie\CookieJarInterface}.
      */
     const COOKIES = 'cookies';
 
@@ -131,6 +131,14 @@ final class RequestOptions
      * works if your handler has the `httpErrors` middleware.
      */
     const HTTP_ERRORS = 'http_errors';
+
+    /**
+     * idn: (bool|int, default=true) A combination of IDNA_* constants for
+     * idn_to_ascii() PHP's function (see "options" parameter). Set to false to
+     * disable IDN support completely, or to true to use the default
+     * configuration (IDNA_DEFAULT constant).
+     */
+    const IDN_CONVERSION = 'idn_conversion';
 
     /**
      * json: (mixed) Adds JSON data to a request. The provided value is JSON

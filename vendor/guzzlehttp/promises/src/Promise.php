@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Promise;
+namespace GuzzleHttp\Promise;
 
 /**
  * Promises/A+ implementation that avoids recursion when possible.
@@ -224,7 +224,7 @@ class Promise implements PromiseInterface
         } elseif ($this->waitList) {
             $this->invokeWaitList();
         } else {
-            // If there's no wait function, then reject the promise.
+            // If there's not wait function, then reject the promise.
             $this->reject('Cannot wait on a promise that has '
                 . 'no internal wait function. You must provide a wait '
                 . 'function when constructing the promise to be able to '

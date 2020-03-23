@@ -70,21 +70,21 @@ class OrderLine extends BaseResource
     /**
      * The price of a single item in the order line.
      *
-     * @var object
+     * @var \stdClass
      */
     public $unitPrice;
 
     /**
      * Any discounts applied to the order line.
      *
-     * @var object|null
+     * @var \stdClass|null
      */
     public $discountAmount;
 
     /**
      * The total amount of the line, including VAT and discounts.
      *
-     * @var object
+     * @var \stdClass
      */
     public $totalAmount;
 
@@ -101,7 +101,7 @@ class OrderLine extends BaseResource
     /**
      * The amount of value-added tax on the line.
      *
-     * @var object
+     * @var \stdClass
      */
     public $vatAmount;
 
@@ -133,6 +133,11 @@ class OrderLine extends BaseResource
      * @var string
      */
     public $createdAt;
+
+    /**
+     * @var \stdClass
+     */
+    public $_links;
 
     /**
      * Is this order line created?
@@ -175,7 +180,8 @@ class OrderLine extends BaseResource
     }
 
     /**
-     * Is this order line refunded?
+     * (Deprecated) Is this order line refunded?
+     * @deprecated 2018-11-27
      *
      * @return bool
      */
@@ -274,25 +280,24 @@ class OrderLine extends BaseResource
         return $this->type === OrderLineType::TYPE_SURCHARGE;
     }
 
-    /**
-     * Cancel this order line.
-     *
-     * @param  array|null $data
-     * @return null
-     */
-    public function cancel($data = [])
+    public function update()
     {
-        $resource = "orders/" . urlencode($this->orderId) . "/lines/" . urlencode($this->id);
+        $body = json_encode(array(
+            "name" => $this->name,
+            'imageUrl' => $this->imageUrl,
+            'productUrl' => $this->productUrl,
+            'quantity' => $this->quantity,
+            'unitPrice' => $this->unitPrice,
+            'discountAmount' => $this->discountAmount,
+            'totalAmount' => $this->totalAmount,
+            'vatAmount' => $this->vatAmount,
+            'vatRate' => $this->vatRate,
+        ));
 
-        $body = null;
-        if (count($data) > 0) {
-            $body = json_encode($data);
-        }
+        $url="orders/{$this->orderId}/lines/{$this->id}";
 
-        return $this->client->performHttpCall(
-            MollieApiClient::HTTP_DELETE,
-            $resource,
-            $body
-        );
+        $result = $this->client->performHttpCall(MollieApiClient::HTTP_PATCH, $url, $body);
+
+        return ResourceFactory::createFromApiResult($result, new Order($this->client));
     }
 }

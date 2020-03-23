@@ -1,6 +1,6 @@
 <?php
 
-namespace GuzzleHttpV6\Psr7;
+namespace GuzzleHttp\Psr7;
 
 final class Rfc7230
 {

@@ -14,18 +14,13 @@
         "php": ">=5.5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8.36"
+        "phpunit/phpunit": "^4.0"
     },
     "autoload": {
         "psr-4": {
             "GuzzleHttp\\Promise\\": "src/"
         },
         "files": ["src/functions_include.php"]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "GuzzleHttp\\Promise\\Tests\\": "tests/"
-        }
     },
     "scripts": {
         "test": "vendor/bin/phpunit",

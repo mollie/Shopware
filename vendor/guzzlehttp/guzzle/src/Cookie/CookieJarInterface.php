@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6\Cookie;
+namespace GuzzleHttp\Cookie;
 
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -58,9 +58,9 @@ interface CookieJarInterface extends \Countable, \IteratorAggregate
      * arguments, then the cookie with the specified name, path and domain is
      * removed.
      *
-     * @param string $domain Clears cookies matching a domain
-     * @param string $path   Clears cookies matching a domain and path
-     * @param string $name   Clears cookies matching a domain, path, and name
+     * @param string|null $domain Clears cookies matching a domain
+     * @param string|null $path   Clears cookies matching a domain and path
+     * @param string|null $name   Clears cookies matching a domain, path, and name
      *
      * @return CookieJarInterface
      */

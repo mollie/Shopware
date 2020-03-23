@@ -499,39 +499,62 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         if ($transaction !== null) {
-            $transactionId = null;
+            $config = $this->getConfig();
+            $mollieApi = $this->getMollieApi();
+            $molliePayment = null;
+            $paymentTransactionNumber = null;
+            $transactionNumber = null;
 
             if ((string) $transaction->getMolliePaymentId() !== '') {
-                $order->setTransactionId($transaction->getMolliePaymentId());
+                $transactionNumber = $transaction->getMolliePaymentId();
 
-                $config = $this->getConfig();
-
-                if (
-                    $config !== null
-                    && $config->getTransactionNumberType() === $config::TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD
-                ) {
-                    $mollieApi = $this->getMollieApi();
-
-                    if ($mollieApi !== null) {
-                        $molliePayment = $mollieApi->payments->get($transaction->getMolliePaymentId());
-                        $transactionNumber = $transaction->getMolliePaymentId();
-
-                        if (isset($molliePayment->details->paypalReference)) {
-                            $transactionNumber = $molliePayment->details->paypalReference;
-                        }
-
-                        if (isset($molliePayment->details->transferReference)) {
-                            $transactionNumber = $molliePayment->details->transferReference;
-                        }
-
-                        $order->setTransactionId($transactionNumber);
-                    }
+                if ($mollieApi !== null) {
+                    $molliePayment = $mollieApi->payments->get($transactionNumber);
                 }
             }
 
             if ((string) $transaction->getMollieId() !== '') {
-                $order->setTransactionId($transaction->getMollieId());
+                $transactionNumber = $transaction->getMollieId();
+
+                if ($mollieApi !== null) {
+                    $mollieOrder = $mollieApi->orders->get($transaction->getMollieId(), [
+                        'embed' => 'payments'
+                    ]);
+
+                    if (
+                        $mollieOrder !== null
+                        && $mollieOrder->payments() !== null
+                        && $mollieOrder->payments()->count()
+                    ) {
+                        $molliePayment = $mollieOrder->payments()[0];
+                    }
+                }
             }
+
+            $paymentTransactionNumber = $transactionNumber;
+
+            if (
+                $molliePayment !== null
+                && isset($molliePayment->details, $molliePayment->details->paypalReference)
+            ) {
+                $paymentTransactionNumber = $molliePayment->details->paypalReference;
+            }
+
+            if (
+                $molliePayment !== null
+                && isset($molliePayment->details, $molliePayment->details->transferReference)
+            ) {
+                $paymentTransactionNumber = $molliePayment->details->transferReference;
+            }
+
+            if (
+                $config !== null
+                && $config->getTransactionNumberType() === $config::TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD
+            ) {
+                $transactionNumber = $paymentTransactionNumber;
+            }
+
+            $order->setTransactionId($transactionNumber);
 
             try {
                 /** @var \Shopware\Components\Model\ModelManager $modelManager */

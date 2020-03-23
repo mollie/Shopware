@@ -1,4 +1,6 @@
 <?php
-namespace GuzzleHttpV6\Exception;
+namespace GuzzleHttp\Exception;
 
-class TooManyRedirectsException extends RequestException {}
+class TooManyRedirectsException extends RequestException
+{
+}

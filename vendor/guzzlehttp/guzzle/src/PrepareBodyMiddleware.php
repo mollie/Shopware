@@ -1,8 +1,8 @@
 <?php
-namespace GuzzleHttpV6;
+namespace GuzzleHttp;
 
-use GuzzleHttpV6\Promise\PromiseInterface;
-use GuzzleHttpV6\Psr7;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -66,6 +66,11 @@ class PrepareBodyMiddleware
         return $fn(Psr7\modify_request($request, $modify), $options);
     }
 
+    /**
+     * Add expect header
+     *
+     * @return void
+     */
     private function addExpectHeader(
         RequestInterface $request,
         array $options,

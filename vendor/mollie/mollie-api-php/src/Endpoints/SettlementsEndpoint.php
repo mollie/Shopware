@@ -6,7 +6,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Settlement;
 use Mollie\Api\Resources\SettlementCollection;
 
-class SettlementsEndpoint extends EndpointAbstract
+class SettlementsEndpoint extends CollectionEndpointAbstract
 {
     protected $resourcePath = "settlements";
 
@@ -17,20 +17,20 @@ class SettlementsEndpoint extends EndpointAbstract
      */
     protected function getResourceObject()
     {
-        return new Settlement($this->api);
+        return new Settlement($this->client);
     }
 
     /**
      * Get the collection object that is used by this API. Every API uses one type of collection object.
      *
      * @param int $count
-     * @param object[] $_links
+     * @param \stdClass $_links
      *
      * @return \Mollie\Api\Resources\BaseCollection
      */
     protected function getResourceCollectionObject($count, $_links)
     {
-        return new SettlementCollection($this->api, $count, $_links);
+        return new SettlementCollection($this->client, $count, $_links);
     }
 
     /**

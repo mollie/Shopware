@@ -1,5 +1,5 @@
 <?php
-namespace GuzzleHttpV6;
+namespace GuzzleHttp;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
@@ -168,6 +168,11 @@ class MessageFormatter
         );
     }
 
+    /**
+     * Get headers from message as string
+     *
+     * @return string
+     */
     private function headers(MessageInterface $message)
     {
         $result = '';

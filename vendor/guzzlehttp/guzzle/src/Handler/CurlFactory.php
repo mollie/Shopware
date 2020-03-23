@@ -1,12 +1,12 @@
 <?php
-namespace GuzzleHttpV6\Handler;
+namespace GuzzleHttp\Handler;
 
-use GuzzleHttpV6\Exception\RequestException;
-use GuzzleHttpV6\Exception\ConnectException;
-use GuzzleHttpV6\Promise\FulfilledPromise;
-use GuzzleHttpV6\Psr7;
-use GuzzleHttpV6\Psr7\LazyOpenStream;
-use GuzzleHttpV6\TransferStats;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Psr7\LazyOpenStream;
+use GuzzleHttp\TransferStats;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -14,6 +14,9 @@ use Psr\Http\Message\RequestInterface;
  */
 class CurlFactory implements CurlFactoryInterface
 {
+    const CURL_VERSION_STR = 'curl_version';
+    const LOW_CURL_VERSION_NUMBER = '7.21.2';
+
     /** @var array */
     private $handles = [];
 
@@ -87,7 +90,7 @@ class CurlFactory implements CurlFactoryInterface
      * @param EasyHandle           $easy
      * @param CurlFactoryInterface $factory Dictates how the handle is released
      *
-     * @return \GuzzleHttpV6\Promise\PromiseInterface
+     * @return \GuzzleHttp\Promise\PromiseInterface
      */
     public static function finish(
         callable $handler,
@@ -117,6 +120,7 @@ class CurlFactory implements CurlFactoryInterface
     private static function invokeStats(EasyHandle $easy)
     {
         $curlStats = curl_getinfo($easy->handle);
+        $curlStats['appconnect_time'] = curl_getinfo($easy->handle, CURLINFO_APPCONNECT_TIME);
         $stats = new TransferStats(
             $easy->request,
             $easy->response,
@@ -136,7 +140,9 @@ class CurlFactory implements CurlFactoryInterface
         $ctx = [
             'errno' => $easy->errno,
             'error' => curl_error($easy->handle),
+            'appconnect_time' => curl_getinfo($easy->handle, CURLINFO_APPCONNECT_TIME),
         ] + curl_getinfo($easy->handle);
+        $ctx[self::CURL_VERSION_STR] = curl_version()['version'];
         $factory->release($easy);
 
         // Retry when nothing is present or when curl failed to rewind.
@@ -162,7 +168,7 @@ class CurlFactory implements CurlFactoryInterface
         // If an exception was encountered during the onHeaders event, then
         // return a rejected promise that wraps that exception.
         if ($easy->onHeadersException) {
-            return \GuzzleHttpV6\Promise\rejection_for(
+            return \GuzzleHttp\Promise\rejection_for(
                 new RequestException(
                     'An error was encountered during the on_headers event',
                     $easy->request,
@@ -172,20 +178,29 @@ class CurlFactory implements CurlFactoryInterface
                 )
             );
         }
-
-        $message = sprintf(
-            'cURL error %s: %s (%s)',
-            $ctx['errno'],
-            $ctx['error'],
-            'see https://curl.haxx.se/libcurl/c/libcurl-errors.html'
-        );
+        if (version_compare($ctx[self::CURL_VERSION_STR], self::LOW_CURL_VERSION_NUMBER)) {
+            $message = sprintf(
+                'cURL error %s: %s (%s)',
+                $ctx['errno'],
+                $ctx['error'],
+                'see https://curl.haxx.se/libcurl/c/libcurl-errors.html'
+            );
+        } else {
+            $message = sprintf(
+                'cURL error %s: %s (%s) for %s',
+                $ctx['errno'],
+                $ctx['error'],
+                'see https://curl.haxx.se/libcurl/c/libcurl-errors.html',
+                $easy->request->getUri()
+            );
+        }
 
         // Create a connection exception if it was a specific error code.
         $error = isset($connectionErrors[$easy->errno])
             ? new ConnectException($message, $easy->request, null, $ctx)
             : new RequestException($message, $easy->request, $easy->response, null, $ctx);
 
-        return \GuzzleHttpV6\Promise\rejection_for($error);
+        return \GuzzleHttp\Promise\rejection_for($error);
     }
 
     private function getDefaultConf(EasyHandle $easy)
@@ -364,7 +379,7 @@ class CurlFactory implements CurlFactoryInterface
         if (isset($options['sink'])) {
             $sink = $options['sink'];
             if (!is_string($sink)) {
-                $sink = \GuzzleHttpV6\Psr7\stream_for($sink);
+                $sink = \GuzzleHttp\Psr7\stream_for($sink);
             } elseif (!is_dir(dirname($sink))) {
                 // Ensure that the directory exists before failing in curl.
                 throw new \RuntimeException(sprintf(
@@ -416,7 +431,7 @@ class CurlFactory implements CurlFactoryInterface
                 if (isset($options['proxy'][$scheme])) {
                     $host = $easy->request->getUri()->getHost();
                     if (!isset($options['proxy']['no']) ||
-                        !\GuzzleHttpV6\is_host_in_noproxy($host, $options['proxy']['no'])
+                        !\GuzzleHttp\is_host_in_noproxy($host, $options['proxy']['no'])
                     ) {
                         $conf[CURLOPT_PROXY] = $options['proxy'][$scheme];
                     }
@@ -439,11 +454,16 @@ class CurlFactory implements CurlFactoryInterface
         }
 
         if (isset($options['ssl_key'])) {
-            $sslKey = $options['ssl_key'];
-            if (is_array($sslKey)) {
-                $conf[CURLOPT_SSLKEYPASSWD] = $sslKey[1];
-                $sslKey = $sslKey[0];
+            if (is_array($options['ssl_key'])) {
+                if (count($options['ssl_key']) === 2) {
+                    list($sslKey, $conf[CURLOPT_SSLKEYPASSWD]) = $options['ssl_key'];
+                } else {
+                    list($sslKey) = $options['ssl_key'];
+                }
             }
+
+            $sslKey = isset($sslKey) ? $sslKey: $options['ssl_key'];
+
             if (!file_exists($sslKey)) {
                 throw new \InvalidArgumentException(
                     "SSL private key not found: {$sslKey}"
@@ -471,7 +491,7 @@ class CurlFactory implements CurlFactoryInterface
         }
 
         if (!empty($options['debug'])) {
-            $conf[CURLOPT_STDERR] = \GuzzleHttpV6\debug_resource($options['debug']);
+            $conf[CURLOPT_STDERR] = \GuzzleHttp\debug_resource($options['debug']);
             $conf[CURLOPT_VERBOSE] = true;
         }
     }

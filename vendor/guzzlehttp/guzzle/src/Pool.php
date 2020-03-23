@@ -1,12 +1,13 @@
 <?php
-namespace GuzzleHttpV6;
+namespace GuzzleHttp;
 
-use GuzzleHttpV6\Promise\PromisorInterface;
+use GuzzleHttp\Promise\EachPromise;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\PromisorInterface;
 use Psr\Http\Message\RequestInterface;
-use GuzzleHttpV6\Promise\EachPromise;
 
 /**
- * Sends and iterator of requests concurrently using a capped pool size.
+ * Sends an iterator of requests concurrently using a capped pool size.
  *
  * The pool will read from an iterator until it is cancelled or until the
  * iterator is consumed. When a request is yielded, the request is sent after
@@ -50,7 +51,7 @@ class Pool implements PromisorInterface
             $opts = [];
         }
 
-        $iterable = \GuzzleHttpV6\Promise\iter_for($requests);
+        $iterable = \GuzzleHttp\Promise\iter_for($requests);
         $requests = function () use ($iterable, $client, $opts) {
             foreach ($iterable as $key => $rfn) {
                 if ($rfn instanceof RequestInterface) {
@@ -69,6 +70,11 @@ class Pool implements PromisorInterface
         $this->each = new EachPromise($requests(), $config);
     }
 
+    /**
+     * Get promise
+     *
+     * @return PromiseInterface
+     */
     public function promise()
     {
         return $this->each->promise();
@@ -85,7 +91,7 @@ class Pool implements PromisorInterface
      * @param ClientInterface $client   Client used to send the requests
      * @param array|\Iterator $requests Requests to send concurrently.
      * @param array           $options  Passes through the options available in
-     *                                  {@see GuzzleHttpV6\Pool::__construct}
+     *                                  {@see GuzzleHttp\Pool::__construct}
      *
      * @return array Returns an array containing the response or an exception
      *               in the same order that the requests were sent.
@@ -106,6 +112,11 @@ class Pool implements PromisorInterface
         return $res;
     }
 
+    /**
+     * Execute callback(s)
+     *
+     * @return void
+     */
     private static function cmpCallback(array &$options, $name, array &$results)
     {
         if (!isset($options[$name])) {
