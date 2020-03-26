@@ -1350,12 +1350,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     //
                 }
 
-                if ($molliePayment !== null) {
-                    if ($molliePayment->isCanceled() === true ||
-                        $molliePayment->isFailed() === true ||
-                        $molliePayment->isExpired() === true) {
-                        return true;
-                    }
+                if (
+                    $molliePayment !== null
+                    && ($molliePayment->isCanceled() === true || $molliePayment->isFailed() === true)
+                ) {
+                    return true;
                 }
             }
         }
@@ -1372,7 +1371,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $paymentsTotal = $payments->count();
         $canceledPayments = 0;
         $failedPayments = 0;
-        $expiredPayments = 0;
 
         if ($paymentsTotal > 0) {
             /** @var \Mollie\Api\Resources\Payment $payment */
@@ -1383,13 +1381,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 if ($payment->isFailed() === true) {
                     $failedPayments++;
                 }
-                if ($payment->isExpired() === true) {
-                    $expiredPayments++;
-                }
             }
 
-            if ($canceledPayments > 0 || $failedPayments > 0 || $expiredPayments > 0) {
-                if (($canceledPayments + $failedPayments + $expiredPayments) === $paymentsTotal) {
+            if ($canceledPayments > 0 || $failedPayments > 0) {
+                if (($canceledPayments + $failedPayments) === $paymentsTotal) {
                     return true;
                 }
             }
