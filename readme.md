@@ -19,3 +19,5 @@ Maintenance of our official plugin is performed by our [Shopware development par
 There are two ways of installing this plugin manually: You can either checkout this repository on your machine (in the plugins folder of your Shopware installation) or you can download the zip file above (most recent version can be found here: [master](https://github.com/mollie/Shopware/archive/master.zip)) and extract this on your machine (in the very same plugins folder).
 ## Finalizing steps
 To finalize the installation you need to enter your API key in the corresponding box. You can find yours in the [Mollie Dashboard](https://www.mollie.com/dashboard/payments). Click save and then enable the plugin. Your payment methods are now being installed.
+## Wiki
+Read more about the plugin configuration on [our Wiki](https://github.com/mollie/Shopware/wiki).
