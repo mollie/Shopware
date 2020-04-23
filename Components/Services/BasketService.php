@@ -98,8 +98,9 @@ class BasketService
                     }
 
                     // reset ordered quantity
-                    if ($this->config->autoResetStock())
+                    if ($this->config->autoResetStock()) {
                         $this->resetOrderDetailQuantity($orderDetail);
+                    }
                 }
 
                 // append internal comment
@@ -157,11 +158,19 @@ class BasketService
                 $totalAmount = $unitPrice * $basketItem->getQuantity();
                 $vatAmount = 0;
 
-                if (isset($userData['additional']['charge_vat'], $userData['additional']['show_net']) &&
-                    $userData['additional']['charge_vat'] &&
-                    false === $userData['additional']['show_net']) {
+                if (
+                    isset($userData['additional']['charge_vat'], $userData['additional']['show_net'])
+                    && $userData['additional']['charge_vat'] === true
+                    && $userData['additional']['show_net'] === false
+                ) {
                     $unitPrice *= ($basketItem->getTaxRate() + 100) / 100;
                     $totalAmount = $unitPrice * $basketItem->getQuantity();
+                }
+
+                if (
+                    isset($userData['additional']['charge_vat'])
+                    && $userData['additional']['charge_vat'] === true
+                ) {
                     $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
                 }
 
@@ -307,36 +316,34 @@ class BasketService
      * @throws \Exception
      */
     public function resetOrderDetailQuantity(\Shopware\Models\Order\Detail $orderDetail) {
-        // variables
-        $article = null;
-        $orderedQuantity = $orderDetail->getQuantity();
-
         // reset quantity
         $orderDetail->setQuantity(0);
 
+        try {
+            $this->modelManager->persist($orderDetail);
+            $this->modelManager->flush($orderDetail);
+        } catch (\Exception $e) {
+            //
+        }
+
         // build order detail repository
-        $orderDetailRepo = Shopware()->Models()->getRepository(
+        $articleDetailRepository = Shopware()->Models()->getRepository(
             \Shopware\Models\Article\Detail::class
         );
 
         try {
             /** @var Detail $article */
-            $article = $orderDetailRepo->findOneBy([
+            $article = $articleDetailRepository->findOneBy([
                 'number' => $orderDetail->getArticleNumber()
             ]);
         }
         catch (\Exception $ex) {
-            // write exception to log
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
-            );
+            //
         }
 
         // restore stock
         if ($article !== null) {
-            $article->setInStock($article->getInStock() + $orderedQuantity);
+            $article->setInStock($article->getInStock());
 
             try {
                 $this->modelManager->persist($article);
