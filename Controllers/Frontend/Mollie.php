@@ -278,7 +278,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transactionNumber !== ''
             && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
         ) {
-            $order = $this->getOrderFromTransaction($transactionNumber);
+            $order = $this->getOrderFromTransaction($transactionNumber, false);
         }
 
         // check the payment status for the order and notify the user.
@@ -597,7 +597,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         return $order;
     }
 
-    private function getOrderFromTransaction($transactionNumber)
+    private function getOrderFromTransaction($transactionNumber, $mayCreateOrder = true)
     {
         $order = null;
         $transaction = null;
@@ -722,7 +722,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             // if order doesn't exist, save the order and retrieve an order number
-            if (empty($orderNumber) && $createOrder === true) {
+            if (empty($orderNumber) && $createOrder === true && $mayCreateOrder === true) {
                 $sendStatusMail = false;
 
                 if ($this->getConfig() !== null) {
