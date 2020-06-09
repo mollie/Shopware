@@ -2,8 +2,10 @@
 
 namespace MollieShopware\Components\Helpers;
 
-use Psr\Container\ContainerInterface;
+use Exception;
+use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Logger;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LogHelper
 {
@@ -34,15 +36,20 @@ class LogHelper
     /**
      * Logs a message to the plugin logger.
      *
-     * @param string $message
-     * @param string $logMethod
-     * @param null $exception
+     * @param string                  $message
+     * @param string                  $logMethod
+     * @param null                    $exception
+     * @param ContainerInterface|null $container
+     *
      * @return bool
      */
-    public static function logMessage($message, $logMethod = self::LOG_ERROR, $exception = null)
+    public static function logMessage($message, $logMethod = self::LOG_ERROR, $exception = null, ContainerInterface $container = null)
     {
+        // Set the container
+        static::$container = static::getContainer($container);
+
         // Check if the log method exists
-        if (!method_exists(static::pluginLogger(), $logMethod)) {
+        if (!method_exists(static::pluginLogger(static::$container), $logMethod)) {
             $logMethod = self::LOG_DEBUG;
 
             // Throw a warning that the log level is unknown
@@ -52,7 +59,12 @@ class LogHelper
             );
         }
 
-        return static::pluginLogger()->$logMethod($message, [$exception]);
+        // Check if the plugin logger is available
+        if (static::pluginLogger() !== null) {
+            return static::pluginLogger()->$logMethod($message, [$exception]);
+        }
+
+        return false;
     }
 
     /**
@@ -64,7 +76,7 @@ class LogHelper
     private static function pluginLogger(ContainerInterface $container = null)
     {
         // Set the container
-        static::$container = ($container === null ? static::$container : $container);
+        static::$container = static::getContainer($container);
 
         // Get the plugin logger from the container
         if (static::$pluginLogger === null && static::$container !== null) {
@@ -72,5 +84,36 @@ class LogHelper
         }
 
         return static::$pluginLogger;
+    }
+
+    /**
+     * Returns the container interface, or null if not available.
+     *
+     * @param ContainerInterface|null $container
+     *
+     * @return ContainerInterface|Container
+     */
+    private static function getContainer(ContainerInterface $container = null)
+    {
+        // If the given container is null, but the global container is available, use it
+        if (
+            $container === null
+            && static::$container !== null
+        ) {
+            $container = static::$container;
+        }
+
+        // If the container is still null, try to use the singleton
+        if (
+            $container === null
+        ) {
+            try {
+                $container = Shopware()->Container();
+            } catch (Exception $e) {
+                //
+            }
+        }
+
+        return $container;
     }
 }

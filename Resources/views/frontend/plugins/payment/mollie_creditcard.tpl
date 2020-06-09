@@ -6,7 +6,7 @@
     <input type="hidden" name="mollie_shopware_credit_card_token" id="cardToken" value="" />
     <div class="block-group">
         <div class="intro-text">
-            <span>{s namespace="frontend/mollie/plugins" name="CreditCardHeadLine"}Enter your card information{/s}</span>
+            {s namespace="frontend/mollie/plugins" name="CreditCardHeadline"}Enter your card information{/s}
         </div>
     </div>
     <div class="block-group">
