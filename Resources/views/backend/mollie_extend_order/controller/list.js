@@ -10,10 +10,29 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
             'order-list-main-window order-list': {
                 refundOrder: me.onRefundOrder,
                 shipOrder: me.onShipOrder,
+                shippable: me.isShippable,
             }
         });
 
         me.callParent(arguments);
+    },
+
+    isShippable: function(record) {
+        Ext.Ajax.request({
+            url: '{url action="shippable" controller=MollieOrders}',
+            params: {
+                orderId: record.get('id'),
+                orderNumber: record.get('number')
+            },
+            success: function (res) {
+                try {
+                    var result = JSON.parse(res.responseText);
+                    return result.shippable;
+                } catch (e) {
+                    //
+                }
+            }
+        });
     },
 
     onShipOrder: function(record) {

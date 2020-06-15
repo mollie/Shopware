@@ -13,6 +13,7 @@ class OrderBackendSubscriber implements SubscriberInterface
     {
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
+            'Shopware_Controllers_Api_Orders::putAction::after' => 'onOrderApiPut',
             'Shopware_Modules_Order_SendMail_Send' => 'onSendMail'
         ];
     }
@@ -87,6 +88,32 @@ class OrderBackendSubscriber implements SubscriberInterface
             return true;
         }
 
+        return $this->shipOrderToMollie($orderId);
+    }
+
+    public function onOrderApiPut(\Enlight_Hook_HookArgs $args)
+    {
+        /** @var \Enlight_Controller_Action $controller */
+        $controller = $args->getSubject();
+
+        /** @var \Enlight_Controller_Request_Request $request */
+        $request = $controller->Request();
+
+        if ($request === null) {
+            return true;
+        }
+
+        $orderId = $request->getParam('id');
+
+        if (empty($orderId)) {
+            return true;
+        }
+
+        return $this->shipOrderToMollie($orderId);
+    }
+
+    private function shipOrderToMollie($orderId)
+    {
         $order = null;
 
         try {

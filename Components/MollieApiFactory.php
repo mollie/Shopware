@@ -49,7 +49,7 @@ class MollieApiFactory
 
                 // add plugin name and version
                 $this->apiClient->addVersionString(
-                    'MollieShopware/1.5.12'
+                    'MollieShopware/1.5.13'
                 );
             }
             catch (\Exception $ex) {
@@ -58,6 +58,22 @@ class MollieApiFactory
         }
 
         return $this->apiClient;
+    }
+
+    /**
+     * Sets the api key for the sub shop.
+     *
+     * @param int $shopId
+     */
+    public function setApiKeyForSubShop($shopId = 1)
+    {
+        $this->config->setShop($shopId);
+
+        try {
+            $this->apiClient = $this->create();
+        } catch (\Exception $e) {
+            //
+        }
     }
 
     public function requireDependencies()

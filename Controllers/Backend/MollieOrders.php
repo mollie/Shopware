@@ -153,6 +153,46 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
     }
 
+    public function shippableAction()
+    {
+        $shippable = false;
+
+        try {
+            /** @var \Enlight_Controller_Request_Request $request */
+            $request = $this->Request();
+
+            /** @var \Shopware\Components\Model\ModelManager $modelManager */
+            $this->modelManager = $this->container->get('models');
+
+            /** @var \MollieShopware\Components\Config $config */
+            $this->config = $this->container->get('mollie_shopware.config');
+
+            /** @var \Mollie\Api\MollieApiClient $apiClient */
+            $this->apiClient = $this->container->get('mollie_shopware.api');
+
+            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            $this->orderService = $this->container->get('mollie_shopware.order_service');
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $this->orderService->getOrderById(
+                $request->getParam('orderId')
+            );
+
+            if (
+                $order !== null
+                && (string) $this->orderService->getMollieOrderId($order) !== ''
+            ) {
+                $shippable = true;
+            }
+        } catch (Exception $e) {
+            //
+        }
+
+        $this->returnJson([
+            'shippable' => $shippable,
+        ]);
+    }
+
     /**
      * Refund a Mollie order
      *

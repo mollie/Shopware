@@ -294,6 +294,24 @@ class PaymentService
     }
 
     /**
+     * Set the correct API key for the subshop.
+     *
+     * @param \Shopware\Models\Order\Order $order
+     */
+    public function setApiKeyForSubShop(\Shopware\Models\Order\Order $order)
+    {
+        // Use the order's shop in the in the config service
+        $this->config->setShop($order->getShop()->getId());
+
+        // Set the corresponding API key in the client
+        try {
+            $this->apiClient->setApiKey($this->config->apiKey());
+        } catch (\Exception $e) {
+            //
+        }
+    }
+
+    /**
      * Get the Mollie order object
      *
      * @param \Shopware\Models\Order\Order $order
@@ -311,6 +329,9 @@ class PaymentService
 
         /** @var \MollieShopware\Models\Transaction $transaction */
         $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
+
+        // Set the correct API key for the order's shop
+        $this->setApiKeyForSubShop($order);
 
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = $this->apiClient->orders->get(
@@ -344,6 +365,9 @@ class PaymentService
 
         if (empty($paymentId))
             $paymentId = $transaction->getMolliePaymentId();
+
+        // Set the correct API key for the order's shop
+        $this->setApiKeyForSubShop($order);
 
         /** @var \Mollie\Api\Resources\Payment $molliePayment */
         $molliePayment = $this->apiClient->payments->get(

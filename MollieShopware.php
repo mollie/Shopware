@@ -8,6 +8,7 @@ use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Services\PaymentMethodService;
+use MollieShopware\Components\Services\ShopService;
 use MollieShopware\Models\TransactionItem;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\OrderLines;
@@ -380,6 +381,9 @@ class MollieShopware extends Plugin
         /** @var Plugin\ConfigReader $configReader */
         $configReader = $this->container->get('shopware.plugin.cached_config_reader');
 
+        /** @var ShopService $shopService */
+        $shopService = new ShopService($this->container->get('models'));
+
         /** @var MollieApiFactory $factory */
         $factory = null;
 
@@ -388,7 +392,7 @@ class MollieShopware extends Plugin
 
         // Get the config
         if ($configReader !== null) {
-            $config = new Config($configReader);
+            $config = new Config($configReader, $shopService);
         }
 
         // Get the Mollie API factory service

@@ -103,7 +103,10 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
                     me.getOrderPaymentName(record).substring(0, 'mollie_'.length) === 'mollie_' &&
 
                     // payment status should not be open
-                    record.data && parseInt(record.data.cleared, 10) !== me.paymentStatus.OPEN
+                    record.data && parseInt(record.data.cleared, 10) !== me.paymentStatus.OPEN &&
+
+                    // order is shippable through mollie
+                    me.isShippableOrder(record)
                 ) {
                     return '';
                 }
@@ -111,6 +114,18 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
                 return 'mollie-hide';
             }
         }
+    },
+
+    isShippableOrder: function(record) {
+        if (record.data.transactionId.substring(0, 4) === 'ord_') {
+            return true;
+        }
+
+        if (this.fireEvent('shippable', record) === true) {
+            return true;
+        }
+
+        return false;
     },
 
     /**

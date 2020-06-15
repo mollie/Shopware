@@ -2,6 +2,8 @@
 
 namespace MollieShopware\Components;
 
+use MollieShopware\Components\Services\ShopService;
+use Shopware\Components\Plugin\ConfigReader;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
@@ -9,15 +11,25 @@ class Config
     const TRANSACTION_NUMBER_TYPE_MOLLIE = 'mollie';
     const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
 
-    /** @var \Shopware\Components\Plugin\ConfigReader */
+    /** @var ConfigReader */
     protected $configReader;
+
+    /** @var int */
+    protected $shopId = 1;
 
     /** @var array */
     protected $data = null;
 
-    public function __construct(\Shopware\Components\Plugin\ConfigReader $configReader)
+    /** @var ShopService */
+    protected $shopService;
+
+    public function __construct(
+        ConfigReader $configReader,
+        ShopService $shopService
+    )
     {
         $this->configReader = $configReader;
+        $this->shopService = $shopService;
     }
 
     /**
@@ -32,7 +44,7 @@ class Config
     {
         if (empty($this->data)) {
             try {
-                $shop = Shopware()->Shop();
+                $shop = $this->shopService->shopById($this->shopId);
             }
             catch(ServiceNotFoundException $ex) {
                 $shop = null;
@@ -49,6 +61,20 @@ class Config
         }
 
         return $this->data;
+    }
+
+    /**
+     * Sets the current shop.
+     *
+     * @param $shopId
+     */
+    public function setShop($shopId)
+    {
+        // Set the shop ID
+        $this->shopId = (int) $shopId;
+
+        // Reset the data
+        $this->data = null;
     }
 
     /**

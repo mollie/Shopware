@@ -500,7 +500,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($transaction !== null) {
             $config = $this->getConfig();
-            $mollieApi = $this->getMollieApi();
+            $mollieApi = $this->getMollieApi($order->getShop()->getId());
             $molliePayment = null;
             $paymentTransactionNumber = null;
             $transactionNumber = null;
@@ -696,7 +696,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $createOrder = false;
 
             /** @var \Mollie\Api\MollieApiClient $mollieApi */
-            $mollieApi = $this->container->get('mollie_shopware.api');
+            $mollieApi = $this->getMollieApi();
 
             if ($mollieApi !== null) {
                 if ((string) $transaction->getMollieId() !== '') {
@@ -922,7 +922,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         if ((string) $transaction->getMollieId() !== null) {
             /** @var \Mollie\Api\MollieApiClient $mollieApi */
-            $mollieApi = $this->container->get('mollie_shopware.api');
+            $mollieApi = $this->getMollieApi();
 
             try {
                 /** @var \Mollie\Api\Resources\Order $mollieOrder */
@@ -1311,7 +1311,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         /** @var \Mollie\Api\MollieApiClient $mollieApi */
         $mollieApi = $this->getMollieApi();
-
         $mollieOrder = null;
         $molliePayment = null;
 
@@ -1411,10 +1410,25 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
+     * @param int $shopId
+     *
      * @return \Mollie\Api\MollieApiClient
      */
-    private function getMollieApi()
+    private function getMollieApi($shopId = 1)
     {
-        return Shopware()->Container()->get('mollie_shopware.api');
+        /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
+        $apiFactory = Shopware()->Container()->get('mollie_shopware.api_factory');
+
+        if ($apiFactory !== null) {
+            $apiFactory->setApiKeyForSubShop($shopId);
+
+            try {
+                return $apiFactory->create();
+            } catch (Exception $e) {
+                //
+            }
+        }
+
+        return null;
     }
 }

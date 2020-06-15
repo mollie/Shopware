@@ -50,6 +50,10 @@
             <argument type="service" id="models" />
         </service>
 
+        <service id="mollie_shopware.shop_service" class="MollieShopware\Components\Services\ShopService">
+            <argument type="service" id="models" />
+        </service>
+
         <service id="mollie_shopware.attributes" class="MollieShopware\Components\Attributes">
             <argument type="service" id="models" />
             <argument type="service" id="shopware_attribute.crud_service" />
@@ -57,6 +61,7 @@
 
         <service id="mollie_shopware.config" class="MollieShopware\Components\Config">
             <argument type="service" id="shopware.plugin.cached_config_reader" />
+            <argument type="service" id="mollie_shopware.shop_service" />
         </service>
 
         <service id="mollie_shopware.api_factory" class="MollieShopware\Components\MollieApiFactory">

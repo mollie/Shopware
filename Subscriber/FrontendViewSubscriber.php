@@ -4,7 +4,9 @@ namespace MollieShopware\Subscriber;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Enlight\Event\SubscriberInterface;
+use Enlight_Controller_Action;
 use Enlight_Event_EventArgs;
+use Enlight_View;
 use MollieShopware\Components\Config;
 use Shopware\Components\Theme\LessDefinition;
 
@@ -28,14 +30,18 @@ class FrontendViewSubscriber implements SubscriberInterface
      */
     public function addComponentsVariables(Enlight_Event_EventArgs $args)
     {
-        /** @var \Enlight_Controller_Action $controller */
+        /** @var Enlight_Controller_Action $controller */
         $controller = null;
 
-        /** @var \Enlight_View $view */
+        /** @var string|null $controllerName */
+        $controllerName = null;
+
+        /** @var Enlight_View $view */
         $view = null;
 
         if (method_exists($args, 'getSubject')) {
             $controller = $args->getSubject();
+            $controllerName = $controller->Request()->getControllerName();
         }
 
         if ($controller !== null) {
@@ -45,7 +51,7 @@ class FrontendViewSubscriber implements SubscriberInterface
         /** @var Config $config */
         $config = Shopware()->Container()->get('mollie_shopware.config');
 
-        if ($config !== null && $view !== null) {
+        if ($controllerName === 'checkout' && $config !== null && $view !== null) {
             $view->assign('sMollieEnableComponent', $config->enableCreditCardComponent());
             $view->assign('sMollieEnableComponentStyling', $config->enableCreditCardComponentStyling());
         }
@@ -58,10 +64,10 @@ class FrontendViewSubscriber implements SubscriberInterface
      */
     public function addViewDirectory(Enlight_Event_EventArgs $args)
     {
-        /** @var \Enlight_Controller_Action $controller */
+        /** @var Enlight_Controller_Action $controller */
         $controller = null;
 
-        /** @var \Enlight_View $view */
+        /** @var Enlight_View $view */
         $view = null;
 
         if (method_exists($args, 'getSubject')) {
@@ -87,10 +93,10 @@ class FrontendViewSubscriber implements SubscriberInterface
         /** @var \Enlight_Components_Session_Namespace $session */
         $session = Shopware()->Session();
 
-        /** @var \Enlight_Controller_Action $controller */
+        /** @var Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
 
-        /** @var \Enlight_View $view */
+        /** @var Enlight_View $view */
         $view = null;
 
         if (!empty($controller))
