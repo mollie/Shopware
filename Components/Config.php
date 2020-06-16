@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components;
 
+use Exception;
 use MollieShopware\Components\Services\ShopService;
 use Shopware\Components\Plugin\ConfigReader;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -12,16 +13,16 @@ class Config
     const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
 
     /** @var ConfigReader */
-    protected $configReader;
+    private $configReader;
 
     /** @var int */
-    protected $shopId = 1;
+    private $shopId = null;
 
     /** @var array */
-    protected $data = null;
+    private $data = null;
 
     /** @var ShopService */
-    protected $shopService;
+    private $shopService;
 
     public function __construct(
         ConfigReader $configReader,
@@ -43,11 +44,24 @@ class Config
     public function get($key = null, $default = null)
     {
         if (empty($this->data)) {
-            try {
-                $shop = $this->shopService->shopById($this->shopId);
+            $shop = null;
+
+            // if a shop id is given, get the shop object for the given id
+            if ($this->shopId !== null) {
+                try {
+                    $shop = $this->shopService->shopById($this->shopId);
+                } catch (ServiceNotFoundException $ex) {
+                    $shop = null;
+                }
             }
-            catch(ServiceNotFoundException $ex) {
-                $shop = null;
+
+            // if no shop was given, or the given shop was not found, fallback to the current shop
+            if ($shop === null) {
+                try {
+                    $shop = Shopware()->Shop();
+                } catch (Exception $e) {
+                    //
+                }
             }
 
             // get config for shop or for main if shopid is null
@@ -71,7 +85,7 @@ class Config
     public function setShop($shopId)
     {
         // Set the shop ID
-        $this->shopId = (int) $shopId;
+        $this->shopId = $shopId;
 
         // Reset the data
         $this->data = null;

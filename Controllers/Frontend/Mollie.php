@@ -1413,22 +1413,29 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @param int $shopId
      *
      * @return \Mollie\Api\MollieApiClient
+     * @throws Exception
      */
-    private function getMollieApi($shopId = 1)
+    private function getMollieApi($shopId = null)
     {
+        /** @var MollieApiClient $apiClient */
+        $apiClient = null;
+
         /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
         $apiFactory = Shopware()->Container()->get('mollie_shopware.api_factory');
 
         if ($apiFactory !== null) {
-            $apiFactory->setApiKeyForSubShop($shopId);
-
             try {
-                return $apiFactory->create();
-            } catch (Exception $e) {
-                //
+                $apiClient = $apiFactory->create($shopId);
+            } catch (ApiException $e) {
+                Logger::log(
+                    'error',
+                    'Could not create an API client.',
+                    $e,
+                    true
+                );
             }
         }
 
-        return null;
+        return $apiClient;
     }
 }

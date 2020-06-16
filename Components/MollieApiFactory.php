@@ -4,6 +4,7 @@ namespace MollieShopware\Components;
 
 require_once __DIR__ . '/../Client/vendor/autoload.php';
 
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 
 class MollieApiFactory
@@ -27,18 +28,19 @@ class MollieApiFactory
     /**
      * Create the API client
      *
+     * @param null $shopId
+     *
      * @return MollieApiClient
      *
-     * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
      */
-    public function create()
+    public function create($shopId = null)
     {
         $this->requireDependencies();
 
         if (empty($this->apiClient)) {
             $this->apiClient = new MollieApiClient();
-            $this->apiClient->setApiKey($this->config->apikey());
 
             try {
                 // add platform name and version
@@ -49,7 +51,7 @@ class MollieApiFactory
 
                 // add plugin name and version
                 $this->apiClient->addVersionString(
-                    'MollieShopware/1.5.13'
+                    'MollieShopware/1.5.14'
                 );
             }
             catch (\Exception $ex) {
@@ -57,23 +59,13 @@ class MollieApiFactory
             }
         }
 
-        return $this->apiClient;
-    }
-
-    /**
-     * Sets the api key for the sub shop.
-     *
-     * @param int $shopId
-     */
-    public function setApiKeyForSubShop($shopId = 1)
-    {
+        // set the configuration for the shop
         $this->config->setShop($shopId);
 
-        try {
-            $this->apiClient = $this->create();
-        } catch (\Exception $e) {
-            //
-        }
+        // set the api key based on the configuration
+        $this->apiClient->setApiKey($this->config->apiKey());
+
+        return $this->apiClient;
     }
 
     public function requireDependencies()
