@@ -46,7 +46,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (empty($order))
                 $this->returnError('Order not found');
 
-            $mollieId = $this->orderService->getMollieOrderId($order);
+            $mollieId = $this->orderService->getMollieOrderId($order->getId());
 
             if (empty($mollieId))
                 $this->returnError('Order is paid as a single payment (not an order) at Mollie');
