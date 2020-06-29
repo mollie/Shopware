@@ -6,9 +6,14 @@ use Enlight\Event\SubscriberInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Logger;
+use MollieShopware\Components\Services\OrderService;
+use Shopware\Models\Order\Order;
 
 class OrderBackendSubscriber implements SubscriberInterface
 {
+    /** @var OrderService */
+    private $orderService;
+
     public static function getSubscribedEvents()
     {
         return [
@@ -16,6 +21,11 @@ class OrderBackendSubscriber implements SubscriberInterface
             'Shopware_Controllers_Api_Orders::putAction::after' => 'onOrderApiPut',
             'Shopware_Modules_Order_SendMail_Send' => 'onSendMail'
         ];
+    }
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
     }
 
     /**
@@ -103,10 +113,25 @@ class OrderBackendSubscriber implements SubscriberInterface
             return true;
         }
 
+        /** @var Order $order */
+        $order = null;
+
+        /** @var int|string $orderId */
         $orderId = $request->getParam('id');
+
+        /** @var bool $numberAsId */
+        $numberAsId = (bool) $request->getParam('useNumberAsId', 0);
 
         if (empty($orderId)) {
             return true;
+        }
+
+        if ($numberAsId === true) {
+            $order = $this->orderService->getOrderByNumber($orderId);
+        }
+
+        if ($order !== null) {
+            $orderId = $order->getId();
         }
 
         return $this->shipOrderToMollie($orderId);
@@ -114,17 +139,13 @@ class OrderBackendSubscriber implements SubscriberInterface
 
     private function shipOrderToMollie($orderId)
     {
+        /** @var \Shopware\Models\Order\Order $order */
         $order = null;
 
         try {
-            /** @var \MollieShopware\Components\Services\OrderService $orderService */
-            $orderService = Shopware()->Container()
-                ->get('mollie_shopware.order_service');
-
-            /** @var \Shopware\Models\Order\Order $order */
-            $order = $orderService->getOrderById($orderId);
+            $order = $this->orderService->getOrderById($orderId);
         } catch (\Exception $e) {
-            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
+            //
         }
 
         if ($order === null) {
@@ -134,7 +155,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         $mollieId = null;
 
         try {
-            $mollieId = $orderService->getMollieOrderId($order);
+            $mollieId = $this->orderService->getMollieOrderId($order->getId());
         } catch (\Exception $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }

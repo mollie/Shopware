@@ -624,6 +624,7 @@ class PaymentService
      */
     public function updateOrderStatus(\Shopware\Models\Order\Order $order, $transactionId)
     {
+        $orderId = null;
         $paymentId = null;
 
         /** @var TransactionRepository $transactionRepo */
@@ -635,7 +636,12 @@ class PaymentService
         $transaction = $transactionRepo->find($transactionId);
 
         if ($transaction !== null) {
+            $orderId = $transaction->getMollieId();
             $paymentId = $transaction->getMolliePaymentId();
+        }
+
+        if ($orderId !== null) {
+            $this->checkOrderStatus($order);
         }
 
         return $this->checkPaymentStatus($order, $paymentId);

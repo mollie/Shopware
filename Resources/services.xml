@@ -93,6 +93,7 @@
         </service>
 
         <service id="mollie_shopware.subscriber.order_backend" class="MollieShopware\Subscriber\OrderBackendSubscriber">
+            <argument type="service" id="mollie_shopware.order_service" />
             <tag name="shopware.event_subscriber" />
         </service>
 

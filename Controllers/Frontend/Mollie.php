@@ -264,16 +264,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $paymentService = $this->container
             ->get('mollie_shopware.payment_service');
 
-        try {
-            $order = $this->getOrder();
-        }
-        catch(\Exception $e) {
-            Notifier::notifyException(
-                $e->getMessage(),
-                $e
-            );
-        }
-
         if (
             $transactionNumber !== ''
             && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
@@ -310,7 +300,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     );
                 }
             } else {
-                Notifier::notifyException(
+                Notifier::notifyOk(
                     'Order not found'
                 );
             }
