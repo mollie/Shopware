@@ -118,8 +118,23 @@ class BasketService
                 );
 
                 // set payment status
-                if ($this->config->cancelFailedOrders())
+                if ($this->config->cancelFailedOrders()) {
+                    /** @var \MollieShopware\Components\Services\OrderHistoryService $historyService */
+                    $historyService = Shopware()->Container()->get('mollie_shopware.order_history_service');
+
+                    // add item to the history
+                    if ($historyService !== null) {
+                        $historyService->addOrderHistory(
+                            $order,
+                            $order->getOrderStatus()->getId(),
+                            $order->getOrderStatus()->getId(),
+                            $statusCanceled->getId(),
+                            $order->getPaymentStatus()->getId()
+                        );
+                    }
+
                     $order->setPaymentStatus($statusCanceled);
+                }
 
                 // save order
                 $this->modelManager->persist($order);

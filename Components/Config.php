@@ -242,4 +242,18 @@ class Config
     {
         return (bool) $this->get('enable_credit_card_component_styling', true);
     }
+
+    /**
+     * @return int|null
+     */
+    public function mollieShopwareUserId()
+    {
+        $userId = $this->get('mollie_shopware_user_id', null);
+
+        if ((string) $userId === '') {
+            return null;
+        }
+
+        return (int) $userId;
+    }
 }
