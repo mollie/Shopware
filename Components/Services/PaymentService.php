@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Models\Transaction;
@@ -11,6 +12,18 @@ use Shopware\Models\Order\Status;
 
 class PaymentService
 {
+
+    /**
+     * yes this is a small hack :)
+     * credit cards without a 3d secure (isnt allowed except on test systems)
+     * do not have a checkout URL. in that case the
+     * payment is immediately PAID and thus we "just" redirect to the finish page.
+     * We need this constants, because the response for the controller is a
+     * string and i dont want to touch anything else.
+     */
+    const CHECKOUT_URL_CC_NON3D_SECURE = 'OK_NON_3dSecure';
+    
+    
     /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
     protected $apiFactory;
 
@@ -210,6 +223,21 @@ class PaymentService
             //
         }
 
+        # if we have no checkout url
+        # but our payment is valid, "paid" and done with a payment method "creditcard"
+        # then we have the case that its a "non 3d secure" card, and thus
+        # its ok that our checkout url is empty. We just "finish" the order in the controller action.
+        if (empty($checkoutUrl)) {
+
+            if ($molliePayment instanceof Payment &&
+                $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID &&
+                $molliePayment->method === PaymentMethod::CREDITCARD) {
+                # assign our constant which helps us
+                # to finish the order in the controller action
+                $checkoutUrl = self::CHECKOUT_URL_CC_NON3D_SECURE;
+            } 
+        }
+        
         return $checkoutUrl;
     }
 
