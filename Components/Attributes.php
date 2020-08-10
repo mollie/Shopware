@@ -70,11 +70,7 @@ class Attributes
      */
     public function remove($columnSpecs)
     {
-        foreach ($columnSpecs as $spec) {
-
-            $table = $spec[0];
-            $columnSpec = $spec[1];
-
+        foreach ($columnSpecs as $table => $columnSpec) {
             if ($this->columnExists($table, $columnSpec)) {
                 call_user_func_array([ $this->crudService, 'delete' ], $columnSpec);
             }

@@ -191,6 +191,8 @@ class BasketService
 
                 // build the order line array
                 $orderLine = [
+                    'basket_item_id' => $basketItem->getId(),
+                    'article_id' => $basketItem->getArticleId(),
                     'name' => $basketItem->getArticleName(),
                     'type' => $this->getOrderType($basketItem, $unitPrice),
                     'quantity' => $basketItem->getQuantity(),
@@ -200,6 +202,17 @@ class BasketService
                     'vat_rate' => $vatAmount == 0 ? 0 : $basketItem->getTaxRate(),
                     'vat_amount' => $vatAmount,
                 ];
+
+                if (
+                    $basketItem !== null
+                    && $basketItem->getAttribute() !== null
+                    && method_exists($basketItem->getAttribute(), 'setBasketItemId')
+                ) {
+                    $basketItem->getAttribute()->setBasketItemId($basketItem->getId());
+
+                    $this->modelManager->persist($basketItem);
+                    $this->modelManager->flush($basketItem);
+                }
 
                 // add the order line to items
                 $items[] = $orderLine;

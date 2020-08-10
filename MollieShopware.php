@@ -33,6 +33,7 @@ class MollieShopware extends Plugin
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
             'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+            'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
             'Enlight_Controller_Front_RouteStartup' => [ 'fixLanguageShopPush', -10 ],
         ];
     }
@@ -123,6 +124,8 @@ class MollieShopware extends Plugin
         if ($request->getActionName() == 'load') {
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
+            $view->extendsTemplate('backend/mollie_extend_order_detail/view/list/position.js');
+            $view->extendsTemplate('backend/mollie_extend_order_detail/controller/list.js');
         }
     }
 
@@ -301,6 +304,41 @@ class MollieShopware extends Plugin
      */
     protected function updateAttributes()
     {
+        try {
+            $this->makeAttributes()->create([['s_order_basket_attributes', 'basket_item_id', 'int', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->create([['s_order_details_attributes', 'basket_item_id', 'int', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_transaction_id', 'int', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_order_line_id', 'int', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
+        try {
+            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_return', 'int', []]]);
+        }
+        catch (Exception $ex) {
+            //
+        }
+
         try {
             $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_ideal_issuer', 'string', []]]);
         }

@@ -110,6 +110,13 @@ class OrderLine extends \Mollie\Api\Resources\BaseResource
      */
     public $productUrl;
     /**
+     * During creation of the order you can set custom metadata on order lines that is stored with
+     * the order, and given back whenever you retrieve that order line.
+     *
+     * @var \stdClass|mixed|null
+     */
+    public $metadata;
+    /**
      * The order line's date and time of creation, in ISO 8601 format.
      *
      * @example 2018-08-02T09:29:56+00:00
