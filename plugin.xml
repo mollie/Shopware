@@ -8,6 +8,7 @@
 
     <version>1.5.17</version>
     <copyright>(c) Mollie B.V.</copyright>
+    <license>MIT</license>
     <author>Kiener E-commerce</author>
     <link>https://www.kiener.nl</link>
 
@@ -16,4 +17,13 @@
     <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.17)</description>
 
     <compatibility minVersion="5.3.0"/>
+
+    <changelog version="1.5.17">
+        <changes lang="de">Added partial refunds.</changes>
+        <changes lang="en">Fixed issues with non-3d-secure credit cards using Creditcard Components.</changes>
+    </changelog>
+
+    <changelog version="1.5.16">
+        <changes lang="de">Added a feature where Mollie's status updates are added to the status history of an order.</changes>
+    </changelog>
 </plugin>
