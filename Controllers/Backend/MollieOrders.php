@@ -290,8 +290,15 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             'lines' => $mollieShipmentLines
         ]);
 
-        if (!empty($refund))
+        if (!empty($refund)) {
             $this->processRefund($order);
+
+            if ($order->getDetails()->isEmpty() === false) {
+                foreach ($order->getDetails() as $detail) {
+                    $this->updateRefundedItemsOnOrderDetail($detail, $detail->getQuantity());
+                }
+            }
+        }
 
         return $refund;
     }
@@ -331,24 +338,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
         if (!empty($refund)) {
             $this->processRefund($order);
-
-            if (
-                $detail->getAttribute() !== null
-                && method_exists($detail->getAttribute(), 'getMollieReturn')
-                && method_exists($detail->getAttribute(), 'setMollieReturn')
-            ) {
-                $mollieReturn = $detail->getAttribute()->getMollieReturn();
-                $mollieReturn += $quantity;
-
-                $detail->getAttribute()->setMollieReturn($mollieReturn);
-
-                try {
-                    $this->modelManager->persist($detail->getAttribute());
-                    $this->modelManager->flush($detail->getAttribute());
-                } catch (Exception $e) {
-                    //
-                }
-            }
+            $this->updateRefundedItemsOnOrderDetail($detail, $quantity);
         }
 
         return $refund;
@@ -434,6 +424,27 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
 
         return true;
+    }
+
+    private function updateRefundedItemsOnOrderDetail($detail, $quantity)
+    {
+        if (
+            $detail->getAttribute() !== null
+            && method_exists($detail->getAttribute(), 'getMollieReturn')
+            && method_exists($detail->getAttribute(), 'setMollieReturn')
+        ) {
+            $mollieReturn = $detail->getAttribute()->getMollieReturn();
+            $mollieReturn += $quantity;
+
+            $detail->getAttribute()->setMollieReturn($mollieReturn);
+
+            try {
+                $this->modelManager->persist($detail->getAttribute());
+                $this->modelManager->flush($detail->getAttribute());
+            } catch (Exception $e) {
+                //
+            }
+        }
     }
 
     /**

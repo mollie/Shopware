@@ -8,7 +8,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         columns.push(me.createRefundColumn());
         columns.push({
             xtype: 'gridcolumn',
-            header: 'Mollie refund amount',
+            header: 'Mollie refunded items',
             renderer: function(value, metaData, record) {
                 const returned = record.raw.attribute.mollieReturn;
                 return (returned) ? returned : ' ' ;
@@ -56,37 +56,33 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
                     quantityRemaining -= record.raw.attribute.mollieReturn;
                 }
 
-                if (quantityRemaining > 1) {
-                    const messageBox = Ext.MessageBox;
-                    const titel = 'Quantity';
-                    const message = 'How many items do you want to return ?';
-                    messageBox.prompt(titel, message, function(choice, amount) {
-                        if (choice === 'ok') {
-                            const chosenQuantity = parseInt(amount);
-                            if (chosenQuantity > 0 && chosenQuantity <= quantityRemaining) {
-                                me.returnItems(chosenQuantity, record, store);
-                            } else {
-                                Shopware.Notification.createGrowlMessage(
-                                    'Error',
-                                    'Please enter a valid quantity',
-                                    ''
-                                );
-                                return false;
-                            }
+                const messageBox = Ext.MessageBox;
+                const titel = 'Quantity';
+                const message = 'How many items do you want to return ?';
+                messageBox.prompt(titel, message, function(choice, amount) {
+                    if (choice === 'ok') {
+                        const chosenQuantity = parseInt(amount);
+                        if (chosenQuantity > 0 && chosenQuantity <= quantityRemaining) {
+                            me.returnItems(chosenQuantity, record, store);
+                        } else {
+                            Shopware.Notification.createGrowlMessage(
+                                'Error',
+                                'Please enter a valid quantity',
+                                ''
+                            );
+                            return false;
                         }
-                    });
+                    }
+                });
 
-                    const inputDiv = messageBox.textField.bodyEl.dom;
-                    const input = inputDiv.querySelector("input");
+                const inputDiv = messageBox.textField.bodyEl.dom;
+                const input = inputDiv.querySelector("input");
 
-                    input.type = 'number';
-                    input.min = 1;
-                    input.max = quantityRemaining;
-                    input.value = quantityRemaining;
-                    input.step = 1;
-                } else {
-                    me.returnItems(1, record, store);
-                }
+                input.type = 'number';
+                input.min = 1;
+                input.max = quantityRemaining;
+                input.value = quantityRemaining;
+                input.step = 1;
             },
 
             getClass: function(value, metadata, record) {
