@@ -53,6 +53,39 @@ class OrderService
     }
 
     /**
+     * Get an order detail by it's id
+     *
+     * @param int $orderDetailId
+     *
+     * @return \Shopware\Models\Order\Detail $detail
+     *
+     * @throws \Exception
+     */
+    public function getOrderDetailById($orderDetailId)
+    {
+        $detail = null;
+
+        try {
+            /** @var \Shopware\Models\Order\Repository $orderRepo */
+            $orderRepo = $this->modelManager->getRepository(
+                \Shopware\Models\Order\Detail::class
+            );
+
+            /** @var \Shopware\Models\Order\Detail $detail */
+            $detail = $orderRepo->find($orderDetailId);
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
+            );
+        }
+
+        return $detail;
+    }
+
+    /**
      * Get an order by it's number
      *
      * @param string $orderNumber
@@ -216,6 +249,7 @@ class OrderService
                     // build the order line array
                     $orderLine = [
                         'name' => $orderDetail->getArticleName(),
+                        'order_line_id' => $orderDetail->getId(),
                         'type' => 'physical',
                         'quantity' => $orderDetail->getQuantity(),
                         'unit_price' => $unitPrice,

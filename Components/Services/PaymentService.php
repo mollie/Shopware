@@ -12,7 +12,6 @@ use Shopware\Models\Order\Status;
 
 class PaymentService
 {
-
     /**
      * yes this is a small hack :)
      * credit cards without a 3d secure (isnt allowed except on test systems)
@@ -22,8 +21,7 @@ class PaymentService
      * string and i dont want to touch anything else.
      */
     const CHECKOUT_URL_CC_NON3D_SECURE = 'OK_NON_3dSecure';
-    
-    
+
     /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
     protected $apiFactory;
 
@@ -235,9 +233,9 @@ class PaymentService
                 # assign our constant which helps us
                 # to finish the order in the controller action
                 $checkoutUrl = self::CHECKOUT_URL_CC_NON3D_SECURE;
-            } 
+            }
         }
-        
+
         return $checkoutUrl;
     }
 
@@ -525,6 +523,7 @@ class PaymentService
                 'sku' => null,
                 'imageUrl' => null,
                 'productUrl' => null,
+                'metadata' => json_encode(['transaction_item_id' => $item->getId()]),
             ];
         }
 

@@ -35,6 +35,20 @@ class TransactionItem
     private $transaction;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="article_id", type="integer", nullable=true)
+     */
+    private $articleId;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="basket_item_id", type="integer", nullable=true)
+     */
+    private $basketItemId;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="name", type="string", nullable=true)
@@ -112,6 +126,13 @@ class TransactionItem
     private $productUrl;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="order_line_id", type="string", nullable=true)
+     */
+    private $orderLineId;
+
+    /**
      * @return int
      */
     public function getId()
@@ -162,6 +183,42 @@ class TransactionItem
     public function setTransaction(\MollieShopware\Models\Transaction $transaction)
     {
         $this->transaction = $transaction;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getArticleId()
+    {
+        return $this->articleId;
+    }
+
+    /**
+     * @param int $articleId
+     * @return TransactionItem
+     */
+    public function setArticleId($articleId)
+    {
+        $this->articleId = $articleId;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBasketItemId()
+    {
+        return $this->basketItemId;
+    }
+
+    /**
+     * @param int $basketItemId
+     * @return TransactionItem
+     */
+    public function setBasketItemId($basketItemId)
+    {
+        $this->basketItemId = $basketItemId;
         return $this;
     }
 
@@ -363,5 +420,21 @@ class TransactionItem
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getOrderLineId()
+    {
+        return $this->orderLineId;
+    }
 
+    /**
+     * @param string $orderLineId
+     * @return TransactionItem
+     */
+    public function setOrderLineId($orderLineId)
+    {
+        $this->orderLineId = $orderLineId;
+        return $this;
+    }
 }

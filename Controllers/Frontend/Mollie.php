@@ -146,7 +146,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->getPaymentShortName(),
             $transaction
         );
-        
+
         if ($checkoutUrl === PaymentService::CHECKOUT_URL_CC_NON3D_SECURE) {
             # just finish our payment by redirecting
             # to our return, such as if the user would have really
@@ -159,7 +159,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 ]
             );
         }
-        
+
         if (is_array($checkoutUrl)) {
             return $this->redirectBack($checkoutUrl['error'], $checkoutUrl['message']);
         }
@@ -408,7 +408,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $transactionItem = new \MollieShopware\Models\TransactionItem();
 
                 // set transaction item variables
+
                 $transactionItem->setTransaction($transaction);
+                $transactionItem->setArticleId($basketLine['article_id']);
+                $transactionItem->setBasketItemId($basketLine['basket_item_id']);
                 $transactionItem->setName($basketLine['name']);
                 $transactionItem->setType($basketLine['type']);
                 $transactionItem->setQuantity($basketLine['quantity']);
@@ -491,7 +494,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             try {
                 /** @var \MollieShopware\Models\Transaction $transaction */
                 $transaction = $this->getTransactionRepository()->findOneBy([
-                    'transactionId' => $order->getTransactionId()
+                    'transactionId' => $order->getTransactionId(),
                 ]);
             } catch (\Exception $ex) {
                 Logger::log(
@@ -522,7 +525,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
                 if ($mollieApi !== null) {
                     $mollieOrder = $mollieApi->orders->get($transaction->getMollieId(), [
-                        'embed' => 'payments'
+                        'embed' => 'payments',
                     ]);
 
                     if (
@@ -531,6 +534,56 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                         && $mollieOrder->payments()->count()
                     ) {
                         $molliePayment = $mollieOrder->payments()[0];
+
+                        if ($mollieOrder->lines()->count) {
+                            /** @var \Mollie\Api\Resources\OrderLine $orderLine */
+                            foreach ($mollieOrder->lines() as $orderLine) {
+                                $metadata = json_decode($orderLine->metadata, true);
+
+                                if (is_array($metadata) && isset($metadata['transaction_item_id'])) {
+                                    /** @var \MollieShopware\Models\TransactionItem $transactionItem */
+                                    foreach ($transaction->getItems() as $transactionItem) {
+                                        if ($transactionItem->getId() === (int) $metadata['transaction_item_id']) {
+                                            $transactionItem->setOrderLineId($orderLine->id);
+
+                                            try {
+                                                $this->getModelManager()->persist($transactionItem);
+                                                $this->getModelManager()->flush($transactionItem);
+                                            } catch (Exception $e) {
+                                                //
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($order->getDetails()->isEmpty() === false) {
+                            /** @var \Shopware\Models\Order\Detail $detail */
+                            foreach ($order->getDetails() as $detail) {
+                                if ($transaction->getItems()->isEmpty() === false) {
+                                    foreach ($transaction->getItems() as $transactionItem) {
+                                        if (
+                                            $detail->getAttribute() !== null
+                                            && method_exists($detail->getAttribute(), 'getBasketItemId')
+                                            && method_exists($detail->getAttribute(), 'setMollieTransactionId')
+                                            && method_exists($detail->getAttribute(), 'setMollieOrderLineId')
+                                            && (int)$detail->getAttribute()->getBasketItemId() === $transactionItem->getBasketItemId()
+                                        ) {
+                                            $detail->getAttribute()->setMollieTransactionId($transaction->getMollieId());
+                                            $detail->getAttribute()->setMollieOrderLineId($transactionItem->getOrderLineId());
+
+                                            try {
+                                                $this->getModelManager()->persist($detail->getAttribute());
+                                                $this->getModelManager()->flush($detail->getAttribute());
+                                            } catch (Exception $e) {
+                                                //
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -794,7 +847,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             return $this->sendResponse([
                 'data' => $idealIssuers,
-                'success' => true
+                'success' => true,
             ]);
         }
         catch (\Exception $ex) {
@@ -877,7 +930,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             'hu_HU',
             'pl_PL',
             'lv_LV',
-            'lt_LT'
+            'lt_LT',
         ];
 
         // get shop locale
@@ -1324,7 +1377,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 try {
                     /** @var \Mollie\Api\Resources\Order $mollieOrder */
                     $mollieOrder = $mollieApi->orders->get($transaction->getMollieId(), [
-                        'embed' => 'payments'
+                        'embed' => 'payments',
                     ]);
                 } catch (\Exception $e) {
                     //
