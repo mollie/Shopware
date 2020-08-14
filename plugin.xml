@@ -18,17 +18,32 @@
     <compatibility minVersion="5.3.0"/>
 
     <changelog version="1.5.18">
-        <changes lang="de">Fixed issues with not loading the order positions tab.</changes>
-        <changes lang="de">Fixed issues with not loading the order positions tab.</changes>
+        <changes lang="de">
+            - Fixed issues with not loading the order positions tab.
+        </changes>
+        <changes lang="en">
+            - Fixed issues with not loading the order positions tab.
+        </changes>
     </changelog>
 
     <changelog version="1.5.17">
-        <changes lang="de">Added partial refunds.</changes>
-        <changes lang="de">Fixed issues with non-3d-secure credit cards using Creditcard Components.</changes>
+        <changes lang="de">
+            - Added partial refunds.
+            - Fixed issues with non-3d-secure credit cards using Creditcard Components.
+        </changes>
+        <changes lang="en">
+            - Added partial refunds.
+            - Fixed issues with non-3d-secure credit cards using Creditcard Components.
+        </changes>
     </changelog>
 
     <changelog version="1.5.16">
-        <changes lang="de">Added a feature where Mollie's status updates are added to the status history of an order.</changes>
+        <changes lang="de">
+            - Added a feature where Mollie's status updates are added to the status history of an order.
+        </changes>
+        <changes lang="en">
+            - Added a feature where Mollie's status updates are added to the status history of an order.
+        </changes>
     </changelog>
 
 </plugin>
