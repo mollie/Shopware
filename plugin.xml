@@ -18,6 +18,7 @@
     <compatibility minVersion="5.3.0"/>
 
     <changelog version="1.5.18">
+        <changes lang="de">Fixed issues with not loading the order positions tab.</changes>
         <changes lang="en">Fixed issues with not loading the order positions tab.</changes>
     </changelog>
 
