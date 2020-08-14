@@ -6,17 +6,20 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.5.17</version>
+    <version>1.5.18</version>
     <copyright>(c) Mollie B.V.</copyright>
-    <license>MIT</license>
     <author>Kiener E-commerce</author>
     <link>https://www.kiener.nl</link>
 
-    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.5.17)</description>
-    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.5.17)</description>
-    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.17)</description>
+    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.5.18)</description>
+    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.5.18)</description>
+    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.18)</description>
 
     <compatibility minVersion="5.3.0"/>
+
+    <changelog version="1.5.18">
+        <changes lang="en">Fixed issues with not loading the order positions tab.</changes>
+    </changelog>
 
     <changelog version="1.5.17">
         <changes lang="de">Added partial refunds.</changes>
@@ -26,4 +29,5 @@
     <changelog version="1.5.16">
         <changes lang="de">Added a feature where Mollie's status updates are added to the status history of an order.</changes>
     </changelog>
+
 </plugin>

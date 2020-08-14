@@ -217,6 +217,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             && typeof record.raw.attribute !== "undefined"
             && typeof record.raw.attribute.mollieReturn !== "undefined"
             && typeof record.raw.attribute.mollieTransactionId !== "undefined"
+            && record.raw.attribute.mollieTransactionId !== null
             && record.raw.attribute.mollieTransactionId.toString() !== ''
             && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
         ) {
@@ -243,6 +244,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             && typeof record.raw.attribute !== "undefined"
             && typeof record.raw.attribute.mollieReturn !== "undefined"
             && typeof record.raw.attribute.mollieTransactionId !== "undefined"
+            && record.raw.attribute.mollieTransactionId !== null
             && record.raw.attribute.mollieTransactionId.toString() !== ''
             && record.raw.attribute.mollieTransactionId.toString().substr(0, 3) === 'tr_'
             && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
@@ -270,6 +272,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             && typeof record.raw.attribute !== "undefined"
             && typeof record.raw.attribute.mollieReturn !== "undefined"
             && typeof record.raw.attribute.mollieTransactionId !== "undefined"
+            && record.raw.attribute.mollieTransactionId !== null
             && record.raw.attribute.mollieTransactionId.toString() !== ''
             && record.raw.attribute.mollieTransactionId.toString().substr(0, 4) === 'ord_'
             && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
