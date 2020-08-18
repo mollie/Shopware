@@ -2,29 +2,34 @@
 // {$smarty.block.parent}
 Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     override: 'Shopware.apps.Order.view.detail.Position',
-    getColumns: function() {
-        var me = this;
+    getColumns: function(view) {
+        let me = this;
+        var store = view.getStore(),
+            record = store.getAt(0);
         var columns = me.callParent(arguments);
-        columns.push(me.createRefundColumn());
-        columns.push({
-            xtype: 'gridcolumn',
-            header: 'Mollie refunded items',
-            renderer: function(value, metaData, record) {
-                const returned = record.raw.attribute.mollieReturn;
-                return (returned) ? returned : ' ' ;
-            },
-            sortable: false,
-            dataIndex: 'name'
-        });
+        const refundable = (me.isMollieOrder(record) !== false);
+        if (refundable) {
+            columns.push(me.createRefundColumn());
+            columns.push({
+                xtype: 'gridcolumn',
+                header: 'Mollie refunded items',
+                renderer: function(value, metaData, record) {
+                    const attribute = record.raw.attribute;
+                    const returned = (attribute) ? (attribute.mollieReturn) ? attribute.mollieReturn : ' ' : ' ';
+                    return (returned) ? returned : ' ' ;
+                },
+                sortable: false,
+                dataIndex: 'name'
+            });
+        }
         return columns;
     },
-
     createRefundColumn: function() {
         var me = this;
         return Ext.create('Ext.grid.column.Action', {
             width: 80,
             items: [
-                 me.createRefundOrderColumn(),
+                me.createRefundOrderColumn(),
             ],
             header: (me.snippets.columns) ? me.snippets.columns.mollie_actions : 'Mollie actions',
         });
@@ -255,7 +260,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         return false;
     },
 
-    isRefundableOrder: function (record) {
+    isMollieOrder: function(record) {
         if (
             typeof this.record.data !== "undefined"
             && typeof this.record.data.cleared !== "undefined"
@@ -275,11 +280,20 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             && record.raw.attribute.mollieTransactionId !== null
             && record.raw.attribute.mollieTransactionId.toString() !== ''
             && record.raw.attribute.mollieTransactionId.toString().substr(0, 4) === 'ord_'
+        ) {
+            return record;
+        }
+        return false;
+    },
+
+    isRefundableOrder: function (record) {
+        let me = this;
+        if (
+            me.isMollieOrder(record) !== false
             && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
         ) {
             return true;
         }
-
         return false;
     },
 
