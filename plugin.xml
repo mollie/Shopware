@@ -6,17 +6,26 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.5.19</version>
+    <version>1.5.20</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Kiener E-commerce</author>
     <link>https://www.kiener.nl</link>
 
-    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.5.19)</description>
-    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.5.19)</description>
-    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.19)</description>
+    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.5.20)</description>
+    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.5.20)</description>
+    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.20)</description>
 
     <compatibility minVersion="5.3.0"/>
+
+    <changelog version="1.5.20">
+        <changes lang="de">
+            - Fixed plugin conflict with the order positions tab.
+        </changes>
+        <changes lang="en">
+            - Fixed plugin conflict with the order positions tab.
+        </changes>
+    </changelog>
 
     <changelog version="1.5.19">
         <changes lang="de">
