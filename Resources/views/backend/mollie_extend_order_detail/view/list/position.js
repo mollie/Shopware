@@ -4,19 +4,25 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     override: 'Shopware.apps.Order.view.detail.Position',
     getColumns: function(view) {
         let me = this;
-        var store = view.getStore(),
-            record = store.getAt(0);
+        var store = view.getStore();
+        var record = (!!store.getAt(0)) ? store.getAt(0) : store.getAt(1);
         var columns = me.callParent(arguments);
-        const refundable = (me.isMollieOrder(record) !== false);
-        if (refundable) {
+        const refundable = (me.isMollieOrder(record));
+        if (!!refundable) {
             columns.push(me.createRefundColumn());
             columns.push({
                 xtype: 'gridcolumn',
                 header: 'Mollie refunded items',
                 renderer: function(value, metaData, record) {
-                    const attribute = record.raw.attribute;
-                    const returned = (attribute) ? (attribute.mollieReturn) ? attribute.mollieReturn : ' ' : ' ';
-                    return (returned) ? returned : ' ' ;
+                    if (
+                        !!record
+                        && !!record.raw
+                        && !!record.raw.attribute
+                    ) {
+                        return (!!record.raw.attribute.mollieReturn) ? record.raw.attribute.mollieReturn : ' ';
+                    } else {
+                        return ' ';
+                    }
                 },
                 sortable: false,
                 dataIndex: 'name'
@@ -262,8 +268,9 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
 
     isMollieOrder: function(record) {
         if (
-            typeof this.record.data !== "undefined"
-            && typeof this.record.data.cleared !== "undefined"
+            !!record
+            && !!this.record
+            && typeof this.record.data !== "undefined"
             && (
                 this.record.data.cleared === 9
                 || this.record.data.cleared === 10
@@ -271,10 +278,11 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
                 || this.record.data.cleared === 12
                 || this.record.data.cleared === 20
             )
-            && typeof record.data !== "undefined"
+            && !!record.data
             && typeof record.data.quantity !== "undefined"
             && typeof record.raw !== "undefined"
-            && typeof record.raw.attribute !== "undefined"
+            && !!record.raw
+            && !!record.raw.attribute
             && typeof record.raw.attribute.mollieReturn !== "undefined"
             && typeof record.raw.attribute.mollieTransactionId !== "undefined"
             && record.raw.attribute.mollieTransactionId !== null
