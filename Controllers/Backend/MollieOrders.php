@@ -2,6 +2,7 @@
 
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
+use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Status;
 
@@ -33,10 +34,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-
-            /** @var \Mollie\Api\MollieApiClient $apiClient */
-            $this->apiClient = $this->container->get('mollie_shopware.api');
-
+            
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
@@ -50,7 +48,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             if (empty($order))
                 $this->returnError('Order not found');
+            
+            
+            # switch to the config and api key of the shop from the order
+            $shopSwitcher = new MollieShopSwitcher($this->container);
+            $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
+            $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
 
+            
             $mollieId = $this->orderService->getMollieOrderId($order);
 
             if (empty($mollieId))
@@ -106,10 +111,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-
-            /** @var \Mollie\Api\MollieApiClient $apiClient */
-            $this->apiClient = $this->container->get('mollie_shopware.api');
-
+            
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
@@ -121,6 +123,13 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (empty($order))
                 $this->returnError('Order not found');
 
+
+            # switch to the config and api key of the shop from the order
+            $shopSwitcher = new MollieShopSwitcher($this->container);
+            $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
+            $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
+            
+            
             /** @var Order $mollieOrder */
             try {
                 $mollieOrder = $this->apiClient->orders->get(
@@ -169,10 +178,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-
-            /** @var \Mollie\Api\MollieApiClient $apiClient */
-            $this->apiClient = $this->container->get('mollie_shopware.api');
-
+            
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
@@ -189,6 +195,11 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if (empty($order))
                 $this->returnError('Order not found');
 
+            # switch to the config and api key of the shop from the order
+            $shopSwitcher = new MollieShopSwitcher($this->container);
+            $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
+            $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
+            
             /** @var Order $mollieOrder */
             try {
                 $mollieOrder = $this->apiClient->orders->get(
@@ -248,12 +259,11 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderId')
             );
 
-            if (
-                $order !== null
-                && (string) $this->orderService->getMollieOrderId($order) !== ''
-            ) {
+            if ($order !== null && (string) $this->orderService->getMollieOrderId($order) !== '') 
+            {
                 $shippable = true;
             }
+            
         } catch (Exception $e) {
             //
         }
