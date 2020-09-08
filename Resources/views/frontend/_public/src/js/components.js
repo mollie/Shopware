@@ -66,16 +66,25 @@ if (cardToken !== undefined) {
     };
 
     const disableForm = () => {
-        submitButton.disabled = true;
+        let submitButtons = document.querySelectorAll('button[type="submit"]');
+        if (submitButtons.length) {
+            submitButtons.forEach(function(el) {
+                el.disabled = true;
+            });
+        }
     };
 
     const enableForm = () => {
-        submitButton.disabled = false;
+        let submitButtons = document.querySelectorAll('button[type="submit"]');
+        if (submitButtons.length) {
+            submitButtons.forEach(function(el) {
+                el.disabled = false;
+            });
+        }
     };
 
     // Elements
     const form = document.getElementById('shippingPaymentForm');
-    const submitButton = document.querySelector('button[type="submit"]');
 
     // Create inputs
     inputs.forEach((element, index, arr) => {
