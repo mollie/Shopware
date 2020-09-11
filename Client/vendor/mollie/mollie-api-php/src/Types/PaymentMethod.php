@@ -9,6 +9,10 @@ class PaymentMethod
      */
     const APPLEPAY = "applepay";
     /**
+     * @link https://www.mollie.com/en/payments/applepay
+     */
+    const APPLEPAY_DIRECT = "applepaydirect";
+    /**
      * @link https://www.mollie.com/en/payments/bancontact
      */
     const BANCONTACT = "bancontact";

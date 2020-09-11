@@ -5,6 +5,7 @@ namespace MollieShopware\Components\Services;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
+use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieLineItemCleaner;
@@ -14,6 +15,7 @@ use Shopware\Models\Order\Status;
 
 class PaymentService
 {
+
     /**
      * yes this is a small hack :)
      * credit cards without a 3d secure (isnt allowed except on test systems)
@@ -23,6 +25,8 @@ class PaymentService
      * string and i dont want to touch anything else.
      */
     const CHECKOUT_URL_CC_NON3D_SECURE = 'OK_NON_3dSecure';
+
+
 
     /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
     protected $apiFactory;
@@ -355,12 +359,7 @@ class PaymentService
         // Use the order's shop in the in the config service
         $this->config->setShop($order->getShop()->getId());
 
-        // Set the corresponding API key in the client
-        try {
-            $this->apiClient->setApiKey($this->config->apiKey());
-        } catch (\Exception $e) {
-            //
-        }
+        $this->apiClient = $this->apiFactory->create($order->getShop()->getId());
     }
 
     /**
@@ -471,6 +470,7 @@ class PaymentService
             $paymentParameters
         );
 
+
         // create prepared order array
         $molliePrepared = [
             'amount' => $this->getPriceArray(
@@ -519,6 +519,12 @@ class PaymentService
                 $paymentMethod,
                 $molliePrepared
             );
+        }
+
+
+        if ((string) $paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
+            # assign the payment token
+            $molliePrepared['method']  = PaymentMethod::APPLE_PAY;
         }
 
         return $molliePrepared;
@@ -673,6 +679,17 @@ class PaymentService
         /** @var CreditCardService $creditCardService */
         $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
         return $creditCardService->getCardToken();
+    }
+
+    /**
+     * @return string
+     * @throws ApiException
+     */
+    protected function getApplePayPaymentToken()
+    {
+        /** @var ApplePayDirectFactory $applePayFactory */
+        $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+        return $applePayFactory->createHandler()->getPaymentToken();
     }
 
     /**
@@ -1209,6 +1226,11 @@ class PaymentService
                 (string) $this->getCreditCardToken() !== '') {
                 $paymentParameters['cardToken'] = $this->getCreditCardToken();
             }
+        }
+
+        if ((string) $paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
+            # assign the payment token
+            $paymentParameters["applePayPaymentToken"] = $this->getApplePayPaymentToken();
         }
 
         return $paymentParameters;

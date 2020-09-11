@@ -23,4 +23,5 @@ class PaymentMethod
     const KLARNA_SLICE_IT = "klarnasliceit";
     const P24 = "przelewy24";
     const APPLE_PAY = "applepay";
+    const APPLEPAY_DIRECT = "applepaydirect";
 }

@@ -9,8 +9,13 @@ use Exception;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\BaseCollection;
+use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
+use Mollie\Api\Types\PaymentMethod;
+use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
+use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Helpers\LogHelper;
+use Shopware\Components\Api\Resource\PaymentMethods;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\PaymentInstaller;
 use Shopware\Models\Payment\Payment;
@@ -53,8 +58,7 @@ class PaymentMethodService
         MollieApiClient $mollieApiClient,
         PaymentInstaller $paymentInstaller,
         Enlight_Template_Manager $templateManager
-    )
-    {
+    ) {
         $this->modelManager = $modelManager;
         $this->mollieApiClient = $mollieApiClient;
         $this->paymentInstaller = $paymentInstaller;
@@ -88,9 +92,9 @@ class PaymentMethodService
     /**
      * Returns an array of payment methods from the Mollie API.
      *
+     * @return array
      * @todo Get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
      *
-     * @return array
      */
     public function getPaymentMethodsFromMollie()
     {
@@ -99,7 +103,7 @@ class PaymentMethodService
         $position = 0;
 
         /** @var null|MethodCollection $methods */
-        $methods = $this->getActivePaymentMethodsFromMollie();
+        $methods = $this->appendApplePayDirectFeature($this->getActivePaymentMethodsFromMollie());
 
         // Add the template directory to the template manager
         $this->templateManager->addTemplateDir(__DIR__ . '/Resources/views');
@@ -136,18 +140,26 @@ class PaymentMethodService
 
             // Retrieve existing information so it doesn't get overwritten
             if (isset($method[self::PAYMENT_METHOD_NAME], $method[self::PAYMENT_METHOD_ACTION])) {
-                $existingMethod = $this->getPaymentMethod([
-                    self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME],
-                ]);
+                $existingMethod = $this->getPaymentMethod(
+                    [
+                        self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME],
+                    ]
+                );
             }
 
             // Set existing data on method
             if ($existingMethod !== null) {
-                $method[self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION] = (string) $existingMethod->getAdditionalDescription();
+                $method[self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION] = (string)$existingMethod->getAdditionalDescription();
                 $method[self::PAYMENT_METHOD_COUNTRIES] = $existingMethod->getCountries();
-                $method[self::PAYMENT_METHOD_DESCRIPTION] = (string) $existingMethod->getDescription();
+                $method[self::PAYMENT_METHOD_DESCRIPTION] = (string)$existingMethod->getDescription();
                 $method[self::PAYMENT_METHOD_POSITION] = $existingMethod->getPosition();
                 $method[self::PAYMENT_METHOD_SURCHARGE] = $existingMethod->getSurcharge();
+            }
+
+            // new payment methods are all activated
+            // but not apple pay direct, that wouldnt be good in the storefront ;)
+            if ($method[self::PAYMENT_METHOD_NAME] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
+                $method[self::PAYMENT_METHOD_ACTIVE] = 0;
             }
 
             // Install the payment method in Shopware
@@ -186,12 +198,41 @@ class PaymentMethodService
         $methods = null;
 
         try {
-            $methods = $this->mollieApiClient->methods->allActive([
-                'resource' => 'orders',
-                'includeWallets' => 'applepay'
-            ]);
+            $methods = $this->mollieApiClient->methods->allActive(
+                [
+                    'resource' => 'orders',
+                    'includeWallets' => 'applepay',
+                ]
+            );
         } catch (ApiException $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
+        }
+
+        return $methods;
+    }
+
+    /**
+     * Verify if "Apple Pay" payment method exists and
+     * append "Apple Pay Direct" feature
+     *
+     * @param MethodCollection $methods
+     * @return MethodCollection
+     */
+    private function appendApplePayDirectFeature(MethodCollection $methods)
+    {
+        $applePayDirect = static function ($method) {
+            $applePayDirect = clone $method;
+            $applePayDirect->id = PaymentMethod::APPLEPAY_DIRECT;
+            $applePayDirect->description = 'Apple Pay Direct';
+            return $applePayDirect;
+        };
+
+        /** @var Method $method */
+        foreach ($methods as $method) {
+            if ($method->id === PaymentMethod::APPLEPAY) {
+                $methods->append($applePayDirect($method));
+                break;
+            }
         }
 
         return $methods;
@@ -218,7 +259,7 @@ class PaymentMethodService
             self::PAYMENT_METHOD_ACTIVE => 1,
             self::PAYMENT_METHOD_NAME => $paymentMethodName,
             self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION => $additionalDescription,
-            self::PAYMENT_METHOD_DESCRIPTION => (string) $method->description,
+            self::PAYMENT_METHOD_DESCRIPTION => (string)$method->description,
             self::PAYMENT_METHOD_POSITION => $position,
         ];
 
@@ -260,6 +301,6 @@ class PaymentMethodService
             // No need to handle this exception, the additional description is simply left null
         }
 
-        return (string) $additionalDescription;
+        return (string)$additionalDescription;
     }
 }

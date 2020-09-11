@@ -12,12 +12,13 @@ use Shopware\Components\Theme\LessDefinition;
 
 class FrontendViewSubscriber implements SubscriberInterface
 {
+
     public static function getSubscribedEvents()
     {
         return [
             'Enlight_Controller_Action_PreDispatch' => 'addComponentsVariables',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'addViewDirectory',
-            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout'=>'getController',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'getController',
             'Theme_Compiler_Collect_Plugin_Javascript' => 'onCollectJavascript',
             'Theme_Compiler_Collect_Plugin_Less' => 'onCollectLess',
         ];
@@ -99,12 +100,12 @@ class FrontendViewSubscriber implements SubscriberInterface
         /** @var Enlight_View $view */
         $view = null;
 
-        if (!empty($controller))
+        if (!empty($controller)) {
             $view = $controller->view();
+        }
 
         if ($session !== null && $view !== null &&
             ($session->mollieError || $session->mollieStatusError)) {
-
             // assign errors to view
             $view->assign('sMollieError', $session->mollieError);
             $view->assign('sMollieStatusError', $session->mollieStatusError);
@@ -124,9 +125,6 @@ class FrontendViewSubscriber implements SubscriberInterface
     {
         // Create new array collection to add src files
         $collection = new ArrayCollection();
-
-        // Add the javascript files to the collection
-        $collection->add(__DIR__ . '/../Resources/views/frontend/_public/src/js/applepay.js');
 
         return $collection;
     }
@@ -151,4 +149,5 @@ class FrontendViewSubscriber implements SubscriberInterface
 
         return new ArrayCollection([$less]);
     }
+
 }
