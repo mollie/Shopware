@@ -7,6 +7,7 @@ use MollieShopware\Components\Services\ShopService;
 use Shopware\Components\Plugin\ConfigReader;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Repository;
+use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
@@ -96,7 +97,7 @@ class Config
 
         // get default shop
         /** @var Repository $shopRepository */
-        $shopRepository = Shopware()->Models()->getRepository('Shopware\\Models\\Shop\\Shop');
+        $shopRepository = Shopware()->Models()->getRepository(Shop::class);
         $mainShop = $shopRepository->getActiveDefault();
 
         if ($mainShop === null) {

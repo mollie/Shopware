@@ -49,7 +49,7 @@ class MollieShopSwitcher
     public function getMollieApi($shopId)
     {
         /** @var MollieApiFactory $apiFactory */
-        $apiFactory = Shopware()->Container()->get('mollie_shopware.api_factory');
+        $apiFactory = $this->container->get('mollie_shopware.api_factory');
 
         return $apiFactory->create($shopId);
     }
