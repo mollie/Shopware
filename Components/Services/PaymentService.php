@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -57,6 +58,30 @@ class PaymentService
         $this->customEnvironmentVariables = $customEnvironmentVariables;
     }
 
+    /**
+     * This function helps to use a different api client 
+     * for this payment methods service.
+     * One day there should be a refactoring to do this in the constructor.
+     * 
+     * @param MollieApiClient $client
+     */
+    public function switchApiClient(MollieApiClient $client)
+    {
+        $this->apiClient = $client;
+    }
+
+    /**
+     * This function helps to use a different config
+     * for this payment methods service.
+     * One day there should be a refactoring to do this in the constructor.
+     * 
+     * @param \MollieShopware\Components\Config $config
+     */
+    public function switchConfig(\MollieShopware\Components\Config $config)
+    {
+        $this->config = $config;
+    }
+    
     /**
      * Create the transaction in the TransactionRepository.
      *

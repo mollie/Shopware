@@ -5,6 +5,7 @@ namespace MollieShopware\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\LogHelper;
+use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Services\OrderService;
 use Shopware\Models\Order\Order;
@@ -120,7 +121,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         $orderId = $request->getParam('id');
 
         /** @var bool $numberAsId */
-        $numberAsId = (bool) $request->getParam('useNumberAsId', 0);
+        $numberAsId = (bool)$request->getParam('useNumberAsId', 0);
 
         if (empty($orderId)) {
             return true;
@@ -164,13 +165,15 @@ class OrderBackendSubscriber implements SubscriberInterface
             return true;
         }
 
-        /** @var Config $config */
-        $config = Shopware()->Container()->get('mollie_shopware.config');
+        # switch to the config of the shop from the order
+        $shopSwitcher = new MollieShopSwitcher(Shopware()->Container());
+        $subShopConfig = $shopSwitcher->getConfig($order->getShop()->getId());
+
 
         $orderStatusId = \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED;
 
-        if ($config !== null) {
-            $orderStatusId = $config->getKlarnaShipOnStatus();
+        if ($subShopConfig !== null) {
+            $orderStatusId = $subShopConfig->getKlarnaShipOnStatus();
         }
 
         if ($order->getOrderStatus()->getId() !== $orderStatusId) {
@@ -179,10 +182,22 @@ class OrderBackendSubscriber implements SubscriberInterface
 
         try {
             /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-            $paymentService = Shopware()->Container()
-                ->get('mollie_shopware.payment_service');
+            $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
+
+            # we have to do this after the payment 
+            # service...otherwise the reference is overwritten again
+            $subShopApiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
+            # also do this again just to be sure
+            $subShopConfig = $shopSwitcher->getConfig($order->getShop()->getId());
+
+
+            # switch to the api client and config with
+            # data for our sub shop
+            $paymentService->switchConfig($subShopConfig);
+            $paymentService->switchApiClient($subShopApiClient);
 
             $paymentService->sendOrder($mollieId);
+
         } catch (\Exception $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }

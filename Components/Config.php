@@ -5,12 +5,16 @@ namespace MollieShopware\Components;
 use Exception;
 use MollieShopware\Components\Services\ShopService;
 use Shopware\Components\Plugin\ConfigReader;
+use Shopware\Models\Order\Status;
+use Shopware\Models\Shop\Repository;
+use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 class Config
 {
     const TRANSACTION_NUMBER_TYPE_MOLLIE = 'mollie';
     const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
+    const INHERITED_CONFIG_VALUE = 'inherited';
 
     /** @var ConfigReader */
     private $configReader;
@@ -67,7 +71,9 @@ class Config
             // get config for shop or for main if shopid is null
             $parts = explode('\\', __NAMESPACE__);
             $name = array_shift($parts);
-            $this->data = $this->configReader->getByPluginName($name, $shop);
+            $config = $this->configReader->getByPluginName($name, $shop);
+            $config = $this->addInheritedConfig($config, $name);
+            $this->data = $config;
         }
 
         if (!empty($key)) {
@@ -75,6 +81,39 @@ class Config
         }
 
         return $this->data;
+    }
+
+    /**
+     * @param array $config
+     * @param string $name
+     * @return array
+     */
+    private function addInheritedConfig(array $config, $name)
+    {
+        // check if inherited or null fields are in config to get from default shop
+        if (!in_array(self::INHERITED_CONFIG_VALUE, $config) && !in_array(null, $config)) {
+            return $config;
+        }
+
+        // get default shop
+        /** @var Repository $shopRepository */
+        $shopRepository = Shopware()->Models()->getRepository(Shop::class);
+        $mainShop = $shopRepository->getActiveDefault();
+
+        if ($mainShop === null) {
+            return $config;
+        }
+
+        $inheritedConfig = $this->configReader->getByPluginName($name, $mainShop);
+
+        // replace inherited or null fields in config
+        foreach ($config as $key => $value) {
+            if ($value === self::INHERITED_CONFIG_VALUE || $value === null) {
+                $config[$key] = $inheritedConfig[$key];
+            }
+        }
+
+        return $config;
     }
 
     /**
@@ -160,7 +199,7 @@ class Config
      */
     public function getAuthorizedPaymentStatusId()
     {
-        $statusModel = new \Shopware\Models\Order\Status();
+        $statusModel = new Status();
         $paymentStatus = null;
         $configuredStatus = $this->get('payment_authorized_status', 'ordered');
 
@@ -200,7 +239,7 @@ class Config
      */
     public function getKlarnaShipOnStatus()
     {
-        return (int) $this->get('klarna_ship_on_status', \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED);
+        return (int) $this->get('klarna_ship_on_status', Status::ORDER_STATE_COMPLETELY_DELIVERED);
     }
 
     /**

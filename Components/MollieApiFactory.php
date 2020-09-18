@@ -61,10 +61,11 @@ class MollieApiFactory
 
         // set the configuration for the shop
         $this->config->setShop($shopId);
-
+        
+        $key = $this->config->apiKey();
         // set the api key based on the configuration
-        $this->apiClient->setApiKey($this->config->apiKey());
-
+        $this->apiClient->setApiKey($key);
+            
         return $this->apiClient;
     }
 

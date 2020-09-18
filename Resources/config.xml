@@ -17,6 +17,12 @@
             <value>yes</value>
             <store>
                 <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
@@ -38,6 +44,12 @@
             <label lang="nl">Stuur restitutiestatus mail</label>
             <value>yes</value>
             <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
                 <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
@@ -61,6 +73,12 @@
             <value>yes</value>
             <store>
                 <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
@@ -83,6 +101,12 @@
             <value>yes</value>
             <store>
                 <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
@@ -104,6 +128,12 @@
             <label lang="nl">Status voor geautoriseerde betalingen (b.v. Klarna Pay Later)</label>
             <value>ordered</value>
             <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
                 <option>
                     <value>ordered</value>
                     <label lang="de">Die Zahlung wurde angewiesen (not available in Shopware 5.3)</label>
@@ -149,6 +179,12 @@
             <value>mollie</value>
             <store>
                 <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
                     <value>mollie</value>
                     <label lang="de">Mollie</label>
                     <label lang="en">Mollie</label>
@@ -170,6 +206,12 @@
             <label lang="nl">Order statussen vanuit Mollie overnemen</label>
             <value>no</value>
             <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
                 <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
@@ -196,6 +238,12 @@
             <description lang="nl">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
             <store>
                 <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
@@ -217,6 +265,12 @@
             <label lang="nl">Besteltotaal en verzending leegmaken bij geannuleerde bestelling</label>
             <value>no</value>
             <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
                 <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
@@ -242,6 +296,12 @@
             <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
             <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
             <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
                 <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
