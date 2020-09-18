@@ -4,6 +4,7 @@ namespace MollieShopware\Command;
 
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Commands\ShopwareCommand;
@@ -58,7 +59,7 @@ class KlarnaShippingCommand extends ShopwareCommand
         if ($transactionRepository !== null) {
             $transactions = $transactionRepository->findBy([
                 'isShipped' => false,
-                'paymentMethod' => 'mollie_klarna'
+                'paymentMethod' => 'mollie_' . PaymentMethod::KLARNA_PAY_LATER
             ]);
         }
 
@@ -67,13 +68,13 @@ class KlarnaShippingCommand extends ShopwareCommand
             && is_array($transactions)
         ) {
             $output->writeln(count($transactions) . ' orders to update.');
-
+     
             foreach ($transactions as $transaction) {
                 $output->writeln('Updating order ' . $transaction->getOrderNumber());
 
                 /** @var Order $order */
                 $order = null;
-
+             
                 if ($transaction->getOrderId() === null) {
                     continue;
                 }
