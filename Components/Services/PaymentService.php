@@ -6,6 +6,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\Helpers\MollieLineItemCleaner;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Status;
@@ -526,7 +527,15 @@ class PaymentService
                 'metadata' => json_encode(['transaction_item_id' => $item->getId()]),
             ];
         }
-
+        
+        
+        $cleaner = new MollieLineItemCleaner();
+        
+        # sometimes the advanced promotion suite has duplicate discounts in there.
+        # so we just remove these, otherwise we would get the error
+        # "amount of line items does not match provided total sum" of mollie
+        $orderlines = $cleaner->removeDuplicateDiscounts($orderlines);
+        
         return $orderlines;
     }
 
