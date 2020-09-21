@@ -337,25 +337,28 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     public function notifyAction()
     {
-        /** @var \Shopware\Models\Order\Order $order */
-        $order = null;
+        Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
-        /** @var string $transactionNumber */
-        $transactionNumber = $this->Request()->getParam('transactionNumber');
-
-        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-        $paymentService = $this->container
-            ->get('mollie_shopware.payment_service');
-
-        if (
-            $transactionNumber !== ''
-            && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
-        ) {
-            $order = $this->getOrderFromTransaction($transactionNumber, false);
-        }
-
-        // check the payment status for the order and notify the user.
         try {
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = null;
+
+            /** @var string $transactionNumber */
+            $transactionNumber = $this->Request()->getParam('transactionNumber');
+
+            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            $paymentService = $this->container
+                ->get('mollie_shopware.payment_service');
+
+            if (
+                $transactionNumber !== ''
+                && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
+            ) {
+                $order = $this->getOrderFromTransaction($transactionNumber, false);
+            }
+
+            // check the payment status for the order and notify the user.
             $result = null;
 
             if ($order !== null) {
@@ -387,11 +390,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     'Order not found'
                 );
             }
-        } catch (\Exception $e) {
-            Notifier::notifyException(
-                $e->getMessage(),
-                $e
+        } catch (\Throwable $e) {
+
+            # please consider to avoid adding the exception
+            # because a throwable might not be an exception ;)
+            Logger::log('error', 'Mollie Notification: ' . $e->getMessage(), null, false);
+
+            http_response_code(500);
+
+            echo json_encode(
+                array(
+                    'success' => false,
+                    'message' => 'There was a problem. Please see the logs for more.'
+                )
             );
+
+            die();
         }
     }
 
