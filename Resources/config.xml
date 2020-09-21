@@ -2,11 +2,43 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
 
-        <element required="true" type="text" scope="shop">
+        <element required="false" type="text" scope="shop">
             <name>api-key</name>
-            <label lang="de">API-key</label>
-            <label lang="en">API-key</label>
-            <label lang="nl">API-key</label>
+            <label lang="de">Live API-key</label>
+            <label lang="en">Live API-key</label>
+            <label lang="nl">Live API-key</label>
+        </element>
+
+        <element required="false" type="text" scope="shop">
+            <name>test-api-key</name>
+            <label lang="de">Test API-key</label>
+            <label lang="en">Test API-key</label>
+            <label lang="nl">Test API-key</label>
+        </element>
+
+        <element required="true" type="select" scope="shop">
+            <name>test_mode_active</name>
+            <label lang="de">Testmodus</label>
+            <label lang="en">Test mode</label>
+            <label lang="nl">Testmodus</label>
+            <value>no</value>
+            <description lang="de">Zahlungen werden über das Testystem durchgeführt.</description>
+            <description lang="en">Payments are done using the testing system.</description>
+            <description lang="nl">Betalingen worden gedaan met behulp van het testsysteem.</description>
+            <store>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
         </element>
 
         <element type="select" scope="shop">

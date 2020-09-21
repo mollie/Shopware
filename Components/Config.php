@@ -16,22 +16,32 @@ class Config
     const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
     const INHERITED_CONFIG_VALUE = 'inherited';
 
-    /** @var ConfigReader */
+    /**
+     * @var ConfigReader
+     */
     private $configReader;
 
-    /** @var int */
+    /**
+     * @var int
+     */
     private $shopId = null;
 
-    /** @var array */
+    /**
+     * @var array
+     */
     private $data = null;
 
-    /** @var ShopService */
+    /**
+     * @var ShopService
+     */
     private $shopService;
 
-    public function __construct(
-        ConfigReader $configReader,
-        ShopService $shopService
-    )
+
+    /**
+     * @param ConfigReader $configReader
+     * @param ShopService $shopService
+     */
+    public function __construct(ConfigReader $configReader, ShopService $shopService)
     {
         $this->configReader = $configReader;
         $this->shopService = $shopService;
@@ -137,7 +147,50 @@ class Config
      */
     public function apiKey()
     {
-        return $this->get('api-key');
+        /** @var string|null $key */
+        $key = $this->get('api-key');
+
+        if ($key === null) {
+            return "";
+        }
+
+        return $key;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTestApiKey()
+    {
+        /** @var string|null $key */
+        $key = $this->get('test-api-key');
+
+        if ($key === null) {
+            return "";
+        }
+
+        return $key;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTestmodeActive()
+    {
+        /** @var string|null $isActive */
+        $isActive = $this->get('test_mode_active');
+
+        if ($isActive === null) {
+            return false;
+        }
+
+        if (strtolower($isActive) === 'no') {
+            return false;
+        }
+
+        # default is TRUE
+        # just to avoid any problems with plugin updates
+        return true;
     }
 
     /**
@@ -191,7 +244,7 @@ class Config
      */
     public function getTransactionNumberType()
     {
-        return (string) $this->get('transaction_number_type', self::TRANSACTION_NUMBER_TYPE_MOLLIE);
+        return (string)$this->get('transaction_number_type', self::TRANSACTION_NUMBER_TYPE_MOLLIE);
     }
 
     /**
@@ -295,4 +348,5 @@ class Config
 
         return (int) $userId;
     }
+
 }

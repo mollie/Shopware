@@ -1,0 +1,49 @@
+.apple-pay--container--detail {
+    margin-top: 10px;
+    width: 100%;
+    display: inline-block;
+
+    .applepay-button {
+        width: 63%;
+        margin-left: 37%;
+        height: 33px;
+    }
+}
+
+.apple-pay--container--ajax-cart {
+    margin-top: 20px;
+    width: 100%;
+    display: inline-block;
+
+    .applepay-button {
+        width: 100%;
+        height: 31px;
+    }
+}
+
+.apple-pay--container--cart {
+    display: inline-block;
+    width: 100%;
+
+    &.is--top {
+      margin-top: 10px;
+    }
+
+    .applepay-button {
+        width: 100%;
+
+        @media screen and (min-width: @phoneLandscapeViewportWidth) {
+          width: 49%;
+          margin-left: 51%;
+        }
+
+        @media screen and (min-width: @tabletViewportWidth) {
+            width: 25%;
+            margin-left: 75%;
+        }
+    }
+}
+
+.applepay-button {
+    cursor: pointer;
+}

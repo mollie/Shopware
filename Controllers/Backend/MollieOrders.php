@@ -1,10 +1,11 @@
 <?php
 
+use Shopware\Models\Order\Status;
+
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use Shopware\Models\Order\Detail;
-use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {

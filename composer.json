@@ -1,5 +1,11 @@
 {
-    "require": {
-        "mollie/mollie-api-php": "^2.0"
+  "require": {
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MollieShopware\\Components\\": "Components/",
+      "MollieShopware\\Models\\": "Models/",
+      "MollieShopware\\Tests\\": "Tests/"
     }
+  }
 }
