@@ -5,6 +5,8 @@ namespace MollieShopware\Command;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
+use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\Components\Logger;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Commands\ShopwareCommand;
@@ -63,53 +65,77 @@ class KlarnaShippingCommand extends ShopwareCommand
             ]);
         }
 
-        if (
-            $transactions !== null
-            && is_array($transactions)
-        ) {
+        if ($transactions !== null && is_array($transactions)) {
+
             $output->writeln(count($transactions) . ' orders to update.');
-     
+
+            $switcher = new MollieShopSwitcher($this->container);
+
+            
             foreach ($transactions as $transaction) {
-                $output->writeln('Updating order ' . $transaction->getOrderNumber());
-
-                /** @var Order $order */
-                $order = null;
-             
-                if ($transaction->getOrderId() === null) {
-                    continue;
-                }
-
-                /** @var Repository $orderRepository */
-                $orderRepository = $this->modelManager->getRepository(Order::class);
-
-                if ($orderRepository === null) {
-                    continue;
-                }
-
-                /** @var Order $order */
-                $order = $orderRepository->find($transaction->getOrderId());
-
-                if ($order === null) {
-                    continue;
-                }
 
                 // Ship order
                 try {
+
+                    $output->writeln('>> updating order: ' . $transaction->getOrderNumber());
+
+                    /** @var Order $order */
+                    $order = null;
+
+                    if ($transaction->getOrderId() === null) {
+                        continue;
+                    }
+
+                    /** @var Repository $orderRepository */
+                    $orderRepository = $this->modelManager->getRepository(Order::class);
+
+                    if ($orderRepository === null) {
+                        continue;
+                    }
+
+                    /** @var Order $order */
+                    $order = $orderRepository->find($transaction->getOrderId());
+
+                    if ($order === null) {
+                        continue;
+                    }
+
+
+                    $this->config = $switcher->getConfig($order->getShop()->getId());
+                    $this->apiClient = $switcher->getMollieApi($order->getShop()->getId());
+
                     $mollieOrder = $this->apiClient->orders->get($transaction->getMollieId());
 
-                    if (
-                        $mollieOrder !== null
-                        && $order->getOrderStatus()->getId() === $this->config->getKlarnaShipOnStatus()
-                        && !in_array($order->getPaymentStatus()->getId(), [
-                            Status::PAYMENT_STATE_OPEN,
-                            Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
-                        ], true)
-                    ) {
-                        $mollieOrder->shipAll();
-                        $transaction->setIsShipped(true);
+                    # order not found
+                    # move to next one
+                    if ($mollieOrder === null) {
+                        continue;
                     }
+
+                    $notShippableStates = array(
+                        Status::PAYMENT_STATE_OPEN,
+                        Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+                    );
+
+                    # order is in list of not shippable status entry
+                    # move to the next one
+                    if (in_array($order->getPaymentStatus()->getId(), $notShippableStates, true)) {
+                        continue;
+                    }
+
+                    # order status not the one for klarna
+                    # move to the next one
+                    if ($order->getOrderStatus()->getId() !== $this->config->getKlarnaShipOnStatus()) {
+                        $output->writeln(' ...wrong order status');
+                        continue;
+                    }
+
+                    $mollieOrder->shipAll();
+                    $transaction->setIsShipped(true);
+
                 } catch (\Exception $e) {
-                    //
+                    $output->writeln(' ...' . $e->getMessage());
+                    Logger::log('error', $e->getMessage());
                 }
 
                 // Save order
