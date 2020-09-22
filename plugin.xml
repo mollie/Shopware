@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.0</version>
+    <version>1.6.1</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>dasistweb GmbH</author>
@@ -42,6 +42,15 @@
     </description>
 
 
+    <changelog version="1.6.1">
+        <changes lang="de">
+            - Behebung einer kaputten Zahlungs Return URL in seltenen Fällen
+        </changes>
+        <changes lang="en">
+            - Fix broken payment return page in some rare scenarios
+        </changes>
+    </changelog>
+    
     <changelog version="1.6.0">
         <changes lang="de">
             - Neue "Apple Pay Direct" Zahlungsart für einen schnellen Checkout auf Detail Seiten und im Warenkorb.
