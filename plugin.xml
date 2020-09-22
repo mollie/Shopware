@@ -6,17 +6,73 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.5.20</version>
+    <version>1.6.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
-    <author>Kiener E-commerce</author>
-    <link>https://www.kiener.nl</link>
-
-    <description lang="en">Plugin to allow iDeal payments using the Mollie API (1.5.20)</description>
-    <description lang="nl">Plugin die iDealbetalingen via de Mollie API doorgeeft (1.5.20)</description>
-    <description lang="de">Plugin um Zahlungen mit der Mollie API zu ermöglichen (1.5.20)</description>
-
+    <author>dasistweb GmbH</author>
+    <link>https://www.dasistweb.de</link>
     <compatibility minVersion="5.3.0"/>
+
+    <description lang="en">
+        We do our best to get you started as fast as possible.
+        <br/>
+        Please use our new Wiki documentation to learn more about the installation,
+        configuration and different features of this plugin.
+        <br/>
+        <br/>
+        https://github.com/mollie/Shopware/wiki
+    </description>
+    <description lang="de">
+        Wir geben unser Bestes, damit ihr schnellstmöglich starten könnt.
+        <br/>
+        Bitte benutzt unsere neue Wiki Dokumentation um mehr über Installation,
+        Konfiguration und einzelne Features des Plugins zu lernen.
+        <br/>
+        <br/>
+        https://github.com/mollie/Shopware/wiki
+    </description>
+    <description lang="nl">
+        Wij doen ons best zodat jullie zo snel mogelijk kunnen beginnen.
+        <br/>
+        Gebruik onze nieuwe Wiki-documentatie om meer te weten te komen over de installatie,
+        de configuratie en de individuele features van de plugin.
+        <br/>
+        <br/>
+        https://github.com/mollie/Shopware/wiki
+    </description>
+
+
+    <changelog version="1.6.0">
+        <changes lang="de">
+            - Neue "Apple Pay Direct" Zahlungsart für einen schnellen Checkout auf Detail Seiten und im Warenkorb.
+            - Neue Konfiguration für LIVE und TEST API-Keys, sowie einen Testmodus (aktiv/inaktiv).
+            - Neue "Vererbungs" Möglichkeit in Konfigurationen mit welcher ein Subshop die gleiche Konfiguration wie der Hauptshop erhalten kann.
+            - Freitextfelder des Warenkorbs werden nun bei fehlerhaften Zahlungen korrekt wiederhergestellt.
+            - Optimierter Notification Webhook Endpunkt, der nun stets sauber technische Ausgaben liefert,
+            sowie keine sensiblen Daten mehr anzeigt (diese sind nun in den Shopware Backend Logs sichtbar).
+            - Probleme bei der Markierung von Klarna Bestellungen als "geliefert" im Shopware Backend behoben.
+            - Kaputtes Klarna CLI Kommando repariert, welches über das Terminal Klarna Zahlungen als "geliefert" markieren kann.
+            - Seltenes Problem in Kombination mit der Shopware Advanced Promotion Suite und der Mollie Orders API behoben.
+            - Problem mit mehreren Subshops und unterschiedlichen Konfigurationen in Mollie Plugin behoben.
+            Das Plugin benutzt nun die korrekte Konfiguration des Subshops der jeweiligen Bestellung, wenn Aktionen
+            im Shopware Backend oder in Notifications durchgeführt werden.
+            - Viele kleine Behebungen und Verbesserungen um das Plugin stabiler zu machen.
+        </changes>
+        <changes lang="en">
+            - New "Apple Pay Direct" payment method for quick checkout on detail pages and in your cart.
+            - New option to set both, the LIVE and TEST API-keys along with a Test Mode (enabled/disabled)
+            - New configuration option to allow a sub shop to inherit the configuration from the main shop.
+            - Custom Fields will now be restored on failed payments.
+            - Improved notification webhook endpoint to always show a technical output, but no sensitive data
+            (will be shown in the Shopware backend logs)
+            - Fix problems when setting "shipped" for Klarna payments from Backend.
+            - Fix broken Klarna CLI command to mark orders as "shipped".
+            - Fix rare problem with the Shopware Advanced Promotion plugin and the Mollie Orders API.
+            - Fix problems with multiple sub shops and plugin configurations. The plugin will now always
+            use the correct configuration from the sub shop of a an order (in the Backend and in notifications).
+            - Lots of minor fixes and improvements to make the plugin more stable.
+        </changes>
+    </changelog>
 
     <changelog version="1.5.20">
         <changes lang="de">
