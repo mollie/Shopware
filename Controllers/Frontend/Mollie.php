@@ -978,7 +978,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         if ($config !== null) {
-            $mollieTestMode = (strpos($config->apiKey(), 'test') === 0);
+            $mollieTestMode = $config->isTestmodeActive();
         }
 
         if ($mollieProfile !== null) {
