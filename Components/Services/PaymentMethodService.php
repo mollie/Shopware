@@ -147,19 +147,21 @@ class PaymentMethodService
                 );
             }
 
-            // Set existing data on method
-            if ($existingMethod !== null) {
+            if ($existingMethod === null) {
+                // setup for new payment methods
+                // -----------------------------------------------------
+                // new payment methods are all activated
+                // but not apple pay direct, that wouldn't be good in the storefront ;)
+                if ($method[self::PAYMENT_METHOD_NAME] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
+                    $method[self::PAYMENT_METHOD_ACTIVE] = 0;
+                }
+            } else {
+                // Set existing data on method
                 $method[self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION] = (string)$existingMethod->getAdditionalDescription();
                 $method[self::PAYMENT_METHOD_COUNTRIES] = $existingMethod->getCountries();
                 $method[self::PAYMENT_METHOD_DESCRIPTION] = (string)$existingMethod->getDescription();
                 $method[self::PAYMENT_METHOD_POSITION] = $existingMethod->getPosition();
                 $method[self::PAYMENT_METHOD_SURCHARGE] = $existingMethod->getSurcharge();
-            }
-
-            // new payment methods are all activated
-            // but not apple pay direct, that wouldnt be good in the storefront ;)
-            if ($method[self::PAYMENT_METHOD_NAME] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
-                $method[self::PAYMENT_METHOD_ACTIVE] = 0;
             }
 
             // Install the payment method in Shopware
