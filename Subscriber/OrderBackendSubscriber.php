@@ -3,18 +3,31 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Enlight_Controller_Action;
+use Enlight_Controller_ActionEventArgs;
+use Enlight_Controller_Request_Request;
+use Enlight_Event_EventArgs;
+use Enlight_Hook_HookArgs;
+use Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Services\OrderService;
+use MollieShopware\Components\Services\PaymentService;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
 
 class OrderBackendSubscriber implements SubscriberInterface
 {
     /** @var OrderService */
     private $orderService;
 
+    /**
+     * @return array|string[]
+     */
     public static function getSubscribedEvents()
     {
         return [
@@ -24,20 +37,23 @@ class OrderBackendSubscriber implements SubscriberInterface
         ];
     }
 
+    /**
+     * @param OrderService $orderService
+     */
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
     }
 
     /**
-     * Catch mailvariables when the confirmation email is triggered and store
+     * Catch mail variables when the confirmation email is triggered and store
      * them in the database to use them when the order is fully processed.
      *
-     * @param \Enlight_Event_EventArgs $args
+     * @param Enlight_Event_EventArgs $args
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
-    public function onSendMail(\Enlight_Event_EventArgs $args)
+    public function onSendMail(Enlight_Event_EventArgs $args)
     {
         $variables = $args->get('variables');
         $orderNumber = (isset($variables['ordernumber']) ? $variables['ordernumber'] : null);
@@ -45,20 +61,20 @@ class OrderBackendSubscriber implements SubscriberInterface
         $mollieOrder = null;
 
         if (!empty($orderNumber)) {
-            /** @var \MollieShopware\Components\Services\OrderService $orderService */
+            /** @var OrderService $orderService */
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
-            /** @var \Shopware\Models\Order\Order $order */
+            /** @var Order $order */
             $order = $orderService->getOrderByNumber($orderNumber);
         }
 
         if (!empty($order)) {
             if (strstr($order->getTransactionId(), 'mollie_') &&
-                $order->getPaymentStatus()->getId() == \Shopware\Models\Order\Status::PAYMENT_STATE_OPEN) {
+                $order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
 
-                /** @var \MollieShopware\Models\TransactionRepository $transactionRepo */
+                /** @var TransactionRepository $transactionRepo */
                 $transactionRepo = Shopware()->Models()->getRepository(
-                    \MollieShopware\Models\Transaction::class
+                    Transaction::class
                 );
 
                 /** @var Transaction $transaction */
@@ -70,7 +86,7 @@ class OrderBackendSubscriber implements SubscriberInterface
                     try {
                         $transaction->setOrdermailVariables(json_encode($variables));
                         $transactionRepo->save($transaction);
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
                     }
 
@@ -78,15 +94,24 @@ class OrderBackendSubscriber implements SubscriberInterface
                 }
             }
         }
+
+        return true;
     }
 
-    public function onOrderPostDispatch(\Enlight_Controller_ActionEventArgs $args)
+    /**
+     * @param Enlight_Controller_ActionEventArgs $args
+     * @return bool|void
+     */
+    public function onOrderPostDispatch(Enlight_Controller_ActionEventArgs $args)
     {
-        /** @var \Enlight_Controller_Request_Request $request */
         $request = $args->getRequest();
 
         if ($request === null) {
             return true;
+        }
+
+        if ($request->getActionName() === 'batchProcess') {
+            return $this->processBatch($request);
         }
 
         if ($request->getActionName() !== 'save') {
@@ -102,12 +127,50 @@ class OrderBackendSubscriber implements SubscriberInterface
         return $this->shipOrderToMollie($orderId);
     }
 
-    public function onOrderApiPut(\Enlight_Hook_HookArgs $args)
+    /**
+     * @param Enlight_Controller_Request_Request $request
+     * @return bool
+     */
+    private function processBatch(Enlight_Controller_Request_Request $request)
     {
-        /** @var \Enlight_Controller_Action $controller */
+        $orders = $request->getParam('orders');
+
+        // if batch processing is used for a single order
+        if ($orders === null) {
+            $orderId = $request->getParam('id');
+
+            if ($orderId === null) {
+                return true;
+            }
+
+            return $this->shipOrderToMollie($orderId);
+        }
+
+        // if batch processing is used for multiple orders
+        foreach ($orders as $order) {
+            $orderId = array_key_exists('id', $order) ? $order['id'] : false;
+
+            if (!$orderId) {
+                continue;
+            }
+
+            $this->shipOrderToMollie($orderId);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Enlight_Hook_HookArgs $args
+     * @return bool
+     * @throws Exception
+     */
+    public function onOrderApiPut(Enlight_Hook_HookArgs $args)
+    {
+        /** @var Enlight_Controller_Action $controller */
         $controller = $args->getSubject();
 
-        /** @var \Enlight_Controller_Request_Request $request */
+        /** @var Enlight_Controller_Request_Request $request */
         $request = $controller->Request();
 
         if ($request === null) {
@@ -120,7 +183,6 @@ class OrderBackendSubscriber implements SubscriberInterface
         /** @var int|string $orderId */
         $orderId = $request->getParam('id');
 
-        /** @var bool $numberAsId */
         $numberAsId = (bool)$request->getParam('useNumberAsId', 0);
 
         if (empty($orderId)) {
@@ -138,14 +200,18 @@ class OrderBackendSubscriber implements SubscriberInterface
         return $this->shipOrderToMollie($orderId);
     }
 
+    /**
+     * @param $orderId
+     * @return bool
+     */
     private function shipOrderToMollie($orderId)
     {
-        /** @var \Shopware\Models\Order\Order $order */
+        /** @var Order $order */
         $order = null;
 
         try {
             $order = $this->orderService->getOrderById($orderId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             //
         }
 
@@ -157,7 +223,7 @@ class OrderBackendSubscriber implements SubscriberInterface
 
         try {
             $mollieId = $this->orderService->getMollieOrderId($order->getId());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
@@ -170,7 +236,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         $subShopConfig = $shopSwitcher->getConfig($order->getShop()->getId());
 
 
-        $orderStatusId = \Shopware\Models\Order\Status::ORDER_STATE_COMPLETELY_DELIVERED;
+        $orderStatusId = Status::ORDER_STATE_COMPLETELY_DELIVERED;
 
         if ($subShopConfig !== null) {
             $orderStatusId = $subShopConfig->getKlarnaShipOnStatus();
@@ -181,10 +247,10 @@ class OrderBackendSubscriber implements SubscriberInterface
         }
 
         try {
-            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            /** @var PaymentService $paymentService */
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
 
-            # we have to do this after the payment 
+            # we have to do this after the payment
             # service...otherwise the reference is overwritten again
             $subShopApiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
             # also do this again just to be sure
@@ -197,9 +263,10 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService->switchApiClient($subShopApiClient);
 
             $paymentService->sendOrder($mollieId);
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
+
+        return true;
     }
 }
