@@ -15,4 +15,4 @@ install: ## Installs all dependencies
 	composer install
 
 release: ## Creates a new ZIP package
-	cd .. && zip -r MollieShopware.zip MollieShopware/ -x '*.git*' -x 'makefile'
+	cd .. && zip -r MollieShopware.zip MollieShopware/ -x '*.git*' '*/makefile' '*.DS_Store'
