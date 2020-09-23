@@ -96,6 +96,10 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         $view = $args->getSubject()->View();
 
         $sPayments = $view->getAssign('sPayments');
+        if ($sPayments === null) {
+            return;
+        }
+
         $this->removeApplePayDirectFromPaymentMeans($sPayments);
 
         $view->assign('sPayments', $sPayments);
