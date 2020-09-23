@@ -765,21 +765,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         if ($transaction !== null) {
-
-            # get the order of
-            # the transaction
-            $orderID = $transaction->getOrderId();
-            $order = $this->getOrderRepository()->find($orderID);
-
-            $switcher = new MollieShopSwitcher($this->container);
-
-            # we do not have to assign it
-            # because we change the instance in the container
-            # which is automatically used in the $this->getConfig()
-            # should be refactored one day
-            $switcher->getConfig($order->getShop()->getId());
-
-
             // check whether the payment was canceled
             if ($this->getConfig() !== null &&
                 $this->getOrderCanceledOrFailed($transaction) === true) {
@@ -846,9 +831,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $createOrder = false;
 
-            /** @var \Mollie\Api\MollieApiClient $mollieApi */
-            $mollieApi = $switcher->getMollieApi($order->getShop()->getId());
-
+            $mollieApi = $this->getMollieApi();
 
             if ($mollieApi !== null) {
                 if ((string)$transaction->getMollieId() !== '') {
