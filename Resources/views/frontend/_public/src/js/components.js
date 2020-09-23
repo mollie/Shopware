@@ -67,7 +67,7 @@ if (cardToken !== undefined) {
 
     const disableForm = () => {
         let submitButtons = document.querySelectorAll('button[type="submit"]');
-        if (submitButtons.length) {
+        if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = true;
             });
@@ -76,7 +76,7 @@ if (cardToken !== undefined) {
 
     const enableForm = () => {
         let submitButtons = document.querySelectorAll('button[type="submit"]');
-        if (submitButtons.length) {
+        if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = false;
             });
