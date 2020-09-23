@@ -121,12 +121,12 @@ class OrderService
     }
 
     /**
-     * Get Mollie order ID for order
+     * Gets the external Mollie order id from a provided Shopware order id.
+     * The Mollie order id does only exist if the ORDERS-API has been used.
+     * The id is searched in the Mollie transaction database table.
      *
-     * @param $orderId
-     *
+     * @param int $orderId
      * @return null|string
-     *
      * @throws \Exception
      */
     public function getMollieOrderId($orderId)
