@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.1</version>
+    <version>1.6.2</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>dasistweb GmbH</author>
@@ -41,6 +41,19 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.6.2">
+        <changes lang="de">
+            - Behebung eines Problems bei dem die Bestellungen in Shopware nicht erstellt werden, sofern die Konfiguration "Bestellungen vor Zahlungsabschluss erstellen" deaktiviert ist
+            - Behebung des Problems, dass der schwarze Ladebildschirm bei Zahlungsauswahl nicht mehr verschwindet
+            - Behebung des Java Script Problems bei den "Auswahl" Buttons (in Kombination mit Credit Card Components) auf der Zahlungsseite
+        </changes>
+        <changes lang="en">
+            - Fix problem that orders have not been created in Shopware if plugin was configured to not create orders before the payment
+            - Fix problem with black loading screen screen on the payment selection page
+            - Fixed JavaScript error for the submit buttons while using credit card on the payment selection page
+        </changes>
+    </changelog>
 
     <changelog version="1.6.1">
         <changes lang="de">

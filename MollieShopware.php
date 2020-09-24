@@ -30,7 +30,7 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 class MollieShopware extends Plugin
 {
 
-    const PLUGIN_VERSION = '1.6.1';
+    const PLUGIN_VERSION = '1.6.2';
 
 
     /**
