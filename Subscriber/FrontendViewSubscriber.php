@@ -126,6 +126,9 @@ class FrontendViewSubscriber implements SubscriberInterface
         // Create new array collection to add src files
         $collection = new ArrayCollection();
 
+        # this is used to hide the plain Apple Pay too, if not available for the user
+        $collection->add(__DIR__ . '/../Resources/views/frontend/_public/src/js/applepay.js');
+
         return $collection;
     }
 
