@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
+use Shopware\Models\Order\Order;
 
 class OrderService
 {
@@ -121,15 +122,15 @@ class OrderService
     }
 
     /**
-     * Gets the external Mollie order id from a provided Shopware order id.
+     * Gets the external Mollie order id from a provided Shopware order.
      * The Mollie order id does only exist if the ORDERS-API has been used.
      * The id is searched in the Mollie transaction database table.
      *
-     * @param int $orderId
+     * @param Order $orderId
      * @return null|string
      * @throws \Exception
      */
-    public function getMollieOrderId($orderId)
+    public function getMollieOrderId($order)
     {
         $mollieId = null;
         $transaction = null;
@@ -142,7 +143,7 @@ class OrderService
 
             /** @var \MollieShopware\Models\Transaction $transaction */
             $transaction = $transactionRepo->findOneBy([
-                'orderId' => $orderId
+                'orderId' => $order->getId()
             ]);
         }
         catch (\Exception $ex) {

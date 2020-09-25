@@ -222,7 +222,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         $mollieId = null;
 
         try {
-            $mollieId = $this->orderService->getMollieOrderId($order->getId());
+            $mollieId = $this->orderService->getMollieOrderId($order);
         } catch (Exception $e) {
             LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
