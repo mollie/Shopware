@@ -94,8 +94,6 @@ class OrderBackendSubscriber implements SubscriberInterface
                 }
             }
         }
-
-        return true;
     }
 
     /**
