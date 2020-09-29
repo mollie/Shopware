@@ -6,11 +6,11 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.2</version>
+    <version>1.6.3</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
-    <author>dasistweb GmbH</author>
-    <link>https://www.dasistweb.de</link>
+    <author>Mollie B.V.</author>
+    <link>https://www.mollie.com</link>
     <compatibility minVersion="5.3.0"/>
 
     <description lang="en">
@@ -42,6 +42,19 @@
     </description>
 
 
+    <changelog version="1.6.3">
+        <changes lang="de">
+            - Behebung des Problems, dass Bestellbestätigungs E-Mails nicht versendet wurden
+            - Ursprüngliche Apple Pay Zahlart wird nun wieder ausgeblendet, wenn Apple Pay nicht zur Verfügung steht
+            - kleine Verbesserungen und Optimierungen
+        </changes>
+        <changes lang="en">
+            - Fix broken order confirmation emails that haven't been sent out.
+            - Original Apple Pay payment method is now hidden again if Apple Pay is not available
+            - smaller improvements and refactorings
+        </changes>
+    </changelog>
+
     <changelog version="1.6.2">
         <changes lang="de">
             - Behebung eines Problems bei dem die Bestellungen in Shopware nicht erstellt werden, sofern die Konfiguration "Bestellungen vor Zahlungsabschluss erstellen" deaktiviert ist
@@ -63,7 +76,7 @@
             - Fix broken payment return page in some rare scenarios
         </changes>
     </changelog>
-    
+
     <changelog version="1.6.0">
         <changes lang="de">
             - Neue "Apple Pay Direct" Zahlungsart für einen schnellen Checkout auf Detail Seiten und im Warenkorb.
