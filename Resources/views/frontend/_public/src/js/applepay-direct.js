@@ -49,12 +49,22 @@ function initApplePay() {
         // if we are in normal mode, simply continue with
         // the current cart
         if (button.dataset.addproducturl) {
+
+            // our fallback is quantity 1
+            let qty = 1;
+
+            // if we have our sQuantity dropdown, use
+            // that quantity when adding the product
             const comboQuantity = document.getElementById('sQuantity');
+            if (comboQuantity) {
+                qty = comboQuantity.value;
+            }
+
             $.post(
                 button.dataset.addproducturl,
                 {
                     number: button.dataset.productnumber,
-                    quantity: comboQuantity.value,
+                    quantity: qty,
                 }
             ).done(function (data) {
                 }
@@ -257,16 +267,16 @@ function initApplePay() {
 initApplePay();
 
 // Reinits apple pay buttons
-$.subscribe('plugin/swAjaxVariant/onRequestDataCompleted', function() {
+$.subscribe('plugin/swAjaxVariant/onRequestDataCompleted', function () {
     initApplePay();
 });
 
 // we need to (re)initialize it
 // because we are loaded within an AJAX request
-$.subscribe('plugin/swCollapseCart/onLoadCartFinished', function() {
+$.subscribe('plugin/swCollapseCart/onLoadCartFinished', function () {
     initApplePay();
 });
 
-$.subscribe('plugin/swCollapseCart/onArticleAdded', function() {
+$.subscribe('plugin/swCollapseCart/onArticleAdded', function () {
     initApplePay();
 });
