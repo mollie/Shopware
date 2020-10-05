@@ -71,12 +71,22 @@ function initApplePay() {
         // if we are in normal mode, simply continue with
         // the current cart
         if (button.dataset.addproducturl) {
+
+            // our fallback is quantity 1
+            let qty = 1;
+
+            // if we have our sQuantity dropdown, use
+            // that quantity when adding the product
             const comboQuantity = document.getElementById('sQuantity');
+            if (comboQuantity) {
+                qty = comboQuantity.value;
+            }
+
             $.post(
                 button.dataset.addproducturl,
                 {
                     number: button.dataset.productnumber,
-                    quantity: comboQuantity.value,
+                    quantity: qty,
                 }
             ).done(function (data) {
                 }
