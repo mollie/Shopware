@@ -7,9 +7,6 @@ use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\MollieApiFactory;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
 trait MollieApiClientTrait
 {
 

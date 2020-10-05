@@ -2,10 +2,6 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Models\Button;
 
-
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
 class ApplePayButton
 {
 

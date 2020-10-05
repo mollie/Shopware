@@ -7,9 +7,7 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart;
 use MollieShopware\Components\Shipping\Shipping;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
+
 class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
 {
 

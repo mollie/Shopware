@@ -10,9 +10,6 @@ use Shopware\Models\Payment\Payment;
 use Shopware\Models\Payment\Repository;
 use Shopware_Controllers_Frontend_Checkout;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
 class OrderSession
 {
 

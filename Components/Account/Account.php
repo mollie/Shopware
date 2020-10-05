@@ -5,9 +5,7 @@ namespace MollieShopware\Components\Account;
 use MollieShopware\Components\Account\Gateway\GuestAccountGatewayInterface;
 use Shopware\Components\Password\Manager;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
+
 class Account
 {
 
