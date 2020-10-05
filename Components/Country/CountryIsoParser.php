@@ -2,9 +2,6 @@
 
 namespace MollieShopware\Components\Country;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
 class CountryIsoParser
 {
 

@@ -2,9 +2,7 @@
 
 namespace MollieShopware\Components\ApplePayDirect;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
+
 interface ApplePayDirectHandlerInterface
 {
 

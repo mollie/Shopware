@@ -6,9 +6,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Enlight_Components_Session_Namespace;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
 class Shipping
 {
     /**

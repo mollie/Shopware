@@ -8,9 +8,7 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Shipping\Shipping;
 
-/**
- * @copyright 2020 dasistweb GmbH (https://www.dasistweb.de)
- */
+
 class ApplePayDirectFactory
 {
 
