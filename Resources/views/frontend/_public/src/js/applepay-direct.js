@@ -2,6 +2,7 @@ function initApplePay() {
     "use strict";
 
     var applePayApiVersion = 3;
+    var applePayDivSelector = '.apple-pay--container';
     var applePayButtonSelector = '.applepay-button';
 
     $(document).ready(function () {
@@ -12,8 +13,29 @@ function initApplePay() {
      *
      */
     function initApplePayButtons() {
+
+        // we need our wrapping div layer
+        // because that one will also be hidden to avoid any existing margins
+        // if no apple pay should be displayed at all
+        const divsApplePay = document.querySelectorAll(applePayDivSelector);
+
         if (!window.ApplePaySession || !window.ApplePaySession.canMakePayments()) {
+            // hide our wrapping apple pay div
+            // to avoid any wrong margins if no apple pay is displayed
+            if (divsApplePay) {
+                divsApplePay.forEach(function (div) {
+                    div.style.display = "none";
+                });
+            }
             return;
+        }
+
+        // show our apple pay div layer
+        // just in case it wasn't visible before
+        if (divsApplePay) {
+            divsApplePay.forEach(function (div) {
+                div.style.display = "inline-block";
+            });
         }
 
         var buttons = document.querySelectorAll(applePayButtonSelector);
@@ -257,16 +279,16 @@ function initApplePay() {
 initApplePay();
 
 // Reinits apple pay buttons
-$.subscribe('plugin/swAjaxVariant/onRequestDataCompleted', function() {
+$.subscribe('plugin/swAjaxVariant/onRequestDataCompleted', function () {
     initApplePay();
 });
 
 // we need to (re)initialize it
 // because we are loaded within an AJAX request
-$.subscribe('plugin/swCollapseCart/onLoadCartFinished', function() {
+$.subscribe('plugin/swCollapseCart/onLoadCartFinished', function () {
     initApplePay();
 });
 
-$.subscribe('plugin/swCollapseCart/onArticleAdded', function() {
+$.subscribe('plugin/swCollapseCart/onArticleAdded', function () {
     initApplePay();
 });
