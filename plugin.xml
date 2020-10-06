@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.3</version>
+    <version>1.6.4</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,21 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.6.4">
+        <changes lang="de">
+            - Apple Pay Direct benutzt nun Stückzahl 1, wenn im Theme auf der Artikel Seite keine Auswahlliste für die Stückzahl ist.
+            - Optimierung von Abständen, wenn Apple Pay Direct nicht aktiviert ist.
+            - Problembehebung, dass Mollie die Bestellung nicht annimmt durch minimale Rundungsabweichungen in seltenen Fällen
+            (The amount of the order does not match the total amount from the order lines.)
+        </changes>
+        <changes lang="en">
+            - Apple Pay Direct does now use quantity 1 as fallback, if the Theme does not have a dropdown for the quantity on the article detail page.
+            - Optimization of margins if Apple Pay Direct is not active
+            - Fix very rare error due to rounding problems that prevented Mollie to receive and save the order.
+            (The amount of the order does not match the total amount from the order lines.)
+        </changes>
+    </changelog>
 
     <changelog version="1.6.3">
         <changes lang="de">
