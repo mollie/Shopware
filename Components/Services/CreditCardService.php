@@ -86,12 +86,12 @@ class CreditCardService
          * In B2b a contact customer doesn't have attributes,
          * so take the attributes of the debtor user it belongs to
          */
-        $creditCardToken = $this->modelManager->getConnection()->fetchColumn('
+        return $this->modelManager->getConnection()->fetchColumn('
             SELECT s_user_attributes.mollie_shopware_credit_card_token FROM s_user
             JOIN s_user_attributes ON (s_user.id = s_user_attributes.userID)
             WHERE s_user.customernumber = ?
             AND s_user_attributes.mollie_shopware_ideal_issuer IS NOT NULL
             LIMIT 1
-        ', [ $customer->getNumber() ]);
+        ', [$customer->getNumber()]);
     }
 }
