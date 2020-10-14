@@ -41,6 +41,35 @@ class OrderSession
         $this->repoPayments = Shopware()->Container()->get('models')->getRepository(Payment::class);
     }
 
+    /**
+     * This function allows you to set a custom address object
+     * before creating the actual order in the session.
+     *
+     * @param Shopware_Controllers_Frontend_Checkout $checkoutController
+     * @param OrderAddress $address
+     */
+    public function setCustomerData(Shopware_Controllers_Frontend_Checkout $checkoutController, OrderAddress $address)
+    {
+        $userData = $checkoutController->View()->getAssign('sUserData');
+
+        $userData['billingaddress']['firstname'] = $address->getFirstname();
+        $userData['billingaddress']['lastname'] = $address->getLastname();
+        $userData['billingaddress']['street'] = $address->getStreet();
+        $userData['billingaddress']['zipcode'] = $address->getZipcode();
+        $userData['billingaddress']['city'] = $address->getCity();
+        $userData['billingaddress']['countryId'] = $address->getCountry()['id'];
+        $userData['billingaddress']['country'] = $address->getCountry();
+
+        $userData['shippingaddress']['firstname'] = $address->getFirstname();
+        $userData['shippingaddress']['lastname'] = $address->getLastname();
+        $userData['shippingaddress']['street'] = $address->getStreet();
+        $userData['shippingaddress']['zipcode'] = $address->getZipcode();
+        $userData['shippingaddress']['city'] = $address->getCity();
+        $userData['shippingaddress']['countryId'] = $address->getCountry()['id'];
+        $userData['shippingaddress']['country'] = $address->getCountry();
+
+        $checkoutController->View()->assign('sUserData', $userData);
+    }
 
     /**
      * @param Shopware_Controllers_Frontend_Checkout $checkoutController
@@ -77,8 +106,7 @@ class OrderSession
         # created guest user
         $sOrderVariables['sUserData'] = $checkoutController->View()->getAssign('sUserData');
 
-        # make sure we always use "apple pay direct"
-        # for the order we create
+        # make sure we always use our payment method for the order we create
         $sOrderVariables['sUserData'] ['additional']['user']['paymentID'] = $paymentMethod->getId();
         $sOrderVariables['sUserData'] ['additional']['payment'] = $this->mockPaymentLegacyStructConverter($paymentMethod, $shopContext);
 

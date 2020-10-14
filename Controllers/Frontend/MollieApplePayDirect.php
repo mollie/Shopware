@@ -4,11 +4,14 @@ use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\Components\Account\Account;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
+use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
+use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
 use MollieShopware\Components\BasketSnapshot\BasketSnapshot;
 use MollieShopware\Components\Country\CountryIsoParser;
 use MollieShopware\Components\Logger;
+use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Traits\MollieApiClientTrait;
@@ -365,11 +368,9 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
-
             $email = $this->Request()->getParam('email', '');
             $firstname = $this->Request()->getParam('firstname', '');
             $lastname = $this->Request()->getParam('lastname', '');
-
             $street = $this->Request()->getParam('street', '');
             $zipcode = $this->Request()->getParam('postalCode', '');
             $city = $this->Request()->getParam('city', '');
@@ -383,19 +384,40 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             }
 
 
-            $this->account->createGuestAccount(
+            # now check if we are already signed in
+            # if so, then we can just continue, because sessions are already set.
+            # if we are not signed in, then we need to
+            # create a new guest account and login as that one
+            if (!$this->account->isLoggedIn()) {
+
+                $this->account->createGuestAccount(
+                    $email,
+                    $firstname,
+                    $lastname,
+                    $street,
+                    $zipcode,
+                    $city,
+                    $country['id']
+                );
+
+                $this->account->loginAccount($email);
+            }
+
+
+            # create our user data object
+            # that we need later to set our custom data
+            # in case our registered user has different billing data
+            $userData = new UserData(
                 $email,
                 $firstname,
                 $lastname,
                 $street,
                 $zipcode,
                 $city,
-                $country['id']
+                $countryCode
             );
-
-            $this->account->loginAccount($email);
-
-
+            $this->handlerApplePay->setUserData($userData);
+            
             # save our payment token
             # that will be used when creating the
             # payment in the mollie controller action
@@ -433,11 +455,52 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
+
+            /** @var UserData|null $userData */
+            $userData = $this->handlerApplePay->getUserData();
+
+            # check if we have a valid user data object
+            # if we have it, then modify our session data before creating the order.
+            # Why - because of guidelines!
+            # We might have a signed in user with a different billing address,
+            # so we must always use the data from the Apple Pay payment sheet!
+            if ($userData instanceof UserData) {
+
+                /** @var array $country */
+                $country = $this->getCountry($userData->getCountryCode());
+
+                if ($country === null) {
+                    throw new Exception('No Country found for code ' . $userData->getCountryCode());
+                }
+
+                # now convert to our address object
+                # which is passed on to our order session component
+                $address = new OrderAddress(
+                    $userData->getFirstname(),
+                    $userData->getLastname(),
+                    $userData->getStreet(),
+                    $userData->getZipcode(),
+                    $userData->getCity(),
+                    $country
+                );
+
+                # use our data in the order later on
+                $this->orderSession->setCustomerData($this, $address);
+            }
+
+            # now prepare the session such as the user
+            # would have done it by browsing in the shop.
+            # instead of this, our prepared and simulated data
+            # will be used for this.
             $this->orderSession->prepareOrderSession(
                 $this,
                 $this->applePayPaymentMethod->getPaymentMethod(),
                 $this->shopContext
             );
+
+            # clear our session data
+            $this->handlerApplePay->clearUserData();
+
 
             # redirect to our centralized mollie
             # direct controller action
