@@ -9,6 +9,7 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieLineItemCleaner;
+use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Status;
@@ -795,10 +796,22 @@ class PaymentService
             //
         }
 
+
         if ($molliePayment !== null) {
-            // set the status
-            if ($molliePayment->isPaid())
+            
+            $refundStatus = new MollieRefundStatus();
+            
+            if ($refundStatus->isPaymentFullyRefunded($molliePayment)) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_REFUNDED, true);
+            }
+            
+            if ($refundStatus->isPaymentPartiallyRefunded($molliePayment)) {
+                return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED, true);
+            }
+            
+            if ($molliePayment->isPaid()) {
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
+            }
             elseif ($molliePayment->isPending())
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
             elseif ($molliePayment->isAuthorized())
@@ -840,6 +853,22 @@ class PaymentService
         if (!empty($mollieOrder)) {
             $paymentsResult = $this->getPaymentsResultForOrder($mollieOrder);
 
+            $refundStatus = new MollieRefundStatus();
+
+            if ($refundStatus->isOrderFullyRefunded($mollieOrder)) {
+                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_REFUNDED, $returnResult);
+
+                if ($returnResult)
+                    return true;
+            }
+            
+            if ($refundStatus->isOrderPartiallyRefunded($mollieOrder)) {
+                $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED, $returnResult);
+
+                if ($returnResult)
+                    return true;
+            }
+            
             if ($paymentsResult['total'] > 0) {
                 // fully paid
                 if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID] == $paymentsResult['total']) {
@@ -990,6 +1019,30 @@ class PaymentService
             $sOrder->setPaymentStatus(
                 $order->getId(),
                 Status::PAYMENT_STATE_COMPLETELY_PAID,
+                $this->config->sendStatusMail()
+            );
+
+            if ($returnResult) {
+                return true;
+            }
+        }
+        
+        if ($status === PaymentStatus::MOLLIE_PAYMENT_REFUNDED) {
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_RE_CREDITING,
+                $this->config->sendStatusMail()
+            );
+
+            if ($returnResult) {
+                return true;
+            }
+        }
+        
+        if ($status === PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED) {
+            $sOrder->setPaymentStatus(
+                $order->getId(),
+                Status::PAYMENT_STATE_RE_CREDITING,
                 $this->config->sendStatusMail()
             );
 
