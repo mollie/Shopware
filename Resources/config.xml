@@ -372,5 +372,41 @@
             <label lang="nl">Gebruikers ID voor Mollie-gebruiker in Shopware</label>
         </element>
 
+        <element type="select" scope="shop">
+            <name>mollie_applepaydirect_restrictions</name>
+            <label lang="en">Apple Pay Direct Restrictions</label>
+            <label lang="de">Apple Pay Direct Einschränkungen</label>
+            <label lang="nl">Apple Pay Direct Beperkingen</label>
+            <description lang="en">Restrict Apple Pay Direct from being displayed on these pages.</description>
+            <description lang="de">Verhindere die Anzeige von Apple Pay Direct auf den hier gewählten Seiten</description>
+            <description lang="nl">Voorkom dat Apple Pay Direct wordt weergegeven op deze pagina's.</description>
+            <store><![CDATA[Ext.define('Mollie.ApplePayDirect.RestrictionsForm', {
+    extend: 'Ext.data.Store',
+    fields: [
+        { name:'id', type: 'int' },
+        { name:'name', type: 'string' }
+    ],
+    autoLoad: true,
+    pageSize: 25,
+    proxy: {
+        type: 'ajax',
+        url: window.location.href.substr(0, window.location.href.indexOf('backend')) + 'backend/MollieApplePayDirect/displayRestrictions',
+        reader: {
+            type: 'json',
+            root: 'data',
+            totalProperty: 'total'
+        }
+    }
+    }).create();//new ]]>
+            </store>
+            <options>
+                <multiSelect>true</multiSelect>
+                <valueField>id</valueField>
+                <displayField>name</displayField>
+                <isCustomStore>true</isCustomStore>
+            </options>
+        </element>
+
+
     </elements>
 </config>
