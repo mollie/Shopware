@@ -3,7 +3,7 @@
 namespace MollieShopware\Components\Helpers;
 
 use Mollie\Api\Resources\Order;
-use Shopware\Models\Payment\Payment;
+use Mollie\Api\Resources\Payment;
 
 class MollieRefundStatus
 {
