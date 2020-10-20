@@ -267,6 +267,8 @@ class Config
             $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_PRELIMINARILY_ACCEPTED;
         if ($configuredStatus === 'accepted')
             $paymentStatus = $statusModel::PAYMENT_STATE_THE_CREDIT_HAS_BEEN_ACCEPTED;
+        if ($configuredStatus === 'completely_paid')
+            $paymentStatus = $statusModel::PAYMENT_STATE_COMPLETELY_PAID;
 
         return $paymentStatus;
     }
