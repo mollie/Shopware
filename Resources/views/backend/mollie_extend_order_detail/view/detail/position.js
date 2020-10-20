@@ -2,7 +2,20 @@
 // {$smarty.block.parent}
 Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     override: 'Shopware.apps.Order.view.detail.Position',
-    getColumns: function(view) {
+
+    molSnippets: {
+        colHeaderMollieActions: '{s namespace="backend/mollie/general" name="order_details_column_actions_title"}{/s}',
+        colHeaderRefunds: '{s namespace="backend/mollie/general" name="order_details_column_refunds_title"}{/s}',
+        tooltipRefundItem: '{s namespace="backend/mollie/general" name="order_details_tooltip_refund"}{/s}',
+        refundQuantityTitle: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_title"}{/s}',
+        refundQuantityMessage: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_message"}{/s}',
+        refundQuantityErrorInvalid: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_error_invalid"}{/s}',
+        messagePartialRefundProcessing: '{s namespace="backend/mollie/general" name="order_details_info_partialrefund_processing"}{/s}',
+        messagePartialRefundCreated: '{s namespace="backend/mollie/general" name="order_details_info_partialrefund_created"}{/s}',
+        titleError: 'Error',
+    },
+
+    getColumns: function (view) {
         let me = this;
         var store = view.getStore();
         var record = (!!store.getAt(0)) ? store.getAt(0) : store.getAt(1);
@@ -12,8 +25,8 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             columns.push(me.createRefundColumn());
             columns.push({
                 xtype: 'gridcolumn',
-                header: 'Mollie refunded items',
-                renderer: function(value, metaData, record) {
+                header: me.molSnippets.colHeaderRefunds,
+                renderer: function (value, metaData, record) {
                     if (
                         !!record
                         && !!record.raw
@@ -30,29 +43,29 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         }
         return columns;
     },
-    createRefundColumn: function() {
+    createRefundColumn: function () {
         var me = this;
         return Ext.create('Ext.grid.column.Action', {
+            header: me.molSnippets.colHeaderMollieActions,
             width: 80,
             items: [
                 me.createRefundOrderColumn(),
-            ],
-            header: (me.snippets.columns) ? me.snippets.columns.mollie_actions : 'Mollie actions',
+            ]
         });
     },
 
-    createRefundOrderColumn: function() {
+    createRefundOrderColumn: function () {
         var me = this;
 
         return {
             iconCls: 'sprite-money-coin',
             action: 'editOrder',
-            tooltip: (me.snippets.columns) ? me.snippets.columns.refund : 'Refund item',
+            tooltip: me.molSnippets.tooltipRefundItem,
             /**
              * Add button handler to fire the showDetail event which is handled
              * in the list controller.
              */
-            handler: function(view, rowIndex, colIndex, item) {
+            handler: function (view, rowIndex, colIndex, item) {
                 var store = view.getStore(),
                     record = store.getAt(rowIndex);
 
@@ -68,17 +81,17 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
                 }
 
                 const messageBox = Ext.MessageBox;
-                const titel = 'Quantity';
-                const message = 'How many items do you want to return ?';
-                messageBox.prompt(titel, message, function(choice, amount) {
+                const titel = me.molSnippets.refundQuantityTitle;
+                const message = me.molSnippets.refundQuantityMessage;
+                messageBox.prompt(titel, message, function (choice, amount) {
                     if (choice === 'ok') {
                         const chosenQuantity = parseInt(amount);
                         if (chosenQuantity > 0 && chosenQuantity <= quantityRemaining) {
                             me.returnItems(chosenQuantity, record, store);
                         } else {
                             Shopware.Notification.createGrowlMessage(
-                                'Error',
-                                'Please enter a valid quantity',
+                                me.molSnippets.titleError,
+                                me.molSnippets.refundQuantityErrorInvalid,
                                 ''
                             );
                             return false;
@@ -96,8 +109,8 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
                 input.step = 1;
             },
 
-            getClass: function(value, metadata, record) {
-                if(
+            getClass: function (value, metadata, record) {
+                if (
                     // order line is refundable through mollie
                     me.isRefundableOrder(record)
                 ) {
@@ -113,7 +126,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
      * @param  object  record
      * @return Boolean
      */
-    hasOrderPaymentName: function(record) {
+    hasOrderPaymentName: function (record) {
         return record.getPaymentStore &&
             record.getPaymentStore.data &&
             record.getPaymentStore.data.items &&
@@ -125,7 +138,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     /**
 
      */
-    returnItems: function(quantity, record, store) {
+    returnItems: function (quantity, record, store) {
         const me = this;
 
         let params = {
@@ -138,27 +151,27 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
 
         Shopware.Notification.createGrowlMessage(
             me.snippets.successTitle,
-            'The partial refund is being processed',
+            me.molSnippets.messagePartialRefundProcessing,
             me.snippets.growlMessage
         );
 
         Ext.Ajax.request({
             url: '{url action="partialRefund" controller=MollieOrders}',
             params: params,
-            success: function(res) {
+            success: function (res) {
                 try {
                     var result = JSON.parse(res.responseText);
-                    if( !result.success ) throw new Error(result.message);
+                    if (!result.success) throw new Error(result.message);
 
                     Shopware.Notification.createGrowlMessage(
                         me.snippets.successTitle,
-                        'The partial refund is successfully created',
+                        me.molSnippets.messagePartialRefundCreated,
                         me.snippets.growlMessage
                     );
 
                     // refresh order screen
                     me.doRefresh();
-                } catch(e) {
+                } catch (e) {
                     Shopware.Notification.createGrowlMessage(
                         me.snippets.failureTitle,
                         e.message,
@@ -173,10 +186,10 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
      * @param  object  record
      * @return string
      */
-    getOrderPaymentName: function(record) {
+    getOrderPaymentName: function (record) {
         var me = this;
 
-        if( me.hasOrderPaymentName(record) ) {
+        if (me.hasOrderPaymentName(record)) {
             return record.getPaymentStore.data.items[0].data.name;
         }
 
@@ -186,12 +199,12 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     /**
      * Add a stylesheet to the backend to hide refund button for non-mollie orders
      */
-    createStyleSheet: function() {
+    createStyleSheet: function () {
         var style = document.getElementById('mollie-styles');
         var css;
         var head;
 
-        if( !style ) {
+        if (!style) {
 
             css = '.mollie-hide { display: none !important; }';
             css = '';
@@ -201,7 +214,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             style.type = 'text/css';
             style.setAttribute('id', 'mollie-styles');
 
-            if( style.styleSheet ) {
+            if (style.styleSheet) {
                 style.styleSheet.cssText = css;
             } else {
                 style.appendChild(document.createTextNode(css));
@@ -266,7 +279,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         return false;
     },
 
-    isMollieOrder: function(record) {
+    isMollieOrder: function (record) {
         if (
             !!record
             && !!this.record
@@ -305,7 +318,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         return false;
     },
 
-    doRefresh: function() {
+    doRefresh: function () {
         var me = this;
         me.fireEvent('updateForms', me.record, me.up('window'));
 
