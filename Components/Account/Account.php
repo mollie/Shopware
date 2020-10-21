@@ -61,6 +61,18 @@ class Account
     }
 
     /**
+     * Gets if the user is already signed in.
+     * 
+     * @return bool
+     */
+    public function isLoggedIn()
+    {
+        $userId = $this->session->offsetGet('sUserId');
+
+        return !empty($userId);
+    }
+
+    /**
      * @param string $email
      * @param string $firstname
      * @param string $lastname

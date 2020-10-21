@@ -5,6 +5,7 @@ namespace MollieShopware\Components\ApplePayDirect\Handler;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart;
+use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 use MollieShopware\Components\Shipping\Shipping;
 
 
@@ -18,6 +19,12 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
      */
     const KEY_SESSION_PAYMENTTOKEN = 'MOLLIE_APPLEPAY_PAYMENTTOKEN';
 
+    /**
+     * This is the key for the session entry
+     * that stores the entered user data of the
+     * apple pay customer.
+     */
+    const KEY_SESSION_USERDATA = 'MOLLIE_APPLEPAY_USERDATA';
 
     /**
      * @var MollieApiClient
@@ -93,7 +100,7 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
 
         /** @var array $shipping */
         $shipping = $this->admin->sGetPremiumShippingcosts($country);
-        
+
         if ($shipping['brutto'] !== null && $shipping['brutto'] > 0) {
 
             /** @var array $shipmentMethod */
@@ -130,6 +137,34 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
         );
 
         return (string)$responseString;
+    }
+
+    /**
+     * Sets the user data from the Apple Pay payment sheet.
+     *
+     * @param UserData $userData
+     */
+    public function setUserData(UserData $userData)
+    {
+        $this->session->offsetSet(self::KEY_SESSION_USERDATA, $userData);
+    }
+
+    /**
+     * Gets the user data from the Apple Pay payment sheet.
+     *
+     * @return null|UserData
+     */
+    public function getUserData()
+    {
+        return $this->session->offsetGet(self::KEY_SESSION_USERDATA);
+    }
+
+    /**
+     * Clears the user data in the session
+     */
+    public function clearUserData()
+    {
+        $this->session->offsetSet(self::KEY_SESSION_USERDATA, null);
     }
 
     /**
