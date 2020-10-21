@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,17 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.6.5">
+        <changes lang="de">
+            - Problembehebung, dass rückerstattete Bestellungen wieder als "bezahlt" in Shopware markiert werden, sobald eine Webhook Benachrichtigung nach einer Rückerstattung empfangen wird.
+            - Problembehebung eines seltenen Falls [Credit Card Token Not Found]. Dieses trat bei B2B Kunden, oder Kunden ohne korrekten Attribut-Einträgen (in der Datenbank) auf.
+        </changes>
+        <changes lang="en">
+            - Fix the problem that refunded orders are always marked as "completely paid" again in Shopware, as soon as a webhook notification is received after a refund process.
+            - Fix a rare problem [Credit Card Token Not Found] that happens for either B2B users or users without a valid attributes-entry (in the database).
+        </changes>
+    </changelog>
 
     <changelog version="1.6.4">
         <changes lang="de">
