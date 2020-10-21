@@ -351,4 +351,22 @@ class Config
         return (int) $userId;
     }
 
+    /**
+     * Gets a list of restrictions for the
+     * Apple Pay Direct integration.
+     *
+     * @return array
+     */
+    public function getApplePayDirectRestrictions()
+    {
+        /** @var array|null $restrictions */
+        $restrictions = $this->get('mollie_applepaydirect_restrictions');
+
+        if ($restrictions === null) {
+            return array();
+        }
+
+        return $restrictions;
+    }
+
 }
