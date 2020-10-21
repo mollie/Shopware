@@ -184,12 +184,6 @@
                     <label lang="en">The credit has been accepted</label>
                     <label lang="nl">Het krediet werd goedgekeurd</label>
                 </option>
-                <option>
-                    <value>completely_paid</value>
-                    <label lang="de">Vollständig bezahlt</label>
-                    <label lang="en">Completely paid</label>
-                    <label lang="nl">Volledig betaald</label>
-                </option>
             </store>
         </element>
 
