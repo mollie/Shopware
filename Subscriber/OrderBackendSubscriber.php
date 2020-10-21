@@ -9,8 +9,10 @@ use Enlight_Controller_Request_Request;
 use Enlight_Event_EventArgs;
 use Enlight_Hook_HookArgs;
 use Exception;
+use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
 use MollieShopware\Models\Transaction;
@@ -31,8 +33,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
             'Shopware_Controllers_Api_Orders::putAction::after' => 'onOrderApiPut',
-            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail',
-            'Shopware\Models\Order\Order::postUpdate' => 'onUpdate'
+            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail'
         ];
     }
 
@@ -42,24 +43,6 @@ class OrderBackendSubscriber implements SubscriberInterface
     public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
-    }
-
-    public function onUpdate(Enlight_Event_EventArgs $args)
-    {
-        /** @var Order $order */
-        $order = $args->get('entity');
-
-        if ($order === null) {
-            return;
-        }
-
-        $orderId = $order->getId();
-
-        if ($orderId === null) {
-            return;
-        }
-
-        $this->shipOrderToMollie($orderId);
     }
 
     /**
