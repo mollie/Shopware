@@ -450,15 +450,8 @@ class PaymentService
         $paymentParameters = [];
 
         // get webhook and redirect URLs
-        $redirectUrl = $this->prepareRedirectUrl(
-            $transaction->getId(),
-            'return'
-        );
-
-        $webhookUrl = $this->prepareRedirectUrl(
-            $transaction->getId(),
-            'notify'
-        );
+        $redirectUrl = $this->prepareRedirectUrl($transaction->getId());
+        $webhookUrl = $this->prepareWebhookURL($transaction->getId());
 
         $paymentParameters['webhookUrl'] = $webhookUrl;
 
@@ -527,7 +520,7 @@ class PaymentService
             # assign the payment token
             $molliePrepared['method']  = PaymentMethod::APPLE_PAY;
         }
-
+        
         return $molliePrepared;
     }
 
@@ -617,43 +610,63 @@ class PaymentService
     }
 
     /**
-     * Prepare the redirect URL for Mollie
-     *
-     * @param \Shopware\Models\Order\Order $order
-     * @param string $action
-     * @param string $type
-     *
-     * @return string
-     *
-     * @throws \Exception
+     * @param $number
+     * @return mixed|string
      */
-    private function prepareRedirectUrl($number, $action = 'return')
+    private function prepareRedirectUrl($number)
     {
-        // check for errors
-        if (!in_array($action, ['return', 'notify']))
-            throw new \Exception('Cannot generate "' . $action . '" url as method is undefined');
-
-        // generate redirect url
         $assembleData = [
             'controller'    => 'Mollie',
-            'action'        => $action,
+            'action'        => 'return',
+            'transactionNumber' => $number,
+            'forceSecure'   => true
+        ];
+        
+        $url = Shopware()->Front()->Router()->assemble($assembleData);
+        
+        return $url;
+    }
+
+    /**
+     * @param $number
+     * @return mixed|string
+     * @throws \Exception
+     */
+    private function prepareWebhookURL($number)
+    {
+        $assembleData = [
+            'controller'    => 'Mollie',
+            'action'        => 'notify',
             'transactionNumber' => $number,
             'forceSecure'   => true
         ];
 
-//        if ($action == 'return')
-//            $assembleData['appendSession'] = true;
-
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 
-        // check if we are on local development
-        $mollieLocalDevelopment = false;
+        $customWebhookBaseURL = "";
 
-        if (isset($this->customEnvironmentVariables['mollieLocalDevelopment']))
-            $mollieLocalDevelopment = $this->customEnvironmentVariables['mollieLocalDevelopment'];
+        # let's verify if we have a custom config for mollie
+        # with that custom config its possible to use a different
+        # base url for the webhooks, e.g. if you use ngrok for local development
+        if (isset($this->customEnvironmentVariables['mollie'])) {
+            /** @var array $mollieEnv */
+            $mollieEnv = $this->customEnvironmentVariables['mollie'];
+            /** @var string $customWebhookBaseURL */
+            $customWebhookBaseURL = (isset($mollieEnv['webhook_base_url'])) ? $mollieEnv['webhook_base_url'] : '';
+        }
 
-        if ($mollieLocalDevelopment == true)
-            return 'https://kiener.nl/kiener.mollie.feedback.php?to=' . base64_encode($url);
+        # if we have a custom webhook URL
+        # make sure to replace the original shop urls 
+        # with the one we provide in here
+        if (!empty($customWebhookBaseURL)) {
+
+            $host = Shopware()->Shop()->getHost();
+
+            $newURL = str_replace('http://' . $host, '', $url);
+            $newURL = str_replace('https://' . $host, '', $newURL);
+
+            $url = $customWebhookBaseURL . $newURL;
+        }
 
         return $url;
     }
