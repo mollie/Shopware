@@ -16,6 +16,7 @@ use Shopware\Models\Order\Repository;
 use Shopware\Models\Order\Status;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class KlarnaShippingCommand extends ShopwareCommand
 {
@@ -49,14 +50,30 @@ class KlarnaShippingCommand extends ShopwareCommand
             ->setDescription('Ship completed Klarna orders');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void|null
+     * @throws \Exception
+     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $io = new SymfonyStyle($input, $output);
+        $io->title('MOLLIE Klarna Ship Command');
+        $io->text('Searching for all non-shipped Klarna orders and mark them as shipped if the status is correct...');
+
+
+        $notShippableStates = array(
+            Status::PAYMENT_STATE_OPEN,
+            Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
+        );
+
+
         /** @var Transaction[] $transactions */
         $transactions = null;
 
         /** @var TransactionRepository $transactionRepository */
-        $transactionRepository = $this->modelManager
-            ->getRepository(Transaction::class);
+        $transactionRepository = $this->modelManager->getRepository(Transaction::class);
 
         if ($transactionRepository !== null) {
             $transactions = $transactionRepository->findBy([
@@ -65,31 +82,40 @@ class KlarnaShippingCommand extends ShopwareCommand
             ]);
         }
 
+        if ($transactions === null || !is_array($transactions)) {
+            $io->success("No Mollie Transactions found!");
+        }
+
+
+        $countSuccess = 0;
+        $countFailed = 0;
+        $countSkipped = 0;
+        $countRepaired = 0;
+
         if ($transactions !== null && is_array($transactions)) {
 
-            $output->writeln(count($transactions) . ' orders to update.');
+            $io->text('Found ' . count($transactions) . ' orders that should be processed.');
 
             $switcher = new MollieShopSwitcher($this->container);
 
-            
+            /** @var Repository $orderRepository */
+            $orderRepository = $this->modelManager->getRepository(Order::class);
+
+
+            /** @var Transaction $transaction */
             foreach ($transactions as $transaction) {
 
-                // Ship order
                 try {
 
-                    $output->writeln('>> updating order: ' . $transaction->getOrderNumber());
+                    $io->section('Processing Order: ' . $transaction->getOrderNumber());
 
                     /** @var Order $order */
                     $order = null;
 
                     if ($transaction->getOrderId() === null) {
-                        continue;
-                    }
-
-                    /** @var Repository $orderRepository */
-                    $orderRepository = $this->modelManager->getRepository(Order::class);
-
-                    if ($orderRepository === null) {
+                        $io->note('No Order ID');
+                        $io->text('The transaction does not have an order ID. Every Klarna order must have one!');
+                        $countFailed++;
                         continue;
                     }
 
@@ -97,56 +123,93 @@ class KlarnaShippingCommand extends ShopwareCommand
                     $order = $orderRepository->find($transaction->getOrderId());
 
                     if ($order === null) {
+                        $io->note('No Order for Transaction');
+                        $io->text('The transaction does not have a linked order in Shopware');
+                        $countFailed++;
                         continue;
                     }
 
-
+                    # get the correct configuration
+                    # from the sub shop of the current order
                     $this->config = $switcher->getConfig($order->getShop()->getId());
                     $this->apiClient = $switcher->getMollieApi($order->getShop()->getId());
 
+                    # now request the order object from mollie
+                    # this is the current entity in their system
                     $mollieOrder = $this->apiClient->orders->get($transaction->getMollieId());
 
-                    # order not found
-                    # move to next one
                     if ($mollieOrder === null) {
+                        $io->note('No Order found in Mollie for this transaction!');
+                        $countFailed++;
                         continue;
                     }
 
-                    $notShippableStates = array(
-                        Status::PAYMENT_STATE_OPEN,
-                        Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
-                    );
+                    $io->text('Shop: ' . $order->getShop()->getName());
+                    $io->text('Current Status: #' . $order->getOrderStatus()->getId() . ' "' . $order->getOrderStatus()->getName() . '"');
+                    $io->text('Required Status: #' . $this->config->getKlarnaShipOnStatus());
 
-                    # order is in list of not shippable status entry
-                    # move to the next one
+
                     if (in_array($order->getPaymentStatus()->getId(), $notShippableStates, true)) {
+                        $io->note('Invalid Payment Status!');
+                        $io->text('The payment status of the order is not allowed for a shipping');
+                        $countSkipped++;
                         continue;
                     }
 
-                    # order status not the one for klarna
-                    # move to the next one
                     if ($order->getOrderStatus()->getId() !== $this->config->getKlarnaShipOnStatus()) {
-                        $output->writeln(' ...wrong order status');
+                        $io->note('Invalid Order Status!');
+                        $io->text('The order status of the order is not the one you have set in your plugin configuration.');
+                        $countSkipped++;
+                        continue;
+                    }
+
+                    if (count($mollieOrder->shipments()) > 0) {
+                        $io->note('Order already shipped!');
+                        $io->text('The order is already shipped in Mollie and must not be shipped again! Repairing this order!');
+
+                        $transaction->setIsShipped(true);
+                        $transactionRepository->save($transaction);
+
+                        $countRepaired++;
                         continue;
                     }
 
                     $mollieOrder->shipAll();
+
                     $transaction->setIsShipped(true);
+                    $transactionRepository->save($transaction);
+
+                    $countSuccess++;
 
                 } catch (\Exception $e) {
-                    $output->writeln(' ...' . $e->getMessage());
+                    $countFailed++;
+                    $io->error($e->getMessage());
                     Logger::log('error', $e->getMessage());
                 }
-
-                // Save order
-                try {
-                    $transactionRepository->save($transaction);
-                } catch (\Exception $e) {
-                    //
-                }
             }
-
-            $output->writeln('Done.');
         }
+
+        $io->section('Klarna Shipping command executed...');
+
+        $io->table(
+            ['Status', 'Orders'],
+            [
+                ['Successful Orders', $countSuccess],
+                ['Failed Orders', $countFailed,],
+                ['Skipped Orders', $countSkipped],
+                ['Repaired Orders', $countRepaired],
+            ]
+        );
+
+        $io->text('Some orders might be out-of-sync with Mollie.');
+        $io->text('The repaired orders have been marked as shipped in Shopware because they are already shipped in Mollie.');
+        $io->text("Thus, they won't be processed again the next time you run this command!");
+
+        if ($countFailed > 0) {
+            $io->error('Klarna Shipping failed');
+        } else {
+            $io->success('Klarna Shipping successful');
+        }
+
     }
 }
