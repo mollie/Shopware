@@ -8,6 +8,7 @@ use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\CustomConfig\CustomConfig;
 use MollieShopware\Components\Helpers\MollieLineItemCleaner;
 use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Models\Transaction;
@@ -643,29 +644,22 @@ class PaymentService
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 
-        $customWebhookBaseURL = "";
 
-        # let's verify if we have a custom config for mollie
-        # with that custom config its possible to use a different
-        # base url for the webhooks, e.g. if you use ngrok for local development
-        if (isset($this->customEnvironmentVariables['mollie'])) {
-            /** @var array $mollieEnv */
-            $mollieEnv = $this->customEnvironmentVariables['mollie'];
-            /** @var string $customWebhookBaseURL */
-            $customWebhookBaseURL = (isset($mollieEnv['webhook_base_url'])) ? $mollieEnv['webhook_base_url'] : '';
-        }
-
+        # check if we have a custom
+        # configuration for mollie and see
+        # if we have to use the custom shop base URL
+        $customConfig = new CustomConfig($this->customEnvironmentVariables);
+        
         # if we have a custom webhook URL
         # make sure to replace the original shop urls 
         # with the one we provide in here
-        if (!empty($customWebhookBaseURL)) {
+        if (!empty($customConfig->getShopDomain())) {
 
             $host = Shopware()->Shop()->getHost();
 
-            $newURL = str_replace('http://' . $host, '', $url);
-            $newURL = str_replace('https://' . $host, '', $newURL);
-
-            $url = $customWebhookBaseURL . $newURL;
+            # replace old domain with
+            # new custom domain
+            $url = str_replace($host, $customConfig->getShopDomain(), $url);
         }
 
         return $url;
