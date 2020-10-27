@@ -18,8 +18,9 @@ class ApplePayDirectDisplayOptions
         $restrictions = array();
 
         $restrictions[] = new DisplayOption(1, 'pdp', 'Product Detail Page');
-        $restrictions[] = new DisplayOption(2, 'cart', 'Cart');
-        $restrictions[] = new DisplayOption(3, 'cart_offcanvas', 'Cart (Offcanvas)');
+        $restrictions[] = new DisplayOption(2, 'cart_offcanvas', 'Cart (Offcanvas)');
+        $restrictions[] = new DisplayOption(3, 'cart_top', 'Cart (Top)');
+        $restrictions[] = new DisplayOption(4, 'cart_bot', 'Cart (Bottom)');
 
         return $restrictions;
     }
