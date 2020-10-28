@@ -3,7 +3,12 @@
 </p>
 <h1 align="center">Mollie for Shopware</h1>
 
+[![Build Status](https://travis-ci.com/mollie/Shopware.svg?branch=master)](https://travis-ci.com/mollie/Shopware) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mollie/Shopware)  ![GitHub All Releases](https://img.shields.io/github/downloads/mollie/Shopware/total?label=github%20downloads)  ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/mollie/Shopware/latest)
+
+
+
 ## Introduction
+
 Mollie offers various payment methods which can be easily integrated into your Shopware-powered webshop by using our official plugin. Mollie accepts all major payment methods such as Visa, Mastercard, American Express, PayPal, iDEAL, SOFORT Banking, SEPA Bank Transfer, SEPA Direct Debit, ING Home'Pay, KBC/CBC Payment Button, Bancontact, Belfius Pay Button, paysafecard, CartaSi, Cartes Bancaires and Gift cards
 
 1.  Installation is easy.
