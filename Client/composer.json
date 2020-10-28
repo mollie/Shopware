@@ -1,4 +1,5 @@
 {
+    "name": "mollie/shopware-client",
     "require": {
         "mollie\/mollie-api-php": "^2.0"
     }

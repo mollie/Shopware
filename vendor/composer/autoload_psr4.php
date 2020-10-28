@@ -6,7 +6,4 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'MollieShopware\\Tests\\' => array($baseDir . '/Tests'),
-    'MollieShopware\\Models\\' => array($baseDir . '/Models'),
-    'MollieShopware\\Components\\' => array($baseDir . '/Components'),
 );
