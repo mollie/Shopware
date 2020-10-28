@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.5</version>
+    <version>1.6.6</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,38 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.6.6">
+        <changes lang="de">
+            - Neue Apple Pay Direct Einschränkungen in den Plugin Konfigurationen, um den Apple Pay Button auf bestimmten Seiten ohne Programmierung auszublenden.
+            - Apple Pay Direct verwendet nun den bestehenden Shop Account, wenn man bereits angemeldet ist.
+            - "Komplett bezahlt" ist nun in den Plugin Konfigurationen für "Status für authorisierte Zahlungen" möglich, um z.B. Klarna Bestellungen sofort als "bezahlt" zu markieren.
+            - Neues Entwickler Feature, um lokal ganz einfach mit echten Webhooks sowie mit Apple Pay Direct entwickeln zu können, ohne irgendwelche Anpassungen am Plugin machen zu müssen.
+            (Bitte lest dazu die entsprechenden Anleitungen auf unserer WIKI Seite).
+            - Verbesserte Klarna "Shipping" Erkennung beim Wechsel eines Bestellstatus via CSV Upload oder Dritthersteller Plugins.
+            Das Mollie Plugin hört nun auf "postUpdates" von Doctrine Entities.
+            Sobald euer Code, oder der von einem Plugin, die bevorzugte Möglichkeit zum Aktualisieren einer Bestellung via Entity Manager verwendet, wird ein "Shipping" durchgeführt, sofern die Konditionen zutreffen.
+            - Verbessertes Klarna Shipping CLI Kommando mit optimierten Ausgaben + automatischer Reparatur von Bestellungen, deren Daten nicht mehr mit Mollie Daten synchron sind,
+            was zu einer angestauten Warteschlange bei der Abarbeitung führen kann.
+            - Problembehebung von "An order ID should start with 'ord_'". Dies kommt nur wenn Bestellungen nach der Zahlung in Shopware erstellt werden (Plugin Konfiguration).
+            Hier wurde ein Teil des Codes ausgeführt, der nicht ausgeführt werden sollte.
+            Nachdem die Ausführung jedoch scheitert, gab es kein richtiges Problem - nur die unnötige Ausgabe in den Logs.
+        </changes>
+        <changes lang="en">
+            - Add new Apple Pay Direct Restriction options in the plugin configuration to hide the Apple Pay button on specific pages without the need to code anything.
+            - Apple Pay Direct uses your existing account, if you are signed in in the shop.
+            - Add "Completely paid" to the plugin configuration for "Status on authorized payments" to e.g. immediately mark Klarna payments as "paid".
+            - Add brand new developer feature to run real webhooks and Apple Pay Direct locally without changing anything in the plugin.
+            (Please see our WIKI for more details)
+            - Improved Klarna "shipping detection" for order status transitions in combination with CSV upload and other plugins.
+            The Mollie plugin does now listen for Doctrine Entity "postUpdates".
+            As soon as you or a plugin uses the preferred way to update the order status with the EntityManager, the shipping will be started if conditions are met.
+            - Improved Klarna Shipping CLI command with better output + "auto repair" mechanism to repair any problems and data that might be out of sync,
+            which could lead to a jammed queue.
+            - Fix error "An order ID should start with 'ord_'", that only happens when you create orders after the payment (plugin configuration).
+            The code part did not work, but shouldn't be triggered anyway - so it was not a problem at all - it only led to that disturbing log entry.
+        </changes>
+    </changelog>
 
     <changelog version="1.6.5">
         <changes lang="de">
