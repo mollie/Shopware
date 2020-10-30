@@ -982,23 +982,9 @@ class PaymentService
         // get the order module
         $sOrder = Shopware()->Modules()->Order();
 
-        // get the history service
-        /** @var OrderHistoryService $historyService */
-        $historyService = Shopware()->Container()->get('mollie_shopware.order_history_service');
-
         // the order is completed
         if ($status === PaymentStatus::MOLLIE_PAYMENT_COMPLETED) {
             if ($type === 'order' && $this->config->updateOrderStatus()) {
-                if ($historyService !== null) {
-                    $historyService->addOrderHistory(
-                        $order,
-                        Status::ORDER_STATE_COMPLETED,
-                        $order->getOrderStatus()->getId(),
-                        $order->getPaymentStatus()->getId(),
-                        $order->getPaymentStatus()->getId()
-                    );
-                }
-
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_COMPLETED,
@@ -1013,16 +999,6 @@ class PaymentService
 
         // the order or payment is paid
         if ($status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
-            if ($historyService !== null) {
-                $historyService->addOrderHistory(
-                    $order,
-                    $order->getOrderStatus()->getId(),
-                    $order->getOrderStatus()->getId(),
-                    Status::PAYMENT_STATE_COMPLETELY_PAID,
-                    $order->getPaymentStatus()->getId()
-                );
-            }
-
             $sOrder->setPaymentStatus(
                 $order->getId(),
                 Status::PAYMENT_STATE_COMPLETELY_PAID,
@@ -1073,16 +1049,6 @@ class PaymentService
 
         // the payment is delayed
         if ($status === PaymentStatus::MOLLIE_PAYMENT_DELAYED) {
-            if ($historyService !== null) {
-                $historyService->addOrderHistory(
-                    $order,
-                    $order->getOrderStatus()->getId(),
-                    $order->getOrderStatus()->getId(),
-                    Status::PAYMENT_STATE_DELAYED,
-                    $order->getPaymentStatus()->getId()
-                );
-            }
-
             $sOrder->setPaymentStatus(
                 $order->getId(),
                 Status::PAYMENT_STATE_DELAYED,
@@ -1096,16 +1062,6 @@ class PaymentService
 
         // the payment is open
         if ($status === PaymentStatus::MOLLIE_PAYMENT_OPEN) {
-            if ($historyService !== null) {
-                $historyService->addOrderHistory(
-                    $order,
-                    $order->getOrderStatus()->getId(),
-                    $order->getOrderStatus()->getId(),
-                    Status::PAYMENT_STATE_OPEN,
-                    $order->getPaymentStatus()->getId()
-                );
-            }
-
             $sOrder->setPaymentStatus(
                 $order->getId(),
                 Status::PAYMENT_STATE_OPEN,
@@ -1120,16 +1076,6 @@ class PaymentService
         // the order or payment is canceled
         if ($status === PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
             if ($type === 'payment') {
-                if ($historyService !== null) {
-                    $historyService->addOrderHistory(
-                        $order,
-                        $order->getOrderStatus()->getId(),
-                        $order->getOrderStatus()->getId(),
-                        Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-                        $order->getPaymentStatus()->getId()
-                    );
-                }
-
                 $sOrder->setPaymentStatus(
                     $order->getId(),
                     Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
@@ -1144,16 +1090,6 @@ class PaymentService
                     && $this->config->updateOrderStatus()
                 )
             ) {
-                if ($historyService !== null) {
-                    $historyService->addOrderHistory(
-                        $order,
-                        Status::ORDER_STATE_CANCELLED_REJECTED,
-                        $order->getOrderStatus()->getId(),
-                        $order->getPaymentStatus()->getId(),
-                        $order->getPaymentStatus()->getId()
-                    );
-                }
-
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_CANCELLED_REJECTED,
@@ -1174,16 +1110,6 @@ class PaymentService
         if ($status === PaymentStatus::MOLLIE_PAYMENT_FAILED ||
             $status === PaymentStatus::MOLLIE_PAYMENT_EXPIRED) {
             if ($type === 'payment') {
-                if ($historyService !== null) {
-                    $historyService->addOrderHistory(
-                        $order,
-                        $order->getOrderStatus()->getId(),
-                        $order->getOrderStatus()->getId(),
-                        Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
-                        $order->getPaymentStatus()->getId()
-                    );
-                }
-
                 $sOrder->setPaymentStatus(
                     $order->getId(),
                     Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
@@ -1192,16 +1118,6 @@ class PaymentService
             }
 
             if ($this->config->cancelFailedOrders()) {
-                if ($historyService !== null) {
-                    $historyService->addOrderHistory(
-                        $order,
-                        Status::ORDER_STATE_CANCELLED_REJECTED,
-                        $order->getOrderStatus()->getId(),
-                        $order->getPaymentStatus()->getId(),
-                        $order->getPaymentStatus()->getId()
-                    );
-                }
-
                 $sOrder->setOrderStatus(
                     $order->getId(),
                     Status::ORDER_STATE_CANCELLED_REJECTED,
