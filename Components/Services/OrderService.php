@@ -3,21 +3,28 @@
 namespace MollieShopware\Components\Services;
 
 use MollieShopware\Components\Logger;
+use Psr\Log\LoggerInterface;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 
 class OrderService
 {
-    /** @var \Shopware\Components\Model\ModelManager $modelManager */
+    /** @var ModelManager $modelManager */
     protected $modelManager;
 
     /**
-     * Constructor
-     *
-     * @param \Shopware\Components\Model\ModelManager $modelManager
+     * @var LoggerInterface
      */
-    public function __construct(\Shopware\Components\Model\ModelManager $modelManager)
+    private $logger;
+
+    /**
+     * @param ModelManager $modelManager
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ModelManager $modelManager, LoggerInterface $logger)
     {
         $this->modelManager = $modelManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -41,12 +48,13 @@ class OrderService
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $orderRepo->find($orderId);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error when loading order by id: ' . $orderId,
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
@@ -74,12 +82,13 @@ class OrderService
 
             /** @var \Shopware\Models\Order\Detail $detail */
             $detail = $orderRepo->find($orderDetailId);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error when loading order detail by id: ' . $orderDetailId,
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
@@ -109,12 +118,13 @@ class OrderService
             $order = $orderRepo->findOneBy([
                 'number' => $orderNumber
             ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error when loading order by number: ' . $orderNumber,
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
@@ -145,12 +155,13 @@ class OrderService
             $transaction = $transactionRepo->findOneBy([
                 'orderId' => $order->getId()
             ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error when loading mollie order id',
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
@@ -184,12 +195,13 @@ class OrderService
             $transaction = $transactionRepo->findOneBy([
                 'orderId' => $orderId
             ]);
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error when loading mollie payment id of order: ' . $orderId,
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
@@ -280,12 +292,12 @@ class OrderService
                     $items[] = $orderLine;
                 }
             }
-        }
-        catch (\Exception $ex) {
-            Logger::log(
-                'error',
-                $ex->getMessage(),
-                $ex
+        } catch (\Exception $ex) {
+            $this->logger->error(
+                'Error when loading order lines',
+                array(
+                    'error' => $ex->getMessage(),
+                )
             );
         }
 
