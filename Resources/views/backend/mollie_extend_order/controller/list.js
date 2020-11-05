@@ -3,6 +3,16 @@
 Ext.define('Shopware.apps.Mollie.controller.List', {
     override: 'Shopware.apps.Order.controller.List',
 
+    molSnippets: {
+        confirmUpdateShippingTitle: '{s namespace="backend/mollie/general" name="orders_list_action_confirm_shipping_title"}{/s}',
+        confirmUpdateShippingMessage: '{s namespace="backend/mollie/general" name="orders_list_action_confirm_shipping_message"}{/s}',
+        confirmRefundTitle: '{s namespace="backend/mollie/general" name="orders_list_action_confirm_refund_title"}{/s}',
+        confirmRefundMessage: '{s namespace="backend/mollie/general" name="orders_list_action_confirm_refund_message"}{/s}',
+        errorOrderAlreadyShipped: '{s namespace="backend/mollie/general" name="global_error_order_already_shipped"}{/s}',
+        errorOrderAlreadyRefunded: '{s namespace="backend/mollie/general" name="global_error_order_already_refunded"}{/s}',
+    },
+
+
     init: function() {
         var me = this;
 
@@ -38,13 +48,15 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
     onShipOrder: function(record) {
         var me = this;
         var store = me.subApplication.getStore('Order');
-        var message = ((me.snippets.shipOrderConfirm && me.snippets.shipOrderConfirm.message) || 'Are you sure you want to set the status of order') + ' ' + record.get('number') + ' to shipping at Mollie?';
-        var title = (me.snippets.shipOrderConfirm && me.snippets.shipOrderConfirm.title) || 'Ship order';
 
+        var title = me.molSnippets.confirmUpdateShippingTitle;
+        var message = me.molSnippets.confirmUpdateShippingMessage + ' ' + record.get('number');
+
+   
         if( [ 2 ].indexOf(record.get('status')) !== -1 ) {
             return Shopware.Notification.createGrowlMessage(
                 me.snippets.failureTitle,
-                'Order already shipped',
+                me.molSnippets.errorOrderAlreadyShipped,
                 me.snippets.growlMessage
             );
         }
@@ -74,7 +86,7 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
                     } catch(e) {
                         Shopware.Notification.createGrowlMessage(
                             me.snippets.failureTitle,
-                            me.snippets.changeStatus.failureMessage + '<br>' + e.message,
+                            e.message,
                             me.snippets.growlMessage
                         );
                     }
@@ -86,13 +98,13 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
     onRefundOrder: function(record) {
         var me = this;
         var store = me.subApplication.getStore('Order');
-        var message = ((me.snippets.refundOrderConfirm && me.snippets.refundOrderConfirm.message) || 'Are you sure you want to refund order' ) + ' ' + record.get('number');
-        var title = (me.snippets.refundOrderConfirm && me.snippets.refundOrderConfirm.title) || 'Refund order';
+        var message = me.molSnippets.confirmRefundMessage + ' ' + record.get('number');
+        var title = me.molSnippets.confirmRefundTitle;
 
         if( [ 20 ].indexOf(record.get('cleared')) !== -1 ) {
             return Shopware.Notification.createGrowlMessage(
                 me.snippets.failureTitle,
-                'Order already refunded',
+                me.molSnippets.errorOrderAlreadyRefunded,
                 me.snippets.growlMessage
             );
         }
@@ -125,7 +137,7 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
                     } catch(e) {
                         Shopware.Notification.createGrowlMessage(
                             me.snippets.failureTitle,
-                            me.snippets.changeStatus.failureMessage + '<br> ' + e.message,
+                            e.message,
                             me.snippets.growlMessage
                         );
                     }

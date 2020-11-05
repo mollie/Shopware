@@ -105,7 +105,7 @@
 
         <element type="select" scope="shop">
             <name>auto_reset_stock</name>
-            <label lang="de">Lader automatisch züruckzetsen nach ein fehlgeschlagener Zahlung</label>
+            <label lang="de">Lagerbestand automatisch zurücksetzen nach fehlgeschlagener Zahlung</label>
             <label lang="en">Automatically reset stock on failed payment</label>
             <label lang="nl">Voorraad automatisch herstellen na een mislukte betaling</label>
             <value>yes</value>
@@ -133,7 +133,7 @@
 
         <element type="select" scope="shop">
             <name>orders_api_only_where_mandatory</name>
-            <label lang="de">Nur Bestellungen bei Mollie erstellen für Klarna Pay Later und Klarna Slice It</label>
+            <label lang="de">Nur Bestellungen für Klarna Pay Later und Klarna Slice It in Mollie erstellen</label>
             <label lang="en">Only create orders at Mollie for Klarna Pay Later and Klarna Slice It</label>
             <label lang="nl">Alleen orders bij Mollie aanmaken voor Klarna Pay Later en Klarna Slice It gebruiken</label>
             <value>yes</value>
@@ -180,13 +180,13 @@
                 </option>
                 <option>
                     <value>preliminarily_accepted</value>
-                    <label lang="de">Der Krediet wurde vorlaeufig akzeptiert</label>
+                    <label lang="de">Der Kredit wurde vorläufig akzeptiert</label>
                     <label lang="en">The credit has been preliminarily accepted</label>
                     <label lang="nl">Het krediet werd voorlopig geaccepteerd</label>
                 </option>
                 <option>
                     <value>accepted</value>
-                    <label lang="de">Der Krediet wurde genehmigt</label>
+                    <label lang="de">Der Kredit wurde genehmigt</label>
                     <label lang="en">The credit has been accepted</label>
                     <label lang="nl">Het krediet werd goedgekeurd</label>
                 </option>
@@ -209,7 +209,7 @@
 
         <element type="combo" scope="shop">
             <name>klarna_shipped_status</name>
-            <label lang="de">Order status für ausgelieferte Bestellungen (Klarna Pay Later)</label>
+            <label lang="de">Bestellstatus für ausgelieferte Bestellungen (Klarna Pay Later)</label>
             <label lang="en">Order status for shipped orders (Klarna Pay Later)</label>
             <label lang="nl">Bestelstatus voor verzonden bestellingen (Klarna Pay Later)</label>
             <store>Shopware.apps.Base.store.OrderStatus</store>
@@ -304,7 +304,7 @@
 
         <element type="select" scope="shop">
             <name>reset_invoice_shipping</name>
-            <label lang="de">Gesamtbetrag und Versand bei stornierter Bestellungen löschen</label>
+            <label lang="de">Gesamtbetrag und Versand bei stornierter Bestellung löschen</label>
             <label lang="en">Clear invoice amount and shipping on canceled order</label>
             <label lang="nl">Besteltotaal en verzending leegmaken bij geannuleerde bestelling</label>
             <value>no</value>
@@ -332,7 +332,7 @@
 
         <element type="select" scope="shop">
             <name>create_order_before_payment</name>
-            <label lang="de">Bestellung erstellen bevor Abschluss der Zahlung</label>
+            <label lang="de">Bestellung vor Abschluss der Zahlung erstellen</label>
             <label lang="en">Create order before finishing the payment</label>
             <label lang="nl">Order aanmaken vóór het afronden van de betaling</label>
             <value>yes</value>
@@ -363,7 +363,7 @@
 
         <element type="boolean">
             <name>enable_credit_card_component</name>
-            <label lang="de">Kreditkartenkomponente aktivieren</label>
+            <label lang="de">Kreditkarten Komponenten aktivieren</label>
             <label lang="en">Enable credit card component</label>
             <label lang="nl">Credit card component activeren</label>
             <value>true</value>
@@ -371,7 +371,7 @@
 
         <element type="boolean">
             <name>enable_credit_card_component_styling</name>
-            <label lang="de">Styling für die Kreditkartenkomponente aktivieren</label>
+            <label lang="de">Styling für die Kreditkarten Komponenten aktivieren</label>
             <label lang="en">Enable styling for credit card component</label>
             <label lang="nl">Voeg styling toe aan credit card component</label>
             <value>true</value>
