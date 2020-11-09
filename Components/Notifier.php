@@ -2,8 +2,11 @@
 
 namespace MollieShopware\Components;
 
+use Psr\Log\LoggerInterface;
+
 class Notifier
 {
+
     /**
      * Shows a JSON exception for the given request.
      *
@@ -11,13 +14,18 @@ class Notifier
      * @param null $exception
      * @throws \Exception
      */
-    public static function notifyException($error, $exception = null) {
-        // log the error
-        Logger::log(
-            'error',
-            $error,
-            $exception
-        );
+    public static function notifyException($error, $exception = null)
+    {
+        if ($exception !== null) {
+            self::getLogger()->error(
+                $error,
+                array(
+                    'error' => $exception->getMessage()
+                )
+            );
+        } else {
+            self::getLogger()->error($error);
+        }
 
         self::notify(false, $error, '500 Server Error');
     }
@@ -28,12 +36,9 @@ class Notifier
      * @param $message
      * @throws \Exception
      */
-    public static function notifyOk($message) {
-        // log the message
-        Logger::log(
-            'info',
-            $message
-        );
+    public static function notifyOk($message)
+    {
+        self::getLogger()->info($message);
 
         self::notify(true, $message);
     }
@@ -58,4 +63,13 @@ class Notifier
 
         die();
     }
+
+    /**
+     * @return LoggerInterface
+     */
+    private static function getLogger()
+    {
+        return Shopware()->Container()->get('mollie_shopware.components.logger');
+    }
+
 }
