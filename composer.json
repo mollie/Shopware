@@ -4,7 +4,9 @@
     "php": ">=5.6"
   },
   "require-dev": {
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "doctrine/collections": "1.6.4",
+    "monolog/monolog": "1.25.3"
   },
   "autoload-dev": {
     "psr-4": {

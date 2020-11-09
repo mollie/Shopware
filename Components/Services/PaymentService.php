@@ -11,6 +11,7 @@ use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CustomConfig\CustomConfig;
 use MollieShopware\Components\Helpers\MollieLineItemCleaner;
 use MollieShopware\Components\Helpers\MollieRefundStatus;
+use MollieShopware\Components\MollieApi\LineItemsBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Shopware\Models\Order\Status;
@@ -27,7 +28,6 @@ class PaymentService
      * string and i dont want to touch anything else.
      */
     const CHECKOUT_URL_CC_NON3D_SECURE = 'OK_NON_3dSecure';
-
 
 
     /** @var \MollieShopware\Components\MollieApiFactory $apiFactory */
@@ -65,10 +65,10 @@ class PaymentService
     }
 
     /**
-     * This function helps to use a different api client 
+     * This function helps to use a different api client
      * for this payment methods service.
      * One day there should be a refactoring to do this in the constructor.
-     * 
+     *
      * @param MollieApiClient $client
      */
     public function switchApiClient(MollieApiClient $client)
@@ -80,14 +80,14 @@ class PaymentService
      * This function helps to use a different config
      * for this payment methods service.
      * One day there should be a refactoring to do this in the constructor.
-     * 
+     *
      * @param \MollieShopware\Components\Config $config
      */
     public function switchConfig(\MollieShopware\Components\Config $config)
     {
         $this->config = $config;
     }
-    
+
     /**
      * Create the transaction in the TransactionRepository.
      *
@@ -156,7 +156,7 @@ class PaymentService
             $orderLinesRepo = Shopware()->container()->get('models')
                 ->getRepository('\MollieShopware\Models\OrderLines');
 
-            foreach($mollieOrder->lines as $index => $line) {
+            foreach ($mollieOrder->lines as $index => $line) {
                 // create new item
                 $item = new \MollieShopware\Models\OrderLines();
 
@@ -170,8 +170,7 @@ class PaymentService
                 // save item
                 $orderLinesRepo->save($item);
             }
-        }
-        else {
+        } else {
             // prepare the payment for mollie
             $molliePaymentPrepared = $this->prepareRequest(
                 $paymentMethod,
@@ -237,7 +236,7 @@ class PaymentService
         // Store transaction
         $transactionRepo->save($transaction);
 
-        if ((string) $errorMessage !== '') {
+        if ((string)$errorMessage !== '') {
             return [
                 'error' => $error,
                 'message' => $errorMessage
@@ -308,7 +307,7 @@ class PaymentService
             $orderLinesRepo = Shopware()->container()->get('models')
                 ->getRepository('\MollieShopware\Models\OrderLines');
 
-            foreach($mollieOrder->lines as $index => $line) {
+            foreach ($mollieOrder->lines as $index => $line) {
                 // create new item
                 $item = new \MollieShopware\Models\OrderLines();
 
@@ -319,8 +318,7 @@ class PaymentService
                 // save item
                 $orderLinesRepo->save($item);
             }
-        }
-        else {
+        } else {
             // prepare the payment for mollie
             $molliePaymentPrepared = $this->preparePayment($order);
 
@@ -478,16 +476,17 @@ class PaymentService
             'method' => $paymentMethod,
         ];
 
-        $paymentDescription = (string) (time() . $transaction->getId() . substr($transaction->getBasketSignature(), -4));
+        $paymentDescription = (string)(time() . $transaction->getId() . substr($transaction->getBasketSignature(), -4));
 
         // add extra parameters depending on using the Orders API or the Payments API
         if ($ordersApi) {
             // get order lines
-            $orderLines = $this->getOrderLines($transaction);
+            $lineItemBuilder = new LineItemsBuilder();
+            $orderLines = $lineItemBuilder->buildLineItems($transaction);
 
             // set order parameters
             $molliePrepared['orderNumber'] = strlen($transaction->getOrderNumber()) ?
-                (string) $transaction->getOrderNumber() : $paymentDescription;
+                (string)$transaction->getOrderNumber() : $paymentDescription;
 
             $molliePrepared['lines'] = $orderLines;
             $molliePrepared['billingAddress'] = $this->getAddress(
@@ -517,52 +516,12 @@ class PaymentService
         }
 
 
-        if ((string) $paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
+        if ((string)$paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
             # assign the payment token
-            $molliePrepared['method']  = PaymentMethod::APPLE_PAY;
+            $molliePrepared['method'] = PaymentMethod::APPLE_PAY;
         }
-        
+
         return $molliePrepared;
-    }
-
-    /**
-     * Get the order lines for an order
-     *
-     * @param \MollieShopware\Models\Transaction $transaction
-     *
-     * @return array
-     */
-    private function getOrderLines(\MollieShopware\Models\Transaction $transaction)
-    {
-        $orderlines = [];
-
-        /** @var \MollieShopware\Models\TransactionItem $item */
-        foreach($transaction->getItems() as $item)
-        {
-            $orderlines[] = [
-                'type' => $item->getType(),
-                'name' => $item->getName(),
-                'quantity' => (int)$item->getQuantity(),
-                'unitPrice' => $this->getPriceArray($transaction->getCurrency(), $item->getUnitPrice()),
-                'totalAmount' => $this->getPriceArray($transaction->getCurrency(), $item->getTotalAmount()),
-                'vatRate' => number_format($item->getVatRate(), 2, '.', ''),
-                'vatAmount' => $this->getPriceArray($transaction->getCurrency(), $item->getVatAmount()),
-                'sku' => null,
-                'imageUrl' => null,
-                'productUrl' => null,
-                'metadata' => json_encode(['transaction_item_id' => $item->getId()]),
-            ];
-        }
-        
-        
-        $cleaner = new MollieLineItemCleaner();
-        
-        # sometimes the advanced promotion suite has duplicate discounts in there.
-        # so we just remove these, otherwise we would get the error
-        # "amount of line items does not match provided total sum" of mollie
-        $orderlines = $cleaner->removeDuplicateDiscounts($orderlines);
-        
-        return $orderlines;
     }
 
     /**
@@ -617,14 +576,14 @@ class PaymentService
     private function prepareRedirectUrl($number)
     {
         $assembleData = [
-            'controller'    => 'Mollie',
-            'action'        => 'return',
+            'controller' => 'Mollie',
+            'action' => 'return',
             'transactionNumber' => $number,
-            'forceSecure'   => true
+            'forceSecure' => true
         ];
-        
+
         $url = Shopware()->Front()->Router()->assemble($assembleData);
-        
+
         return $url;
     }
 
@@ -636,10 +595,10 @@ class PaymentService
     private function prepareWebhookURL($number)
     {
         $assembleData = [
-            'controller'    => 'Mollie',
-            'action'        => 'notify',
+            'controller' => 'Mollie',
+            'action' => 'notify',
             'transactionNumber' => $number,
-            'forceSecure'   => true
+            'forceSecure' => true
         ];
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
@@ -649,7 +608,7 @@ class PaymentService
         # configuration for mollie and see
         # if we have to use the custom shop base URL
         $customConfig = new CustomConfig($this->customEnvironmentVariables);
-        
+
         # if we have a custom webhook URL
         # make sure to replace the original shop urls 
         # with the one we provide in here
@@ -805,21 +764,20 @@ class PaymentService
 
 
         if ($molliePayment !== null) {
-            
+
             $refundStatus = new MollieRefundStatus();
-            
+
             if ($refundStatus->isPaymentFullyRefunded($molliePayment)) {
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_REFUNDED, true);
             }
-            
+
             if ($refundStatus->isPaymentPartiallyRefunded($molliePayment)) {
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED, true);
             }
-            
+
             if ($molliePayment->isPaid()) {
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PAID, true);
-            }
-            elseif ($molliePayment->isPending())
+            } elseif ($molliePayment->isPending())
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_DELAYED, true);
             elseif ($molliePayment->isAuthorized())
                 return $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED, true);
@@ -852,8 +810,7 @@ class PaymentService
         /** @var \Mollie\Api\Resources\Order $mollieOrder */
         try {
             $mollieOrder = $this->getMollieOrder($order);
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             //
         }
 
@@ -868,14 +825,14 @@ class PaymentService
                 if ($returnResult)
                     return true;
             }
-            
+
             if ($refundStatus->isOrderPartiallyRefunded($mollieOrder)) {
                 $this->setPaymentStatus($order, PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED, $returnResult);
 
                 if ($returnResult)
                     return true;
             }
-            
+
             if ($paymentsResult['total'] > 0) {
                 // fully paid
                 if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID] == $paymentsResult['total']) {
@@ -974,8 +931,8 @@ class PaymentService
      * @param \Shopware\Models\Order\Order $order
      * @param string $status
      * @param boolean $returnResult
-     * @throws \Exception
      * @return mixed
+     * @throws \Exception
      */
     public function setPaymentStatus(\Shopware\Models\Order\Order $order, $status, $returnResult = false, $type = 'payment')
     {
@@ -1009,7 +966,7 @@ class PaymentService
                 return true;
             }
         }
-        
+
         if ($status === PaymentStatus::MOLLIE_PAYMENT_REFUNDED) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
@@ -1021,7 +978,7 @@ class PaymentService
                 return true;
             }
         }
-        
+
         if ($status === PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED) {
             $sOrder->setPaymentStatus(
                 $order->getId(),
@@ -1151,8 +1108,7 @@ class PaymentService
         try {
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
             $mollieOrder = $this->apiClient->orders->get($mollieId);
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             throw new \Exception('Order ' . $mollieId . ' could not be found at Mollie.');
         }
 
@@ -1162,16 +1118,14 @@ class PaymentService
             if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
                 if ($mollieOrder->isCompleted()) {
                     throw new \Exception('The order is already completed at Mollie.');
-                }
-                else {
+                } else {
                     throw new \Exception('The order doesn\'t seem to be paid or authorized.');
                 }
             }
 
             try {
                 $result = $mollieOrder->shipAll();
-            }
-            catch (\Exception $ex) {
+            } catch (\Exception $ex) {
                 throw new \Exception('The order can\'t be shipped.');
             }
 
@@ -1193,18 +1147,18 @@ class PaymentService
         $paymentMethod,
         array $paymentParameters)
     {
-        if ((string) $paymentMethod === PaymentMethod::IDEAL) {
+        if ((string)$paymentMethod === PaymentMethod::IDEAL) {
             $paymentParameters['issuer'] = $this->getIdealIssuer();
         }
 
-        if ((string) $paymentMethod === PaymentMethod::CREDITCARD) {
+        if ((string)$paymentMethod === PaymentMethod::CREDITCARD) {
             if ($this->config->enableCreditCardComponent() === true &&
-                (string) $this->getCreditCardToken() !== '') {
+                (string)$this->getCreditCardToken() !== '') {
                 $paymentParameters['cardToken'] = $this->getCreditCardToken();
             }
         }
 
-        if ((string) $paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
+        if ((string)$paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
             # assign the payment token
             $paymentParameters["applePayPaymentToken"] = $this->getApplePayPaymentToken();
         }
@@ -1264,7 +1218,8 @@ class PaymentService
      * @param \Shopware\Models\Order\Order $order
      * @throws \Exception
      */
-    public function resetStock(\Shopware\Models\Order\Order $order) {
+    public function resetStock(\Shopware\Models\Order\Order $order)
+    {
         if ($this->config->autoResetStock()) {
             // Cancel failed orders
             /** @var \MollieShopware\Components\Services\BasketService $basketService */
