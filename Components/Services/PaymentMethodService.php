@@ -111,7 +111,15 @@ class PaymentMethodService
         $position = 0;
 
         /** @var null|MethodCollection $methods */
-        $methods = $this->appendApplePayDirectFeature($this->getActivePaymentMethodsFromMollie());
+        $methods = $this->getActivePaymentMethodsFromMollie();
+
+        if ($methods !== null) {
+            # if its not null, do the same again
+            # please note we give the original list into it
+            # to avoid duplicate adding (without changing anything else)
+            $methods = $this->appendApplePayDirectFeature($this->getActivePaymentMethodsFromMollie());
+        }
+
 
         // Add the template directory to the template manager
         $this->templateManager->addTemplateDir(__DIR__ . '/Resources/views');
