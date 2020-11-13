@@ -267,7 +267,7 @@ class BasketService
 
             foreach ($basketItems as $basketItem) {
                 $unitPrice = round($basketItem->getPrice(), 2);
-                $netPrice = $basketItem->getNetPrice();
+                $netPrice = round($basketItem->getNetPrice(), 2);
                 $totalAmount = $unitPrice * $basketItem->getQuantity();
                 $vatAmount = 0;
 
@@ -276,7 +276,8 @@ class BasketService
                     && $userData['additional']['charge_vat'] === true
                     && $userData['additional']['show_net'] === false
                 ) {
-                    $unitPrice *= ($basketItem->getTaxRate() + 100) / 100;
+                    $unitPrice = $unitPrice * ($basketItem->getTaxRate() + 100) / 100;
+                    $unitPrice = round($unitPrice, 2);
                     $totalAmount = $unitPrice * $basketItem->getQuantity();
                 }
 
@@ -285,6 +286,7 @@ class BasketService
                     && $userData['additional']['charge_vat'] === true
                 ) {
                     $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
+                    $vatAmount = round($vatAmount, 2);
                 }
 
                 // build the order line array
