@@ -452,6 +452,11 @@
             type: 'json',
             root: 'data',
             totalProperty: 'total'
+        },
+        listeners: {
+            exception: function(store, response, operation) {
+                throw new Error('Please clear your cache to use the Apple Pay Display restrictions and reopen the configuration!');
+            }
         }
     }
     }).create();//new ]]>
