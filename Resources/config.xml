@@ -27,12 +27,6 @@
             <description lang="nl">Betalingen worden gedaan met behulp van het testsysteem.</description>
             <store>
                 <option>
-                    <value>inherited</value>
-                    <label lang="de">Vererbt</label>
-                    <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
-                </option>
-                <option>
                     <value>yes</value>
                     <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
