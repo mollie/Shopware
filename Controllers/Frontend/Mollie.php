@@ -498,7 +498,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $transactionItem->setQuantity($basketLine['quantity']);
                 $transactionItem->setUnitPrice($basketLine['unit_price']);
                 $transactionItem->setNetPrice($basketLine['net_price']);
-                $transactionItem->setTotalAmount(round($basketLine['unit_price'],2) * $basketLine['quantity']);
+                $transactionItem->setTotalAmount($basketLine['total_amount']);
                 $transactionItem->setVatRate($basketLine['vat_rate']);
                 $transactionItem->setVatAmount($basketLine['vat_amount']);
 
