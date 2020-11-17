@@ -6,14 +6,35 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f
 {
-    public static $classMap = array (
-        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+    public static $prefixLengthsPsr4 = array (
+        'M' => 
+        array (
+            'MollieShopware\\Tests\\' => 21,
+            'MollieShopware\\Models\\' => 22,
+            'MollieShopware\\Components\\' => 26,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'MollieShopware\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Tests',
+        ),
+        'MollieShopware\\Models\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Models',
+        ),
+        'MollieShopware\\Components\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Components',
+        ),
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }
