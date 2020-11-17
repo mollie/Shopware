@@ -404,6 +404,18 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             \Shopware\Models\Order\Status::PAYMENT_STATE_RE_CREDITING
         );
 
+        /** @var \MollieShopware\Components\Services\OrderHistoryService $historyService */
+        $historyService = Shopware()->Container()->get('mollie_shopware.order_history_service');
+
+        // add item to the history
+        $historyService->addOrderHistory(
+            $order,
+            $order->getOrderStatus()->getId(),
+            $order->getOrderStatus()->getId(),
+            $paymentStatusRefunded->getId(),
+            $order->getPaymentStatus()->getId()
+        );
+
         // set the payment status
         $order->setPaymentStatus($paymentStatusRefunded);
 
