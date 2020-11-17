@@ -2,30 +2,30 @@
 
 namespace MollieShopware;
 
-use Doctrine\DBAL\Query\QueryBuilder;
 use Enlight_Template_Manager;
 use Exception;
 use Mollie\Api\MollieApiClient;
+use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandler;
+use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
+use MollieShopware\Components\ApplePayDirect\ApplePayDirectSetup;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayDomainFileDownloader;
-use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
-use MollieShopware\Components\Logger;
 use MollieShopware\Components\MollieApiFactory;
-use MollieShopware\Components\Schema;
 use MollieShopware\Components\Services\PaymentMethodService;
 use MollieShopware\Components\Services\ShopService;
-use MollieShopware\Components\Snippets\SnippetFile;
-use MollieShopware\Components\Snippets\SnippetsCleaner;
-use MollieShopware\Models\OrderLines;
-use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\OrderLines;
+use MollieShopware\Components\Schema;
+use MollieShopware\Components\Attributes;
+use MollieShopware\Components\Logger;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
-use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
+use Shopware\Components\Plugin\Context\UninstallContext;
 
 class MollieShopware extends Plugin
 {
@@ -132,7 +132,8 @@ class MollieShopware extends Plugin
         if ($request->getActionName() == 'load') {
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
-            $view->extendsTemplate('backend/mollie_extend_order_detail/view/detail/position.js');
+            $view->extendsTemplate('backend/mollie_extend_order_detail/view/list/position.js');
+            $view->extendsTemplate('backend/mollie_extend_order_detail/controller/list.js');
         }
     }
 
@@ -141,8 +142,6 @@ class MollieShopware extends Plugin
      */
     public function install(InstallContext $context)
     {
-        $this->cleanBackendSnippets();
-
         // Payments are not created at install,
         // because the user hasn't had the ability to put in an API-key at this time
         //
@@ -168,8 +167,6 @@ class MollieShopware extends Plugin
      */
     public function update(UpdateContext $context)
     {
-        $this->cleanBackendSnippets();
-
         // clear config cache
         $context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
 
@@ -319,31 +316,36 @@ class MollieShopware extends Plugin
     {
         try {
             $this->makeAttributes()->create([['s_order_basket_attributes', 'basket_item_id', 'int', []]]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             //
         }
 
         try {
             $this->makeAttributes()->create([['s_order_details_attributes', 'basket_item_id', 'int', []]]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             //
         }
 
         try {
             $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_transaction_id', 'int', []]]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             //
         }
 
         try {
             $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_order_line_id', 'int', []]]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             //
         }
 
         try {
             $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_return', 'int', []]]);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             //
         }
 
@@ -494,24 +496,4 @@ class MollieShopware extends Plugin
 
         return $paymentMethodService;
     }
-
-    /**
-     *
-     */
-    private function cleanBackendSnippets()
-    {
-        $connection = $this->container->get('dbal_connection');
-
-        $iniFiles = array(
-            new SnippetFile(
-                'backend/mollie/general',
-                __DIR__ . '/Resources/snippets/backend/mollie/general.ini'
-            )
-        );
-
-        $cleaner = new SnippetsCleaner($connection, $iniFiles);
-
-        $cleaner->cleanBackendSnippets();
-    }
-
 }
