@@ -6,7 +6,6 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Logger;
-use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Detail;
@@ -35,24 +34,21 @@ class BasketService
     protected $db;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
+     * Constructor
+     *
      * @param ModelManager $modelManager
-     * @param LoggerInterface $logger
      */
-    public function __construct(ModelManager $modelManager, LoggerInterface $logger)
+    public function __construct(ModelManager $modelManager)
     {
-        $this->modelManager = $modelManager;
-        $this->logger = $logger;
+        $this->config = Shopware()->Container()
+            ->get('mollie_shopware.config');
 
-        $this->config = Shopware()->Container()->get('mollie_shopware.config');
+        $this->modelManager = $modelManager;
 
         $this->basketModule = Shopware()->Modules()->Basket();
 
-        $this->orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+        $this->orderService = Shopware()->Container()
+            ->get('mollie_shopware.order_service');
 
         $this->db = Shopware()->Container()->get('db');
     }
@@ -318,12 +314,10 @@ class BasketService
                 $items[] = $orderLine;
             }
         } catch (Exception $ex) {
-
-            $this->logger->error(
-                'Error when loading basket lines',
-                array(
-                    'error' => $ex->getMessage(),
-                )
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
 
@@ -385,11 +379,10 @@ class BasketService
                 'id' => $voucherId
             ]);
         } catch (Exception $ex) {
-            $this->logger->error(
-                'Error when loading voucher by ID: ' . $voucherId,
-                array(
-                    'error' => $ex->getMessage(),
-                )
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
 
@@ -425,11 +418,10 @@ class BasketService
                 $orderDetailId,
             ]);
         } catch (Exception $ex) {
-            $this->logger->error(
-                'Error when removing order detail: ' . $orderDetailId,
-                array(
-                    'error' => $ex->getMessage(),
-                )
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
 
@@ -445,8 +437,7 @@ class BasketService
      *
      * @throws Exception
      */
-    public function resetOrderDetailQuantity(Detail $orderDetail)
-    {
+    public function resetOrderDetailQuantity(Detail $orderDetail) {
         // reset quantity
         $orderDetail->setQuantity(0);
 

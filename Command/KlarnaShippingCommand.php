@@ -9,7 +9,6 @@ use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Logger;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
-use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
@@ -21,32 +20,19 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class KlarnaShippingCommand extends ShopwareCommand
 {
-    /**
-     * @var Config
-     */
+    /** @var Config */
     private $config;
 
-    /**
-     * @var ModelManager
-     */
+    /** @var ModelManager */
     private $modelManager;
 
-    /**
-     * @var MollieApiClient
-     */
+    /** @var MollieApiClient */
     private $apiClient;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
 
     public function __construct(
         Config $config,
         ModelManager $modelManager,
         MollieApiClient $apiClient,
-        LoggerInterface $logger,
         $name = null
     )
     {
@@ -55,7 +41,6 @@ class KlarnaShippingCommand extends ShopwareCommand
         $this->config = $config;
         $this->modelManager = $modelManager;
         $this->apiClient = $apiClient;
-        $this->logger = $logger;
     }
 
     public function configure()
@@ -133,7 +118,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                         $io->note('No Order ID');
                         $io->text('The transaction does not have an order ID. Every Klarna order must have one!');
 
-                        $this->logger->error('Klarna Ship Command: No order ID found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
+                        Logger::log('error', 'Mollie Klarna Ship Command: No order ID found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
 
                         continue;
                     }
@@ -147,7 +132,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                         $io->note('No Order for Transaction');
                         $io->text('The transaction does not have a linked order in Shopware');
 
-                        $this->logger->error('Klarna Ship Command: No order found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
+                        Logger::log('error', 'Mollie Klarna Ship Command: No order found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
 
                         continue;
                     }
@@ -165,7 +150,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                     if ($mollieOrder === null) {
                         $io->note('No Order found in Mollie for this transaction!');
 
-                        $this->logger->error('Klarna Ship Command: No order found in Mollie for transaction: ' . $transaction->getId() . '!');
+                        Logger::log('error', 'Mollie Klarna Ship Command: No order found in Mollie for transaction: ' . $transaction->getId() . '!');
 
                         $countFailed++;
                         continue;
@@ -234,7 +219,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                 } catch (\Exception $e) {
                     $countFailed++;
                     $io->error($e->getMessage());
-                    $this->logger->error('Klarna Ship Command: ' . $e->getMessage());
+                    Logger::log('error', 'Mollie Klarna Ship Command: ' . $e->getMessage());
                 }
             }
         }

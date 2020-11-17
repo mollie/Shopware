@@ -3,7 +3,6 @@
 namespace MollieShopware\Models;
 
 use MollieShopware\Components\Logger;
-use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelRepository;
 
 class TransactionRepository extends ModelRepository
@@ -17,9 +16,9 @@ class TransactionRepository extends ModelRepository
      * @param \Mollie\Api\Resources\Order|null $mollieOrder
      * @param \Mollie\Api\Resources\Payment|null $molliePayment
      *
-     * @return \MollieShopware\Models\Transaction
      * @throws \Exception
      *
+     * @return \MollieShopware\Models\Transaction
      */
     public function create(
         \Shopware\Models\Order\Order $order = null,
@@ -62,13 +61,12 @@ class TransactionRepository extends ModelRepository
         try {
             $this->getEntityManager()->persist($transaction);
             $this->getEntityManager()->flush($transaction);
-        } catch (\Exception $ex) {
-
-            $this->getLogger()->error(
-                'Error when saving transaction in database',
-                array(
-                    'error' => $ex->getMessage(),
-                )
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
 
@@ -85,7 +83,7 @@ class TransactionRepository extends ModelRepository
     {
         /** @var Transaction $transaction */
         $transaction = $this->findOneBy([
-            'orderId' => $order->getId()
+            'orderId'=> $order->getId()
         ]);
 
         return $transaction;
@@ -94,8 +92,8 @@ class TransactionRepository extends ModelRepository
     /**
      * Get the last transaction id from the database
      *
-     * @return int|null
      * @throws \Exception
+     * @return int|null
      */
     public function getLastId()
     {
@@ -107,25 +105,15 @@ class TransactionRepository extends ModelRepository
 
             if (!empty($transaction))
                 $id = $transaction->getId();
-        } catch (\Exception $ex) {
-
-            $this->getLogger()->error(
-                'Error when loading last ID',
-                array(
-                    'error' => $ex->getMessage(),
-                )
+        }
+        catch (\Exception $ex) {
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
 
         return $id;
     }
-
-    /**
-     * @return LoggerInterface
-     */
-    private function getLogger()
-    {
-        return Shopware()->Container()->get('mollie_shopware.components.logger');
-    }
-
 }

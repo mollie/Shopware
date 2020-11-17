@@ -47,51 +47,6 @@
             </store>
         </element>
 
-        <element required="true" type="select">
-            <name>log_level</name>
-            <label lang="de">Protokollstufe</label>
-            <label lang="en">Log Level</label>
-            <label lang="nl">Log niveau</label>
-            <value>2, INFO</value>
-            <description lang="de">Konfiguration ab welcher Stufe Informationen und Fehler protokolliert werden sollen.</description>
-            <description lang="en">Configuration from which level information and errors should be logged</description>
-            <description lang="nl">Configuratie vanaf welk niveau informatie en errors gelogd moeten worden</description>
-            <store>
-                <option>
-                    <value>100</value>
-                    <label>1, DEBUG</label>
-                </option>
-                <option>
-                    <value>200</value>
-                    <label>2, INFO</label>
-                </option>
-                <option>
-                    <value>250</value>
-                    <label>3, NOTICE</label>
-                </option>
-                <option>
-                    <value>300</value>
-                    <label>4, WARNING</label>
-                </option>
-                <option>
-                    <value>400</value>
-                    <label>5, ERROR</label>
-                </option>
-                <option>
-                    <value>500</value>
-                    <label>6, CRITICAL</label>
-                </option>
-                <option>
-                    <value>550</value>
-                    <label>7, ALERT</label>
-                </option>
-                <option>
-                    <value>600</value>
-                    <label>8, EMERGENCY</label>
-                </option>
-            </store>
-        </element>
-
         <element type="select" scope="shop">
             <name>send_status_mail</name>
             <label lang="de">Statusmail für Zahlungen senden</label>

@@ -15,7 +15,6 @@ use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
-use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
@@ -23,12 +22,6 @@ class OrderBackendSubscriber implements SubscriberInterface
 {
     /** @var OrderService */
     private $orderService;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
 
     /**
      * @return array|string[]
@@ -45,12 +38,10 @@ class OrderBackendSubscriber implements SubscriberInterface
 
     /**
      * @param OrderService $orderService
-     * @param LoggerInterface $logger
      */
-    public function __construct(OrderService $orderService, LoggerInterface $logger)
+    public function __construct(OrderService $orderService)
     {
         $this->orderService = $orderService;
-        $this->logger = $logger;
     }
 
     public function onUpdate(Enlight_Event_EventArgs $args)
@@ -113,12 +104,7 @@ class OrderBackendSubscriber implements SubscriberInterface
                         $transaction->setOrdermailVariables(json_encode($variables));
                         $transactionRepo->save($transaction);
                     } catch (Exception $e) {
-                        $this->logger->error(
-                            'Error in onSendMail event',
-                            array(
-                                'error' => $e->getMessage(),
-                            )
-                        );
+                        LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
                     }
 
                     return false;
@@ -253,12 +239,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         try {
             $mollieId = $this->orderService->getMollieOrderId($order);
         } catch (Exception $e) {
-            $this->logger->error(
-                'Error when loading mollie ID in shipping',
-                array(
-                    'error' => $e->getMessage(),
-                )
-            );
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
         if (empty($mollieId)) {
@@ -298,12 +279,7 @@ class OrderBackendSubscriber implements SubscriberInterface
 
             $paymentService->sendOrder($mollieId);
         } catch (Exception $e) {
-            $this->logger->error(
-                'Error when shipping order to Mollie',
-                array(
-                    'error' => $e->getMessage(),
-                )
-            );
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
         return true;

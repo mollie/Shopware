@@ -4,7 +4,6 @@ namespace MollieShopware\Components;
 
 use Exception;
 use MollieShopware\Components\Services\ShopService;
-use Shopware\Components\Logger;
 use Shopware\Components\Plugin\ConfigReader;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Shop\Repository;
@@ -192,24 +191,6 @@ class Config
         # default is TRUE
         # just to avoid any problems with plugin updates
         return true;
-    }
-
-    /**
-     * Gets the set log level for the
-     * Mollie PSR4 Logger instance.
-     *
-     * @return int
-     */
-    public function getLogLevel()
-    {
-        /** @var int|null $level */
-        $level = $this->get('log_level');
-
-        if ($level === null) {
-            return Logger::INFO;
-        }
-
-        return $level;
     }
 
     /**

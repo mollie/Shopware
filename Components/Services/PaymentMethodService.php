@@ -15,7 +15,6 @@ use Mollie\Api\Types\PaymentMethod;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Helpers\LogHelper;
-use Psr\Log\LoggerInterface;
 use Shopware\Components\Api\Resource\PaymentMethods;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\PaymentInstaller;
@@ -47,30 +46,23 @@ class PaymentMethodService
     private $templateManager;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
+     * Creates a new instance of the payment method service.
+     *
      * @param ModelManager $modelManager
      * @param MollieApiClient $mollieApiClient
      * @param PaymentInstaller $paymentInstaller
      * @param Enlight_Template_Manager $templateManager
-     * @param LoggerInterface $logger
      */
     public function __construct(
         ModelManager $modelManager,
         MollieApiClient $mollieApiClient,
         PaymentInstaller $paymentInstaller,
-        Enlight_Template_Manager $templateManager,
-        LoggerInterface $logger
-    )
-    {
+        Enlight_Template_Manager $templateManager
+    ) {
         $this->modelManager = $modelManager;
         $this->mollieApiClient = $mollieApiClient;
         $this->paymentInstaller = $paymentInstaller;
         $this->templateManager = $templateManager;
-        $this->logger = $logger;
     }
 
     /**
@@ -223,12 +215,7 @@ class PaymentMethodService
                 ]
             );
         } catch (ApiException $e) {
-            $this->logger->error(
-                'Error when loading active payment methods from Mollie',
-                array(
-                    'error' => $e->getMessage(),
-                )
-            );
+            LogHelper::logMessage($e->getMessage(), LogHelper::LOG_ERROR, $e);
         }
 
         return $methods;

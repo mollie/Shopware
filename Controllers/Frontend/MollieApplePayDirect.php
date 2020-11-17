@@ -4,11 +4,13 @@ use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\Components\Account\Account;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
+use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
 use MollieShopware\Components\BasketSnapshot\BasketSnapshot;
 use MollieShopware\Components\Country\CountryIsoParser;
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
@@ -22,11 +24,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
     use MollieApiClientTrait;
 
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
 
     /**
      * @var ContainerAwareEventManager $eventManager
@@ -96,7 +93,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     private function loadServices()
     {
-        $this->logger = Shopware()->Container()->get('mollie_shopware.components.logger');
         $this->eventManager = Shopware()->Container()->get('events');
         $this->shopContext = Shopware()->Container()->get('shopware_storefront.context_service')->getShopContext();
 
@@ -151,13 +147,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             die();
 
         } catch (Throwable $ex) {
-
-            $this->logger->error(
-                'Error when adding product to apple pay cart',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error when adding product to apple pay cart', $ex->getMessage(), $ex);
 
             http_response_code(500);
             die();
@@ -232,13 +222,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             die();
 
         } catch (Throwable $ex) {
-
-            $this->logger->error(
-                'Error loading shippings for Mollie Apple Pay Direct',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error loading shippings for Mollie Apple Pay Direct: ' . $ex->getMessage(), $ex);
 
             $data = array(
                 'success' => false,
@@ -291,13 +275,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             die();
 
         } catch (Throwable $ex) {
-
-            $this->logger->error(
-                'Error setting shipping for Mollie Apple Pay Direct',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error setting shipping for Mollie Apple Pay Direct: ' . $ex->getMessage(), $ex);
 
             $data = array(
                 'success' => false,
@@ -333,13 +311,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             die();
 
         } catch (Throwable $ex) {
-
-            $this->logger->error(
-                'Error restoring cart after Mollie Apple Pay Direct',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error restoring cart after Mollie Apple Pay Direct: ' . $ex->getMessage(), $ex);
 
             http_response_code(500);
             die();
@@ -374,12 +346,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
         } catch (Exception $ex) {
 
-            $this->logger->error(
-                'Error starting Mollie Apple Pay Direct session',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error starting Mollie Apple Pay Direct session: ' . $ex->getMessage(), $ex);
 
             http_response_code(500);
             die();
@@ -450,7 +417,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 $countryCode
             );
             $this->handlerApplePay->setUserData($userData);
-
+            
             # save our payment token
             # that will be used when creating the
             # payment in the mollie controller action
@@ -470,12 +437,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
         } catch (Throwable $ex) {
 
-            $this->logger->error(
-                'Error starting Mollie Apple Pay Direct payment',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error starting Mollie Apple Pay Direct payment: ' . $ex->getMessage(), $ex);
 
             http_response_code(500);
             die();
@@ -551,12 +513,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
         } catch (Throwable $ex) {
 
-            $this->logger->error(
-                'Error finishing Mollie Apple Pay Direct payment',
-                array(
-                    'error' => $ex->getMessage()
-                )
-            );
+            Logger::log('error', 'Error finishing Mollie Apple Pay Direct payment: ' . $ex->getMessage(), $ex);
 
             http_response_code(500);
             die();

@@ -7,7 +7,6 @@ require_once __DIR__ . '/../Client/vendor/autoload.php';
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\MollieShopware;
-use Psr\Log\LoggerInterface;
 
 class MollieApiFactory
 {
@@ -16,20 +15,15 @@ class MollieApiFactory
      */
     protected $config;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
 
     /**
+     * MollieApiFactory constructor
+     *
      * @param Config $config
-     * @param LoggerInterface $logger
      */
-    public function __construct(Config $config, LoggerInterface $logger)
+    public function __construct(Config $config)
     {
         $this->config = $config;
-        $this->logger = $logger;
     }
 
 
@@ -123,12 +117,7 @@ class MollieApiFactory
             $client->setApiKey($apiKey);
 
         } catch (\Throwable $ex) {
-            $this->logger->error(
-                'Fatal error with Mollie API Key. Invalid Key: ' . $apiKey,
-                array(
-                    'error' => $ex->getMessage(),
-                )
-            );
+            Logger::log('error', 'Fatal error with Mollie API Key. Invalid Key: ' . $apiKey, $ex, false);
         }
 
         return $client;

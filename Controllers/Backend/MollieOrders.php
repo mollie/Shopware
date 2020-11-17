@@ -60,7 +60,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $mollieId = $this->orderService->getMollieOrderId($order);
 
             if (empty($mollieId))
-                $this->returnError('Order is only a transaction in Mollie. Transactions cannot be shipped, only payments that have created an order in Mollie can be shipped!');
+                $this->returnError('Order is paid as a single payment (not an order) at Mollie');
 
             $mollieOrder = $this->apiClient->orders->get($mollieId);
             $errorMessage = '';

@@ -9,6 +9,7 @@ use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayDomainFileDownloader;
 use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Logger;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Schema;
 use MollieShopware\Components\Services\PaymentMethodService;
@@ -18,7 +19,6 @@ use MollieShopware\Components\Snippets\SnippetsCleaner;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
-use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -262,18 +262,6 @@ class MollieShopware extends Plugin
     }
 
     /**
-     * We use the plugin logger in here, because our
-     * own logger hasnt been registered in the process
-     * of activating the plugin.
-     *
-     * @return LoggerInterface
-     */
-    private function getPluginLogger()
-    {
-        return $this->container->get('pluginlogger');
-    }
-
-    /**
      * Update extra database tables
      */
     protected function updateDbTables()
@@ -286,12 +274,10 @@ class MollieShopware extends Plugin
                 OrderLines::class
             ]);
         } catch (Exception $ex) {
-
-            $this->getPluginLogger()->error(
-                'Error when updating database tables',
-                array(
-                    'error' => $ex->getMessage(),
-                )
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
     }
@@ -307,12 +293,10 @@ class MollieShopware extends Plugin
             $schema->remove(TransactionItem::class);
             $schema->remove(OrderLines::class);
         } catch (Exception $ex) {
-
-            $this->getPluginLogger()->error(
-                'Error when removing database tables',
-                array(
-                    'error' => $ex->getMessage(),
-                )
+            Logger::log(
+                'error',
+                $ex->getMessage(),
+                $ex
             );
         }
     }
@@ -456,7 +440,7 @@ class MollieShopware extends Plugin
 
         // Get the Mollie API factory service
         if ($config !== null) {
-            $factory = new MollieApiFactory($config, $this->getPluginLogger());
+            $factory = new MollieApiFactory($config);
         }
 
         // Create the Mollie API client
@@ -504,8 +488,7 @@ class MollieShopware extends Plugin
                 $modelManager,
                 $mollieApiClient,
                 $paymentInstaller,
-                $templateManager,
-                $this->getPluginLogger()
+                $templateManager
             );
         }
 
