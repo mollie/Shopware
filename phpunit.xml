@@ -1,9 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" bootstrap="vendor/autoload.php" cacheResult="false" executionOrder="random">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheResult="false"
+         colors="true"
+         executionOrder="random"
+         forceCoversAnnotation="true">
     <coverage/>
+
     <testsuites>
         <testsuite name="Mollie Test Suite">
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./</directory>
+            <exclude>
+                <!--
+                we had to exclude a few folders at the moment
+                if we add shopware as dev dependency it should work again,
+                but step by step....for now we just need a bit of a code coverage
+                -->
+                <directory suffix=".php">./Client</directory>
+                <directory suffix=".php">./Command</directory>
+                <directory suffix=".php">./Components/Base</directory>
+                <directory suffix=".php">./Controllers</directory>
+                <directory suffix=".php">./Models</directory>
+                <directory suffix=".php">./Subscriber</directory>
+                <directory suffix=".php">./Tests</directory>
+                <directory suffix=".php">./vendor</directory>
+                <file>./MollieShopware.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-clover" target="./.reports/logs/clover.xml"/>
+        <log type="coverage-html" target="./.reports/coverage" charset="UTF-8" yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+    </logging>
+
 </phpunit>

@@ -20,6 +20,7 @@ dev: ## Installs all dev dependencies
 
 clean: ## Cleans all dependencies
 	rm -rf vendor
+	rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
 test: ## Starts all Tests
@@ -28,4 +29,4 @@ test: ## Starts all Tests
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
-	@cd .. && zip -qq -r MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*/makefile' '*.DS_Store'
+	@cd .. && zip -qq -r MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.reports*' '*.travis.yml*' '*/Tests*' '*/makefile' '*.DS_Store'

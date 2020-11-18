@@ -6,6 +6,7 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Logger;
+use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Basket;
@@ -241,124 +242,6 @@ class BasketService
         }
 
         return $orderDetailAttributesResult[0];
-    }
-
-    /**
-     * Get positions from basket
-     *
-     * @param array $userData
-     * @return array
-     * @throws Exception
-     */
-    function getBasketLines($userData = array())
-    {
-        $items = [];
-
-        try {
-            /** @var Repository $basketRepo */
-            $basketRepo = Shopware()->Container()->get('models')->getRepository(
-                Basket::class
-            );
-
-            /** @var Basket[] $basketItems */
-            $basketItems = $basketRepo->findBy([
-                'sessionId' => Shopware()->Session()->offsetGet('sessionId')
-            ]);
-
-            foreach ($basketItems as $basketItem) {
-                $unitPrice = round($basketItem->getPrice(), 2);
-                $netPrice = round($basketItem->getNetPrice(), 2);
-                $totalAmount = $unitPrice * $basketItem->getQuantity();
-                $vatAmount = 0;
-
-                if (
-                    isset($userData['additional']['charge_vat'], $userData['additional']['show_net'])
-                    && $userData['additional']['charge_vat'] === true
-                    && $userData['additional']['show_net'] === false
-                ) {
-                    $unitPrice = $unitPrice * ($basketItem->getTaxRate() + 100) / 100;
-                    $unitPrice = round($unitPrice, 2);
-                    $totalAmount = $unitPrice * $basketItem->getQuantity();
-                }
-
-                if (
-                    isset($userData['additional']['charge_vat'])
-                    && $userData['additional']['charge_vat'] === true
-                ) {
-                    $vatAmount = $totalAmount * ($basketItem->getTaxRate() / ($basketItem->getTaxRate() + 100));
-                    $vatAmount = round($vatAmount, 2);
-                }
-
-                // build the order line array
-                $orderLine = [
-                    'basket_item_id' => $basketItem->getId(),
-                    'article_id' => $basketItem->getArticleId(),
-                    'name' => $basketItem->getArticleName(),
-                    'type' => $this->getOrderType($basketItem, $unitPrice),
-                    'quantity' => $basketItem->getQuantity(),
-                    'unit_price' => $unitPrice,
-                    'net_price' => $netPrice,
-                    'total_amount' => $totalAmount,
-                    'vat_rate' => $vatAmount == 0 ? 0 : $basketItem->getTaxRate(),
-                    'vat_amount' => $vatAmount,
-                ];
-
-                if (
-                    $basketItem !== null
-                    && $basketItem->getAttribute() !== null
-                    && method_exists($basketItem->getAttribute(), 'setBasketItemId')
-                ) {
-                    $basketItem->getAttribute()->setBasketItemId($basketItem->getId());
-
-                    $this->modelManager->persist($basketItem);
-                    $this->modelManager->flush($basketItem);
-                }
-
-                // add the order line to items
-                $items[] = $orderLine;
-            }
-        } catch (Exception $ex) {
-
-            $this->logger->error(
-                'Error when loading basket lines',
-                array(
-                    'error' => $ex->getMessage(),
-                )
-            );
-        }
-
-        return $items;
-    }
-
-    /**
-     * @param $basketItem
-     * @param float $unitPrice
-     * @return string
-     */
-    private function getOrderType($basketItem, $unitPrice)
-    {
-        // set the order line type
-        if (strpos($basketItem->getOrderNumber(), 'surcharge') !== false) {
-            return 'surcharge';
-        }
-
-        if (strpos($basketItem->getOrderNumber(), 'discount') !== false) {
-            return 'discount';
-        }
-
-        if ($basketItem->getEsdArticle() > 0) {
-            return 'digital';
-        }
-
-        if ($basketItem->getMode() == 2) {
-            return 'discount';
-        }
-
-        if ($unitPrice < 0) {
-            return 'discount';
-        }
-
-        return 'physical';
     }
 
     /**

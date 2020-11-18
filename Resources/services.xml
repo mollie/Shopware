@@ -7,6 +7,7 @@
     <imports>
         <import resource="services/logger.xml"/>
         <import resource="services/applepay_direct.xml"/>
+        <import resource="services/components.xml"/>
     </imports>
 
     <services>
@@ -14,9 +15,14 @@
         <!-- COMPONENTS -->
         <!-- _______________________________________________________________________________________________________ -->
 
+        <service id="mollie_shopware.components.shipping.provider.cart" class="MollieShopware\Components\Shipping\Providers\CartShippingCostsProvider"
+                 public="false">
+        </service>
+
         <service id="mollie_shopware.components.shipping" class="MollieShopware\Components\Shipping\Shipping">
             <argument type="service" id="dbal_connection"/>
             <argument type="service" id="session"/>
+            <argument type="service" id="mollie_shopware.components.shipping.provider.cart"/>
         </service>
 
         <service id="mollie_shopware.components.order_session" class="MollieShopware\Components\Order\OrderSession">
@@ -52,8 +58,8 @@
         </service>
 
         <service id="mollie_shopware.order_history_service" class="MollieShopware\Components\Services\OrderHistoryService">
-            <argument type="service" id="mollie_shopware.config" />
-            <argument type="service" id="models" />
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="models"/>
         </service>
 
         <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService">

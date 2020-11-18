@@ -14,12 +14,12 @@ before_install:
 
 _jobs_no_tests: &jobs_no_tests
   script:
-    - find . -path ./vendor -prune -false -o -name '*.php' | xargs -n 1 -P4 php -l
+    - find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
 
 _jobs_full: &jobs_full
   script:
     - make dev -B
-    - find . -path ./vendor -prune -false -o -name '*.php' | xargs -n 1 -P4 php -l
+    - find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
     - make test -B
 
 # ---------------------------------------------------------------------------------------

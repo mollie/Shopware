@@ -11,6 +11,10 @@ class IPAnonymizerTest extends TestCase
     /**
      * This test verifies that our placeholder is used
      * correctly when anonymizing our ip address.
+     *
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer::anonymize
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer::isValidIP
      */
     public function testPlaceholder()
     {
@@ -26,10 +30,15 @@ class IPAnonymizerTest extends TestCase
      * by setting the last digit to 0.
      *
      * @dataProvider getIPData
+     *
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer::anonymize
+     * @covers \MollieShopware\Components\Logger\Services\IPAnonymizer::isValidIP
+     *
      * @param string $expected
      * @param string $ip
      */
-    public function testAnonymizing(string $expected, string $ip)
+    public function testAnonymizing($expected, $ip)
     {
         $service = new IPAnonymizer('0');
         $anonymousIP = $service->anonymize($ip);

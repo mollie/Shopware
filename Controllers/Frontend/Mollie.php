@@ -7,12 +7,18 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\Base\AbstractPaymentController;
+use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
+use MollieShopware\Components\Services\BasketService;
 use MollieShopware\Components\Services\PaymentService;
+use MollieShopware\Components\Shipping\Shipping;
+use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
+use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Traits\MollieApiClientTrait;
@@ -546,9 +552,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
 
+    /**
+     * @param Transaction $transaction
+     * @param $basketSignature
+     * @return Transaction
+     */
     private function prepareTransaction(\MollieShopware\Models\Transaction $transaction, $basketSignature)
     {
         try {
+
+            /** @var Basket $basket */
+            $basket = $this->container->get('mollie_shopware.components.basket');
+
+            /** @var Shipping $shipping */
+            $shipping = $this->container->get('mollie_shopware.components.shipping');
+
+
             // variables
             $transactionItems = new \Doctrine\Common\Collections\ArrayCollection();
 
@@ -564,102 +583,53 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $transaction->setCurrency($currency);
             $transaction->setTotalAmount($this->getAmount());
 
-            // set transaction as net order
-            if (isset($this->getUser()['additional']) &&
-                (!isset($this->getUser()['additional']['show_net']) ||
-                    empty($this->getUser()['additional']['show_net']))
-            ) {
-                $transaction->setNet(true);
-            }
-
-            // set transaction as tax free
-            if (isset($this->getUser()['additional']) &&
-                (!isset($this->getUser()['additional']['charge_vat']) ||
-                    empty($this->getUser()['additional']['charge_vat']))
-            ) {
-                $transaction->setTaxFree(true);
-            }
-
             // set the customer
             if (!empty($customer)) {
                 $transaction->setCustomer($customer);
                 $transaction->setCustomerId($customer->getId());
             }
 
-            /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = $this->container
-                ->get('mollie_shopware.basket_service');
+            // set transaction as tax free
+            if (isset($this->getUser()['additional']) && (!isset($this->getUser()['additional']['charge_vat']) || empty($this->getUser()['additional']['charge_vat']))) {
+                $transaction->setTaxFree(true);
+            }
 
-            foreach ($basketService->getBasketLines($this->getUser()) as $basketLine) {
-                // create transaction item
-                $transactionItem = new \MollieShopware\Models\TransactionItem();
+            # set transaction as net order
+            # e.g. show_net = false means its a NET order
+            if (isset($this->getUser()['additional']) && (!isset($this->getUser()['additional']['show_net']) || empty($this->getUser()['additional']['show_net']))) {
+                $transaction->setNet(true);
+            }
 
-                // set transaction item variables
 
-                $transactionItem->setTransaction($transaction);
-                $transactionItem->setArticleId($basketLine['article_id']);
-                $transactionItem->setBasketItemId($basketLine['basket_item_id']);
-                $transactionItem->setName($basketLine['name']);
-                $transactionItem->setType($basketLine['type']);
-                $transactionItem->setQuantity($basketLine['quantity']);
-                $transactionItem->setUnitPrice($basketLine['unit_price']);
-                $transactionItem->setNetPrice($basketLine['net_price']);
-                $transactionItem->setTotalAmount($basketLine['total_amount']);
+            # build our tax mode depending on the configuration from above
+            $taxMode = new TaxMode(!$transaction->getTaxFree(), $transaction->getNet());
+            $transactionBuilder = new TransactionItemBuilder($taxMode);
 
-                $transactionItem->setVatRate($basketLine['vat_rate']);
-                $transactionItem->setVatAmount($basketLine['vat_amount']);
 
-                // add transaction item to collection
+            /** @var BasketItem[] $basketLines */
+            $basketLines = $basket->getBasketLines($this->getUser());
+
+            /** @var BasketItem $basketItem */
+            foreach ($basketLines as $basketItem) {
+                # build our new transaction item from the basket line.
+                # this must be perfectly rounded!
+                $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $basketItem);
                 $transactionItems->add($transactionItem);
             }
 
-            // shipping costs
-            $shippingCosts = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts();
 
-            if (is_array($shippingCosts) && count($shippingCosts)) {
-                // create shipping item
-                $shippingItem = new \MollieShopware\Models\TransactionItem();
+            /** @var BasketItem $shippingItem */
+            $shippingItem = $shipping->getCartShippingCosts();
 
-                // get shipping tax rate
-                $shippingTaxRate = floatval($shippingCosts['tax']);
-
-                // get shipping the unit price
-                $shippingUnitPrice = round(floatval($shippingCosts['brutto']), 2);
-
-                // get shipping net price
-                $shippingNetPrice = floatval($shippingCosts['netto']);
-
-                // clear shipping tax if order is tax free
-                if ($transaction->getTaxFree() === true) {
-                    $shippingUnitPrice = $shippingNetPrice;
-                }
-
-                // get shipping vat amount
-                $shippingVatAmount = $shippingUnitPrice * ($shippingTaxRate / ($shippingTaxRate + 100));
-
-                // clear shipping vat amount if order is tax free
-                if ($transaction->getTaxFree() === true) {
-                    $shippingVatAmount = 0;
-                }
-
-                // set shipping item variables
-                $shippingItem->setTransaction($transaction);
-                $shippingItem->setName('Shipping fee');
-                $shippingItem->setType('shipping_fee');
-                $shippingItem->setQuantity(1);
-                $shippingItem->setUnitPrice($shippingUnitPrice);
-                $shippingItem->setNetPrice($shippingNetPrice);
-                $shippingItem->setTotalAmount($shippingUnitPrice);
-                $shippingItem->setVatRate($shippingVatAmount == 0 ? 0 : $shippingTaxRate);
-                $shippingItem->setVatAmount($shippingVatAmount);
-
-                // add shipping item to collection
-                $transactionItems->add($shippingItem);
+            # if we have shipping costs
+            # then convert them to a transaction item too
+            if ($shippingItem->getUnitPrice() > 0) {
+                $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $shippingItem);
+                $transactionItems->add($transactionItem);
             }
 
-            // set transactions items
-            if ($transactionItems->count())
-                $transaction->setItems($transactionItems);
+            $transaction->setItems($transactionItems);
+
         } catch (\Exception $ex) {
 
             $this->logger->error(
@@ -672,6 +642,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         return $transaction;
     }
+
 
     private function updateTransactionId(Order $order, $transaction = null)
     {
@@ -1463,7 +1434,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         if ($currentCustomer->getCurrentId() == $order->getCustomer()->getId()) {
 
-            /** @var \MollieShopware\Components\Services\BasketService $basketService */
+            /** @var BasketService $basketService */
             $basketService = $this->container
                 ->get('mollie_shopware.basket_service');
 
