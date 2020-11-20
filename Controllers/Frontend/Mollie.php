@@ -21,6 +21,7 @@ use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
+use MollieShopware\Subscriber\Compatibility\OrderEmptyPaymentSubscriber;
 use MollieShopware\Traits\MollieApiClientTrait;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -40,6 +41,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @var ApplePayDirectFactory
      */
     private $applePayFactory;
+
+    /**
+     * @var Enlight_Components_Session_Namespace
+     */
+    private $session;
 
 
     /**
@@ -111,6 +117,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             /** @var int $paymentId */
             $paymentId = $this->getPaymentId();
+
+            # backup our payment ID in case
+            # its somehow empty...see more in OrderemptyPaymentSubscriber
+            $this->session->offsetSet(OrderEmptyPaymentSubscriber::KEY_SESSION_PAYMENT_ID_BACKUP, $paymentId);
 
             /**
              * Create an instance of the PaymentService. The PaymentService is used
@@ -308,55 +318,69 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        if (
-            $transactionNumber !== ''
-            && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
-        ) {
-            $order = $this->getOrderFromTransaction($transactionNumber);
-        }
+        try {
 
-        if ($order === null) {
-            return $this->redirectBack('Payment failed');
-        }
-
-        /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
-        $paymentService = $this->container
-            ->get('mollie_shopware.payment_service');
-
-        if ($order !== null) {
-            // Assign the order number to view
-            $this->view->assign('orderNumber', $order->getNumber());
-
-            // Update the transaction ID
-            $this->updateTransactionId($order, $transaction);
-        }
-
-        if (
-            $transaction !== null
-            && (string)$transaction->getOrderNumber() !== ''
-            && (string)$transaction->getMolliePaymentId() === '') {
-            $result = $this->processOrderReturn($order, $paymentService);
-
-            if ($result !== false) {
-                return $result;
+            if (
+                $transactionNumber !== ''
+                && ($order === null || !$order instanceof \Shopware\Models\Order\Order)
+            ) {
+                $order = $this->getOrderFromTransaction($transactionNumber);
             }
-        }
 
-        if (
-            $transaction !== null
-            && (string)$transaction->getMolliePaymentId() !== ''
-        ) {
-            $result = $this->processPaymentReturn($order, $paymentService);
-
-            if ($result !== false) {
-                return $result;
+            if ($order === null) {
+                return $this->redirectBack('Payment failed');
             }
+
+            /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
+            $paymentService = $this->container
+                ->get('mollie_shopware.payment_service');
+
+            if ($order !== null) {
+                // Assign the order number to view
+                $this->view->assign('orderNumber', $order->getNumber());
+
+                // Update the transaction ID
+                $this->updateTransactionId($order, $transaction);
+            }
+
+            if (
+                $transaction !== null
+                && (string)$transaction->getOrderNumber() !== ''
+                && (string)$transaction->getMolliePaymentId() === '') {
+                $result = $this->processOrderReturn($order, $paymentService);
+
+                if ($result !== false) {
+                    return $result;
+                }
+            }
+
+            if (
+                $transaction !== null
+                && (string)$transaction->getMolliePaymentId() !== ''
+            ) {
+                $result = $this->processPaymentReturn($order, $paymentService);
+
+                if ($result !== false) {
+                    return $result;
+                }
+            }
+
+            // something went wrong because nothing is returned until now
+            $this->logger->error('Return action: The order could not be retrieved');
+
+            $this->redirectBack('Payment failed');
+
+        } catch (\Exception $e) {
+
+            $this->logger->error(
+                'Error in Mollie Return Action after payment',
+                array(
+                    'error' => $e->getMessage()
+                )
+            );
+
+            $this->redirectBack('Payment failed');
         }
-
-        // something went wrong because nothing is returned until now
-        $this->logger->error('Return action: The order could not be retrieved');
-
-        $this->redirectBack('Payment failed');
     }
 
     /**
@@ -1591,6 +1615,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         $this->logger = Shopware()->Container()->get('mollie_shopware.components.logger');
         $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+        $this->session = Shopware()->Container()->get('session');
     }
 
 

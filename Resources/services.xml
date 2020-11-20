@@ -154,5 +154,10 @@
             <tag name="shopware.event_subscriber"/>
         </service>
 
+        <service id="mollie_shopware.subscriber.compatibility.order_empty_payment" class="MollieShopware\Subscriber\Compatibility\OrderEmptyPaymentSubscriber">
+            <argument type="service" id="session"/>
+            <tag name="shopware.event_subscriber"/>
+        </service>
+
     </services>
 </container>
