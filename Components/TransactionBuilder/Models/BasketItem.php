@@ -56,6 +56,12 @@ class BasketItem
     private $taxRate;
 
     /**
+     * @var bool
+     */
+    private $isNetMode;
+
+
+    /**
      * @param int $id
      * @param int $articleID
      * @param string $orderNumber
@@ -79,6 +85,8 @@ class BasketItem
         $this->unitPriceNet = $unitPriceNet;
         $this->quantity = $quantity;
         $this->taxRate = $taxRate;
+
+        $this->isNetMode = false;
     }
 
     /**
@@ -134,6 +142,10 @@ class BasketItem
      */
     public function getUnitPrice()
     {
+        if ($this->isNetMode) {
+            return $this->unitPriceNet;
+        }
+
         return $this->unitPrice;
     }
 
@@ -159,6 +171,18 @@ class BasketItem
     public function getTaxRate()
     {
         return $this->taxRate;
+    }
+
+    /**
+     * Enable or disable net mode.
+     * If enabled, the returned unit price
+     * will be the net price.
+     *
+     * @param bool $isNetMode
+     */
+    public function setNetMode($isNetMode)
+    {
+        $this->isNetMode = $isNetMode;
     }
 
 }
