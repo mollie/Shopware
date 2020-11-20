@@ -624,6 +624,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             # if we have shipping costs
             # then convert them to a transaction item too
             if ($shippingItem->getUnitPrice() > 0) {
+
+                # our articles are all correctly set to gross or net
+                # price depending on the shop setting.
+                # but shipping will always return gross AND net in different fields.
+                # our transaction builder will automatically convert NET to GROSS
+                # so we need to make sure to set the net price manually in that case.
+                $shippingItem->setNetMode($taxMode->isNetOrder());
+
                 $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $shippingItem);
                 $transactionItems->add($transactionItem);
             }
