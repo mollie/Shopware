@@ -2,11 +2,32 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/config.xsd">
     <elements>
 
+        <element type="button">
+            <name>btn_wiki</name>
+            <label lang="de">>> Benutzeranleitung öffnen >></label>
+            <label lang="en">>> Open Documentation >></label>
+            <label lang="nl">>> Handleiding openen >></label>
+            <options>
+                <handler>
+                    <![CDATA[
+                    function(button) {
+                        window.open("https://github.com/mollie/Shopware/wiki/Plugin-Configuration")
+                    }
+                    ]]>
+                </handler>
+                <position>0</position>
+            </options>
+        </element>
+
+
         <element required="false" type="text" scope="shop">
             <name>api-key</name>
             <label lang="de">Live API-key</label>
             <label lang="en">Live API-key</label>
             <label lang="nl">Live API-key</label>
+            <options>
+                <position>1</position>
+            </options>
         </element>
 
         <element required="false" type="text" scope="shop">
@@ -14,6 +35,9 @@
             <label lang="de">Test API-key</label>
             <label lang="en">Test API-key</label>
             <label lang="nl">Test API-key</label>
+            <options>
+                <position>2</position>
+            </options>
         </element>
 
         <element required="true" type="select" scope="shop">
@@ -45,6 +69,9 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>3</position>
+            </options>
         </element>
 
         <element required="true" type="select">
@@ -53,7 +80,7 @@
             <label lang="en">Log Level</label>
             <label lang="nl">Log niveau</label>
             <value>2, INFO</value>
-            <description lang="de">Konfiguration ab welcher Stufe Informationen und Fehler protokolliert werden sollen.</description>
+            <description lang="de">Konfiguration, ab welcher Stufe Informationen und Fehler protokolliert werden sollen.</description>
             <description lang="en">Configuration from which level information and errors should be logged</description>
             <description lang="nl">Configuratie vanaf welk niveau informatie en errors gelogd moeten worden</description>
             <store>
@@ -90,98 +117,31 @@
                     <label>8, EMERGENCY</label>
                 </option>
             </store>
+            <options>
+                <position>4</position>
+            </options>
         </element>
 
-        <element type="select" scope="shop">
-            <name>send_status_mail</name>
-            <label lang="de">Statusmail für Zahlungen senden</label>
-            <label lang="en">Send payment status mail</label>
-            <label lang="nl">Stuur betaalstatus e-mail</label>
-            <value>yes</value>
-            <store>
-                <option>
-                    <value>inherited</value>
-                    <label lang="de">Vererbt</label>
-                    <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
-                </option>
-                <option>
-                    <value>yes</value>
-                    <label lang="de">Ja</label>
-                    <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
-                </option>
-                <option>
-                    <value>no</value>
-                    <label lang="de">Nein</label>
-                    <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
-                </option>
-            </store>
-        </element>
 
-        <element type="select" scope="shop">
-            <name>send_refund_status_mail</name>
-            <label lang="de">Erstattungsstatus senden</label>
-            <label lang="en">Send refund status mail</label>
-            <label lang="nl">Stuur restitutiestatus mail</label>
-            <value>yes</value>
-            <store>
-                <option>
-                    <value>inherited</value>
-                    <label lang="de">Vererbt</label>
-                    <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
-                </option>
-                <option>
-                    <value>yes</value>
-                    <label lang="de">Ja</label>
-                    <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
-                </option>
-                <option>
-                    <value>no</value>
-                    <label lang="de">Nein</label>
-                    <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
-                </option>
-            </store>
-        </element>
-
-        <element type="select" scope="shop">
-            <name>auto_reset_stock</name>
-            <label lang="de">Lagerbestand automatisch zurücksetzen nach fehlgeschlagener Zahlung</label>
-            <label lang="en">Automatically reset stock on failed payment</label>
-            <label lang="nl">Voorraad automatisch herstellen na een mislukte betaling</label>
-            <value>yes</value>
-            <store>
-                <option>
-                    <value>inherited</value>
-                    <label lang="de">Vererbt</label>
-                    <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
-                </option>
-                <option>
-                    <value>yes</value>
-                    <label lang="de">Ja</label>
-                    <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
-                </option>
-                <option>
-                    <value>no</value>
-                    <label lang="de">Nein</label>
-                    <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
-                </option>
-            </store>
+        <element type="button" required="false">
+            <name>separator_orders</name>
+            <label lang="de">--------------------------------------------------------------------------------------- Bestellungen ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- Orders ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- Bestellingen ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>5</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
             <name>orders_api_only_where_mandatory</name>
-            <label lang="de">Nur Bestellungen für Klarna Pay Later und Klarna Slice It in Mollie erstellen</label>
-            <label lang="en">Only create orders at Mollie for Klarna Pay Later and Klarna Slice It</label>
-            <label lang="nl">Alleen orders bij Mollie aanmaken voor Klarna Pay Later en Klarna Slice It gebruiken</label>
+            <label lang="de">Nur Transaktionen in Mollie erstellen</label>
+            <label lang="en">Only create transactions in Mollie</label>
+            <label lang="nl">Creëer alleen transacties in Mollie</label>
             <value>yes</value>
+            <description lang="de">Mit JA werden nur einfache Transaktionen in Mollie erstellt. Mit NEIN werden zusätzlich zu Transaktionen Bestellungen angelegt. Für Klarna werden immer Bestellungen angelegt.</description>
+            <description lang="en">Use YES to create only simple transactions in Mollie. With NO you will also get orders in addition to these transactions. Klarna will always create orders.</description>
+            <description lang="nl">Met JA worden alleen eenvoudige transacties in Mollie gecreëerd. Met NEE worden naast transacties ook orders aangelegd. Klarna legt altijd orders aan.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -202,13 +162,50 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>6</position>
+            </options>
+        </element>
+
+        <element type="select" scope="shop">
+            <name>create_order_before_payment</name>
+            <label lang="de">Bestellung vor Zahlungsabschluss anlegen</label>
+            <label lang="en">Create order before finishing the payment</label>
+            <label lang="nl">Bestelling aanleggen voordat de betaling voltooid is</label>
+            <value>yes</value>
+            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
+            <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
+            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+            <options>
+                <position>7</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
             <name>payment_authorized_status</name>
-            <label lang="de">Status für autorisierte Zahlungen (z.b. Klarna Pay Later)</label>
-            <label lang="en">Status for authorized payments (e.g. Klarna Pay Later)</label>
-            <label lang="nl">Status voor geautoriseerde betalingen (b.v. Klarna Pay Later)</label>
+            <label lang="de">Zahlungsstatus für autorisierte Bezahlungen</label>
+            <label lang="en">Status for authorized payments</label>
+            <label lang="nl">Status voor geautoriseerde betalingen</label>
             <value>ordered</value>
             <store>
                 <option>
@@ -242,30 +239,20 @@
                     <label lang="nl">Volledig betaald</label>
                 </option>
             </store>
-        </element>
-
-        <element type="combo" scope="shop">
-            <name>klarna_ship_on_status</name>
-            <label lang="de">Status, bei dem die Bestellung als gesendet markiert ist (Klarna Pay Later)</label>
-            <label lang="en">Status on which order is marked as sent (Klarna Pay Later)</label>
-            <label lang="nl">Status waarop bestelling wordt gemarkeerd als verzonden (Klarna Pay Later)</label>
-            <store>Shopware.apps.Base.store.OrderStatus</store>
-        </element>
-
-        <element type="combo" scope="shop">
-            <name>klarna_shipped_status</name>
-            <label lang="de">Bestellstatus für ausgelieferte Bestellungen (Klarna Pay Later)</label>
-            <label lang="en">Order status for shipped orders (Klarna Pay Later)</label>
-            <label lang="nl">Bestelstatus voor verzonden bestellingen (Klarna Pay Later)</label>
-            <store>Shopware.apps.Base.store.OrderStatus</store>
+            <options>
+                <position>8</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
             <name>transaction_number_type</name>
-            <label lang="de">Wählen Sie die Transaktionsnummer, die auf Bestellungen angezeigt wird</label>
-            <label lang="en">Choose the transaction number that is visible on orders</label>
-            <label lang="nl">Kies het transactienummer dat zichtbaar is op orders</label>
+            <label lang="de">Transaktionsnummer für Bestellungen</label>
+            <label lang="en">Transaction number for orders</label>
+            <label lang="nl">Transactienummer voor orders</label>
             <value>mollie</value>
+            <description lang="de">Wähle die Transaktionsnummer, die auf Bestellungen angezeigt werden soll.</description>
+            <description lang="en">Choose the transaction number that is visible on orders</description>
+            <description lang="nl">Selecteer het transactienummer dat op de orders moet worden weergegeven.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -286,6 +273,9 @@
                     <label lang="nl">Betaalmethode</label>
                 </option>
             </store>
+            <options>
+                <position>9</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
@@ -314,15 +304,18 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>10</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
             <name>auto_cancel_failed_orders</name>
-            <label lang="de">Fehlgeschlagene Bestellungen automatisch stornieren</label>
-            <label lang="en">Cancel failed orders automatically</label>
-            <label lang="nl">Mislukte bestellingen automatisch annuleren</label>
+            <label lang="de">Fehlgeschlagene Bestellungen stornieren</label>
+            <label lang="en">Cancel failed orders</label>
+            <label lang="nl">Mislukte bestellingen annuleren</label>
             <value>yes</value>
-            <description lang="de">Wenn eine Bestellung wiederhergestellt wird, die alte (fehlgeschlagener) Bestellung automatisch stornieren.</description>
+            <description lang="de">Wenn eine Bestellung wiederhergestellt wird, wird die alte (fehlgeschlagene) Bestellung automatisch storniert.</description>
             <description lang="en">Automatically cancel the old (failed) order when an order is restored.</description>
             <description lang="nl">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
             <store>
@@ -345,14 +338,21 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>11</position>
+            </options>
         </element>
+
 
         <element type="select" scope="shop">
             <name>reset_invoice_shipping</name>
-            <label lang="de">Gesamtbetrag und Versand bei stornierter Bestellung löschen</label>
-            <label lang="en">Clear invoice amount and shipping on canceled order</label>
-            <label lang="nl">Besteltotaal en verzending leegmaken bij geannuleerde bestelling</label>
+            <label lang="de">Stornierung von Gesamtbetrag und Versand</label>
+            <label lang="en">Cancellation of total amount and shipping</label>
+            <label lang="nl">Annulering van het totaalbedrag en verzending</label>
             <value>no</value>
+            <description lang="de">Der Gesamtbetrag sowie die Versandkosten werden beim Stornieren einer Bestellung geleert.</description>
+            <description lang="en">The invoice amount and shipping will be cleared for canceled orders.</description>
+            <description lang="nl">Het factuurbedrag en de verzendkosten worden verrekend voor geannuleerde bestellingen.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -373,17 +373,18 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>12</position>
+            </options>
         </element>
+
 
         <element type="select" scope="shop">
-            <name>create_order_before_payment</name>
-            <label lang="de">Bestellung vor Abschluss der Zahlung erstellen</label>
-            <label lang="en">Create order before finishing the payment</label>
-            <label lang="nl">Order aanmaken vóór het afronden van de betaling</label>
+            <name>auto_reset_stock</name>
+            <label lang="de">Lagerbestand bei Fehler zurücksetzen</label>
+            <label lang="en">Reset stock on failed payment</label>
+            <label lang="nl">Voorraad terugzetten bij mislukte betaling</label>
             <value>yes</value>
-            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
-            <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
-            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -404,36 +405,181 @@
                     <label lang="nl">Nee</label>
                 </option>
             </store>
+            <options>
+                <position>13</position>
+            </options>
         </element>
 
-        <element type="boolean">
-            <name>enable_credit_card_component</name>
-            <label lang="de">Kreditkarten Komponenten aktivieren</label>
-            <label lang="en">Enable credit card component</label>
-            <label lang="nl">Credit card component activeren</label>
-            <value>true</value>
-        </element>
-
-        <element type="boolean">
-            <name>enable_credit_card_component_styling</name>
-            <label lang="de">Styling für die Kreditkarten Komponenten aktivieren</label>
-            <label lang="en">Enable styling for credit card component</label>
-            <label lang="nl">Voeg styling toe aan credit card component</label>
-            <value>true</value>
-        </element>
 
         <element type="text" scope="shop">
             <name>mollie_shopware_user_id</name>
             <label lang="de">Benutzer-ID für Mollie-Benutzer in Shopware</label>
             <label lang="en">User ID for Mollie-user in Shopware</label>
             <label lang="nl">Gebruikers ID voor Mollie-gebruiker in Shopware</label>
+            <options>
+                <position>14</position>
+            </options>
+        </element>
+
+
+        <element type="button" required="false">
+            <name>separator_mails</name>
+            <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>15</position>
+            </options>
+        </element>
+
+        <element type="select" scope="shop">
+            <name>send_status_mail</name>
+            <label lang="de">Statusmail für Zahlungen senden</label>
+            <label lang="en">Send payment status mail</label>
+            <label lang="nl">Stuur betaalstatus e-mail</label>
+            <value>yes</value>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+            <options>
+                <position>16</position>
+            </options>
+        </element>
+
+        <element type="select" scope="shop">
+            <name>send_refund_status_mail</name>
+            <label lang="de">Statusmail für Rückerstattungen senden</label>
+            <label lang="en">Send refund status mail</label>
+            <label lang="nl">Stuur restitutiestatus mail</label>
+            <value>yes</value>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="de">Vererbt</label>
+                    <label lang="en">Inherited</label>
+                    <label lang="nl">Geërfd</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="de">Ja</label>
+                    <label lang="en">Yes</label>
+                    <label lang="nl">Ja</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="de">Nein</label>
+                    <label lang="en">No</label>
+                    <label lang="nl">Nee</label>
+                </option>
+            </store>
+            <options>
+                <position>17</position>
+            </options>
+        </element>
+
+
+        <element type="button" required="false">
+            <name>separator_credit_card</name>
+            <label lang="de">--------------------------------------------------------------------------------------- Kreditkarte ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>18</position>
+            </options>
+        </element>
+
+        <element type="boolean">
+            <name>enable_credit_card_component</name>
+            <label lang="de">Komponenten aktivieren</label>
+            <label lang="en">Enable components</label>
+            <label lang="nl">Component activeren</label>
+            <value>true</value>
+            <options>
+                <position>19</position>
+            </options>
+        </element>
+
+        <element type="boolean">
+            <name>enable_credit_card_component_styling</name>
+            <label lang="de">Styling für Komponenten aktivieren</label>
+            <label lang="en">Enable styling for components</label>
+            <label lang="nl">Voeg styling toe aan componenten</label>
+            <value>true</value>
+            <options>
+                <position>20</position>
+            </options>
+        </element>
+
+        <element type="button" required="false">
+            <name>separator_klarna</name>
+            <label lang="de">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>21</position>
+            </options>
+        </element>
+
+        <element type="combo" scope="shop">
+            <name>klarna_ship_on_status</name>
+            <label lang="de">Automatischer Versand Status</label>
+            <label lang="en">Automatic shipping status</label>
+            <label lang="nl">Automatische verzendstatus</label>
+            <description lang="de">Die Bestellung wird automatisch in Mollie als versendet markiert, wenn ein Übergang in diesen Status erfolgt.</description>
+            <description lang="en">The order is automatically marked as shipped in Mollie if a transition to this status is made.</description>
+            <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+            <options>
+                <position>22</position>
+            </options>
+        </element>
+
+        <element type="combo" scope="shop">
+            <name>klarna_shipped_status</name>
+            <label lang="de">Status für versendete Bestellungen</label>
+            <label lang="en">Status for shipped orders</label>
+            <label lang="nl">Status voor verzonden bestellingen</label>
+            <description lang="de">Bestellstatus für Bestellungen die als versendet markiert wurden.</description>
+            <description lang="en">Order status for shipped orders.</description>
+            <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+            <options>
+                <position>23</position>
+            </options>
+        </element>
+
+        <element type="button" required="false">
+            <name>separator_applepay</name>
+            <label lang="de">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>24</position>
+            </options>
         </element>
 
         <element type="select" scope="shop">
             <name>mollie_applepaydirect_restrictions</name>
-            <label lang="en">Apple Pay Direct Restrictions</label>
-            <label lang="de">Apple Pay Direct Einschränkungen</label>
-            <label lang="nl">Apple Pay Direct Beperkingen</label>
+            <label lang="de">Anzeige Einschränkungen</label>
+            <label lang="en">Display Restrictions</label>
+            <label lang="nl">Beperkingen weergeven</label>
             <description lang="en">Restrict Apple Pay Direct from being displayed on these pages.</description>
             <description lang="de">Verhindere die Anzeige von Apple Pay Direct auf den hier gewählten Seiten</description>
             <description lang="nl">Voorkom dat Apple Pay Direct wordt weergegeven op deze pagina's.</description>
@@ -466,9 +612,9 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
+                <position>25</position>
             </options>
         </element>
-
 
     </elements>
 </config>
