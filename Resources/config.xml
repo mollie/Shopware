@@ -616,5 +616,25 @@
             </options>
         </element>
 
+        <element type="button" required="false">
+            <name>separator_banktransfer</name>
+            <label lang="de">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>26</position>
+            </options>
+        </element>
+
+        <element type="number" scope="shop">
+            <name>banktransfer_duedate_days</name>
+            <label lang="de">Zahlungsziel (Tage)</label>
+            <label lang="en">Payment term (Days)</label>
+            <label lang="nl">Betalingstermijn (Dagen)</label>
+            <options>
+                <position>27</position>
+            </options>
+        </element>
+
     </elements>
 </config>

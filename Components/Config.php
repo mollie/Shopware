@@ -213,6 +213,25 @@ class Config
     }
 
     /**
+     * Gets the number of +days from "now" for the
+     * due date of a bank transfer payment.
+     * If nothing has been set, 0 will be returned.
+     *
+     * @return int
+     */
+    public function getBankTransferDueDateDays()
+    {
+        /** @var int|null $level */
+        $dueDateDays = $this->get('banktransfer_duedate_days');
+
+        if ($dueDateDays === null) {
+            return 0;
+        }
+
+        return $dueDateDays;
+    }
+
+    /**
      * Whether to send status mails to the customer when the status of the payment changes
      *
      * @return boolean
@@ -313,7 +332,7 @@ class Config
      */
     public function getKlarnaShipOnStatus()
     {
-        return (int) $this->get('klarna_ship_on_status', Status::ORDER_STATE_COMPLETELY_DELIVERED);
+        return (int)$this->get('klarna_ship_on_status', Status::ORDER_STATE_COMPLETELY_DELIVERED);
     }
 
     /**
@@ -321,7 +340,7 @@ class Config
      */
     public function getShippedStatus()
     {
-        return (int) $this->get('klarna_shipped_status', -1);
+        return (int)$this->get('klarna_shipped_status', -1);
     }
 
     /**
@@ -345,7 +364,7 @@ class Config
      */
     public function enableCreditCardComponent()
     {
-        return (bool) $this->get('enable_credit_card_component', true);
+        return (bool)$this->get('enable_credit_card_component', true);
     }
 
     /**
@@ -353,7 +372,7 @@ class Config
      */
     public function enableCreditCardComponentStyling()
     {
-        return (bool) $this->get('enable_credit_card_component_styling', true);
+        return (bool)$this->get('enable_credit_card_component_styling', true);
     }
 
     /**
@@ -363,11 +382,11 @@ class Config
     {
         $userId = $this->get('mollie_shopware_user_id', null);
 
-        if ((string) $userId === '') {
+        if ((string)$userId === '') {
             return null;
         }
 
-        return (int) $userId;
+        return (int)$userId;
     }
 
     /**

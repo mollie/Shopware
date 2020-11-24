@@ -1163,6 +1163,15 @@ class PaymentService
             $paymentParameters["applePayPaymentToken"] = $this->getApplePayPaymentToken();
         }
 
+        if ((string)$paymentMethod === PaymentMethod::BANKTRANSFER) {
+
+            $dueDateDays = $this->config->getBankTransferDueDateDays();
+           
+            if (!empty($dueDateDays)) {
+                $paymentParameters['dueDate'] = date('Y-m-d', strtotime(' + ' . $dueDateDays . ' day'));
+            }
+        }
+    
         return $paymentParameters;
     }
 
