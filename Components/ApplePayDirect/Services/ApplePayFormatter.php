@@ -12,6 +12,8 @@ use Shopware\Models\Shop\Shop;
 class ApplePayFormatter
 {
 
+    const TEST_SUFFIX = "(Test Mode)";
+
     /**
      * this is the default snippet namespace for our
      * mollie apple pay direct translation.
@@ -26,14 +28,13 @@ class ApplePayFormatter
 
     /**
      * ApplePayFormatter constructor.
-     *
      * @param $snippets
      */
     public function __construct($snippets)
     {
         $this->snippets = $snippets->getNamespace(self::SNIPPET_NS);
     }
-    
+
     /**
      * @param array $method
      * @param $shippingCosts
@@ -52,15 +53,22 @@ class ApplePayFormatter
     /**
      * @param ApplePayCart $cart
      * @param Shop $shop
+     * @param bool $isTestMode
      * @return array
      */
-    public function formatCart(ApplePayCart $cart, Shop $shop)
+    public function formatCart(ApplePayCart $cart, Shop $shop, $isTestMode)
     {
+        $shopName = $shop->getName();
+
+        if ($isTestMode) {
+            $shopName .= ' ' . self::TEST_SUFFIX;
+        }
+
         # -----------------------------------------------------
         # INITIAL DATA
         # -----------------------------------------------------
         $data = array(
-            'label' => $shop->getName(),
+            'label' => $shopName,
             'amount' => $this->prepareFloat($cart->getAmount()),
             'items' => array(),
         );
@@ -102,7 +110,7 @@ class ApplePayFormatter
         # TOTAL DATA
         # -----------------------------------------------------
         $data['total'] = array(
-            'label' => $shop->getName(),
+            'label' => $shopName,
             'amount' => $this->prepareFloat($cart->getAmount()),
             'type' => 'final',
         );

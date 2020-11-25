@@ -8,6 +8,7 @@
         <import resource="services/logger.xml"/>
         <import resource="services/applepay_direct.xml"/>
         <import resource="services/components.xml"/>
+        <import resource="services/subscriber.xml"/>
     </imports>
 
     <services>

@@ -8,6 +8,7 @@ use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
 use MollieShopware\Components\BasketSnapshot\BasketSnapshot;
+use MollieShopware\Components\Config;
 use MollieShopware\Components\Country\CountryIsoParser;
 use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
@@ -73,6 +74,11 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     private $basketSnapshot;
 
+    /**
+     * @var Config
+     */
+    private $config;
+
 
     /**
      * @return string[]
@@ -104,6 +110,8 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
         $this->orderSession = Shopware()->Container()->get('mollie_shopware.components.order_session');
         $this->account = Shopware()->Container()->get('mollie_shopware.components.account.account');
         $this->basketSnapshot = Shopware()->Container()->get('mollie_shopware.components.basket_snapshot.basket_snapshot');
+
+        $this->config = Shopware()->Container()->get('mollie_shopware.config');
 
         $this->applePayPaymentMethod = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.services.payment_method');
         $this->applePayFormatter = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.services.formatter');
@@ -219,7 +227,11 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
 
             $cart = $this->handlerApplePay->buildApplePayCart();
-            $formattedCart = $this->applePayFormatter->formatCart($cart, Shopware()->Shop());
+            $formattedCart = $this->applePayFormatter->formatCart(
+                $cart,
+                Shopware()->Shop(),
+                $this->config->isTestmodeActive()
+            );
 
 
             $data = array(
@@ -280,7 +292,11 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             }
 
             $cart = $this->handlerApplePay->buildApplePayCart();
-            $formattedCart = $this->applePayFormatter->formatCart($cart, Shopware()->Shop());
+            $formattedCart = $this->applePayFormatter->formatCart(
+                $cart,
+                Shopware()->Shop(),
+                $this->config->isTestmodeActive()
+            );
 
             $data = array(
                 'success' => true,

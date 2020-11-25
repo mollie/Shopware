@@ -32,7 +32,9 @@ class MollieShopware extends Plugin
 
     const PLUGIN_VERSION = '1.6.6';
 
+    const PAYMENT_PREFIX = 'mollie_';
 
+    
     /**
      * Return Shopware events subscribed to
      */
