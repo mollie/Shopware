@@ -88,12 +88,19 @@ class ApplePayDirectSubscriber implements SubscriberInterface
      */
     public function onFrontendCheckoutPostDispatch(Enlight_Event_EventArgs $args)
     {
-        if ($args->getRequest()->getActionName() !== 'shippingPayment') {
+        $actionName = $args->getRequest()->getActionName();
+
+        if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
         }
 
         /** @var Enlight_View $view */
         $view = $args->getSubject()->View();
+
+        if ($actionName === 'confirm') {
+            $this->preventApplePayDirectAsPaymentMethodOnConfirm($view);
+            return;
+        }
 
         $sPayments = $view->getAssign('sPayments');
         if ($sPayments === null) {
@@ -121,4 +128,25 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         }
     }
 
+    /**
+     * @param Enlight_View $view
+     */
+    private function preventApplePayDirectAsPaymentMethodOnConfirm(Enlight_View $view)
+    {
+        $payment = null;
+
+        $admin = Shopware()->Modules()->Admin();
+        $session = Shopware()->Session();
+
+        if (!empty($view->sUserData['additional']['payment'])) {
+            $payment = $view->sUserData['additional']['payment'];
+        } elseif (!empty($session['sPaymentID'])) {
+            $payment = $admin->sGetPaymentMeanById($session['sPaymentID'], $view->sUserData);
+        }
+
+        if ($payment && $payment['name'] === 'mollie_' . PaymentMethod::APPLEPAY_DIRECT) {
+            $payment = $admin->sGetPaymentMean('mollie_' . PaymentMethod::APPLE_PAY);
+            $view->assign('sPayment', $payment);
+        }
+    }
 }
