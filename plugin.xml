@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.6</version>
+    <version>1.6.7</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,41 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.6.7">
+        <changes lang="de">
+            - Der Test Modus ist nun im Shop Storefront neben dem Namen der Zahlungsart sichtbar.
+            Dies erleichtert das Testen - man weiß somit sofort, wenn man auf "Live" Modus zahlen würde.
+            - Es gibt nun einen neuen Logger im Shopware Backend. Mollie erstellt dadurch eine separate
+            Log Datei mit weiteren Informationen die beim Analysieren helfen.
+            Zusätzlich kann die Protokollierungsstufe in den Plugin Einstellungen angepasst werden.
+            Wir empfehlen zumindest ERROR bzw. INFO.
+            - Die Struktur der Plugin Einstellungen wurde vereinfacht und die Übersicht somit erleichtert.
+            Auch die Bezeichungen der Einstellungen sind nun verkürzt und einfacher gestaltet.
+            - Der Test Modus kann in den Plugin Einstellungen nun auch von einem Hauptshop vererbt werden.
+            - Verbesserte Übersetzungen für DE, EN und NL im Shop sowie im Shopware Backend.
+            - Umbau der Rundungs-Logik für das Erstellen von Bestellungen in Mollie.
+            Dadurch werden Fehler wie "VAT Amount of Line Item does not match" oder "Total Amount does not match" verhindert.
+            - Duplizierte Status-History Einträge in Bestellungen werden nun nicht mehr erstellt bei einem
+            Status Übergang von einer Bestellung.
+            - Problembehebung des ExtJS Fehler Dialogs bei initialer Plugin Installation.
+        </changes>
+        <changes lang="en">
+            - The Test Mode is now visible in the Storefront next to the payment method names. This helps when testing,
+            so you're always know your not in production mode.
+            - Added a new logger in the Shopware Backend. Mollie now creates a separate log file with enhanced
+            information. You can also adjust the log level within the plugin configuration.
+            We recommend at least ERROR, or even INFO.
+            - Improved the plugin configuration with a structured layout along with better names for
+            the configuration settings.
+            - Test Mode in the plugin configuration can now also be inherited from a base shop
+            - Improve translations for DE, EN and NL in the Storefront and Shopware Backend
+            - Refactored the rounding algorithms when creating orders in Mollie.
+            This avoids errors like "VAT amount in line item does not match"...or "total amount does not match".
+            - Remove duplicate entries in the order status history when transitions occur
+            - Fix ExtJS Error Dialog in Shopware Backend when installing the plugin
+        </changes>
+    </changelog>
 
     <changelog version="1.6.6">
         <changes lang="de">
