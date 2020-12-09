@@ -5,13 +5,10 @@ use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Profile;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
-use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\Base\AbstractPaymentController;
 use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
-use MollieShopware\Components\Helpers\MollieShopSwitcher;
-use MollieShopware\Components\Logger;
 use MollieShopware\Components\Notifier;
 use MollieShopware\Components\Services\BasketService;
 use MollieShopware\Components\Services\PaymentService;
@@ -316,6 +313,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
 
         if ($order === null) {
+            if ($transaction !== null) {
+                $this->unsetOrdermailVariables($transaction);
+            }
             return $this->redirectBack('Payment failed');
         }
 
@@ -337,6 +337,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             && (string)$transaction->getMolliePaymentId() === '') {
             $result = $this->processOrderReturn($order, $paymentService);
 
+            $this->unsetOrdermailVariables($transaction);
+
             if ($result !== false) {
                 return $result;
             }
@@ -347,6 +349,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             && (string)$transaction->getMolliePaymentId() !== ''
         ) {
             $result = $this->processPaymentReturn($order, $paymentService);
+
+            $this->unsetOrdermailVariables($transaction);
 
             if ($result !== false) {
                 return $result;
@@ -1601,5 +1605,29 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
     }
 
+
+    private function unsetOrdermailVariables(Transaction $transaction)
+    {
+        /**
+         * Clear the order mail variables from the transaction
+         * as they are no longer needed, or log an error if the
+         * changes could not be saved.
+         */
+        try {
+            $transaction->setOrdermailVariables(null);
+            $this->getTransactionRepository()->save($transaction);
+        } catch (\Exception $ex) {
+            $this->logger->error(
+                'Error at unsetting order mail variables: ' . $ex->getMessage(),
+                array(
+                    'transaction' => array(
+                        'id' => $transaction->getId(),
+                        'orderId' => $transaction->getOrderId(),
+                        'customerId' => $transaction->getCustomerId()
+                    )
+                )
+            );
+        }
+    }
 
 }

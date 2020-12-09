@@ -2,6 +2,7 @@
 
 namespace MollieShopware;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Enlight_Template_Manager;
 use Exception;
@@ -259,6 +260,10 @@ class MollieShopware extends Plugin
         // download apple pay merchant domain verification file of mollie
         $downloader = new ApplePayDomainFileDownloader();
         $downloader->downloadDomainAssociationFile(Shopware()->DocPath());
+
+        // cleanup old transaction ordermail variables
+        $this->cleanOrdermailVariables();
+        $this->addIndexToTransactions();
 
         parent::activate($context);
     }
@@ -531,6 +536,30 @@ class MollieShopware extends Plugin
         $cleaner = new SnippetsCleaner($connection, $iniFiles);
 
         $cleaner->cleanBackendSnippets();
+    }
+
+
+    /**
+     *
+     */
+    private function cleanOrdermailVariables()
+    {
+        /** @var Connection $connection */
+        $connection = $this->container->get('dbal_connection');
+
+        $connection->executeQuery('UPDATE mol_sw_transactions set ordermail_variables = NULL');
+    }
+
+    private function addIndexToTransactions()
+    {
+        /** @var Connection $connection */
+        $connection = $this->container->get('dbal_connection');
+
+        $indexExistsCheck = $connection->executeQuery("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name='mol_sw_transactions' AND index_name='transaction_id_idx';")->fetch();
+
+        if ($indexExistsCheck['indexIsThere'] == 0) {
+            $connection->executeQuery('ALTER TABLE `mol_sw_transactions` ADD INDEX `transaction_id_idx` (`transaction_id`);');
+        }
     }
 
 }
