@@ -260,6 +260,9 @@ class MollieShopware extends Plugin
         $downloader = new ApplePayDomainFileDownloader();
         $downloader->downloadDomainAssociationFile(Shopware()->DocPath());
 
+        // add index to mol_sw_transactions if not exists
+        $this->addIndexToTransactions();
+
         parent::activate($context);
     }
 
@@ -531,6 +534,17 @@ class MollieShopware extends Plugin
         $cleaner = new SnippetsCleaner($connection, $iniFiles);
 
         $cleaner->cleanBackendSnippets();
+    }
+
+    private function addIndexToTransactions()
+    {
+        $connection = $this->container->get('dbal_connection');
+
+        $indexExistsCheck = $connection->executeQuery("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name='mol_sw_transactions' AND index_name='transaction_id_idx';")->fetch();
+
+        if ($indexExistsCheck['indexIsThere'] === 0) {
+            $connection->executeQuery('ALTER TABLE `mol_sw_transactions` ADD INDEX `transaction_id_idx` (`transaction_id`);');
+        }
     }
 
 }
