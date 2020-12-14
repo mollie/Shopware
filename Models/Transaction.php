@@ -387,7 +387,7 @@ class Transaction
      */
     public function getPaymentMethod()
     {
-        return (string) $this->paymentMethod;
+        return (string)$this->paymentMethod;
     }
 
     /**
@@ -405,7 +405,7 @@ class Transaction
      */
     public function getIsShipped()
     {
-        return (bool) $this->isShipped;
+        return (bool)$this->isShipped;
     }
 
     /**
@@ -417,4 +417,50 @@ class Transaction
         $this->isShipped = $isShipped;
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function isTypePayment()
+    {
+        return ((string)$this->getMolliePaymentId() !== '');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTypeOrder()
+    {
+        return ((string)$this->getMollieId() !== '');
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShopwareTransactionNumber()
+    {
+        $transactionId = $this->getMolliePaymentId();
+
+        if (empty($transactionId))
+            $transactionId = $this->getMollieId();
+
+        if (empty($transactionId))
+            $transactionId = $this->getTransactionId();
+
+        return $transactionId;
+    }
+
+
+    /**
+     * Gets the Id of the mollie order if existing
+     * (this is an additional wrapper to make it more readable
+     * without refactoring it).
+     *
+     * @return string
+     */
+    public function getMollieOrderId()
+    {
+        return $this->mollieId;
+    }
+
 }

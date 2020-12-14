@@ -9,6 +9,7 @@
         <import resource="services/applepay_direct.xml"/>
         <import resource="services/components.xml"/>
         <import resource="services/subscriber.xml"/>
+        <import resource="services/gateways.xml"/>
     </imports>
 
     <services>
@@ -42,6 +43,7 @@
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
             <argument type="service" id="mollie_shopware.api_factory"/>
             <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument>%shopware.custom%</argument>
         </service>
 

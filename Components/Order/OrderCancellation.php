@@ -1,0 +1,149 @@
+<?php
+
+namespace MollieShopware\Components\Order;
+
+
+use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\CurrentCustomer;
+use MollieShopware\Components\Services\BasketService;
+use MollieShopware\Components\Services\OrderService;
+use MollieShopware\Components\Services\PaymentService;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
+use Shopware\Models\Order\Order;
+
+class OrderCancellation
+{
+
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repoTransactions;
+
+    /**
+     * @var OrderService
+     */
+    private $orderService;
+
+    /**
+     * @var BasketService
+     */
+    private $basketService;
+
+    /**
+     * @var PaymentService
+     */
+    private $paymentService;
+
+    /**
+     * @var OrderUpdater
+     */
+    private $orderUpdater;
+
+    /**
+     * @param Config $config
+     * @param TransactionRepository $repoTransactions
+     * @param OrderService $orderService
+     * @param BasketService $basketService
+     * @param PaymentService $paymentService
+     * @param OrderUpdater $orderUpdater
+     */
+    public function __construct(Config $config, TransactionRepository $repoTransactions, OrderService $orderService, BasketService $basketService, PaymentService $paymentService, OrderUpdater $orderUpdater)
+    {
+        $this->config = $config;
+        $this->repoTransactions = $repoTransactions;
+        $this->orderService = $orderService;
+        $this->basketService = $basketService;
+        $this->paymentService = $paymentService;
+        $this->orderUpdater = $orderUpdater;
+    }
+
+
+    /**
+     * @param $transactionNumber
+     * @throws \Exception
+     */
+    public function cancelAndRestoreByTransaction($transactionNumber)
+    {
+        if (empty($transactionNumber)) {
+            return;
+        }
+
+        $transaction = $this->repoTransactions->find($transactionNumber);
+
+        if (!$transaction instanceof Transaction) {
+            return;
+        }
+
+        $orderNumber = $transaction->getOrderNumber();
+        $swOrder = $this->orderService->getShopwareOrderByNumber($orderNumber);
+
+        $this->cancelAndRestoreByOrder($swOrder);
+    }
+
+    /**
+     * @param $swOrder
+     * @throws \Exception
+     */
+    public function cancelAndRestoreByOrder($swOrder)
+    {
+        if (!$swOrder instanceof Order) {
+            return;
+        }
+
+        # make sure we have all status data cancelled as expected
+        $this->cancelPlacedOrder($swOrder);
+
+        # restore the cart, otherwise it would be empty
+        $this->restoreCartFromOrder($swOrder);
+    }
+
+    /**
+     * Cancels the payment status of the provided order
+     * and also updates the order status and stock if configured
+     * in the plugin configuration.
+     *
+     * @param Order $order
+     * @throws \Exception
+     */
+    public function cancelPlacedOrder($order)
+    {
+        $this->orderUpdater->updateShopwarePaymentStatusWithoutMail(
+            $order,
+            PaymentStatus::MOLLIE_PAYMENT_CANCELED
+        );
+
+        if ($this->config->cancelFailedOrders()) {
+
+            $this->orderUpdater->updateShopwareOrderStatusWithoutMail(
+                $order,
+                PaymentStatus::MOLLIE_PAYMENT_CANCELED
+            );
+
+            if ($this->config->autoResetStock()) {
+                $this->paymentService->resetStock($order);
+            }
+        }
+    }
+
+    /**
+     * @param Order $order
+     * @throws \Exception
+     */
+    private function restoreCartFromOrder(Order $order)
+    {
+        /** @var CurrentCustomer $currentCustomer */
+        $currentCustomer = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
+
+        if ($currentCustomer->getCurrentId() === $order->getCustomer()->getId()) {
+            $this->basketService->restoreBasket($order);
+        }
+    }
+
+}
