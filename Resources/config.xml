@@ -250,9 +250,9 @@
             <label lang="en">Transaction number for orders</label>
             <label lang="nl">Transactienummer voor orders</label>
             <value>mollie</value>
-            <description lang="de">Wähle die Transaktionsnummer, die auf Bestellungen angezeigt werden soll.</description>
-            <description lang="en">Choose the transaction number that is visible on orders</description>
-            <description lang="nl">Selecteer het transactienummer dat op de orders moet worden weergegeven.</description>
+            <description lang="de">Wähle die Transaktionsnummer, die in Shopware als Referenz angezeigt werden soll. Dies ist entweder die Nummer der Mollie Transaktion, oder eine Referenznummer der Zahlart, sofern verfügbar.</description>
+            <description lang="en">Choose the transaction number that is visible as reference in Shopware. This is either the number of the Mollie transaction, or a reference number of the payment method, if available.</description>
+            <description lang="nl">Selecteer het transactienummer dat in Shopware als referentie moet worden weergegeven. Dit is of het nummer van de Mollie transactie, of een referentienummer van de betalingsmethode, indien beschikbaar.</description>
             <store>
                 <option>
                     <value>inherited</value>

@@ -23,5 +23,44 @@ class PaymentStatus
      */
     const MOLLIE_PAYMENT_REFUNDED = 'refunded';
     const MOLLIE_PAYMENT_PARTIALLY_REFUNDED = 'partially_refunded';
-    
+
+
+    /**
+     * Gets if the provided payment status means that
+     * its allowed to cancel an (open) order.
+     *
+     * @param $status
+     * @return bool
+     */
+    public static function isFailedStatus($status)
+    {
+        $list = array(
+            PaymentStatus::MOLLIE_PAYMENT_CANCELED,
+            PaymentStatus::MOLLIE_PAYMENT_FAILED,
+            PaymentStatus::MOLLIE_PAYMENT_EXPIRED,
+        );
+
+        return (in_array($status, $list, true));
+    }
+
+    /**
+     * Gets if the provided payment status is an approved payment.
+     * This means that the order is approved.
+     * This does not mean that its already completely paid.
+     *
+     * @param $status
+     * @return bool
+     */
+    public static function isApprovedStatus($status)
+    {
+        $list = array(
+            PaymentStatus::MOLLIE_PAYMENT_PAID,
+            PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED,
+            PaymentStatus::MOLLIE_PAYMENT_DELAYED,
+            PaymentStatus::MOLLIE_PAYMENT_OPEN,
+        );
+
+        return (in_array($status, $list, true));
+    }
+
 }

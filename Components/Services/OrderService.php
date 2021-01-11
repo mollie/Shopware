@@ -96,37 +96,18 @@ class OrderService
     }
 
     /**
-     * Get an order by it's number
-     *
-     * @param string $orderNumber
-     *
-     * @return \Shopware\Models\Order\Order $order
-     *
-     * @throws \Exception
+     * @param $orderNumber
+     * @return Order
      */
-    public function getOrderByNumber($orderNumber)
+    public function getShopwareOrderByNumber($orderNumber)
     {
-        $order = null;
+        /** @var \Shopware\Models\Order\Repository $orderRepo */
+        $orderRepo = $this->modelManager->getRepository(\Shopware\Models\Order\Order::class);
 
-        try {
-            /** @var \Shopware\Models\Order\Repository $orderRepo */
-            $orderRepo = $this->modelManager->getRepository(
-                \Shopware\Models\Order\Order::class
-            );
-
-            /** @var \Shopware\Models\Order\Order $order */
-            $order = $orderRepo->findOneBy([
-                'number' => $orderNumber
-            ]);
-        } catch (\Exception $ex) {
-
-            $this->logger->error(
-                'Error when loading order by number: ' . $orderNumber,
-                array(
-                    'error' => $ex->getMessage(),
-                )
-            );
-        }
+        /** @var \Shopware\Models\Order\Order $order */
+        $order = $orderRepo->findOneBy([
+            'number' => $orderNumber
+        ]);
 
         return $order;
     }

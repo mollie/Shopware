@@ -5,6 +5,7 @@ namespace MollieShopware\Models;
 use MollieShopware\Components\Logger;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelRepository;
+use Shopware\Models\Order\Order;
 
 class TransactionRepository extends ModelRepository
 {
@@ -13,7 +14,7 @@ class TransactionRepository extends ModelRepository
      * mollie Order object. This stores the mollie ID with the
      * order so it can be recovered later.
      *
-     * @param \Shopware\Models\Order\Order|null $order
+     * @param Order|null $order
      * @param \Mollie\Api\Resources\Order|null $mollieOrder
      * @param \Mollie\Api\Resources\Payment|null $molliePayment
      *
@@ -22,7 +23,7 @@ class TransactionRepository extends ModelRepository
      *
      */
     public function create(
-        \Shopware\Models\Order\Order $order = null,
+        Order $order = null,
         \Mollie\Api\Resources\Order $mollieOrder = null,
         \Mollie\Api\Resources\Payment $molliePayment = null
     )
@@ -51,37 +52,26 @@ class TransactionRepository extends ModelRepository
     }
 
     /**
-     * Save a transaction to the database
-     *
      * @param Transaction $transaction
-     * @return \MollieShopware\Models\Transaction
-     * @throws \Exception
+     * @return Transaction
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function save(Transaction $transaction)
     {
-        try {
-            $this->getEntityManager()->persist($transaction);
-            $this->getEntityManager()->flush($transaction);
-        } catch (\Exception $ex) {
-
-            $this->getLogger()->error(
-                'Error when saving transaction in database',
-                array(
-                    'error' => $ex->getMessage(),
-                )
-            );
-        }
-
+        $this->getEntityManager()->persist($transaction);
+        $this->getEntityManager()->flush($transaction);
+            
         return $transaction;
     }
 
     /**
      * Get the most recent transaction for an order
      *
-     * @param \Shopware\Models\Order\Order $order
+     * @param Order $order
      * @return Transaction
      */
-    public function getMostRecentTransactionForOrder(\Shopware\Models\Order\Order $order)
+    public function getMostRecentTransactionForOrder(Order $order)
     {
         /** @var Transaction $transaction */
         $transaction = $this->findOneBy([

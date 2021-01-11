@@ -27,6 +27,7 @@
                 <directory suffix=".php">./Command</directory>
                 <directory suffix=".php">./Components/Base</directory>
                 <directory suffix=".php">./Controllers</directory>
+                <directory suffix=".php">./Gateways</directory>
                 <directory suffix=".php">./Models</directory>
                 <directory suffix=".php">./Subscriber</directory>
                 <directory suffix=".php">./Tests</directory>

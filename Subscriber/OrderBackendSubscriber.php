@@ -91,7 +91,7 @@ class OrderBackendSubscriber implements SubscriberInterface
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
             /** @var Order $order */
-            $order = $orderService->getOrderByNumber($orderNumber);
+            $order = $orderService->getShopwareOrderByNumber($orderNumber);
         }
 
         if (!empty($order)) {
@@ -219,7 +219,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         }
 
         if ($numberAsId === true) {
-            $order = $this->orderService->getOrderByNumber($orderId);
+            $order = $this->orderService->getShopwareOrderByNumber($orderId);
         }
 
         if ($order !== null) {

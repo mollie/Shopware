@@ -205,11 +205,15 @@ class Config
         /** @var int|null $level */
         $level = $this->get('log_level');
 
+        if ($level === '2, INFO') {
+            $level = Logger::INFO;
+        }
+
         if ($level === null) {
             return Logger::INFO;
         }
 
-        return $level;
+        return (int)$level;
     }
 
     /**
@@ -236,7 +240,7 @@ class Config
      *
      * @return boolean
      */
-    public function sendStatusMail()
+    public function isPaymentStatusMailEnabled()
     {
         return $this->get('send_status_mail', 'no') == 'yes';
     }

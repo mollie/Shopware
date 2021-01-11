@@ -87,7 +87,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     Shopware()->Modules()->Order()->setOrderStatus(
                         $order->getId(),
                         $this->config->getShippedStatus(),
-                        $this->config->sendStatusMail()
+                        $this->config->isPaymentStatusMailEnabled()
                     );
                 }
 
@@ -412,7 +412,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $this->modelManager->flush();
 
         // send status email
-        if ($this->config->sendStatusMail() && $this->config->sendRefundStatusMail()) {
+        if ($this->config->isPaymentStatusMailEnabled() && $this->config->sendRefundStatusMail()) {
             $mail = Shopware()->Modules()->Order()->createStatusMail(
                 $order->getId(),
                 $paymentStatusRefunded->getId()
