@@ -284,4 +284,31 @@ class OrderService
 
         return $items;
     }
+
+    public function getOrderBySessionId(string $sessionId)
+    {
+        $order = null;
+
+        try {
+            /** @var \Shopware\Models\Order\Repository $orderRepo */
+            $orderRepo = $this->modelManager->getRepository(
+                \Shopware\Models\Order\Order::class
+            );
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $orderRepo->findOneBy([
+                'temporaryId' => $sessionId
+            ]);
+        }
+        catch (\Exception $ex) {
+            $this->logger->error(
+                'Error when loading order by session ID: ' . $sessionId,
+                array(
+                    'error' => $ex->getMessage(),
+                )
+            );
+        }
+
+        return $order;
+    }
 }
