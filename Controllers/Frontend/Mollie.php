@@ -24,6 +24,7 @@ use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
+use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use MollieShopware\Traits\MollieApiClientTrait;
 use Shopware\Models\Order\Order;
 
@@ -33,6 +34,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
 
     const ERROR_PAYMENT_FAILED = 'Payment failed';
+
+    const TOKEN_ANONYMIZER_PLACEHOLDER_COUNT = 4;
+
+    const TOKEN_ANONYMIZER_MAX_LENGTH = 15;
 
 
     /**
@@ -66,9 +71,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     private $orderCancellation;
 
     /**
-     * @var ApplePayDirectFactory
+     * @var ApplePayDirectHandlerInterface
      */
-    private $applePayFactory;
+    private $applePay;
 
     /**
      * @var OrderService
@@ -152,7 +157,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 )
             );
 
-
             # in theory this is not catched,
             # but for a better code understanding, we keep it here
             if ($this->checkout->getRestorableOrder() instanceof Order) {
@@ -164,9 +168,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         } finally {
 
             # we always have to immediately clear the token in SUCCESS or FAILURE ways
-            /** @var ApplePayDirectHandlerInterface $applePay */
-            $applePay = $this->applePayFactory->createHandler();
-            $applePay->setPaymentToken('');
+            $this->applePay->setPaymentToken('');
         }
     }
 
@@ -427,7 +429,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         try {
 
-            $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+            $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+            $this->applePay = $applePayFactory->createHandler();
+
+            $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
+
 
             $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
 
@@ -458,6 +464,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $orderUpdater = new OrderUpdater($this->config, $sOrder);
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
+            $tokeAnonymizer = new TokenAnonymizer(
+                '*',
+                self::TOKEN_ANONYMIZER_PLACEHOLDER_COUNT,
+                self::TOKEN_ANONYMIZER_MAX_LENGTH
+            );
+
 
             $this->orderCancellation = new OrderCancellation(
                 $config,
@@ -475,7 +487,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 new MollieRefundStatus()
             );
 
-
             $this->checkout = new CheckoutSessionFacade(
                 $config,
                 $paymentService,
@@ -488,7 +499,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $repoTransactions,
                 $this->localeFinder,
                 $sBasket,
-                $swOrderBuilder
+                $swOrderBuilder,
+                $tokeAnonymizer,
+                $this->applePay,
+                $creditCardService
             );
 
             $this->checkoutReturn = new FinishCheckoutFacade(
