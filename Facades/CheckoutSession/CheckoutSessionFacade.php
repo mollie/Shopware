@@ -2,11 +2,13 @@
 
 namespace MollieShopware\Facades\CheckoutSession;
 
+use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\Helpers\LocaleFinder;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
+use MollieShopware\Components\Services\CreditCardService;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
 use MollieShopware\Components\Shipping\Shipping;
@@ -15,6 +17,7 @@ use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
+use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Customer\Customer;
@@ -90,6 +93,21 @@ class CheckoutSessionFacade
      */
     private $swOrderBuilder;
 
+    /**
+     * @var TokenAnonymizer
+     */
+    private $tokenAnonymizer;
+
+    /**
+     * @var ApplePayDirectHandler
+     */
+    private $applePay;
+
+    /**
+     * @var CreditCardService
+     */
+    private $creditCardService;
+
 
     /**
      * @param Config $config
@@ -104,8 +122,11 @@ class CheckoutSessionFacade
      * @param LocaleFinder $localeFinder
      * @param $sBasket
      * @param ShopwareOrderBuilder $swOrderBuilder
+     * @param TokenAnonymizer $anonymizer
+     * @param ApplePayDirectHandler $applePay
+     * @param CreditCardService $creditCard
      */
-    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, TransactionRepository $repoTransactions, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder)
+    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, TransactionRepository $repoTransactions, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard)
     {
         $this->config = $config;
         $this->paymentService = $paymentService;
@@ -119,6 +140,9 @@ class CheckoutSessionFacade
         $this->localeFinder = $localeFinder;
         $this->sBasket = $sBasket;
         $this->swOrderBuilder = $swOrderBuilder;
+        $this->tokenAnonymizer = $anonymizer;
+        $this->applePay = $applePay;
+        $this->creditCardService = $creditCard;
     }
 
 
@@ -150,6 +174,12 @@ class CheckoutSessionFacade
 
         $basketData = $this->sBasket->sGetBasketData();
 
+
+        # we want to log anonymized tokens
+        # to see if they are used correctly.
+        $tokenCreditCard = $this->creditCardService->getCardToken();
+        $tokenApplePay = $this->applePay->getPaymentToken();
+
         $this->logger->info(
             'Starting checkout for user: ' . $basketUserId . ' with payment: ' . $paymentShortName,
             array(
@@ -158,6 +188,10 @@ class CheckoutSessionFacade
                     'quantity' => $basketData['Quantity'],
                     'payment' => $paymentShortName,
                     'user' => $basketUserId
+                ),
+                'tokens' => array(
+                    'creditcard' => $this->tokenAnonymizer->anonymize($tokenCreditCard),
+                    'applepay' => $this->tokenAnonymizer->anonymize($tokenApplePay),
                 )
             )
         );

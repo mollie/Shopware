@@ -10,9 +10,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "MollieShopware\\Components\\": "Components/",
-      "MollieShopware\\Models\\": "Models/",
-      "MollieShopware\\Tests\\": "Tests/"
+      "MollieShopware\\": "./"
     }
   }
 }
