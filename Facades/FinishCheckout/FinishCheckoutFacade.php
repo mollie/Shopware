@@ -281,4 +281,23 @@ class FinishCheckoutFacade
         );
     }
 
+    /**
+     * @param $transactionNumber
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function cleanupTransaction($transactionNumber)
+    {
+        $transaction = $this->repoTransactions->find($transactionNumber);
+
+        if (!$transaction instanceof Transaction) {
+            return;
+        }
+
+        # Unset OrdermailVariables to prevent bloating transaction table
+        if ($transaction->getOrdermailVariables() !== null) {
+            $transaction->setOrdermailVariables(null);
+            $this->repoTransactions->save($transaction);
+        }
+    }
 }
