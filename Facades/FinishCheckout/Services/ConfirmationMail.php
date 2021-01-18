@@ -59,10 +59,6 @@ class ConfirmationMail
 
             $this->sOder->sendMail($variables);
         }
-
-        $transaction->setOrdermailVariables(null);
-
-        $this->repoTransaction->save($transaction);
     }
 
 }

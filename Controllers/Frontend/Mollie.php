@@ -222,6 +222,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirectBack(self::ERROR_PAYMENT_FAILED);
+
+        } finally {
+            if (!empty($transactionNumber)) {
+                $this->checkoutReturn->cleanupTransaction($transactionNumber);
+            }
         }
     }
 

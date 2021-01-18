@@ -2,6 +2,7 @@
 
 namespace MollieShopware;
 
+use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Enlight_Template_Manager;
 use Exception;
@@ -262,6 +263,9 @@ class MollieShopware extends Plugin
 
         // add index to mol_sw_transactions if not exists
         $this->addIndexToTransactions();
+
+        // cleanup old transaction ordermail variables
+        $this->cleanOrdermailVariables();
 
         parent::activate($context);
     }
@@ -547,4 +551,11 @@ class MollieShopware extends Plugin
         }
     }
 
+    private function cleanOrdermailVariables()
+    {
+        /** @var Connection $connection */
+        $connection = $this->container->get('dbal_connection');
+
+        $connection->executeQuery('UPDATE mol_sw_transactions SET ordermail_variables = NULL');
+    }
 }
