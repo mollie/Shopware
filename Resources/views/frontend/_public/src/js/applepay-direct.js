@@ -203,6 +203,11 @@ function initApplePay() {
         session.onpaymentauthorized = function (e) {
             let paymentToken = e.payment.token;
             paymentToken = JSON.stringify(paymentToken);
+
+            // complete the session and notify the
+            // devices and the system that everything worked
+            session.completePayment(ApplePaySession.STATUS_SUCCESS);
+
             // now finish our payment by filling a form
             // and submitting it along with our payment token
             finishPayment(button.dataset.checkouturl, paymentToken, e.payment);
