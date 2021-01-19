@@ -546,9 +546,11 @@ class MollieShopware extends Plugin
 
         $indexExistsCheck = $connection->executeQuery("SELECT COUNT(1) indexIsThere FROM INFORMATION_SCHEMA.STATISTICS WHERE table_schema=DATABASE() AND table_name='mol_sw_transactions' AND index_name='transaction_id_idx';")->fetch();
 
-        if ($indexExistsCheck['indexIsThere'] === 0) {
+        $isExisting = ((int)$indexExistsCheck['indexIsThere'] === 1);
+
+        if (!$isExisting) {
             $connection->executeQuery('ALTER TABLE `mol_sw_transactions` ADD INDEX `transaction_id_idx` (`transaction_id`);');
-        }
+        } 
     }
 
     private function cleanOrdermailVariables()
