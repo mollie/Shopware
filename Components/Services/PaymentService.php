@@ -724,6 +724,10 @@ class PaymentService
                 if ($this->config->autoResetStock()) {
                     $this->resetStock($order);
                 }
+
+                if ($this->config->resetInvoiceAndShipping()){
+                    $this->resetInvoiceAndShipping($order);
+                }
             }
 
             if ($returnResult) {
@@ -751,6 +755,10 @@ class PaymentService
 
                 if ($this->config->autoResetStock()) {
                     $this->resetStock($order);
+                }
+
+                if ($this->config->resetInvoiceAndShipping()) {
+                    $this->resetInvoiceAndShipping($order);
                 }
             }
 
@@ -895,22 +903,31 @@ class PaymentService
      */
     public function resetStock(Order $order)
     {
-        if ($this->config->autoResetStock()) {
-            // Cancel failed orders
-            /** @var \MollieShopware\Components\Services\BasketService $basketService */
-            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-            // Reset order quantity
-            foreach ($order->getDetails() as $orderDetail) {
-                $basketService->resetOrderDetailQuantity($orderDetail);
-            }
-            // Reset shipping and invoice amount
-            if ($this->config->resetInvoiceAndShipping()) {
-                $order->setInvoiceShipping(0);
-                $order->setInvoiceShippingNet(0);
-                $order->setInvoiceAmount(0);
-                $order->setInvoiceAmountNet(0);
-            }
+        /** @var \MollieShopware\Components\Services\BasketService $basketService */
+        $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
+        // Reset order quantity
+        foreach ($order->getDetails() as $orderDetail) {
+            $basketService->resetOrderDetailQuantity($orderDetail);
         }
+
+        // Store order
+        Shopware()->Models()->persist($order);
+        Shopware()->Models()->flush($order);
+    }
+
+    /**
+     * Reset invoice and shipping on an order
+     *
+     * @param Order $order
+     * @throws \Exception
+     */
+    public function resetInvoiceAndShipping(Order $order)
+    {
+        // Reset shipping and invoice amount
+        $order->setInvoiceShipping(0);
+        $order->setInvoiceShippingNet(0);
+        $order->setInvoiceAmount(0);
+        $order->setInvoiceAmountNet(0);
 
         // Store order
         Shopware()->Models()->persist($order);
