@@ -85,7 +85,8 @@ class Notifications
 
 
     /**
-     * @param $transactionNumber
+     * @param $transactionID
+     * @param $paymentID
      * @throws OrderNotFoundException
      * @throws PaymentStatusNotFoundException
      * @throws TransactionNotFoundException
@@ -93,18 +94,19 @@ class Notifications
      * @throws \MollieShopware\Exceptions\OrderStatusNotFoundException
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function onNotify($transactionNumber)
+    public function onNotify($transactionID, $paymentID)
     {
-        $this->logger->debug('Incoming Webhook Notification for transaction: ' . $transactionNumber);
+        $this->logger->info('Incoming Webhook Notification for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
 
-        $transaction = $this->repoTransactions->find($transactionNumber);
+
+        $transaction = $this->repoTransactions->find($transactionID);
 
         if (!$transaction instanceof Transaction) {
-            throw new TransactionNotFoundException($transactionNumber);
+            throw new TransactionNotFoundException($transactionID);
         }
 
         if (empty($transaction->getOrderNumber())) {
-            # TODO das ist in ordnung wenn webhook schnell kommt. darf nicht logged werden...mhm
+            # TODO this is if webhook is too fast, we cant log it now to avoid confusing merchants but if its coming later it would be a problem
             #throw new \Exception('Transaction ' . $transactionNumber . ' has no valid order number!');
             return;
         }
@@ -119,12 +121,28 @@ class Notifications
 
         if ($transaction->isTypeOrder()) {
 
+            # if have a payment ID sent by mollie, but our transaction
+            # does not yet have an order ID, then simply skip that webhook
+            # TODO one day we should use that payment ID anyway. downside is, we wouldn't be able to "just" use the webhook url and call it in our browser
+            if (!empty($paymentID) && empty($transaction->getOrderId())) {
+                $this->logger->debug('Skipping webhook for ' . $paymentID . '. Order not yet ready in Shopware!');
+                return;
+            }
+
             # get the order from the mollie api
             # and extract the status from its data
             $mollieOrder = $this->paymentService->getMollieOrder($order);
             $mollieStatus = $this->statusConverter->getOrderStatus($mollieOrder);
 
         } else {
+
+            # if have a payment ID sent by mollie, but our transaction
+            # does not yet have one, then simply skip that webhook
+            # TODO one day we should use that payment ID anyway. downside is, we wouldn't be able to "just" use the webhook url and call it in our browser
+            if (!empty($paymentID) && empty($transaction->getMolliePaymentId())) {
+                $this->logger->debug('Skipping webhook for ' . $paymentID . '. Order not yet ready in Shopware!');
+                return;
+            }
 
             # get the payment from our molli api
             # and extract its status 
@@ -148,8 +166,7 @@ class Notifications
 
         } else {
 
-            # update our payment status from our
-            # notification data
+            # update our payment status from our notification data
             $this->orderUpdater->updateShopwarePaymentStatus($order, $mollieStatus);
 
             # if configured, also update the order status
@@ -158,6 +175,7 @@ class Notifications
             }
         }
 
+        $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
 
 }

@@ -226,8 +226,6 @@ class CheckoutSessionFacade
                 throw new \Exception('The order with order number ' . $orderNumber . ' could not be found');
             }
 
-            $this->logger->debug('Created Order: ' . $orderNumber . ' for Transaction: ' . $transaction->getId());
-
             # now that we have the order, we need to remember it
             # this is required to restore the basket from that order in case of
             # any additional failures below. otherwise the cart is empty because

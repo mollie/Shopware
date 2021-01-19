@@ -192,7 +192,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 throw new Exception('Missing Transaction Number');
             }
 
-            $this->logger->debug('Returning from Mollie for Transaction ' . $transactionNumber);
+            $this->logger->debug('User returning from Mollie for Transaction ' . $transactionNumber);
 
             $checkoutData = $this->checkoutReturn->finishTransaction($transactionNumber);
 
@@ -241,14 +241,18 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->loadServices();
 
-            /** @var string $transactionNumber */
-            $transactionNumber = $this->Request()->getParam('transactionNumber');
+            /** @var string $transactionID */
+            $transactionID = $this->Request()->getParam('transactionNumber', '');
 
-            if (empty($transactionNumber)) {
+            if (empty($transactionID)) {
                 throw new \Exception('No transaction number provided!');
             }
 
-            $this->notifications->onNotify($transactionNumber);
+            /** @var string $paymentID */
+            $paymentID = $this->Request()->getParam('id', '');
+
+
+            $this->notifications->onNotify($transactionID, $paymentID);
 
             $data = array(
                 'success' => true,
