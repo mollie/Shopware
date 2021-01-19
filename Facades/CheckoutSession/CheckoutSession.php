@@ -10,6 +10,11 @@ class CheckoutSession
 {
 
     /**
+     * @var bool
+     */
+    private $redirectToMollieRequired;
+
+    /**
      * @var Transaction
      */
     private $transaction;
@@ -19,16 +24,25 @@ class CheckoutSession
      */
     private $checkoutUrl;
 
-
     /**
      * CheckoutSession constructor.
+     * @param bool $redirectToMollieRequired
      * @param Transaction $transaction
-     * @param $checkoutUrl
+     * @param string $checkoutUrl
      */
-    public function __construct(Transaction $transaction, $checkoutUrl)
+    public function __construct($redirectToMollieRequired, Transaction $transaction, $checkoutUrl)
     {
+        $this->redirectToMollieRequired = $redirectToMollieRequired;
         $this->transaction = $transaction;
         $this->checkoutUrl = $checkoutUrl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRedirectToMollieRequired()
+    {
+        return $this->redirectToMollieRequired;
     }
 
     /**

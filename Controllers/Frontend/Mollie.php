@@ -132,10 +132,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $currency
             );
 
-            if ($session->getCheckoutUrl() === PaymentService::CHECKOUT_URL_CC_NON3D_SECURE) {
-                # just finish our payment by redirecting
-                # to our return, such as if the user would have really
-                # visited the mollie payment form.
+            # some payment methods do not require a redirect to mollie.
+            # these are automatically approved and thus we
+            # have to immediately redirect to the return action.
+            if (!$session->isRedirectToMollieRequired()) {
                 $this->redirect(
                     [
                         'controller' => 'Mollie',
