@@ -17,15 +17,15 @@ function initApplePay() {
         // we need our wrapping div layer
         // because that one will also be hidden to avoid any existing margins
         // if no apple pay should be displayed at all
-        const divsApplePay = document.querySelectorAll(applePayDivSelector);
+        var divsApplePay = document.querySelectorAll(applePayDivSelector);
 
         if (!window.ApplePaySession || !window.ApplePaySession.canMakePayments()) {
             // hide our wrapping apple pay div
             // to avoid any wrong margins if no apple pay is displayed
             if (divsApplePay) {
-                divsApplePay.forEach(function (div) {
-                    div.style.display = "none";
-                });
+                for (var i = 0; i < divsApplePay.length; i++) {
+                    divsApplePay[i].style.display = "none";
+                }
             }
             return;
         }
@@ -56,9 +56,9 @@ function initApplePay() {
      */
     function onButtonClick(event) {
 
-        const button = event.target;
+        var button = event.target;
 
-        const session = createApplePaySession(
+        var session = createApplePaySession(
             button.dataset.label,
             button.dataset.amount,
             button.dataset.country,
@@ -73,11 +73,11 @@ function initApplePay() {
         if (button.dataset.addproducturl) {
 
             // our fallback is quantity 1
-            let qty = 1;
+            var qty = 1;
 
             // if we have our sQuantity dropdown, use
             // that quantity when adding the product
-            const comboQuantity = document.getElementById('sQuantity');
+            var comboQuantity = document.getElementById('sQuantity');
             if (comboQuantity) {
                 qty = comboQuantity.value;
             }
@@ -201,7 +201,7 @@ function initApplePay() {
          * @param e
          */
         session.onpaymentauthorized = function (e) {
-            let paymentToken = e.payment.token;
+            var paymentToken = e.payment.token;
             paymentToken = JSON.stringify(paymentToken);
             // now finish our payment by filling a form
             // and submitting it along with our payment token
@@ -220,7 +220,7 @@ function initApplePay() {
      * @returns {ApplePaySession}
      */
     function createApplePaySession(label, amount, country, currency) {
-        const request = {
+        var request = {
             countryCode: country,
             currencyCode: currency,
             requiredShippingContactFields: [
