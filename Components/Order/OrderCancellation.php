@@ -129,6 +129,10 @@ class OrderCancellation
             if ($this->config->autoResetStock()) {
                 $this->paymentService->resetStock($order);
             }
+
+            if ($this->config->resetInvoiceAndShipping()){
+                $this->paymentService->resetInvoiceAndShipping($order);
+            }
         }
     }
 
