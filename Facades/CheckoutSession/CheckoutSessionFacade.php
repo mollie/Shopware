@@ -247,7 +247,13 @@ class CheckoutSessionFacade
         # the user to for further payment steps.
         $checkoutUrl = $this->paymentService->startMollieSession($paymentShortName, $transaction);
 
+        # some payment methods are approved and
+        # paid immediately and don't require a redirect.
+        # so we just grab this information using our constant
+        $redirectRequired = ($checkoutUrl !== PaymentService::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED);
+
         return new CheckoutSession(
+            $redirectRequired,
             $transaction,
             $checkoutUrl
         );

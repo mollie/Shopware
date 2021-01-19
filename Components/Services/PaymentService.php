@@ -25,13 +25,12 @@ class PaymentService
 
     /**
      * yes this is a small hack :)
-     * credit cards without a 3d secure (isnt allowed except on test systems)
-     * do not have a checkout URL. in that case the
-     * payment is immediately PAID and thus we "just" redirect to the finish page.
-     * We need this constants, because the response for the controller is a
-     * string and i dont want to touch anything else.
+     * some credit cards to not create a checkoutURL.
+     * This is in the case of approved apple pay payments,
+     * and also credit cards without a 3d secure (isnt allowed except on test systems)
+     * in that case the payment is immediately PAID and thus we "just" redirect to the finish page.
      */
-    const CHECKOUT_URL_CC_NON3D_SECURE = 'OK_NON_3dSecure';
+    const CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED = 'OK_NO_CHECKOUT_REDIRECT_REQUIRED';
 
 
     /**
@@ -185,18 +184,25 @@ class PaymentService
         $creditCardService->setCardToken('');
 
 
-        # if we have no checkout url
-        # but our payment is valid, "paid" and done with a payment method "creditcard"
-        # then we have the case that its a "non 3d secure" card, and thus
-        # its ok that our checkout url is empty. We just "finish" the order in the controller action.
+        # some payment methods with credit card, e.g. "non-3d-secure" or apple pay
+        # have no checkout url, because they might already be paid immediately.
+        # so we check for their payment methods and return our special checkout URL
+        # to tell our calling function that we should redirect to the return url immediately.
         if (empty($checkoutUrl)) {
 
-            if ($molliePayment instanceof Payment &&
-                $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID &&
-                $molliePayment->method === PaymentMethod::CREDITCARD) {
-                # assign our constant which helps us
-                # to finish the order in the controller action
-                $checkoutUrl = self::CHECKOUT_URL_CC_NON3D_SECURE;
+            if ($useOrdersAPI) {
+
+                if ($mollieOrder->method === PaymentMethod::CREDITCARD &&
+                    $mollieOrder->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
+                    $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
+                }
+
+            } else {
+
+                if ($molliePayment->method === PaymentMethod::CREDITCARD &&
+                    $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
+                    $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
+                }
             }
         }
 
