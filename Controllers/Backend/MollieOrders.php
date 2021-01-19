@@ -1,5 +1,6 @@
 <?php
 
+use MollieShopware\Services\RefundService;
 use Shopware\Models\Order\Status;
 
 use Mollie\Api\Resources\Order;
@@ -27,6 +28,17 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
     protected $paymentService;
 
+    /**
+     * @var RefundService
+     */
+    protected $refundService;
+
+    public function preDispatch()
+    {
+        $this->refundService = $this->container->get('mollie_shopware.services.refund_service');
+        parent::preDispatch();
+    }
+
     public function shipAction()
     {
         try {
@@ -47,7 +59,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderId')
             );
 
-            if (empty($order))
+            if ($order === null)
                 $this->returnError('Order not found');
             
             
@@ -65,16 +77,21 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $mollieOrder = $this->apiClient->orders->get($mollieId);
             $errorMessage = '';
 
-            if (empty($mollieOrder))
+            if ($mollieOrder === null) {
                 $errorMessage = 'Could not find order at Mollie, are you sure it is paid through the Orders API?';
-            if ($mollieOrder->isPending())
+            }
+            if ($mollieOrder->isPending()){
                 $errorMessage = 'The order is pending at Mollie.';
-            if ($mollieOrder->isExpired())
+            }
+            if ($mollieOrder->isExpired()) {
                 $errorMessage = 'The order is expired at Mollie.';
-            if ($mollieOrder->isCanceled())
+            }
+            if ($mollieOrder->isCanceled()) {
                 $errorMessage = 'The order is canceled at Mollie.';
-            if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0)
+            }
+            if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0) {
                 $errorMessage = 'The order is already shipping at Mollie.';
+            }
 
             if ((string) $errorMessage !== '') {
                 $this->returnError($errorMessage);
@@ -121,9 +138,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderId')
             );
 
-            if (empty($order))
+            if ($order === null) {
                 $this->returnError('Order not found');
-
+            }
 
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
@@ -143,8 +160,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $refund = null;
 
-            if (!empty($mollieOrder)) {
-                $refund = $this->refundOrder($order, $mollieOrder);
+            if ($mollieOrder !== null) {
+                $refund = $this->refundService->refundOrder($order, $mollieOrder);
             }
             else {
                 try {
@@ -156,12 +173,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     //
                 }
 
-                if (!empty($molliePayment))
-                    $refund = $this->refundPayment($order, $molliePayment);
+                if ($molliePayment !== null) {
+                    $refund = $this->refundService->refundPayment($order, $molliePayment);
+                }
             }
 
-            if (!empty($refund))
+            if (!empty($refund)) {
                 $this->returnSuccess('Order successfully refunded', $refund);
+            }
         }
         catch (\Exception $ex) {
             $this->returnError($ex->getMessage());
@@ -193,8 +212,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderDetailId')
             );
 
-            if (empty($order))
+            if ($order === null) {
                 $this->returnError('Order not found');
+            }
 
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
@@ -213,11 +233,11 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $refund = null;
 
-            if (!empty($mollieOrder)) {
+            if ($mollieOrder !== null) {
                 $orderLine = $mollieOrder->lines()->get($request->getParam('mollieOrderLineId'));
 
                 if ($orderLine !== null) {
-                    $refund = $this->partialRefundOrder(
+                    $refund = $this->refundService->partialRefundOrder(
                         $order,
                         $orderDetail,
                         $mollieOrder,
@@ -272,178 +292,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $this->returnJson([
             'shippable' => $shippable,
         ]);
-    }
-
-    /**
-     * Refund a Mollie order
-     *
-     * @param \Shopware\Models\Order\Order $order
-     * @param Order $mollieOrder
-     *
-     * @throws \Exception
-     *
-     * @return bool|\Mollie\Api\Resources\Refund
-     */
-    private function refundOrder(\Shopware\Models\Order\Order $order, Order $mollieOrder)
-    {
-        if (empty($this->modelManager) || empty($this->apiClient))
-            return false;
-
-        /** @var \MollieShopware\Models\OrderLinesRepository $mollieOrderLinesRepo */
-        $mollieOrderLinesRepo = $this->modelManager->getRepository(
-            \MollieShopware\Models\OrderLines::class
-        );
-
-        $mollieShipmentLines = $mollieOrderLinesRepo->getShipmentLines($order);
-
-        /** @var \Mollie\Api\Resources\Refund $refund */
-        $refund = $this->apiClient->orderRefunds->createFor($mollieOrder, [
-            'lines' => $mollieShipmentLines
-        ]);
-
-        if (!empty($refund)) {
-            $this->processRefund($order);
-
-            if ($order->getDetails()->isEmpty() === false) {
-                foreach ($order->getDetails() as $detail) {
-                    $this->updateRefundedItemsOnOrderDetail($detail, $detail->getQuantity());
-                }
-            }
-        }
-
-        return $refund;
-    }
-
-    /**
-     * Refund a Mollie order
-     *
-     * @param \Shopware\Models\Order\Order $order
-     * @param Order $mollieOrder
-     *
-     * @throws \Exception
-     *
-     * @return bool|\Mollie\Api\Resources\Refund
-     */
-    private function partialRefundOrder(
-        \Shopware\Models\Order\Order $order,
-        Detail $detail,
-        Order $mollieOrder,
-        OrderLine $orderLine,
-        $quantity = 1
-    )
-    {
-        if (empty($this->modelManager) || empty($this->apiClient))
-            return false;
-
-        $data = [
-            'lines' => [
-                [
-                    'id' => $orderLine->id,
-                    'quantity' => $quantity,
-                ],
-            ]
-        ];
-
-        /** @var \Mollie\Api\Resources\Refund $refund */
-        $refund = $this->apiClient->orderRefunds->createFor($mollieOrder, $data);
-
-        if (!empty($refund)) {
-            $this->processRefund($order);
-            $this->updateRefundedItemsOnOrderDetail($detail, $quantity);
-        }
-
-        return $refund;
-    }
-
-    /**
-     * Refund a Mollie payment
-     *
-     * @param \Shopware\Models\Order\Order $order
-     * @param \Mollie\Api\Resources\Payment $molliePayment
-     *
-     * @return Mollie\Api\Resources\BaseResource
-     *
-     * @throws \Exception
-     */
-    private function refundPayment(\Shopware\Models\Order\Order $order, \Mollie\Api\Resources\Payment $molliePayment)
-    {
-        $refund = $molliePayment->refund([
-            'amount' => [
-                'currency' => $order->getCurrency(),
-                'value' => number_format($order->getInvoiceAmount(), 2, '.', '')
-            ]
-        ]);
-
-        if (!empty($refund))
-            $this->processRefund($order);
-
-        return $refund;
-    }
-
-    /**
-     * Send the status e-mail
-     *
-     * @param \Shopware\Models\Order\Order $order
-     *
-     * @return bool
-     *
-     * @throws \Exception
-     */
-    private function processRefund(\Shopware\Models\Order\Order $order)
-    {
-        if (empty($this->config) || empty($this->modelManager))
-            return false;
-
-        /** @var \Shopware\Models\Order\Repository $orderStatusRepo */
-        $orderStatusRepo = $this->modelManager->getRepository(
-            \Shopware\Models\Order\Status::class
-        );
-
-        /** @var \Shopware\Models\Order\Status $paymentStatusRefunded */
-        $paymentStatusRefunded = $orderStatusRepo->find(
-            \Shopware\Models\Order\Status::PAYMENT_STATE_RE_CREDITING
-        );
-
-        // set the payment status
-        $order->setPaymentStatus($paymentStatusRefunded);
-
-        // save the order
-        $this->modelManager->persist($order);
-        $this->modelManager->flush();
-
-        // send status email
-        if ($this->config->isPaymentStatusMailEnabled() && $this->config->sendRefundStatusMail()) {
-            $mail = Shopware()->Modules()->Order()->createStatusMail(
-                $order->getId(),
-                $paymentStatusRefunded->getId()
-            );
-
-            if ($mail)
-                Shopware()->Modules()->Order()->sendStatusMail($mail);
-        }
-
-        return true;
-    }
-
-    private function updateRefundedItemsOnOrderDetail($detail, $quantity)
-    {
-        if (
-            $detail->getAttribute() !== null
-            && method_exists($detail->getAttribute(), 'getMollieReturn')
-            && method_exists($detail->getAttribute(), 'setMollieReturn')
-        ) {
-            $mollieReturn = $detail->getAttribute()->getMollieReturn();
-            $mollieReturn += $quantity;
-
-            $detail->getAttribute()->setMollieReturn($mollieReturn);
-
-            try {
-                $this->modelManager->persist($detail->getAttribute());
-                $this->modelManager->flush($detail->getAttribute());
-            } catch (Exception $e) {
-                //
-            }
-        }
     }
 
     /**
