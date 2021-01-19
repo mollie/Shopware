@@ -97,11 +97,15 @@ class OrderCancellation
             return;
         }
 
+        # restore the cart, otherwise it would be empty
+
+        # it's important to restore the order before the placed order is cancelled
+        # otherwise the original quantity of the line items can't be restored
+        $this->restoreCartFromOrder($swOrder);
+
         # make sure we have all status data cancelled as expected
         $this->cancelPlacedOrder($swOrder);
 
-        # restore the cart, otherwise it would be empty
-        $this->restoreCartFromOrder($swOrder);
     }
 
     /**
