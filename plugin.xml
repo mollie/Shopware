@@ -45,10 +45,12 @@
         <changes lang="de">
             - Die Apple Pay Integration verursacht nun keine Fehler mehr im Internet Explorer.
             - Es wurde ein neuer Button in der Konfiguration hinzugefügt, mit dem die Zahlungsarten importiert werden.
+            - Bestellungen können nun  von der Kommandozeile zurückerstattet werden.
         </changes>
         <changes lang="en">
             - The apple pay integration does not cause any errors in the internet explorer anymore.
             - There is a new button, which allows you to import the payment methods.
+            - Orders can now be refunded with a CLI command.
         </changes>
     </changelog>
 
