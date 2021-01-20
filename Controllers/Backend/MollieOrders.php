@@ -28,9 +28,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
     protected $paymentService;
 
-    /**
-     * @var RefundService
-     */
+    /** @var RefundService */
     protected $refundService;
 
     public function preDispatch()
