@@ -5,6 +5,7 @@ namespace MollieShopware\Command;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use InvalidArgumentException;
+use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Services\RefundService;
 use MollieShopware\Traits\MollieApiClientTrait;
@@ -71,9 +72,7 @@ class OrdersRefundCommand extends ShopwareCommand
         ]);
 
         if ($transaction === null) {
-            $io->error('No order with the given order number was found!');
-
-            return 1;
+            throw new TransactionNotFoundException(\sprintf('with ordernumber %s', $orderNumber));
         }
 
         try {

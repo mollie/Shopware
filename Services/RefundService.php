@@ -32,8 +32,6 @@ class RefundService implements RefundInterface
 
     public function refundOrderAmount(Order $order, Transaction $transaction, float $customAmount = null)
     {
-
-
         $mollieClient = $this->getMollieApi($order->getShop()->getId());
 
         if ($mollieClient === null) {
