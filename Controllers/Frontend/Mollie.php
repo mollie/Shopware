@@ -208,7 +208,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         } catch (Throwable $ex) {
 
-            $this->logger->critical(
+            $this->logger->error(
                 'Checkout failed when returning to shop!',
                 array(
                     'error' => $ex->getMessage(),
