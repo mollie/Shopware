@@ -66,6 +66,10 @@ class MollieStatusConverter
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_COMPLETED;
             }
 
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_FAILED] == $paymentsResult['total']) {
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_FAILED;
+            }
+
         } else {
 
             if ($order->isPaid()) {
