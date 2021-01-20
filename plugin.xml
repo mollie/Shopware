@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.7</version>
+    <version>1.7.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,25 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.7.0">
+        <changes lang="de">
+            - Großer Umbau der gesamten Zahlungsabfläufe im Plugin für eine allgemein bessere Stabilität sowie besseres Protokollieren von Fehlern.
+            - Installation/Update/Neuinstallation säubert nun nicht mehr benötigte Datenbankfelder (Mollie Transactions OrderVariables), was die Datenbankgröße reduziert und die Performance des Shops während des Checkouts erhöht.
+            - Neuer Index für die Datenbank (Mollie Transaction) zur allgemeinen Performance Optimierung in Shops mit vielen Bestellungen.
+            - Anonyme Payment-Token werden nun in den Logs beim Starten einer Bestellung hinzugefügt. Dies vereinfacht das Analysieren von Zahlungen mit Apple Pay Direct sowie Kreditkartenkomponenten.
+            - Plugin Feature "Zurücksetzen des Gesamtbetrags + Versandkosten bei Storno" funktioniert nun unabhängig von "Lagerbestand zurücksetzen".
+            - Die Apple Pay Direct Session von Kunden/Browsern wird nun korrekt "abgeschlossen". Ohne diesem Abschluss kann es sein, dass das Apple Pay Formular beim nächsten Versuch nicht sofort direkt funktioniert.
+        </changes>
+        <changes lang="en">
+            - Huge refactoring of the payment flows to improve the overall stability of the plugin along with better error logs.
+            - Installing/Updating/Reinstalling will clean unused fields in the database (Mollie Transactions OrderVariables) that will decrease the database size and improve the checkout performance.
+            - Add new database index (Mollie Transactions) to improve performance for shops with lots of orders.
+            - Add anonymized payment tokens to log entries for better debugging of Apple Pay Direct and Credit Card Components.
+            - Plugin Feature "Cancel Total Amount and Shipping Costs" can now be set independent from the "Reset Stock" functionality.
+            - Add clean completion of Apple Pay Direct session for customers on successful payments. Otherwise it could be that the Apple Pay sheet does not completely work on a retry.
+        </changes>
+    </changelog>
 
     <changelog version="1.6.7">
         <changes lang="de">

@@ -29,4 +29,4 @@ test: ## Starts all Tests
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
-	@cd .. && zip -qq -r MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.reports*' '*.travis.yml*' '*/Tests*' '*/makefile' '*.DS_Store'
+	@cd .. && zip -qq -r -0 MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.reports*' '*.travis.yml*' '*/Tests*' '*/makefile' '*.DS_Store'
