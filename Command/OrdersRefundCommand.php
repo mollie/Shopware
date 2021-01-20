@@ -4,6 +4,7 @@ namespace MollieShopware\Command;
 
 use Doctrine\ORM\EntityManager;
 use Exception;
+use InvalidArgumentException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Services\RefundService;
 use MollieShopware\Traits\MollieApiClientTrait;
@@ -40,6 +41,7 @@ class OrdersRefundCommand extends ShopwareCommand
     {
         $this
             ->setName('mollie:orders:refund')
+            ->setDescription('Perform refunds for given order with optional given amount.')
             ->addArgument('orderNumber', InputArgument::REQUIRED, 'The ordernumber of the order, which should be refunded.')
             ->addArgument('customAmount', null, 'the amount that shall be refunded.', null)
         ;
@@ -54,24 +56,13 @@ class OrdersRefundCommand extends ShopwareCommand
         $orderNumber = $input->getArgument('orderNumber');
         $customAmount = $input->getArgument('customAmount');
 
-        if (
-            \is_array($orderNumber) ||
-            (
-                $customAmount !== null &&
-                \is_array($customAmount) &&
-                !\is_numeric($customAmount)
-            )
-        ) {
-            $io->error('There was an error during the input of information. Please only submit one orderNumber per execution and set refund amounts to be split with a dot.');
-
-            return 1;
-        }
+        $this->validateInputArguments($orderNumber, $customAmount);
 
         /** @var Repository $transactionRepository */
         $transactionRepository = $this->entityManager->getRepository(Transaction::class);
         $orderRepository = $this->entityManager->getRepository(Order::class);
 
-        /** @var array|Transaction[] $transactions */
+        /** @var Transaction $transactions */
         $transaction = $transactionRepository->findOneBy([
             'orderNumber' => $orderNumber
         ]);
@@ -85,47 +76,8 @@ class OrdersRefundCommand extends ShopwareCommand
             return 1;
         }
 
-        $mollieClient = $this->getMollieApi($order->getShop()->getId());
-
-        if ($mollieClient === null) {
-            $io->error('Something went wrong trying to get an API Client Instance. Please try again later.');
-
-            return 1;
-        }
-
         try {
-            if ($transaction->getMolliePaymentId() !== null) {
-                $molliePayment = $mollieClient->payments->get($transaction->getMolliePaymentId());
-
-                if (
-                    (
-                        $customAmount === null ||
-                        $molliePayment->getAmountRemaining() < $customAmount
-                    ) && (
-                        $molliePayment->canBeRefunded() ||
-                        $molliePayment->canBePartiallyRefunded()
-                    )
-                ) {
-                    $this->refundService->refundPayment($order, $molliePayment);
-                }
-
-                if ($customAmount !== null && $molliePayment->canBePartiallyRefunded() && $molliePayment->getAmountRemaining() > $customAmount) {
-                    $this->refundService->partialRefundPayment($order, $molliePayment, $customAmount);
-                }
-            }
-
-            if ($transaction->getMollieOrderId() !== null) {
-                $mollieOrder = $mollieClient->orders->get($transaction->getMollieOrderId());
-
-                if ($customAmount === null || $mollieOrder->amountCaptured <= $customAmount) {
-                    $this->refundService->refundOrder($order, $mollieOrder);
-                }
-
-                if ($customAmount !== null && $mollieOrder->amountCaptured > $customAmount) {
-                    // TODO: Implement partial return on the CLI. This is currently not doable, since you need to refund based on a lineitem.
-                    throw new Exception('partial refunds of orders is currently not implemented.');
-                }
-            }
+            $this->refundService->refundOrderAmount($order, $transaction, $customAmount);
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
 
@@ -133,7 +85,27 @@ class OrdersRefundCommand extends ShopwareCommand
         }
 
         $io->success('The order was successfully refunded.');
+    }
 
-        return 0;
+    /**
+     * @param string|array $orderNumber
+     * @param string|array|null $refundAmount
+     *
+     * @throws InvalidArgumentException
+     */
+    private function validateInputArguments($orderNumber, $refundAmount)
+    {
+        if(\is_array($orderNumber) ||
+            (
+                $refundAmount !== null &&
+                \is_array($refundAmount) &&
+                !\is_numeric($refundAmount)
+            )
+        ) {
+            throw new InvalidArgumentException(
+                'There was an error during the input of information. Please only submit one orderNumber per execution and set refund amounts to be split with a dot.',
+                1
+            );
+        }
     }
 }
