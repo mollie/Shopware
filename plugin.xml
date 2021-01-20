@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.6.8</version>
+    <version>1.6.7</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,7 +41,7 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
-    <changelog version="1.6.8">
+    <changelog version="unreleased">
         <changes lang="de">
             - Die Apple Pay Integration verursacht nun keine Fehler mehr im Internet Explorer.
         </changes>
