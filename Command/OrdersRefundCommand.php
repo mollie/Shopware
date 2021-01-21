@@ -68,7 +68,7 @@ class OrdersRefundCommand extends ShopwareCommand
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
 
-            return $e->getCode() ?? 1;
+            return $e->getCode() ?: 1;
         }
 
         $io->success('The order was successfully refunded.');
