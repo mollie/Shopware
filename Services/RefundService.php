@@ -44,7 +44,7 @@ class RefundService implements RefundInterface
             if (
                 (
                     $customAmount === null ||
-                    $molliePayment->getAmountRemaining() < $customAmount
+                    $molliePayment->amount->value < $customAmount
                 ) && (
                     $molliePayment->canBeRefunded() ||
                     $molliePayment->canBePartiallyRefunded()
@@ -59,14 +59,14 @@ class RefundService implements RefundInterface
         }
 
         if ($transaction->getMollieOrderId() !== null) {
+            /** @var MollieOrder $mollieOrder */
             $mollieOrder = $mollieClient->orders->get($transaction->getMollieOrderId());
 
-            if ($customAmount === null || $mollieOrder->amountCaptured <= $customAmount) {
+            if ($customAmount === null || $mollieOrder->amountCaptured->value <= $customAmount) {
                 $this->refundOrder($order, $mollieOrder);
             }
 
-            if ($customAmount !== null && $mollieOrder->amountCaptured > $customAmount) {
-                // TODO: Implement partial return on the CLI. This is currently not doable, since you need to refund based on a lineitem.
+            if ($customAmount !== null && $mollieOrder->amountCaptured->value > $customAmount) {
                 throw new Exception('partial refunds of orders is currently not implemented.');
             }
         }
