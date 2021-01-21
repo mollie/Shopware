@@ -122,6 +122,33 @@
             </options>
         </element>
 
+        <element type="button">
+            <name>btnPaymentUpdate</name>
+            <label lang="en">update Payment methods</label>
+            <label lang="de">Zahlungsmethoden aktualisieren</label>
+            <options>
+                <handler>
+                    <![CDATA[
+                        function() {
+                            Ext.Ajax.request({
+                                url: 'molliePayments/update',
+                                success: function (response) {
+                                    Shopware.Msg.createGrowlMessage(response.statusText, response.responseText)
+                                },
+                                failure: function (response) {
+                                    if (response.status === 404) {
+                                        Shopware.Msg.createGrowlMessage('Plugin Manager', 'The plugin needs to be enabled.');
+                                    } else {
+                                        Shopware.Msg.createGrowlMessage(response.statusText, response.responseText)
+                                    }
+                                }
+                            });
+                        }
+                    ]]>
+                </handler>
+            </options>
+        </element>
+
 
         <element type="button" required="false">
             <name>separator_orders</name>
