@@ -5,6 +5,7 @@ namespace MollieShopware\Command;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use InvalidArgumentException;
+use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Services\RefundService;
@@ -22,19 +23,19 @@ class OrdersRefundCommand extends ShopwareCommand
     use MollieApiClientTrait;
 
     /**
-     * @var EntityManager
-     */
-    private $entityManager;
-
-    /**
      * @var RefundService
      */
     private $refundService;
 
-    public function __construct(EntityManager $entityManager, RefundService $refundService)
+    /**
+     * @var OrderService
+     */
+    private $orderService;
+
+    public function __construct(RefundService $refundService, OrderService $orderService)
     {
-        $this->entityManager = $entityManager;
         $this->refundService = $refundService;
+        $this->orderService = $orderService;
         parent::__construct();
     }
 
@@ -59,28 +60,15 @@ class OrdersRefundCommand extends ShopwareCommand
 
         $this->validateInputArguments($orderNumber, $customAmount);
 
-        /** @var Repository $transactionRepository */
-        $transactionRepository = $this->entityManager->getRepository(Transaction::class);
-        $orderRepository = $this->entityManager->getRepository(Order::class);
-
-        /** @var Transaction $transactions */
-        $transaction = $transactionRepository->findOneBy([
-            'orderNumber' => $orderNumber
-        ]);
-        $order = $orderRepository->findOneBy([
-            'number' => $orderNumber
-        ]);
-
-        if ($transaction === null) {
-            throw new TransactionNotFoundException(\sprintf('with ordernumber %s', $orderNumber));
-        }
+        $transaction = $this->orderService->getOrderTransactionByNumber($orderNumber);
+        $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
 
         try {
             $this->refundService->refundOrderAmount($order, $transaction, $customAmount);
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
 
-            return 1;
+            return $e->getCode() ?? 1;
         }
 
         $io->success('The order was successfully refunded.');

@@ -42,8 +42,8 @@
 
         <service class="MollieShopware\Command\OrdersRefundCommand">
             <tag name="console.command" command="mollie:orders:refund"/>
-            <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.services.refund_service"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
         </service>
 
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
