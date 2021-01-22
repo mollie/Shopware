@@ -115,7 +115,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                         $this->config->getShippedStatus(),
                         $this->config->isPaymentStatusMailEnabled()
                     );
-
                 }
 
                 $this->modelManager->flush($transaction);
