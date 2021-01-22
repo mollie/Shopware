@@ -15,30 +15,26 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 {
     public function updateAction()
     {
+        $this->getLogger()->info('Importing payment methods.');
         try {
             /** @var PaymentMethodService $paymentMethodService */
             $paymentMethodService = $this->container->get('mollie_shopware.payment_method_service');
 
-            if ($paymentMethodService !== null) {
-                // Deactivate all Mollie payment methods
-                $paymentMethodService->deactivatePaymentMethods();
+            // Deactivate all Mollie payment methods
+            $paymentMethodService->deactivatePaymentMethods();
 
-                // Get all active payment methods from Mollie
-                $methods = $paymentMethodService->getPaymentMethodsFromMollie();
-            }
+            // Get all active payment methods from Mollie
+            $methods = $paymentMethodService->getPaymentMethodsFromMollie();
 
             // Install the payment methods from Mollie
-            if ($methods !== null) {
-                $paymentMethodService->installPaymentMethod($this->container->getParameter('mollie_shopware.plugin_name'), $methods);
-            }
+            $paymentMethodService->installPaymentMethod($this->container->getParameter('mollie_shopware.plugin_name'), $methods);
 
-            // download apple pay merchant domain verification file of mollie
-            $downloader = new ApplePayDomainFileDownloader();
-            $downloader->downloadDomainAssociationFile(Shopware()->DocPath());
-
-            Shopware()->Template()->assign('response', 'Success!');
+            Shopware()->Template()->assign(
+                'response',
+                sprintf('%d Payment Methods were imported/ updated', count($methods))
+            );
         } catch (\Throwable $e) {
-            $this->getPluginLogger()->addError($e->getMessage());
+            $this->getLogger()->error($e->getMessage());
 
             $this->response->setStatusCode(500);
             $this->View()->assign('response', $e->getMessage());
@@ -48,8 +44,8 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
     /**
      * @return LoggerInterface
      */
-    private function getPluginLogger()
+    private function getLogger()
     {
-        return $this->container->get('pluginlogger');
+        return $this->container->get('mollie_shopware.components.logger');
     }
 }

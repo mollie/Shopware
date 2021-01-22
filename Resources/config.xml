@@ -126,7 +126,9 @@
             <name>btnPaymentUpdate</name>
             <label lang="en">update Payment methods</label>
             <label lang="de">Zahlungsmethoden aktualisieren</label>
+            <label lang="nl">Betaalmethoden actualiseren</label>
             <options>
+                <position>5</position>
                 <handler>
                     <![CDATA[
                         function() {
@@ -156,7 +158,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Orders ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bestellingen ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>5</position>
+                <position>6</position>
             </options>
         </element>
 
@@ -190,7 +192,7 @@
                 </option>
             </store>
             <options>
-                <position>6</position>
+                <position>7</position>
             </options>
         </element>
 
@@ -224,7 +226,7 @@
                 </option>
             </store>
             <options>
-                <position>7</position>
+                <position>8</position>
             </options>
         </element>
 
@@ -267,7 +269,7 @@
                 </option>
             </store>
             <options>
-                <position>8</position>
+                <position>9</position>
             </options>
         </element>
 
@@ -301,7 +303,7 @@
                 </option>
             </store>
             <options>
-                <position>9</position>
+                <position>10</position>
             </options>
         </element>
 
@@ -332,7 +334,7 @@
                 </option>
             </store>
             <options>
-                <position>10</position>
+                <position>11</position>
             </options>
         </element>
 
@@ -366,7 +368,7 @@
                 </option>
             </store>
             <options>
-                <position>11</position>
+                <position>12</position>
             </options>
         </element>
 
@@ -401,7 +403,7 @@
                 </option>
             </store>
             <options>
-                <position>12</position>
+                <position>13</position>
             </options>
         </element>
 
@@ -433,7 +435,7 @@
                 </option>
             </store>
             <options>
-                <position>13</position>
+                <position>14</position>
             </options>
         </element>
 
@@ -444,7 +446,7 @@
             <label lang="en">User ID for Mollie-user in Shopware</label>
             <label lang="nl">Gebruikers ID voor Mollie-gebruiker in Shopware</label>
             <options>
-                <position>14</position>
+                <position>15</position>
             </options>
         </element>
 
@@ -455,7 +457,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>15</position>
+                <position>16</position>
             </options>
         </element>
 
@@ -486,7 +488,7 @@
                 </option>
             </store>
             <options>
-                <position>16</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -517,7 +519,7 @@
                 </option>
             </store>
             <options>
-                <position>17</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -528,7 +530,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>18</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -539,7 +541,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>19</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -550,7 +552,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -560,7 +562,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -574,7 +576,7 @@
             <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -588,7 +590,7 @@
             <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>23</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -598,7 +600,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>24</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -639,7 +641,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>25</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -649,7 +651,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>26</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -659,7 +661,7 @@
             <label lang="en">Payment term (Days)</label>
             <label lang="nl">Betalingstermijn (Dagen)</label>
             <options>
-                <position>27</position>
+                <position>28</position>
             </options>
         </element>
 
