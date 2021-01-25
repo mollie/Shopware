@@ -13,9 +13,14 @@ use Shopware\Components\Plugin\PaymentInstaller;
 
 class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_Backend_ExtJs
 {
+
+    /**
+     *
+     */
     public function updateAction()
     {
         $this->getLogger()->info('Importing payment methods.');
+
         try {
             /** @var PaymentMethodService $paymentMethodService */
             $paymentMethodService = $this->container->get('mollie_shopware.payment_method_service');
@@ -29,15 +34,21 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             // Install the payment methods from Mollie
             $paymentMethodService->installPaymentMethod($this->container->getParameter('mollie_shopware.plugin_name'), $methods);
 
-            Shopware()->Template()->assign(
-                'response',
-                sprintf('%d Payment Methods were imported/ updated', count($methods))
-            );
-        } catch (\Throwable $e) {
-            $this->getLogger()->error($e->getMessage());
+            $message = sprintf('%d Payment Methods were imported/updated', count($methods));
 
-            $this->response->setStatusCode(500);
-            $this->View()->assign('response', $e->getMessage());
+            die($message);
+
+        } catch (\Throwable $e) {
+
+            $this->getLogger()->error(
+                'Error when importing payment methods',
+                array(
+                    'error' => $e->getMessage(),
+                )
+            );
+
+            http_response_code(500);
+            die($e->getMessage());
         }
     }
 
@@ -48,4 +59,5 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
     {
         return $this->container->get('mollie_shopware.components.logger');
     }
+
 }
