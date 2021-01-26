@@ -27,7 +27,15 @@ class CartShippingCostsProvider implements ShippingCostsProviderInterface
      */
     public function getShippingCosts()
     {
-        $shippingCosts = $this->getInvoiceShippingCosts();
+        try {
+            // Use the already in order calculated shipping costs if they exist
+            $shippingCosts = $this->getInvoiceShippingCosts();
+        } catch (OrderNotFoundBySessionIdException $ex) {
+            // If order not found by session ID use backend shipping costs configuration.
+            // This is an important Fallback for Direct Payment Methods which don't create
+            // orders in database before they redirect to the external direct checkout
+            $shippingCosts = Shopware()->Modules()->Admin()->sGetPremiumShippingcosts();
+        }
 
         $unitPrice = 0;
         $unitPriceNet = 0;
