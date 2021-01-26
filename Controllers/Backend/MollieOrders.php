@@ -107,6 +107,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $transaction = $this->modelManager->getRepository(Transaction::class)->findOneBy(
                     ['mollieId' => $mollieOrder->id]
                 );
+
+                if ($transaction === null) {
+                    $this->returnError('no transaction found for current order');
+                    return;
+                }
+
                 $transaction->setIsShipped(true);
 
                 if ((int) $this->config->getShippedStatus() > 0) {

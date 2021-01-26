@@ -15,6 +15,7 @@ use MollieShopware\Components\CustomConfig\CustomConfig;
 use MollieShopware\Components\MollieApi\LineItemsBuilder;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Exceptions\MollieOrderNotFound;
+use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Transaction;
@@ -945,14 +946,22 @@ class PaymentService
      * @param int $orderId
      *
      * @throws \Doctrine\ORM\ORMException
+     * @throws TransactionNotFoundException
      */
     private function saveTransactionAsShipped($orderId)
     {
         /** @var EntityManager $entityManager */
         $entityManager = Shopware()->Models();
 
-        /** @var Transaction $transaction */
+        /** @var Transaction|null $transaction */
         $transaction = $entityManager->getRepository(Transaction::class)->findOneBy(['orderNumber' => $orderId]);
+
+        if ($transaction === null) {
+            throw new TransactionNotFoundException(
+                sprintf('with order number %s', $orderId)
+            );
+        }
+
         $transaction->setIsShipped(true);
         $entityManager->persist($transaction);
         $entityManager->flush();
