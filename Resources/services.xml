@@ -19,6 +19,7 @@
 
         <service id="mollie_shopware.components.shipping.provider.cart" class="MollieShopware\Components\Shipping\Providers\CartShippingCostsProvider"
                  public="false">
+            <argument type="service" id="mollie_shopware.order_service"/>
         </service>
 
         <service id="mollie_shopware.components.shipping" class="MollieShopware\Components\Shipping\Shipping">
