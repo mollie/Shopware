@@ -9,9 +9,11 @@ use Enlight_View;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandler;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectSetup;
+use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Logger;
+use MollieShopware\MollieShopware;
 use Shopware\Components\Theme\LessDefinition;
 
 class ApplePayDirectSubscriber implements SubscriberInterface
@@ -88,12 +90,20 @@ class ApplePayDirectSubscriber implements SubscriberInterface
      */
     public function onFrontendCheckoutPostDispatch(Enlight_Event_EventArgs $args)
     {
-        if ($args->getRequest()->getActionName() !== 'shippingPayment') {
+        $actionName = $args->getRequest()->getActionName();
+
+        if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
         }
 
+
         /** @var Enlight_View $view */
         $view = $args->getSubject()->View();
+
+        if ($actionName === 'confirm') {
+            $this->preventApplePayDirectAsPaymentMethodOnConfirm($view);
+            return;
+        }
 
         $sPayments = $view->getAssign('sPayments');
         if ($sPayments === null) {
@@ -119,6 +129,45 @@ class ApplePayDirectSubscriber implements SubscriberInterface
                 break;
             }
         }
+    }
+
+    /**
+     * Apple Pay Direct must never be used on the confirm page.
+     * This is a express checkout only.
+     * Thus, we switch to the normal Apple Pay, if in any case the user gets
+     * to this page - most of the time due to an error.
+     *
+     * @param Enlight_View $view
+     */
+    private function preventApplePayDirectAsPaymentMethodOnConfirm(Enlight_View $view)
+    {
+        $payment = null;
+
+        $admin = Shopware()->Modules()->Admin();
+        $session = Shopware()->Session();
+
+        if (!empty($view->sUserData['additional']['payment'])) {
+
+            $payment = $view->sUserData['additional']['payment'];
+
+        } elseif (!empty($session['sPaymentID'])) {
+
+            $payment = $admin->sGetPaymentMeanById($session['sPaymentID'], $view->sUserData);
+        }
+
+        if (!$payment || $payment['name'] !== ShopwarePaymentMethod::APPLEPAYDIRECT) {
+            return;
+        }
+
+        # switch to apple pay in general view data
+        $payment = $admin->sGetPaymentMean(ShopwarePaymentMethod::APPLEPAY);
+        $view->assign('sPayment', $payment);
+
+        # switch to apple pay as selected user payment
+        # (required for the confirm page display)
+        $userData = $view->getAssign('sUserData');
+        $userData['additional']['payment'] = $payment;
+        $view->assign('sUserData', $userData);
     }
 
 }
