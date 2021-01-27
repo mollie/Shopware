@@ -2,6 +2,8 @@
 
 namespace MollieShopware\Components\Services;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
@@ -13,6 +15,7 @@ use MollieShopware\Components\CustomConfig\CustomConfig;
 use MollieShopware\Components\MollieApi\LineItemsBuilder;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Exceptions\MollieOrderNotFound;
+use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Transaction;
@@ -784,6 +787,10 @@ class PaymentService
         try {
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
             $mollieOrder = $this->apiClient->orders->get($mollieId);
+
+            if ($mollieOrder->isShipping()) {
+                return (new ArrayCollection($mollieOrder->shipments()->getArrayCopy()))->last();
+            }
         } catch (\Exception $ex) {
             throw new \Exception('Order ' . $mollieId . ' could not be found at Mollie.');
         }
@@ -792,6 +799,7 @@ class PaymentService
             $result = null;
 
             if (!$mollieOrder->isPaid() && !$mollieOrder->isAuthorized()) {
+                $this->saveTransactionAsShipped($mollieOrder->orderNumber);
                 if ($mollieOrder->isCompleted()) {
                     throw new \Exception('The order is already completed at Mollie.');
                 } else {
@@ -932,5 +940,30 @@ class PaymentService
         // Store order
         Shopware()->Models()->persist($order);
         Shopware()->Models()->flush($order);
+    }
+
+    /**
+     * @param int $orderId
+     *
+     * @throws \Doctrine\ORM\ORMException
+     * @throws TransactionNotFoundException
+     */
+    private function saveTransactionAsShipped($orderId)
+    {
+        /** @var EntityManager $entityManager */
+        $entityManager = Shopware()->Models();
+
+        /** @var Transaction|null $transaction */
+        $transaction = $entityManager->getRepository(Transaction::class)->findOneBy(['orderNumber' => $orderId]);
+
+        if ($transaction === null) {
+            throw new TransactionNotFoundException(
+                sprintf('with order number %s', $orderId)
+            );
+        }
+
+        $transaction->setIsShipped(true);
+        $entityManager->persist($transaction);
+        $entityManager->flush();
     }
 }

@@ -290,7 +290,6 @@ class OrderBackendSubscriber implements SubscriberInterface
             # also do this again just to be sure
             $subShopConfig = $shopSwitcher->getConfig($order->getShop()->getId());
 
-
             # switch to the api client and config with
             # data for our sub shop
             $paymentService->switchConfig($subShopConfig);

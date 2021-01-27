@@ -1,8 +1,8 @@
 <?php
 
 use MollieShopware\Services\RefundService;
+use MollieShopware\Models\Transaction;
 use Shopware\Models\Order\Status;
-
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
@@ -10,7 +10,7 @@ use Shopware\Models\Order\Detail;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
-    protected $model = \MollieShopware\Models\Transaction::class;
+    protected $model = Transaction::class;
     protected $alias = 'mollie_order';
 
     /** @var \MollieShopware\Components\Config $config */
@@ -57,9 +57,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderId')
             );
 
-            if ($order === null)
+            if ($order === null) {
                 $this->returnError('Order not found');
-            
+            }
             
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
@@ -69,8 +69,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             
             $mollieId = $this->orderService->getMollieOrderId($order);
 
-            if (empty($mollieId))
+            if (empty($mollieId)) {
                 $this->returnError('Order is only a transaction in Mollie. Transactions cannot be shipped, only payments that have created an order in Mollie can be shipped!');
+            }
 
             $mollieOrder = $this->apiClient->orders->get($mollieId);
             $errorMessage = '';
@@ -78,7 +79,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if ($mollieOrder === null) {
                 $errorMessage = 'Could not find order at Mollie, are you sure it is paid through the Orders API?';
             }
-            if ($mollieOrder->isPending()){
+            if ($mollieOrder->isPending()) {
                 $errorMessage = 'The order is pending at Mollie.';
             }
             if ($mollieOrder->isExpired()) {
@@ -98,6 +99,18 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $result = $mollieOrder->shipAll();
 
             if ($result) {
+                /** @var Transaction|null $transaction */
+                $transaction = $this->modelManager->getRepository(Transaction::class)->findOneBy(
+                    ['mollieId' => $mollieOrder->id]
+                );
+
+                if ($transaction === null) {
+                    $this->returnError('no transaction found for current order');
+                    return;
+                }
+
+                $transaction->setIsShipped(true);
+
                 if ((int) $this->config->getShippedStatus() > 0) {
                     Shopware()->Modules()->Order()->setOrderStatus(
                         $order->getId(),
@@ -105,6 +118,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                         $this->config->isPaymentStatusMailEnabled()
                     );
                 }
+
+                $this->modelManager->flush($transaction);
 
                 $this->returnSuccess('Order status set to shipped at Mollie', true);
             } else {
