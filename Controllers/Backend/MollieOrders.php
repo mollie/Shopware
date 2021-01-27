@@ -98,10 +98,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $result = $mollieOrder->shipAll();
 
-            if ($this->modelManager === null) {
-                $this->modelManager = Shopware()->Models();
-            }
-
             if ($result) {
                 /** @var Transaction|null $transaction */
                 $transaction = $this->modelManager->getRepository(Transaction::class)->findOneBy(
