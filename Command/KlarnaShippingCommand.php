@@ -15,6 +15,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Repository;
 use Shopware\Models\Order\Status;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -113,6 +114,9 @@ class KlarnaShippingCommand extends ShopwareCommand
 
             $switcher = new MollieShopSwitcher($this->container);
 
+            $tableView = new Table($output);
+            $tableView->setHeaders(['order number', 'shipping status', 'error message', 'shop name']);
+
             /** @var Repository $orderRepository */
             $orderRepository = $this->modelManager->getRepository(Order::class);
 
@@ -121,31 +125,26 @@ class KlarnaShippingCommand extends ShopwareCommand
             foreach ($transactions as $transaction) {
 
                 try {
-
-                    $io->section('Processing Transaction: ' . $transaction->getId() . ', Order: ' . $transaction->getOrderNumber());
-
-                    /** @var Order $order */
+                    /** @var Order|null $order */
                     $order = null;
 
                     if ($transaction->getOrderId() === null) {
                         $countFailed++;
 
-                        $io->note('No Order ID');
-                        $io->text('The transaction does not have an order ID. Every Klarna order must have one!');
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'transaction does not have an order ID. Every Klarna order must have one.']);
 
                         $this->logger->error('Klarna Ship Command: No order ID found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
 
                         continue;
                     }
 
-                    /** @var Order $order */
+                    /** @var Order|null $order */
                     $order = $orderRepository->find($transaction->getOrderId());
 
                     if ($order === null) {
                         $countFailed++;
 
-                        $io->note('No Order for Transaction');
-                        $io->text('The transaction does not have a linked order in Shopware');
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'transaction does not have an order in shopware']);
 
                         $this->logger->error('Klarna Ship Command: No order found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
 
@@ -163,18 +162,15 @@ class KlarnaShippingCommand extends ShopwareCommand
                     $mollieOrder = $this->apiClient->orders->get($transaction->getMollieId());
 
                     if ($mollieOrder === null) {
-                        $io->note('No Order found in Mollie for this transaction!');
-
-                        $this->logger->error('Klarna Ship Command: No order found in Mollie for transaction: ' . $transaction->getId() . '!');
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'no order found in Mollie']);
 
                         $countFailed++;
                         continue;
                     }
 
                     # REPAIR ORDERS ALREADY SHIPPED ----------------------------------------------------------------
-                    if (count($mollieOrder->shipments()) > 0) {
-                        $io->note('Order already shipped!');
-                        $io->text('The order is already shipped in Mollie and must not be shipped again! Repairing this order!');
+                    if ($mollieOrder->shipments()->count() > 0) {
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'Already shipped. Repairing order, must not be shipped again', $order->getShop()->getName()]);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
@@ -185,8 +181,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # "CLOSE" FINALIZED ORDERS ----------------------------------------------------------------
                     if ($mollieOrder->isCanceled() || $mollieOrder->isExpired()) {
-                        $io->note('Order is cancelled/expired!');
-                        $io->text('The order is cancelled or expired in Mollie. So mark it as "processed"!');
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'order is cancelled or expired in Mollie. Mark it as "processed"']);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
@@ -196,15 +191,9 @@ class KlarnaShippingCommand extends ShopwareCommand
                     }
 
 
-                    $io->text('Shop: ' . $order->getShop()->getName());
-                    $io->text('Current Status: #' . $order->getOrderStatus()->getId() . ' "' . $order->getOrderStatus()->getName() . '"');
-                    $io->text('Required Status: #' . $this->config->getKlarnaShipOnStatus());
-
-
                     # KEEP PENDING ORDERS "OPEN" ----------------------------------------------------------------
                     if (in_array($order->getPaymentStatus()->getId(), $notShippableStates, true)) {
-                        $io->note('Invalid Payment Status!');
-                        $io->text('The payment status of the order is not allowed for a shipping');
+                        $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), 'payment status is not allowed for shipping']);
 
                         $countSkipped++;
                         continue;
@@ -213,14 +202,21 @@ class KlarnaShippingCommand extends ShopwareCommand
                     # KEEP ORDERS WITH OTHER STATUS "OPEN" ----------------------------------------------------------------
                     # we wait until the klarna shipping status is reached
                     if ($order->getOrderStatus()->getId() !== $this->config->getKlarnaShipOnStatus()) {
-                        $io->note('Invalid Order Status!');
-                        $io->text('The order status of the order is not the one you have set in your plugin configuration.');
+                        $tableView->addRow(
+                            [
+                                $transaction->getOrderNumber(),
+                                $order->getOrderStatus()->getName(),
+                                'order status is not at the configured shippable value',
+                                $order->getShop()->getName()
+                            ]
+                        );
 
                         $countSkipped++;
                         continue;
                     }
 
 
+                    $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), '', $order->getShop()->getName()]);
                     # finally ship our order
                     $mollieOrder->shipAll();
 
@@ -237,6 +233,8 @@ class KlarnaShippingCommand extends ShopwareCommand
                     $this->logger->error('Klarna Ship Command: ' . $e->getMessage());
                 }
             }
+
+            $tableView->render();
         }
 
         $io->section('Klarna Shipping command executed...');

@@ -43,11 +43,13 @@
 
     <changelog version="unreleased">
         <changes lang="de">
+            - Die Ausgabe des mollie:ship:klarna Commands auf der Kommandozeile ist nun übersichtlicher.
             - Die Apple Pay Integration verursacht nun keine Fehler mehr im Internet Explorer.
             - Es wurde ein neuer Button in der Konfiguration hinzugefügt, mit dem die Zahlungsarten importiert werden.
             - Bestellungen können nun  von der Kommandozeile zurückerstattet werden.
         </changes>
         <changes lang="en">
+            - The output of the mollie:ship:klarna command on the commandline interface is now cleaner.
             - The apple pay integration does not cause any errors in the internet explorer anymore.
             - There is a new button, which allows you to import the payment methods.
             - Orders can now be refunded with a CLI command.
