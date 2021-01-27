@@ -2,10 +2,14 @@
 
 namespace MollieShopware\Components\Services;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use MollieShopware\Components\Logger;
+use MollieShopware\Exceptions\TransactionNotFoundException;
+use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Repository;
 
 class OrderService
 {
@@ -93,6 +97,28 @@ class OrderService
         }
 
         return $detail;
+    }
+
+    /**
+     * @param string $orderNumber
+     *
+     * @return Transaction
+     *
+     * @throws TransactionNotFoundException
+     */
+    public function getOrderTransactionByNumber($orderNumber)
+    {
+        /** @var Repository $transactionRepository */
+        $transactionRepository = $this->modelManager->getRepository(Transaction::class);
+        $transactions = new ArrayCollection($transactionRepository->findBy([
+            'orderNumber' => $orderNumber
+        ]));
+
+        if ($transactions->count() === 0) {
+            throw new TransactionNotFoundException(sprintf('with ordernumber %s', $orderNumber));
+        }
+
+        return $transactions->first();
     }
 
     /**

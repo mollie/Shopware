@@ -34,11 +34,17 @@
         </service>
 
         <service id="mollie_shopware.klarna_shipping_command" class="MollieShopware\Command\KlarnaShippingCommand">
-            <tag name="console.command" command="mollie:ship:klarna"/>
+            <tag name="console.command"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+        <service class="MollieShopware\Command\OrdersRefundCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="mollie_shopware.services.refund_service"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
         </service>
 
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
@@ -74,6 +80,10 @@
         <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\Services\IdealService">
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="mollie_shopware.customer"/>
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\RefundService">
             <argument type="service" id="models"/>
         </service>
 
