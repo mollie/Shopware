@@ -131,7 +131,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                     if ($transaction->getOrderId() === null) {
                         $countFailed++;
 
-                        $tableView->addRow([$transaction->getOrderNumber(), '', 'transaction does not have an order ID']);
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'transaction does not have an order ID. Every Klarna order must have one.']);
 
                         $this->logger->error('Klarna Ship Command: No order ID found for transaction: ' . $transaction->getId() . ' in Shopware. Please verify your data!');
 
@@ -170,7 +170,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # REPAIR ORDERS ALREADY SHIPPED ----------------------------------------------------------------
                     if ($mollieOrder->shipments()->count() > 0) {
-                        $tableView->addRow([$transaction->getOrderNumber(), '', 'order is already shipped in Mollie', $order->getShop()->getName()]);
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'Already shipped. Repairing order, must not be shipped again', $order->getShop()->getName()]);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
@@ -181,7 +181,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # "CLOSE" FINALIZED ORDERS ----------------------------------------------------------------
                     if ($mollieOrder->isCanceled() || $mollieOrder->isExpired()) {
-                        $tableView->addRow([$transaction->getOrderNumber(), '', 'order is cancelled or expired in Mollie']);
+                        $tableView->addRow([$transaction->getOrderNumber(), '', 'order is cancelled or expired in Mollie. Mark it as "processed"']);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
@@ -193,7 +193,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # KEEP PENDING ORDERS "OPEN" ----------------------------------------------------------------
                     if (in_array($order->getPaymentStatus()->getId(), $notShippableStates, true)) {
-                        $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), 'payment status invalid']);
+                        $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), 'payment status is not allowed for shipping']);
 
                         $countSkipped++;
                         continue;
