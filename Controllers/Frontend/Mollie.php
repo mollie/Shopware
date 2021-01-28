@@ -192,11 +192,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 throw new Exception('Missing Transaction Number');
             }
 
-            $this->logger->debug('User returning from Mollie for Transaction ' . $transactionNumber);
+            $this->logger->debug('User is returning from Mollie for Transaction ' . $transactionNumber);
 
             $checkoutData = $this->checkoutReturn->finishTransaction($transactionNumber);
 
-            $this->logger->debug('Finished order for Transaction ' . $transactionNumber);
+            $this->logger->info('Finished checkout for Transaction ' . $transactionNumber);
 
 
             # prepare the view data (i dont know why)
@@ -490,7 +490,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             $swOrderUpdater = new ShopwareOrderUpdater($this->config, $entityManager);
-            $swOrderBuilder = new ShopwareOrderBuilder($this, $this->logger);
+
+            $swOrderBuilder = new ShopwareOrderBuilder(
+                $this,
+                $orderService,
+                $this->logger
+            );
+
             $statusConverter = new MollieStatusConverter(
                 $paymentService,
                 new MollieRefundStatus()

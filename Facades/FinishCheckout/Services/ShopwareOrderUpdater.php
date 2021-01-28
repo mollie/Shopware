@@ -36,6 +36,43 @@ class ShopwareOrderUpdater
 
 
     /**
+     * @param \Mollie\Api\Resources\Order $mollieOrder
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getFinalTransactionIdFromOrder(\Mollie\Api\Resources\Order $mollieOrder)
+    {
+        if ($mollieOrder->payments() === null || $mollieOrder->payments()->count() <= 0) {
+            throw new \Exception('No Payments found');
+        }
+
+        # all our mollie orders need to use the ord_xyz id.
+        # this is necessary to avoid orders being created duplicated with (create order AFTER payment),
+        # in case that the return URL is invoked multiple times.
+        # the incoming mollie ID is the ord_id, so we need to also use this one as lookup in the order
+        # and not the tr_xxx number.
+        # on the other hand its nice to see where the Orders API has been used.
+        $transactionNumber = $mollieOrder->id;
+
+        $molliePayment = $mollieOrder->payments()[0];
+
+        return $this->getTransactionId($transactionNumber, $molliePayment);
+    }
+
+    /**
+     * @param Payment $payment
+     * @return mixed
+     */
+    public function getFinalTransactionIdFromPayment(Payment $payment)
+    {
+        # for simple payments we use the payment id tr_xxxx
+        # as transaction number in our Shopware order.
+        $transactionNumber = $payment->id;
+
+        return $this->getTransactionId($transactionNumber, $payment);
+    }
+
+    /**
      * @param Order $swOrder
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @param Transaction $transaction
@@ -97,23 +134,15 @@ class ShopwareOrderUpdater
                 }
             }
         }
-
-        $molliePayment = $mollieOrder->payments()[0];
-
-        $this->updateReferencesFromMolliePayment($swOrder, $molliePayment);
     }
 
     /**
-     * @param Order $order
+     * @param $transactionNumber
      * @param Payment $payment
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @return mixed
      */
-    public function updateReferencesFromMolliePayment(Order $order, Payment $payment)
+    private function getTransactionId($transactionNumber, Payment $payment)
     {
-        # use payment id (tr_xxxx);
-        $transactionNumber = $payment->id;
-
         # the merchant can configure that he wants to use
         # a reference from the payment method instead, if existing
         if ($this->config->getTransactionNumberType() === Config::TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD) {
@@ -129,10 +158,7 @@ class ShopwareOrderUpdater
             }
         }
 
-        $order->setTransactionId($transactionNumber);
-
-        $this->entityManger->persist($order);
-        $this->entityManger->flush($order);
+        return $transactionNumber;
     }
 
 }
