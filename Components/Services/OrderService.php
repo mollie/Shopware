@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Services;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use MollieShopware\Components\Logger;
+use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;
@@ -36,7 +37,7 @@ class OrderService
      *
      * @param int $orderId
      *
-     * @return \Shopware\Models\Order\Order $order
+     * @return Order $order
      *
      * @throws \Exception
      */
@@ -47,10 +48,10 @@ class OrderService
         try {
             /** @var \Shopware\Models\Order\Repository $orderRepo */
             $orderRepo = $this->modelManager->getRepository(
-                \Shopware\Models\Order\Order::class
+                Order::class
             );
 
-            /** @var \Shopware\Models\Order\Order $order */
+            /** @var Order $order */
             $order = $orderRepo->find($orderId);
         } catch (\Exception $ex) {
 
@@ -128,9 +129,9 @@ class OrderService
     public function getShopwareOrderByNumber($orderNumber)
     {
         /** @var \Shopware\Models\Order\Repository $orderRepo */
-        $orderRepo = $this->modelManager->getRepository(\Shopware\Models\Order\Order::class);
+        $orderRepo = $this->modelManager->getRepository(Order::class);
 
-        /** @var \Shopware\Models\Order\Order $order */
+        /** @var Order $order */
         $order = $orderRepo->findOneBy([
             'number' => $orderNumber
         ]);
@@ -230,8 +231,8 @@ class OrderService
         $order = null;
         $items = [];
 
-        /** @var \Shopware\Models\Order\Order $order */
-        if ($orderId instanceof \Shopware\Models\Order\Order)
+        /** @var Order $order */
+        if ($orderId instanceof Order)
             $order = $orderId;
         else
             $order = $this->getOrderById($orderId);
@@ -318,15 +319,14 @@ class OrderService
         try {
             /** @var \Shopware\Models\Order\Repository $orderRepo */
             $orderRepo = $this->modelManager->getRepository(
-                \Shopware\Models\Order\Order::class
+                Order::class
             );
 
-            /** @var \Shopware\Models\Order\Order $order */
+            /** @var Order $order */
             $order = $orderRepo->findOneBy([
                 'temporaryId' => $sessionId
             ]);
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             $this->logger->error(
                 'Error when loading order by session ID: ' . $sessionId,
                 array(
@@ -337,4 +337,25 @@ class OrderService
 
         return $order;
     }
+
+    /**
+     * @param string $transactionId
+     * @return Order
+     * @throws OrderNotFoundException
+     */
+    public function getOrderByTransactionId(string $transactionId)
+    {
+        /** @var \Shopware\Models\Order\Repository $orderRepo */
+        $orderRepo = $this->modelManager->getRepository(Order::class);
+
+        /** @var Order $order */
+        $order = $orderRepo->findOneBy(['transactionId' => $transactionId]);
+
+        if (!$order instanceof Order) {
+            throw new OrderNotFoundException('Order for Transaction: ' . $transactionId . ' not found!');
+        }
+
+        return $order;
+    }
+
 }

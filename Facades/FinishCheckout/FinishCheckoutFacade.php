@@ -121,7 +121,7 @@ class FinishCheckoutFacade
 
 
     /**
-     * @param $transactionNumber
+     * @param $transactionId
      * @return CheckoutFinish
      * @throws ApiException
      * @throws MollieOrderNotFound
@@ -132,12 +132,12 @@ class FinishCheckoutFacade
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \MollieShopware\Exceptions\PaymentStatusNotFoundException
      */
-    public function finishTransaction($transactionNumber)
+    public function finishTransaction($transactionId)
     {
-        $transaction = $this->repoTransactions->find($transactionNumber);
+        $transaction = $this->repoTransactions->find($transactionId);
 
         if (!$transaction instanceof Transaction) {
-            throw new TransactionNotFoundException($transactionNumber);
+            throw new TransactionNotFoundException($transactionId);
         }
 
         # -------------------------------------------------------------------------------------------------------------
@@ -170,6 +170,19 @@ class FinishCheckoutFacade
 
         # -------------------------------------------------------------------------------------------------------------
 
+        # get the real transaction number
+        # which is either tr_xxxx or ord_xxxx depending on the type
+        # of payment and API we have used
+        $transactionNumber = $transaction->getShopwareTransactionNumber();
+        $finalTransactionNumber = '';
+
+        if ($transaction->isTypeOrder()) {
+            $finalTransactionNumber = $this->swOrderUpdater->getFinalTransactionIdFromOrder($mollieOrder);
+        } else {
+            $finalTransactionNumber = $this->swOrderUpdater->getFinalTransactionIdFromPayment($molliePayment);
+        }
+
+
         # if our payment was successful, then we have to create a new Shopware order,
         # in case it was not created before the payment
         if (!$this->config->createOrderBeforePayment()) {
@@ -177,8 +190,10 @@ class FinishCheckoutFacade
 
                 # create an order in shopware
                 $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
-                    $transaction,
-                    $this->config->isPaymentStatusMailEnabled()
+                    $transactionNumber,
+                    $finalTransactionNumber,
+                    $this->config->isPaymentStatusMailEnabled(),
+                    $transaction->getBasketSignature()
                 );
 
                 # update the order number in our transaction or the upcoming steps
@@ -188,7 +203,7 @@ class FinishCheckoutFacade
 
             } catch (\Exception $ex) {
                 # lets log that worst-case
-                $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionNumber);
+                $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionId);
                 throw $ex;
             }
         }
@@ -201,7 +216,7 @@ class FinishCheckoutFacade
         $swOrder = $this->orderService->getShopwareOrderByNumber($orderNumber);
 
         if (!$swOrder instanceof Order) {
-            $this->logger->critical('Warning, Mollie is paid but no order exists in Shopware for transaction ' . $transactionNumber);
+            $this->logger->critical('Warning, Mollie is paid but no order exists in Shopware for transaction ' . $transactionId);
             throw new OrderNotFoundException($orderNumber);
         }
 
@@ -220,9 +235,6 @@ class FinishCheckoutFacade
             # make sure we update its number with the one from Shopware
             $mollieOrder->orderNumber = (string)$orderNumber;
             $mollieOrder->update();
-
-        } else {
-            $this->swOrderUpdater->updateReferencesFromMolliePayment($swOrder, $molliePayment);
         }
 
         # -------------------------------------------------------------------------------------------------------------
