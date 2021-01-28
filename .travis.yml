@@ -4,7 +4,7 @@ git:
   depth: false
 
 sudo: false
-dist: trusty
+dist: bionic
 
 before_install:
   - sudo apt-get update
@@ -45,4 +45,6 @@ jobs:
     - name: "PHP 7.4 - Analyze + Tests"
       php: "7.4"
       <<: *jobs_full
-
+    - name: "PHP 8.0 - Analyze + Tests"
+      php: "8.0.0"
+      <<: *jobs_full

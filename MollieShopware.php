@@ -31,11 +31,12 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 class MollieShopware extends Plugin
 {
 
+
     const PLUGIN_VERSION = '1.7.0';
 
     const PAYMENT_PREFIX = 'mollie_';
 
-    
+
     /**
      * Return Shopware events subscribed to
      */
@@ -550,7 +551,7 @@ class MollieShopware extends Plugin
 
         if (!$isExisting) {
             $connection->executeQuery('ALTER TABLE `mol_sw_transactions` ADD INDEX `transaction_id_idx` (`transaction_id`);');
-        } 
+        }
     }
 
     private function cleanOrdermailVariables()
