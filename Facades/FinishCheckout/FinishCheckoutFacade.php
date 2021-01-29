@@ -174,7 +174,6 @@ class FinishCheckoutFacade
         # which is either tr_xxxx or ord_xxxx depending on the type
         # of payment and API we have used
         $transactionNumber = $transaction->getShopwareTransactionNumber();
-        $finalTransactionNumber = '';
 
         if ($transaction->isTypeOrder()) {
             $finalTransactionNumber = $this->swOrderUpdater->getFinalTransactionIdFromOrder($mollieOrder);
@@ -223,6 +222,14 @@ class FinishCheckoutFacade
         # make sure our transaction is correctly linked to the order
         $transaction->setOrderId($swOrder->getId());
         $this->repoTransactions->save($transaction);
+
+
+        # if we have created our order before the payment
+        # then we have to update the transaction ID here so that
+        # it will be our final transaction number
+        if ($this->config->createOrderBeforePayment()) {
+            $this->swOrderUpdater->updateTransactionId($swOrder, $finalTransactionNumber);
+        }
 
 
         # now we need to update the transaction identifier in the Shopware order.

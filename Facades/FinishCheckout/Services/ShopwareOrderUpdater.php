@@ -73,6 +73,22 @@ class ShopwareOrderUpdater
     }
 
     /**
+     * Updates the transaction ID of the provided Shopware order.
+     *
+     * @param Order $order
+     * @param $transactionId
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function updateTransactionId(Order $order, $transactionId)
+    {
+        $order->setTransactionId($transactionId);
+
+        $this->entityManger->persist($order);
+        $this->entityManger->flush($order);
+    }
+
+    /**
      * @param Order $swOrder
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @param Transaction $transaction
