@@ -2,9 +2,11 @@
 
 namespace MollieShopware\Gateways;
 
+use Mollie\Api\MollieApiClient;
+
 interface MollieGatewayInterface
 {
-    
+
     /**
      * @param $orderId
      * @return mixed

@@ -1,6 +1,6 @@
 <?php
 
-use MollieShopware\Services\RefundService;
+use MollieShopware\Services\Refund\RefundService;
 use MollieShopware\Models\Transaction;
 use Shopware\Models\Order\Status;
 use Mollie\Api\Resources\Order;
@@ -45,7 +45,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-            
+
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
@@ -63,13 +63,13 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if ($order === null) {
                 $this->returnError('Order not found');
             }
-            
+
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
             $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
             $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
 
-            
+
             $mollieId = $this->orderService->getMollieOrderId($order);
 
             if (empty($mollieId)) {
@@ -97,7 +97,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 # TODO, should we think of "repairing" the local database entry and mark it also here as "shipped"?
             }
 
-            if ((string) $errorMessage !== '') {
+            if ((string)$errorMessage !== '') {
                 $this->returnError($errorMessage);
             }
 
@@ -116,7 +116,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
                 $transaction->setIsShipped(true);
 
-                if ((int) $this->config->getShippedStatus() > 0) {
+                if ((int)$this->config->getShippedStatus() > 0) {
                     Shopware()->Modules()->Order()->setOrderStatus(
                         $order->getId(),
                         $this->config->getShippedStatus(),
@@ -130,15 +130,21 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             } else {
                 $this->returnError('Order status could not be set to shipped at Mollie');
             }
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             $this->returnError($ex->getMessage());
         }
     }
 
+    /**
+     *
+     */
     public function refundAction()
     {
+        /** @var \Psr\Log\LoggerInterface $logger */
+        $logger = $this->container->get('mollie_shopware.components.logger');
+
         try {
+
             /** @var \Enlight_Controller_Request_Request $request */
             $request = $this->Request();
 
@@ -147,67 +153,58 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-            
+
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
             /** @var \Shopware\Models\Order\Order $order */
-            $order = $this->orderService->getOrderById(
-                $request->getParam('orderId')
-            );
+            $order = $this->orderService->getOrderById($request->getParam('orderId'));
 
             if ($order === null) {
                 $this->returnError('Order not found');
             }
 
+            $logger->info('Starting full refund in Backend for Order: ' . $order->getNumber());
+
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
             $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
             $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
-            
-            
-            /** @var Order $mollieOrder */
-            try {
-                $mollieOrder = $this->apiClient->orders->get(
-                    $this->orderService->getMollieOrderId($order)
-                );
-            }
-            catch (\Exception $ex) {
-                //
-            }
 
-            $refund = null;
+            $transaction = $this->orderService->getOrderTransactionByNumber($order->getNumber());
 
-            if ($mollieOrder !== null) {
-                $refund = $this->refundService->refundOrder($order, $mollieOrder);
-            }
-            else {
-                try {
-                    $molliePayment = $this->apiClient->payments->get(
-                        $this->orderService->getMolliePaymentId($order)
-                    );
-                }
-                catch (\Exception $ex) {
-                    //
-                }
+            $refund = $this->refundService->refundFullOrder($order, $transaction);
 
-                if ($molliePayment !== null) {
-                    $refund = $this->refundService->refundPayment($order, $molliePayment);
-                }
-            }
+            $logger->info('Full refund successful in Backend for Order: ' . $order->getNumber());
 
-            if (!empty($refund)) {
-                $this->returnSuccess('Order successfully refunded', $refund);
-            }
-        }
-        catch (\Exception $ex) {
+            $this->returnSuccess('Order successfully refunded', $refund);
+
+        } catch (Throwable $ex) {
+
+            $logger->error(
+                'Error when executing a full refund order in Shopware Backend',
+                array(
+                    'error' => $ex->getMessage(),
+                )
+            );
+
             $this->returnError($ex->getMessage());
         }
     }
 
+
+    /**
+     *
+     */
     public function partialRefundAction()
     {
+
+        /** @var \Psr\Log\LoggerInterface $logger */
+        $logger = $this->container->get('mollie_shopware.components.logger');
+
+
         try {
+
             /** @var \Enlight_Controller_Request_Request $request */
             $request = $this->Request();
 
@@ -216,7 +213,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             /** @var \MollieShopware\Components\Config $config */
             $this->config = $this->container->get('mollie_shopware.config');
-            
+
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
@@ -234,41 +231,38 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
             }
 
+            $logger->info('Starting partial refund in Backend for Order: ' . $order->getNumber());
+
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
             $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
             $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
-            
-            /** @var Order $mollieOrder */
-            try {
-                $mollieOrder = $this->apiClient->orders->get(
-                    $this->orderService->getMollieOrderId($order)
-                );
-            }
-            catch (\Exception $ex) {
-                //
-            }
 
-            $refund = null;
+            $transaction = $this->orderService->getOrderTransactionByNumber($order->getNumber());
+            $orderLineID = $request->getParam('mollieOrderLineId');
+            $quantity = (int)$request->get('quantity');
 
-            if ($mollieOrder !== null) {
-                $orderLine = $mollieOrder->lines()->get($request->getParam('mollieOrderLineId'));
+            $refund = $this->refundService->refundPartialOrderItem(
+                $order,
+                $orderDetail,
+                $transaction,
+                $orderLineID,
+                $quantity
+            );
 
-                if ($orderLine !== null) {
-                    $refund = $this->refundService->partialRefundOrder(
-                        $order,
-                        $orderDetail,
-                        $mollieOrder,
-                        $orderLine,
-                        (int) $request->get('quantity')
-                    );
-                }
-            }
+            $logger->info('Partial refund successful in Backend for Order: ' . $order->getNumber());
 
-            if (!empty($refund))
-                $this->returnSuccess('Order line successfully refunded', $refund);
-        }
-        catch (\Exception $ex) {
+            $this->returnSuccess('Order line successfully refunded', $refund);
+
+        } catch (Throwable $ex) {
+
+            $logger->error(
+                'Error when executing a partial refund order in Shopware Backend',
+                array(
+                    'error' => $ex->getMessage(),
+                )
+            );
+
             $this->returnError($ex->getMessage());
         }
     }
@@ -298,11 +292,10 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $request->getParam('orderId')
             );
 
-            if ($order !== null && (string) $this->orderService->getMollieOrderId($order) !== '') 
-            {
+            if ($order !== null && (string)$this->orderService->getMollieOrderId($order) !== '') {
                 $shippable = true;
             }
-            
+
         } catch (Exception $e) {
             //
         }

@@ -17,7 +17,8 @@
         <!-- COMPONENTS -->
         <!-- _______________________________________________________________________________________________________ -->
 
-        <service id="mollie_shopware.components.shipping.provider.cart" class="MollieShopware\Components\Shipping\Providers\CartShippingCostsProvider"
+        <service id="mollie_shopware.components.shipping.provider.cart"
+                 class="MollieShopware\Components\Shipping\Providers\CartShippingCostsProvider"
                  public="false">
             <argument type="service" id="mollie_shopware.order_service"/>
         </service>
@@ -41,10 +42,11 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
-        <service class="MollieShopware\Command\OrdersRefundCommand">
+        <service id="mollie_shopware.command.orders_refund_command" class="MollieShopware\Command\OrdersRefundCommand">
             <tag name="console.command"/>
             <argument type="service" id="mollie_shopware.services.refund_service"/>
             <argument type="service" id="mollie_shopware.order_service"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
         <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
@@ -54,7 +56,8 @@
             <argument>%shopware.custom%</argument>
         </service>
 
-        <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService">
+        <service id="mollie_shopware.payment_method_service"
+                 class="MollieShopware\Components\Services\PaymentMethodService">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="shopware.plugin_payment_installer"/>
@@ -67,7 +70,8 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
-        <service id="mollie_shopware.order_history_service" class="MollieShopware\Components\Services\OrderHistoryService">
+        <service id="mollie_shopware.order_history_service"
+                 class="MollieShopware\Components\Services\OrderHistoryService">
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
         </service>
@@ -83,8 +87,9 @@
             <argument type="service" id="models"/>
         </service>
 
-        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\RefundService">
+        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\Refund\RefundService">
             <argument type="service" id="models"/>
+            <argument type="service" id="service_container"/>
         </service>
 
         <service id="mollie_shopware.credit_card_service" class="MollieShopware\Components\Services\CreditCardService">
@@ -125,7 +130,8 @@
             <argument type="service" id="models"/>
         </service>
 
-        <service id="mollie_shopware.components.basket_snapshot.basket_snapshot" class="MollieShopware\Components\BasketSnapshot\BasketSnapshot">
+        <service id="mollie_shopware.components.basket_snapshot.basket_snapshot"
+                 class="MollieShopware\Components\BasketSnapshot\BasketSnapshot">
             <argument type="service" id="session"/>
         </service>
 
@@ -142,7 +148,8 @@
                  class="MollieShopware\Components\Account\Account">
             <argument type="service" id="session"/>
             <argument type="service" id="passwordencoder"/>
-            <argument type="service" id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"/>
+            <argument type="service"
+                      id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"/>
         </service>
 
         <!-- Event Subscribers -->
@@ -157,7 +164,8 @@
             <tag name="shopware.event_subscriber"/>
         </service>
 
-        <service id="mollie_shopware.subscriber.credit_card_token" class="MollieShopware\Subscriber\CreditCardTokenSubscriber">
+        <service id="mollie_shopware.subscriber.credit_card_token"
+                 class="MollieShopware\Subscriber\CreditCardTokenSubscriber">
             <argument type="service" id="mollie_shopware.credit_card_service"/>
             <tag name="shopware.event_subscriber"/>
         </service>

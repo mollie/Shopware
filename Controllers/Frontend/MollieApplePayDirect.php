@@ -13,16 +13,12 @@ use MollieShopware\Components\Country\CountryIsoParser;
 use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
-use MollieShopware\Traits\MollieApiClientTrait;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\CSRFWhitelistAware;
 
 class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Controllers_Frontend_Checkout implements CSRFWhitelistAware
 {
-
-    use MollieApiClientTrait;
-
 
     /**
      * @var \Psr\Log\LoggerInterface
