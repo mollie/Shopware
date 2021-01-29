@@ -49,6 +49,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \MollieShopware\Components\Services\OrderService $orderService */
             $this->orderService = $this->container->get('mollie_shopware.order_service');
 
+            /** @var \Shopware\Components\Model\ModelManager $modelManager */
+            $this->modelManager = $this->container->get('models');
+
             /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
             $this->paymentService = $this->container->get('mollie_shopware.payment_service');
 
@@ -90,6 +93,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             }
             if ($mollieOrder->isShipping() || $mollieOrder->shipments()->count() > 0) {
                 $errorMessage = 'The order is already shipping at Mollie.';
+
+                # TODO, should we think of "repairing" the local database entry and mark it also here as "shipped"?
             }
 
             if ((string) $errorMessage !== '') {
