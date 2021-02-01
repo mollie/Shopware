@@ -2,28 +2,23 @@
 
 namespace MollieShopware\Command;
 
-use Doctrine\ORM\EntityManager;
-use Exception;
 use InvalidArgumentException;
 use MollieShopware\Components\Services\OrderService;
-use MollieShopware\Exceptions\TransactionNotFoundException;
-use MollieShopware\Models\Transaction;
-use MollieShopware\Services\RefundService;
-use MollieShopware\Traits\MollieApiClientTrait;
+use MollieShopware\Services\Refund\RefundInterface;
+use MollieShopware\Services\Refund\RefundService;
+use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
-use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Repository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+
 class OrdersRefundCommand extends ShopwareCommand
 {
-    use MollieApiClientTrait;
 
     /**
-     * @var RefundService
+     * @var RefundInterface
      */
     private $refundService;
 
@@ -32,23 +27,44 @@ class OrdersRefundCommand extends ShopwareCommand
      */
     private $orderService;
 
-    public function __construct(RefundService $refundService, OrderService $orderService)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+
+    /**
+     * @param RefundInterface $refundService
+     * @param OrderService $orderService
+     * @param LoggerInterface $logger
+     */
+    public function __construct(RefundInterface $refundService, OrderService $orderService, LoggerInterface $logger)
     {
         $this->refundService = $refundService;
         $this->orderService = $orderService;
+        $this->logger = $logger;
+
         parent::__construct();
     }
 
+    /**
+     *
+     */
     protected function configure()
     {
         $this
             ->setName('mollie:orders:refund')
-            ->setDescription('Perform refunds for given order with optional given amount.')
-            ->addArgument('orderNumber', InputArgument::REQUIRED, 'The ordernumber of the order, which should be refunded.')
-            ->addArgument('customAmount', null, 'the amount that shall be refunded.', null)
-        ;
+            ->setDescription('Perform full or partial refunds for a given order.')
+            ->addArgument('orderNumber', InputArgument::REQUIRED, 'The ordernumber of the order, that should be refunded.')
+            ->addArgument('customAmount', null, 'Optional amount for partial refunds. Leave it empty for full refunds.', null);
     }
 
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void|null
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
@@ -60,18 +76,36 @@ class OrdersRefundCommand extends ShopwareCommand
 
         $this->validateInputArguments($orderNumber, $customAmount);
 
-        $transaction = $this->orderService->getOrderTransactionByNumber($orderNumber);
-        $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
+        $this->logger->info('Starting Refund on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
         try {
-            $this->refundService->refundOrderAmount($order, $transaction, $customAmount);
+
+            $transaction = $this->orderService->getOrderTransactionByNumber($orderNumber);
+
+            $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
+
+            if (empty($customAmount)) {
+                $this->refundService->refundFullOrder($order, $transaction);
+            } else {
+                $this->refundService->refundPartialOrderAmount($order, $transaction, $customAmount);
+            }
+
+
+            $this->logger->info('Refund Success on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
+
+            $io->success('Order ' . $orderNumber . ' was successfully refunded.');
+
         } catch (\Throwable $e) {
+
+            $this->logger->error(
+                'Error when processing Refund for Order ' . $orderNumber . ' on CLI',
+                array(
+                    'error' => $e->getMessage(),
+                )
+            );
+
             $io->error($e->getMessage());
-
-            return $e->getCode() ?: 1;
         }
-
-        $io->success('The order was successfully refunded.');
     }
 
     /**
@@ -82,7 +116,7 @@ class OrdersRefundCommand extends ShopwareCommand
      */
     private function validateInputArguments($orderNumber, $refundAmount)
     {
-        if(\is_array($orderNumber) ||
+        if (\is_array($orderNumber) ||
             (
                 $refundAmount !== null &&
                 \is_array($refundAmount) &&
@@ -95,4 +129,5 @@ class OrdersRefundCommand extends ShopwareCommand
             );
         }
     }
+
 }

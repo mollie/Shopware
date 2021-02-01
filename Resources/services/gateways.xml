@@ -6,6 +6,9 @@
 
     <services>
 
+        <service id="mollie_shopware.gateways.mollie.factory" class="MollieShopware\Gateways\Mollie\MollieGatewayFactory">
+        </service>
+
         <service id="mollie_shopware.gateways.mollie" class="MollieShopware\Gateways\Mollie\MollieGateway">
             <argument type="service" id="mollie_shopware.api"/>
         </service>

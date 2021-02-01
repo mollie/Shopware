@@ -10,6 +10,7 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\LocaleFinder;
 use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
+use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
@@ -25,13 +26,10 @@ use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
-use MollieShopware\Traits\MollieApiClientTrait;
 use Shopware\Models\Order\Order;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 {
-    use MollieApiClientTrait;
-
 
     const ERROR_PAYMENT_FAILED = 'Payment failed';
 
@@ -358,8 +356,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->loadServices();
 
+            /** @var MollieApiFactory $apiFactory */
+            $apiFactory = Shopware()->Container()->get('mollie_shopware.api_factory');
+            $mollieAPI = $apiFactory->create();
+
             /** @var Profile $mollieProfile */
-            $mollieProfile = $this->getMollieApi()->profiles->get('me');
+            $mollieProfile = $mollieAPI->profiles->get('me');
 
             $mollieProfileId = '';
 

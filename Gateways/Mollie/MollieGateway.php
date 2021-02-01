@@ -3,6 +3,7 @@
 namespace MollieShopware\Gateways\Mollie;
 
 use Mollie\Api\MollieApiClient;
+use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 
@@ -53,49 +54,6 @@ class MollieGateway implements MollieGatewayInterface
         $payment = $this->apiClient->payments->get($paymentId);
 
         return $payment;
-    }
-
-    /**
-     * @param Transaction $transaction
-     * @return bool
-     * @throws \Mollie\Api\Exceptions\ApiException
-     */
-    public function isMollieCancelledOrFailed(Transaction $transaction)
-    {
-        if ($transaction->isTypeOrder()) {
-
-            $mollieOrder = $this->apiClient->orders->get(
-                $transaction->getMollieId(),
-                [
-                    'embed' => 'payments',
-                ]
-            );
-
-            if ($mollieOrder !== null) {
-
-                if ($mollieOrder->isCanceled() === true) {
-                    return true;
-                }
-
-                if ($mollieOrder->isExpired() === true) {
-                    return true;
-                }
-
-                if ($mollieOrder->payments() !== null) {
-                    return $this->getPaymentCollectionCanceledOrFailed($mollieOrder->payments());
-                }
-            }
-
-        } else {
-
-            $molliePayment = $this->apiClient->payments->get($transaction->getMolliePaymentId());
-
-            if ($molliePayment->isCanceled() === true || $molliePayment->isFailed() === true) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
 }
