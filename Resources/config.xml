@@ -124,7 +124,7 @@
 
         <element type="button">
             <name>btnPaymentUpdate</name>
-            <label lang="en">update Payment methods</label>
+            <label lang="en">Update Payment Methods</label>
             <label lang="de">Zahlungsmethoden aktualisieren</label>
             <label lang="nl">Betaalmethoden actualiseren</label>
             <options>
