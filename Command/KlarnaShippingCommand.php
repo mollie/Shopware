@@ -170,7 +170,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # REPAIR ORDERS ALREADY SHIPPED ----------------------------------------------------------------
                     if ($mollieOrder->shipments()->count() > 0) {
-                        $tableView->addRow([$transaction->getOrderNumber(), '', 'Already shipped. Repairing order, must not be shipped again', $order->getShop()->getName()]);
+                        $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), 'Already shipped. Repairing order, must not be shipped again', $order->getShop()->getName()]);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
@@ -181,7 +181,7 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     # "CLOSE" FINALIZED ORDERS ----------------------------------------------------------------
                     if ($mollieOrder->isCanceled() || $mollieOrder->isExpired()) {
-                        $tableView->addRow([$transaction->getOrderNumber(), '', 'order is cancelled or expired in Mollie. Mark it as "processed"']);
+                        $tableView->addRow([$transaction->getOrderNumber(), $order->getOrderStatus()->getName(), 'order is cancelled or expired in Mollie. Mark it as "processed"']);
 
                         $transaction->setIsShipped(true);
                         $transactionRepository->save($transaction);
