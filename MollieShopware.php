@@ -31,7 +31,7 @@ use Shopware\Components\Plugin\Context\UpdateContext;
 class MollieShopware extends Plugin
 {
 
-    const PLUGIN_VERSION = '1.7.0';
+    const PLUGIN_VERSION = '1.7.1';
 
     const PAYMENT_PREFIX = 'mollie_';
 
