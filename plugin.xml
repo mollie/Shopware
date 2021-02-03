@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.7.0</version>
+    <version>1.7.1</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,20 +41,31 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
-    <changelog version="unreleased">
+    <changelog version="1.7.1">
         <changes lang="de">
-            - Die Ausgabe des mollie:ship:klarna Commands auf der Kommandozeile ist nun übersichtlicher.
-            - Die Apple Pay Integration verursacht nun keine Fehler mehr im Internet Explorer.
-            - Es wurde ein neuer Button in der Konfiguration hinzugefügt, mit dem die Zahlungsarten importiert werden.
-            - Bestellungen können nun  von der Kommandozeile zurückerstattet werden.
-            - Die Transaktion wird nun aus dem Backend in der Datenbank als 'versandt' markiert.
+            - Neuer Button in der Plugin Konfiguration, mit dem die Zahlungsarten einfach und unkompliziert ohne Neuinstallation des Plugins aktualisiert werden können.
+            - Rückerstattungen (voll + teilweise) können nun auch mit dem neuen CLI Kommando eingeleitet und gestartet werden
+            - Behebung von manchmal mehrfach erstellten Bestellungen in Kombination mit "Bestellunge NACH Zahlung erstellen" durch mehrfaches Ausführen des Rückweges von Mollie zu Shopware.
+            Das Plugin lässt den Weg zu, ist nun jedoch toleranter und überspringt das erneute Anlegen der Bestellung.
+            - Die Ausgabe des Klarna CLI Shipping Kommandos ist nun kompakter mit neuer tabellarischer Ausgabe.
+            - Apple Pay Direct wird nun durch Apple Pay ausgetauscht, wenn ein Fehler passiert und man sich auf der Bestätigungsseite für einen erneuten Versuch befindet.
+            - Behebung von Apple Pay Direct Javascript Problemen im Internet Explorer
+            - Kompatibilitätsproblem mit dem DHL Wunschpaket und dem Erstellen von Bestellungen in Mollie behoben. Die zusätzlichen Versandkosten werden nun korrekt miteinbezogen.
+            - Behebung, dass Bestellungen, die über das Truck Icon im Backend als "verschickt" markiert wurden, nicht in Shopware als verschickt markiert wurden.
+            Dies hatte nur zur Folge dass z.B. beim Ausführen des CLI Kommandos erneut versucht wurde, diese via Mollie zu verschicken.
         </changes>
         <changes lang="en">
-            - The output of the mollie:ship:klarna command on the commandline interface is now cleaner.
-            - The apple pay integration does not cause any errors in the internet explorer anymore.
-            - There is a new button, which allows you to import the payment methods.
-            - Orders can now be refunded with a CLI command.
-            - Transactions are now marked as 'shipped' when marked in the backend.
+            - Added new button in plugin configuration, to easily update payment methods without reinstalling the plugin.
+            - Refunds (full + partial) can now be started with the brand new CLI command
+            - Fix of multiple created orders in combination with "create order AFTER payment" in scenarios where the way, back from Mollie to Shopware, has been called multiple times.
+            The plugin is now more tolerant and just skips creating an additional order in this case.
+            - The output of the Klarna CLI shipping command is now more compact with the new table view.
+            - Apple Pay Direct is now switched to Apple Pay if an error happens and the user is redirected to the confirm page for a second try.
+            - Fix Apple Pay Direct Javascript errors in Internet Explorer
+            - Fix compatibility problem with DHL Wunschpaket plugin in combination with "create orders in Mollie and not only transactions".
+            The shipping costs will now be correctly added to Mollie.
+            - Fix problem that orders did not get marked as "shipped" within Shopware itself if the truck icon has been used in the backend.
+            This did only lead to the case that processes like the CLI command would have tried to ship these orders again via Mollie.
         </changes>
     </changelog>
 
