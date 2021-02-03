@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace MollieShopware\Services\Refund;
 
 use MollieShopware\Models\Transaction;

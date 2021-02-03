@@ -1,11 +1,7 @@
-<?php declare(strict_types=1);
+<?php
 
 namespace MollieShopware\Exceptions;
 
-
-/**
- * @copyright 2021 dasistweb GmbH (https://www.dasistweb.de)
- */
 class OrderNotFoundBySessionIdException extends \Exception
 {
     /**
