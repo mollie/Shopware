@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.7.1</version>
+    <version>1.7.2</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -40,6 +40,16 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+
+    <changelog version="1.7.2">
+        <changes lang="de">
+            - Erweiterung zur Fehlerbehebung von mehrfach erstellten Bestellungen. In manchen Situationen wurden nach wie vor E-Mails dupliziert verschickt.
+        </changes>
+        <changes lang="en">
+            - Addon to the multiple order fix. In some circumstances some mails still got sent several times.
+     </changes>
+    </changelog>
 
     <changelog version="1.7.1">
         <changes lang="de">
