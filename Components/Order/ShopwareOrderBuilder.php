@@ -97,6 +97,11 @@ class ShopwareOrderBuilder
                 )
             );
 
+            # attention, lets reuse this order number,
+            # if we would continue with saveOrder, its not duplicated anymore (because the transaction number is correct now)
+            # but there would always be another confirmation email being sent :(
+            return $existingOrder->getNumber();
+
         } catch (OrderNotFoundException $ex) {
             # if we have no order, we can continue
             # by creating our new one
