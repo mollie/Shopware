@@ -27,6 +27,7 @@ use Shopware\Components\Plugin\Context\DeactivateContext;
 use Shopware\Components\Plugin\Context\InstallContext;
 use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
+use Shopware\Components\Routing\Context;
 
 class MollieShopware extends Plugin
 {
@@ -35,7 +36,7 @@ class MollieShopware extends Plugin
 
     const PAYMENT_PREFIX = 'mollie_';
 
-    
+
     /**
      * Return Shopware events subscribed to
      */
@@ -194,16 +195,9 @@ class MollieShopware extends Plugin
      */
     public function uninstall(UninstallContext $context)
     {
-        // Don't remove payment methods but set them to inactive.
-        // So orders paid still reference an existing payment method
-
         /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService();
-
-        if ($paymentMethodService !== null) {
-            // Deactivate all Mollie payment methods
-            $paymentMethodService->deactivatePaymentMethods();
-        }
+        $paymentMethodService = $this->getPaymentMethodService($context);
+        $paymentMethodService->uninstallPaymentMethods();
 
         // remove extra attributes
         $this->removeAttributes();
@@ -217,12 +211,8 @@ class MollieShopware extends Plugin
     public function deactivate(DeactivateContext $context)
     {
         /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService();
-
-        if ($paymentMethodService !== null) {
-            // Deactivate all Mollie payment methods
-            $paymentMethodService->deactivatePaymentMethods();
-        }
+        $paymentMethodService = $this->getPaymentMethodService($context);
+        $paymentMethodService->uninstallPaymentMethods();
 
         parent::deactivate($context);
     }
@@ -238,24 +228,9 @@ class MollieShopware extends Plugin
         // update db tables
         $this->updateDbTables();
 
-        /** @var null|array $methods */
-        $methods = null;
-
         /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService();
-
-        if ($paymentMethodService !== null) {
-            // Deactivate all Mollie payment methods
-            $paymentMethodService->deactivatePaymentMethods();
-
-            // Get all active payment methods from Mollie
-            $methods = $paymentMethodService->getPaymentMethodsFromMollie();
-        }
-
-        // Install the payment methods from Mollie
-        if ($methods !== null) {
-            $paymentMethodService->installPaymentMethod($context->getPlugin()->getName(), $methods);
-        }
+        $paymentMethodService = $this->getPaymentMethodService($context);
+        $paymentMethodService->installPaymentMethods();
 
         // download apple pay merchant domain verification file of mollie
         $downloader = new ApplePayDomainFileDownloader();
@@ -485,7 +460,7 @@ class MollieShopware extends Plugin
      *
      * @return PaymentMethodService
      */
-    protected function getPaymentMethodService()
+    protected function getPaymentMethodService($context)
     {
         /** @var ModelManager $modelManager */
         $modelManager = $this->container->get('models');
@@ -514,7 +489,8 @@ class MollieShopware extends Plugin
                 $mollieApiClient,
                 $paymentInstaller,
                 $templateManager,
-                $this->getPluginLogger()
+                $this->getPluginLogger(),
+                $context->getPlugin()->getName()
             );
         }
 
@@ -550,7 +526,7 @@ class MollieShopware extends Plugin
 
         if (!$isExisting) {
             $connection->executeQuery('ALTER TABLE `mol_sw_transactions` ADD INDEX `transaction_id_idx` (`transaction_id`);');
-        } 
+        }
     }
 
     private function cleanOrdermailVariables()

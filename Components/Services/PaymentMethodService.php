@@ -5,45 +5,49 @@ namespace MollieShopware\Components\Services;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Enlight_Template_Manager;
-use Exception;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\BaseCollection;
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
 use Mollie\Api\Types\PaymentMethod;
-use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
-use MollieShopware\Components\Helpers\LogHelper;
+use MollieShopware\Components\Installer\PaymentMethods\IconHtmlBuilder;
 use Psr\Log\LoggerInterface;
-use Shopware\Components\Api\Resource\PaymentMethods;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\PaymentInstaller;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Payment\Repository as PaymentRepository;
 
+
 class PaymentMethodService
 {
-    const PAYMENT_METHOD_ACTION = 'action';
-    const PAYMENT_METHOD_ACTIVE = 'active';
-    const PAYMENT_METHOD_ADDITIONAL_DESCRIPTION = 'additionalDescription';
-    const PAYMENT_METHOD_DESCRIPTION = 'description';
-    const PAYMENT_METHOD_COUNTRIES = 'countries';
-    const PAYMENT_METHOD_NAME = 'name';
-    const PAYMENT_METHOD_POSITION = 'position';
-    const PAYMENT_METHOD_SURCHARGE = 'surcharge';
+
     const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../Resources/views/frontend/plugins/payment';
 
-    /** @var ModelManager */
+    /**
+     * @var string
+     */
+    private $pluginName;
+
+    /**
+     * @var ModelManager
+     */
     private $modelManager;
 
-    /** @var MollieApiClient */
+    /**
+     * @var MollieApiClient
+     */
     private $mollieApiClient;
 
-    /** @var PaymentInstaller */
+    /**
+     * @var PaymentInstaller
+     */
     private $paymentInstaller;
 
-    /** @var Enlight_Template_Manager */
+    /**
+     * @var Enlight_Template_Manager
+     */
     private $templateManager;
 
     /**
@@ -57,69 +61,135 @@ class PaymentMethodService
      * @param PaymentInstaller $paymentInstaller
      * @param Enlight_Template_Manager $templateManager
      * @param LoggerInterface $logger
+     * @param $pluginName
      */
-    public function __construct(
-        ModelManager $modelManager,
-        MollieApiClient $mollieApiClient,
-        PaymentInstaller $paymentInstaller,
-        Enlight_Template_Manager $templateManager,
-        LoggerInterface $logger
-    )
+    public function __construct(ModelManager $modelManager, MollieApiClient $mollieApiClient, PaymentInstaller $paymentInstaller, Enlight_Template_Manager $templateManager, LoggerInterface $logger, $pluginName)
     {
         $this->modelManager = $modelManager;
         $this->mollieApiClient = $mollieApiClient;
         $this->paymentInstaller = $paymentInstaller;
         $this->templateManager = $templateManager;
         $this->logger = $logger;
+        $this->pluginName = $pluginName;
     }
 
+
     /**
-     * Returns a payment method by an array of params, or returns null
-     * if no payment method is found.
+     * This function completely installs everything and makes sure
+     * that new methods are added and old ones are updated
      *
-     * @param array $params
-     * @return object|Payment|null
+     * @return int total number of installed/updated payment methods
+     *
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function getPaymentMethod(array $params)
+    public function installPaymentMethods()
     {
-        /** @var null|Payment $paymentMethod */
-        $paymentMethod = null;
+        # first get all available payment methods
+        # for the connected mollie account
+        $availableMolliePayments = $this->getAvailableMolliePayments();
 
-        /** @var PaymentRepository $paymentMethodRepository */
-        $paymentRepository = $this->modelManager
-            ->getRepository(Payment::class);
+        # now load all installed mollie payment methods
+        # that exist in Shopware already
+        $installedMethods = $this->getInstalledMolliePayments();
 
-        // Find the payment method by the given params
-        if ($paymentRepository !== null) {
-            $paymentMethod = $paymentRepository->findOneBy($params);
+        # now its time to load the delta,
+        # what payment methods have to be inserted, what are updated
+        # and methods do not exist anymore in the mollie profile and thus
+        # need to be deactivated in Shopware
+        $newMethods = $this->getDeltaToInsert($installedMethods, $availableMolliePayments);
+        $updateMethods = $this->getDeltaToUpdate($installedMethods, $availableMolliePayments);
+        $removedMethods = $this->getDeltaToRemove($installedMethods, $newMethods, $updateMethods);
+
+
+        # now insert new payment methods
+        foreach ($newMethods as $method) {
+            $this->logger->info('Installing new payment method: ' . $method['name']);
+            $this->addNewMethod($method);
         }
 
-        return $paymentMethod;
+        # update existing ones
+        /** @var array $method */
+        foreach ($updateMethods as $method) {
+
+            $foundInstalledMethod = null;
+
+            /** @var Payment $installedMethod */
+            foreach ($installedMethods as $installedMethod) {
+                if ($installedMethod->getName() === $method['name']) {
+                    $foundInstalledMethod = $installedMethod;
+                    break;
+                }
+            }
+
+            if ($foundInstalledMethod === null) {
+                continue;
+            }
+
+            # just use DEBUG for simple updates
+            # its clear that they get updated
+            $this->logger->debug('Updating payment method: ' . $method['name']);
+
+            $this->updateExistingMethod($method, $foundInstalledMethod);
+        }
+
+        # and deactivate the ones that should be removed
+        /** @var Payment $method */
+        foreach ($removedMethods as $method) {
+            $this->logger->info('Deactivating payment method: ' . $method->getName());
+            $this->deactivateExistingMethod($method);
+        }
+
+        return count($availableMolliePayments);
     }
 
     /**
-     * Returns an array of payment methods from the Mollie API.
-     *
-     * @return array
-     * @todo Get methods in the correct locale (de_DE en_US es_ES fr_FR nl_BE fr_BE nl_NL)
-     *
+     * Makes sure to do everything that is necessary
+     * when uninstalling the plugin and deactivating the payment methods.
      */
-    public function getPaymentMethodsFromMollie()
+    public function uninstallPaymentMethods()
     {
-        // Variables
-        $options = [];
-        $position = 0;
+        // Don't remove payment methods but set them to inactive.
+        // So orders paid still reference an existing payment method
+        $this->deactivateAllExistingMethods();
+    }
 
-        /** @var null|MethodCollection $methods */
+    /**
+     * Gets the apple pay direct payment method
+     * if existing and active
+     *
+     * @return object|Payment|null
+     */
+    public function getActiveApplePayDirectMethod()
+    {
+        /** @var PaymentRepository $paymentMethodRepository */
+        $paymentRepository = $this->modelManager->getRepository(Payment::class);
+
+        return $paymentRepository->findOneBy([
+            'name' => ShopwarePaymentMethod::APPLEPAYDIRECT,
+            'active' => true,
+        ]);
+    }
+
+
+    /**
+     * @return array
+     */
+    private function getAvailableMolliePayments()
+    {
+        /** @var MethodCollection $methods */
         $methods = $this->getActivePaymentMethodsFromMollie();
 
         if ($methods !== null) {
-            # if its not null, do the same again
-            # please note we give the original list into it
-            # to avoid duplicate adding (without changing anything else)
-            $methods = $this->appendApplePayDirectFeature($this->getActivePaymentMethodsFromMollie());
+            $methods = $methods->getArrayCopy();
+        } else {
+            $methods = [];
         }
 
+        # if its not null, do the same again
+        # please note we give the original list into it
+        # to avoid duplicate adding (without changing anything else)
+        $methods = $this->appendApplePayDirectFeature($methods);
 
         // Add the template directory to the template manager
         $this->templateManager->addTemplateDir(__DIR__ . '/Resources/views');
@@ -129,66 +199,90 @@ class PaymentMethodService
             $this->templateManager->assign('router', Shopware()->Front()->Router());
         }
 
-        // Add options to the array
-        foreach ($methods as $method) {
-            $option = $this->getPreparedPaymentOption($method, $position);
+        $options = [];
+        $position = 0;
 
-            if (is_array($option)) {
-                $options[] = $option;
-                $position++;
+        $iconBuilder = new IconHtmlBuilder();
+
+        /** @var Method $method */
+        foreach ($methods as $method) {
+
+            $paymentMethodName = 'mollie_' . strtolower($method->id);
+
+            $newData = [
+                'action' => 'frontend/Mollie',
+                'name' => $paymentMethodName,
+                'description' => (string)$method->description,
+                'additionalDescription' => $iconBuilder->getIconHTML($method),
+                'active' => 1,
+                'position' => $position,
+                'countries' => [],
+                'surcharge' => 0
+            ];
+
+            if (file_exists(self::PAYMENT_METHOD_TEMPLATE_DIR . '/' . $paymentMethodName . '.tpl')) {
+                $newData['template'] = $paymentMethodName . '.tpl';
             }
+
+            $options[] = $newData;
+            $position++;
         }
 
         return $options;
     }
 
     /**
-     * Installs an array of payment methods.
-     *
-     * @param string $pluginName
-     * @param array $methods
+     * @param array $method
      */
-    public function installPaymentMethod($pluginName, array $methods)
+    private function addNewMethod(array $method)
     {
-        foreach ($methods as $method) {
-            /** @var Payment $existingMethod */
-            $existingMethod = null;
-
-            // Retrieve existing information so it doesn't get overwritten
-            if (isset($method[self::PAYMENT_METHOD_NAME], $method[self::PAYMENT_METHOD_ACTION])) {
-                $existingMethod = $this->getPaymentMethod(
-                    [
-                        self::PAYMENT_METHOD_NAME => $method[self::PAYMENT_METHOD_NAME],
-                    ]
-                );
-            }
-
-            if ($existingMethod === null) {
-                // setup for new payment methods
-                // -----------------------------------------------------
-                // new payment methods are all activated
-                // but not apple pay direct, that wouldn't be good in the storefront ;)
-                if ($method[self::PAYMENT_METHOD_NAME] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
-                    $method[self::PAYMENT_METHOD_ACTIVE] = 0;
-                }
-            } else {
-                // Set existing data on method
-                $method[self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION] = (string)$existingMethod->getAdditionalDescription();
-                $method[self::PAYMENT_METHOD_COUNTRIES] = $existingMethod->getCountries();
-                $method[self::PAYMENT_METHOD_DESCRIPTION] = (string)$existingMethod->getDescription();
-                $method[self::PAYMENT_METHOD_POSITION] = $existingMethod->getPosition();
-                $method[self::PAYMENT_METHOD_SURCHARGE] = $existingMethod->getSurcharge();
-            }
-
-            // Install the payment method in Shopware
-            $this->paymentInstaller->createOrUpdate($pluginName, $method);
+        // new payment methods are all activated
+        // but not apple pay direct, that wouldn't be good in the storefront ;)
+        if ($method['name'] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
+            $method['active'] = 0;
         }
+
+        $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
+    }
+
+    /**
+     * @param array $method
+     * @param Payment $existingMethod
+     */
+    private function updateExistingMethod(array $method, Payment $existingMethod)
+    {
+        # reassign all data here that should be used from the existing method.
+        # This means, everything that the user is allowed to overwrite should be set in here
+        $method['description'] = (string)$existingMethod->getDescription();
+        $method['additionalDescription'] = (string)$existingMethod->getAdditionalDescription();
+
+        $method['position'] = $existingMethod->getPosition();
+
+        $method['countries'] = $existingMethod->getCountries();
+
+        $method['surcharge'] = $existingMethod->getSurcharge();
+
+        $method['active'] = $existingMethod->getActive();
+
+        $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
+    }
+
+    /**
+     * @param Payment $method
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function deactivateExistingMethod(Payment $method)
+    {
+        $method->setActive(false);
+
+        $this->modelManager->flush($method);
     }
 
     /**
      * Deactivates all payment methods created by the Mollie plugin.
      */
-    public function deactivatePaymentMethods()
+    private function deactivateAllExistingMethods()
     {
         /** @var QueryBuilder $queryBuilder */
         $queryBuilder = $this->modelManager->createQueryBuilder();
@@ -206,11 +300,147 @@ class PaymentMethodService
     }
 
     /**
+     * @return array
+     */
+    private function getInstalledMolliePayments()
+    {
+        $qb = $this->modelManager->createQueryBuilder();
+
+        $qb->select(['p'])
+            ->from(Payment::class, 'p')
+            ->where($qb->expr()->like('p.name', ':namePattern'))
+            ->setParameter(':namePattern', 'mollie_%');
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * Verify if "Apple Pay" payment method exists and
+     * append "Apple Pay Direct" feature
+     *
+     * @param array $methods
+     * @return array
+     */
+    private function appendApplePayDirectFeature(array $methods)
+    {
+        $applePayDirect = static function ($method) {
+            $applePayDirect = clone $method;
+            $applePayDirect->id = PaymentMethod::APPLEPAY_DIRECT;
+            $applePayDirect->description = 'Apple Pay Direct';
+            return $applePayDirect;
+        };
+
+        /** @var Method $method */
+        foreach ($methods as $method) {
+            if ($method->id === PaymentMethod::APPLEPAY) {
+                $methods[] = $applePayDirect($method);
+                break;
+            }
+        }
+
+        return $methods;
+    }
+
+    /**
+     * @param Payment[] $installedMethods
+     * @param array $mollieMethods
+     * @return array
+     */
+    private function getDeltaToInsert($installedMethods, $mollieMethods)
+    {
+        $list = array();
+
+        /** @var array $method */
+        foreach ($mollieMethods as $method) {
+
+            /** @var Payment $existingMethod */
+            $existingMethod = null;
+
+            /** @var Payment $installed */
+            foreach ($installedMethods as $installed) {
+                if ($installed->getName() === $method['name']) {
+                    $existingMethod = $installed;
+                    break;
+                }
+            }
+
+            if ($existingMethod === null) {
+                $list[] = $method;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param Payment[] $installedMethods
+     * @param array $mollieMethods
+     * @return array
+     */
+    private function getDeltaToUpdate($installedMethods, $mollieMethods)
+    {
+        $list = array();
+
+        /** @var array $method */
+        foreach ($mollieMethods as $method) {
+
+            /** @var Payment $existingMethod */
+            $existingMethod = null;
+
+            /** @var Payment $installed */
+            foreach ($installedMethods as $installed) {
+                if ($installed->getName() === $method['name']) {
+                    $existingMethod = $installed;
+                    break;
+                }
+            }
+
+            if ($existingMethod !== null) {
+                $list[] = $method;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param $installedMethods
+     * @param $newMethods
+     * @param $updateMethods
+     * @return array
+     */
+    private function getDeltaToRemove($installedMethods, $newMethods, $updateMethods)
+    {
+        $existingMethods = array_merge($newMethods, $updateMethods);
+
+        $list = array();
+
+        /** @var Payment $installed */
+        foreach ($installedMethods as $installed) {
+
+            $found = false;
+            /** @var array $method */
+            foreach ($existingMethods as $method) {
+                if ($installed->getName() === $method['name']) {
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $list[] = $installed;
+            }
+        }
+
+        return $list;
+    }
+
+    /**
      * Returns a collection of active payment methods from the Mollie API.
      *
      * @return null|BaseCollection|MethodCollection
      */
-    public function getActivePaymentMethodsFromMollie()
+    private function getActivePaymentMethodsFromMollie()
     {
         /** @var MethodCollection $methods */
         $methods = null;
@@ -234,96 +464,4 @@ class PaymentMethodService
         return $methods;
     }
 
-    /**
-     * Verify if "Apple Pay" payment method exists and
-     * append "Apple Pay Direct" feature
-     *
-     * @param MethodCollection $methods
-     * @return MethodCollection
-     */
-    private function appendApplePayDirectFeature(MethodCollection $methods)
-    {
-        $applePayDirect = static function ($method) {
-            $applePayDirect = clone $method;
-            $applePayDirect->id = PaymentMethod::APPLEPAY_DIRECT;
-            $applePayDirect->description = 'Apple Pay Direct';
-            return $applePayDirect;
-        };
-
-        /** @var Method $method */
-        foreach ($methods as $method) {
-            if ($method->id === PaymentMethod::APPLEPAY) {
-                $methods->append($applePayDirect($method));
-                break;
-            }
-        }
-
-        return $methods;
-    }
-
-    /**
-     * Returns an option array of a payment method.
-     *
-     * @param $method
-     * @param $position
-     * @return array
-     */
-    private function getPreparedPaymentOption($method, $position = 0)
-    {
-        // Get the name of the payment method
-        $paymentMethodName = 'mollie_' . strtolower($method->id);
-
-        // Get the additional description of a payment method
-        $additionalDescription = $this->getAdditionalDescription($method, $paymentMethodName);
-
-        // Build the option array of the payment method
-        $option = [
-            self::PAYMENT_METHOD_ACTION => 'frontend/Mollie',
-            self::PAYMENT_METHOD_ACTIVE => 1,
-            self::PAYMENT_METHOD_NAME => $paymentMethodName,
-            self::PAYMENT_METHOD_ADDITIONAL_DESCRIPTION => $additionalDescription,
-            self::PAYMENT_METHOD_DESCRIPTION => (string)$method->description,
-            self::PAYMENT_METHOD_POSITION => $position,
-        ];
-
-        // Add the template to the payment method
-        if (file_exists(self::PAYMENT_METHOD_TEMPLATE_DIR . '/' . $paymentMethodName . '.tpl')) {
-            $option['template'] = $paymentMethodName . '.tpl';
-        }
-
-        return $option;
-    }
-
-    /**
-     * Returns the additional description of a payment method.
-     *
-     * @param $method
-     * @param $paymentMethodName
-     * @return string
-     */
-    private function getAdditionalDescription($method, $paymentMethodName)
-    {
-        /** @var null|string $additionalDescription */
-        $additionalDescription = null;
-
-        // Assign the method to the template manager
-        $this->templateManager->assign('method', $method);
-
-        // Get the path of the template file
-        $templatePath = self::PAYMENT_METHOD_TEMPLATE_DIR . '/methods/' . $paymentMethodName . '.tpl';
-
-        // If the template doesn't exist, fallback to the default template
-        if (!file_exists($templatePath)) {
-            $templatePath = self::PAYMENT_METHOD_TEMPLATE_DIR . '/methods/main.tpl';
-        }
-
-        // Fetch the additional description from the template
-        try {
-            $additionalDescription = $this->templateManager->fetch('file:' . $templatePath);
-        } catch (Exception $e) {
-            // No need to handle this exception, the additional description is simply left null
-        }
-
-        return (string)$additionalDescription;
-    }
 }

@@ -31,12 +31,7 @@ class ApplePayPaymentMethod
      */
     public function getPaymentMethod()
     {
-        $applePayDirect = $this->paymentMethodService->getPaymentMethod(
-            [
-                'name' => ShopwarePaymentMethod::APPLEPAYDIRECT,
-                'active' => true,
-            ]
-        );
+        $applePayDirect = $this->paymentMethodService->getActiveApplePayDirectMethod();
 
         if ($applePayDirect instanceof Payment) {
             return $applePayDirect;
