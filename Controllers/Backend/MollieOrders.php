@@ -2,9 +2,6 @@
 
 use MollieShopware\Services\Refund\RefundService;
 use MollieShopware\Models\Transaction;
-use Shopware\Models\Order\Status;
-use Mollie\Api\Resources\Order;
-use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use Shopware\Models\Order\Detail;
 

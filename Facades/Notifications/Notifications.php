@@ -175,6 +175,9 @@ class Notifications
             }
         }
 
+        $orderUpdater = new OrderUpdater($this->config, Shopware()->Modules()->Order());
+        $orderUpdater->updateOrderHistoryUserToMollieUser($order);
+
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
 

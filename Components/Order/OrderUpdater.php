@@ -9,6 +9,7 @@ use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
+use Shopware\Models\Order\History;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Models\Order\Order;
@@ -107,6 +108,33 @@ class OrderUpdater
             $status,
             false
         );
+    }
+
+    /**
+     * @param Order $order
+     *
+     * @throws \Zend_Db_Adapter_Exception
+     * @throws \Zend_Db_Statement_Exception
+     */
+    public function updateOrderHistoryUserToMollieUser(Order $order)
+    {
+        $mollieUserId = $this->config->mollieShopwareUserId();
+
+        if (!$mollieUserId) {
+            return;
+        }
+
+        /** @var History $lastOrderHistoryEntry */
+        $lastOrderHistoryEntry = $order->getHistory()->last();
+
+        $query = Shopware()->Db()->prepare(
+            'UPDATE s_order_history SET userID = :mollieUserId WHERE id = :lastHistoryId'
+        );
+
+        $query->execute([
+            'mollieUserId' => $mollieUserId,
+            'lastHistoryId' => $lastOrderHistoryEntry->getId()
+        ]);
     }
 
     /**
