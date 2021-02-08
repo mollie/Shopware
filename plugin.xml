@@ -44,9 +44,11 @@
     <changelog version="unreleased">
         <changes lang="de">
             - Fehler behoben beim Login mit Apple Pay Direct wenn bereits ein Kundenkonto für den Nutzer existiert
+            - Änderungen, welche durch Mollie durchgeführt werden sind nun deutlich in der Bestellhistorie zu erkennen.
         </changes>
         <changes lang="en">
             - Fix error during login with Apple Pay Direct if account for customer already exists
+            - Changes, which were done by mollie, are now easy to identify in the order history.
         </changes>
     </changelog>
 
