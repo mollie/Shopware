@@ -60,7 +60,7 @@ class PaymentImportCommand extends ShopwareCommand
 
             $this->logger->info('Starting payment methods import on CLI');
 
-            $importCount = $this->paymentMethodService->installPaymentMethods();
+            $importCount = $this->paymentMethodService->installPaymentMethods(false);
 
             $this->logger->info($importCount . ' Payment Methods have been successfully imported on CLI');
 
