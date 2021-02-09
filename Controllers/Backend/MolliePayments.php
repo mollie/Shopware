@@ -1,47 +1,43 @@
 <?php
 
-use Mollie\Api\MollieApiClient;
-use MollieShopware\Components\ApplePayDirect\Services\ApplePayDomainFileDownloader;
-use MollieShopware\Components\Config;
-use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Services\PaymentMethodService;
-use MollieShopware\Components\Services\ShopService;
 use Psr\Log\LoggerInterface;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Components\Plugin\ConfigReader;
-use Shopware\Components\Plugin\PaymentInstaller;
 
 class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_Backend_ExtJs
 {
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
 
     /**
      *
      */
     public function updateAction()
     {
-        $this->getLogger()->info('Importing payment methods.');
+        $this->loadServices();
+
+        $this->logger->info('Starting payment methods import in Backend');
 
         try {
+
             /** @var PaymentMethodService $paymentMethodService */
             $paymentMethodService = $this->container->get('mollie_shopware.payment_method_service');
 
-            // Deactivate all Mollie payment methods
-            $paymentMethodService->deactivatePaymentMethods();
+            $importCount = $paymentMethodService->installPaymentMethods();
 
-            // Get all active payment methods from Mollie
-            $methods = $paymentMethodService->getPaymentMethodsFromMollie();
+            $this->logger->info($importCount . ' Payment Methods have been successfully imported in Backend');
 
-            // Install the payment methods from Mollie
-            $paymentMethodService->installPaymentMethod($this->container->getParameter('mollie_shopware.plugin_name'), $methods);
-
-            $message = sprintf('%d Payment Methods were imported/updated', count($methods));
+            $message = sprintf('%d Payment Methods were imported/updated', $importCount);
 
             die($message);
 
         } catch (\Throwable $e) {
 
-            $this->getLogger()->error(
-                'Error when importing payment methods',
+            $this->logger->error(
+                'Error when importing payment methods in Backend',
                 array(
                     'error' => $e->getMessage(),
                 )
@@ -53,11 +49,11 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
     }
 
     /**
-     * @return LoggerInterface
+     *
      */
-    private function getLogger()
+    private function loadServices()
     {
-        return $this->container->get('mollie_shopware.components.logger');
+        $this->logger = $this->container->get('mollie_shopware.components.logger');
     }
 
 }
