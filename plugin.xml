@@ -41,6 +41,14 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+    <changelog version="unreleased">
+        <changes lang="de">
+            - Fix: Fehler beim Login mit Apple Pay Direct wenn bereits ein Kundenkonto für den Nutzer existiert
+        </changes>
+        <changes lang="en">
+            - Fix: Error during login with Apple Pay Direct if account for customer already exists
+        </changes>
+    </changelog>
 
     <changelog version="1.7.2">
         <changes lang="de">
