@@ -230,8 +230,12 @@ class MollieShopware extends Plugin
 
         /** @var PaymentMethodService $paymentMethodService */
         $paymentMethodService = $this->getPaymentMethodService($context);
-        $paymentMethodService->installPaymentMethods();
 
+        # if we install the plugin from scratch, then we
+        # want to activate all payment methods
+        $paymentMethodService->installPaymentMethods(true);
+
+        
         // download apple pay merchant domain verification file of mollie
         $downloader = new ApplePayDomainFileDownloader();
         $downloader->downloadDomainAssociationFile(Shopware()->DocPath());

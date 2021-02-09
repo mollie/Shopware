@@ -26,7 +26,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             /** @var PaymentMethodService $paymentMethodService */
             $paymentMethodService = $this->container->get('mollie_shopware.payment_method_service');
 
-            $importCount = $paymentMethodService->installPaymentMethods();
+            $importCount = $paymentMethodService->installPaymentMethods(false);
 
             $this->logger->info($importCount . ' Payment Methods have been successfully imported in Backend');
 

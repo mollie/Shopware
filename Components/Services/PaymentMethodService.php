@@ -78,12 +78,12 @@ class PaymentMethodService
      * This function completely installs everything and makes sure
      * that new methods are added and old ones are updated
      *
+     * @param bool $forceActivate enables all payments methods except removed ones
      * @return int total number of installed/updated payment methods
-     *
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function installPaymentMethods()
+    public function installPaymentMethods($forceActivate)
     {
         # first get all available payment methods
         # for the connected mollie account
@@ -137,8 +137,35 @@ class PaymentMethodService
         /** @var Payment $method */
         foreach ($removedMethods as $method) {
             $this->logger->info('Deactivating payment method: ' . $method->getName());
-            $this->deactivateExistingMethod($method);
+            $this->setPaymentActive($method, false);
         }
+
+        # --------------------------------------------------------------------------------
+        # if we have forced to activate payment methods (fresh installation)
+        # then make sure to activate all, but no method that already exists and
+        # is not coming from the mollie payments api anymore (deprecated ones)
+
+        if ($forceActivate) {
+
+            $existingMethods = $this->getInstalledMolliePayments();
+
+            /** @var Payment $method */
+            foreach ($existingMethods as $method) {
+
+                # if the method is in the list of removed ones,
+                # then dont try to activate it (deprecated method)
+                if ($this->isPaymentInList($removedMethods, $method)) {
+                    continue;
+                }
+
+                # verify if its allowed to activate the
+                # current payment method by default
+                if ($this->isMethodDefaultActivated($method->getName())) {
+                    $this->setPaymentActive($method, true);
+                }
+            }
+        }
+
 
         return count($availableMolliePayments);
     }
@@ -151,7 +178,12 @@ class PaymentMethodService
     {
         // Don't remove payment methods but set them to inactive.
         // So orders paid still reference an existing payment method
-        $this->deactivateAllExistingMethods();
+        $methods = $this->getInstalledMolliePayments();
+
+        /** @var Payment $method */
+        foreach ($methods as $method) {
+            $this->setPaymentActive($method, false);
+        }
     }
 
     /**
@@ -236,9 +268,9 @@ class PaymentMethodService
      */
     private function addNewMethod(array $method)
     {
-        // new payment methods are all activated
-        // but not apple pay direct, that wouldn't be good in the storefront ;)
-        if ($method['name'] === ShopwarePaymentMethod::APPLEPAYDIRECT) {
+        # verify if the new method might be black listed
+        # and must not be activated by default on installation
+        if (!$this->isMethodDefaultActivated($method['name'])) {
             $method['active'] = 0;
         }
 
@@ -265,38 +297,6 @@ class PaymentMethodService
         $method['active'] = $existingMethod->getActive();
 
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
-    }
-
-    /**
-     * @param Payment $method
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    private function deactivateExistingMethod(Payment $method)
-    {
-        $method->setActive(false);
-
-        $this->modelManager->flush($method);
-    }
-
-    /**
-     * Deactivates all payment methods created by the Mollie plugin.
-     */
-    private function deactivateAllExistingMethods()
-    {
-        /** @var QueryBuilder $queryBuilder */
-        $queryBuilder = $this->modelManager->createQueryBuilder();
-
-        /** @var Query $query */
-        $query = $queryBuilder->update(Payment::class, 'paymentMethod')
-            ->set('paymentMethod.active', '?1')
-            ->where($queryBuilder->expr()->like('paymentMethod.name', '?2'))
-            ->setParameter(1, false)
-            ->setParameter(2, 'mollie_%')
-            ->getQuery();
-
-        // Execute the query
-        $query->execute();
     }
 
     /**
@@ -436,6 +436,34 @@ class PaymentMethodService
     }
 
     /**
+     * @param $methodName
+     * @return bool
+     */
+    private function isMethodDefaultActivated($methodName)
+    {
+        // new payment methods are all activated
+        // but not apple pay direct, that wouldn't be good in the storefront ;)
+        if ($methodName === ShopwarePaymentMethod::APPLEPAYDIRECT) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Payment $payment
+     * @param $isActive
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function setPaymentActive(Payment $payment, $isActive)
+    {
+        $payment->setActive($isActive);
+
+        $this->modelManager->flush($payment);
+    }
+
+    /**
      * Returns a collection of active payment methods from the Mollie API.
      *
      * @return null|BaseCollection|MethodCollection
@@ -462,6 +490,26 @@ class PaymentMethodService
         }
 
         return $methods;
+    }
+
+    /**
+     * @param $methods
+     * @param Payment $searchedMethod
+     * @return bool
+     */
+    private function isPaymentInList($methods, Payment $searchedMethod)
+    {
+        $removed = false;
+
+        /** @var Payment $remove */
+        foreach ($methods as $method) {
+
+            if ($method->getName() === $searchedMethod->getName()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
