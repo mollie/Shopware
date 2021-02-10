@@ -86,7 +86,13 @@ class CartShippingCostsProvider implements ShippingCostsProviderInterface
      */
     private function getTaxRate(Order $order)
     {
-        $taxRate = $order->getInvoiceShippingTaxRate();
+        $taxRate = null;
+
+        // This Method doesn't exists in early Shopware 5 Versions (<= 5.4)
+        // if the Method exists use it, if not calculate the TaxRate as fallback
+        if (method_exists($order, 'getInvoiceShippingTaxRate')) {
+            $taxRate = $order->getInvoiceShippingTaxRate();
+        }
 
         if ($taxRate !== null) {
             return $taxRate;
