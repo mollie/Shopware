@@ -8,8 +8,9 @@
                 {include 'frontend/plugins/payment/mollie_applepay_direct.tpl' }
             </div>
             <script type="text/javascript">
-                // I know this should not be done, but Safari does not seem to like it any other way
+                // This needs to be inline to force the script on offcanvas reload
                 var applePayContainer = $('.apple-pay--container--ajax-cart');
+
                 applePayContainer.children().each(function () {
                     if (!$(this).is(':visible')) {
                         applePayContainer.hide();
