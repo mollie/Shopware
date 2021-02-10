@@ -41,6 +41,14 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+    <changelog version="unreleased">
+        <changes lang="de">
+            - Im Themeware Plugin ist die Darstellung des Apple Pay Logos im Offcanvas nun korrigiert
+        </changes>
+        <changes lang="en">
+            - The showing of apple pay at the offcanvas in the themeware plugin is now correct
+        </changes>
+    </changelog>
 
     <changelog version="1.7.2">
         <changes lang="de">

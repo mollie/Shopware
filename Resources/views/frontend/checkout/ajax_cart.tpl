@@ -7,7 +7,6 @@
             <div class="apple-pay--container apple-pay--container--ajax-cart">
                 {include 'frontend/plugins/payment/mollie_applepay_direct.tpl' }
             </div>
-            bla
             <script type="text/javascript">
                 // I know this should not be done, but Safari does not seem to like it any other way
                 var applePayContainer = $('.apple-pay--container--ajax-cart');
