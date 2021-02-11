@@ -584,7 +584,7 @@ class PaymentService
             'total' => 0,
             PaymentStatus::MOLLIE_PAYMENT_PAID => 0,
             PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED => 0,
-            PaymentStatus::MOLLIE_PAYMENT_DELAYED => 0,
+            PaymentStatus::MOLLIE_PAYMENT_PENDING => 0,
             PaymentStatus::MOLLIE_PAYMENT_OPEN => 0,
             PaymentStatus::MOLLIE_PAYMENT_CANCELED => 0,
             PaymentStatus::MOLLIE_PAYMENT_FAILED => 0,
@@ -603,7 +603,7 @@ class PaymentService
                 if ($payment->isAuthorized())
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED]++;
                 if ($payment->isPending())
-                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_DELAYED]++;
+                    $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PENDING]++;
                 if ($payment->isOpen())
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN]++;
                 if ($payment->isCanceled())

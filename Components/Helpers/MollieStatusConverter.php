@@ -121,7 +121,7 @@ class MollieStatusConverter
         } else if ($payment->isPaid()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_PAID;
         } elseif ($payment->isPending())
-            $targetState = PaymentStatus::MOLLIE_PAYMENT_DELAYED;
+            $targetState = PaymentStatus::MOLLIE_PAYMENT_PENDING;
         elseif ($payment->isAuthorized()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED;
         } elseif ($payment->isOpen()) {
