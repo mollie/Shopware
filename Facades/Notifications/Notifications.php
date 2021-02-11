@@ -170,7 +170,7 @@ class Notifications
 
             # if configured, also update the order status
             if ($this->config->updateOrderStatus()) {
-                $this->orderUpdater->updateShopwareOrderStatus($order, $mollieStatus);
+                $this->orderUpdater->updateShopwareOrderStatus($order, $mollieStatus, $transaction->isTypeOrder());
             }
         }
 

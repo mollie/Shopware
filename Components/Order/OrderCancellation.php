@@ -127,7 +127,9 @@ class OrderCancellation
 
             $this->orderUpdater->updateShopwareOrderStatusWithoutMail(
                 $order,
-                PaymentStatus::MOLLIE_PAYMENT_CANCELED
+                PaymentStatus::MOLLIE_PAYMENT_CANCELED,
+                $this->config->useOrdersApiOnlyWhereMandatory()
+                    || stripos($order->getPayment()->getName(), 'klarna') !== false
             );
 
             if ($this->config->autoResetStock()) {

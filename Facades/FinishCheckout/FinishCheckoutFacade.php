@@ -271,7 +271,8 @@ class FinishCheckoutFacade
             try {
                 $this->orderUpdater->updateShopwareOrderStatus(
                     $swOrder,
-                    $mollieStatus
+                    $mollieStatus,
+                    $transaction->isTypeOrder()
                 );
             } catch (OrderStatusNotFoundException $ex) {
                 # if we have a problem here, we will still continue
