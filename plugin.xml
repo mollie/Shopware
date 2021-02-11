@@ -41,6 +41,17 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+    <changelog version="unreleased">
+        <changes lang="de">
+            - Wird die Payment API von Mollie benutzt, dann wird nun auch der korrekte Shopware Bestellstatus gesetzt.
+            - Fehler behoben beim Login mit Apple Pay Direct wenn bereits ein Kundenkonto für den Nutzer existiert
+        </changes>
+        <changes lang="en">
+            - If you use the payments api from mollie your shopware order status will now be properly set.
+            - Fix error during login with Apple Pay Direct if account for customer already exists
+        </changes>
+    </changelog>
+
 
     <changelog version="1.7.5">
         <changes lang="de">
