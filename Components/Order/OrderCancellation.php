@@ -124,15 +124,10 @@ class OrderCancellation
         );
 
         if ($this->config->cancelFailedOrders()) {
-            $usePaymentsApi = (
-                $this->config->useOrdersApiOnlyWhereMandatory()
-                || stripos($order->getPayment()->getName(), 'klarna') !== false
-            );
 
             $this->orderUpdater->updateShopwareOrderStatusWithoutMail(
                 $order,
-                PaymentStatus::MOLLIE_PAYMENT_CANCELED,
-                $usePaymentsApi
+                PaymentStatus::MOLLIE_PAYMENT_CANCELED
             );
 
             if ($this->config->autoResetStock()) {

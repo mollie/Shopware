@@ -117,9 +117,6 @@ class OrderUpdater
     /**
      * @param Order $order
      * @param $status
-     * @param bool $isOrderTransaction
-     * @throws ORMException
-     * @throws OptimisticLockException
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
@@ -144,9 +141,6 @@ class OrderUpdater
     /**
      * @param Order $order
      * @param $status
-     * @param bool $isOrderTransaction
-     * @throws ORMException
-     * @throws OptimisticLockException
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
@@ -298,7 +292,6 @@ class OrderUpdater
      * @param Order $order
      * @param $mollieStatus
      * @param $sendMail
-     * @param bool $isOrderTransaction
      * @return bool
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
