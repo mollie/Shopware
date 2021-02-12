@@ -37,7 +37,7 @@ class MollieStatusConverter
      * @param Order $order
      * @return string
      */
-    public function getOrderStatus(Order $order)
+    public function getMollieOrderStatus(Order $order)
     {
         /** @var array $paymentsResult */
         $paymentsResult = $this->paymentService->getPaymentsResultForOrder($order);
@@ -103,7 +103,7 @@ class MollieStatusConverter
      * @param Payment $payment
      * @return string
      */
-    public function getPaymentStatus(Payment $payment)
+    public function getMolliePaymentStatus(Payment $payment)
     {
         $refundStatus = new MollieRefundStatus();
 
