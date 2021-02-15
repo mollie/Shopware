@@ -439,18 +439,6 @@
             </options>
         </element>
 
-
-        <element type="text" scope="shop">
-            <name>mollie_shopware_user_id</name>
-            <label lang="de">Benutzer-ID für Mollie-Benutzer in Shopware</label>
-            <label lang="en">User ID for Mollie-user in Shopware</label>
-            <label lang="nl">Gebruikers ID voor Mollie-gebruiker in Shopware</label>
-            <options>
-                <position>15</position>
-            </options>
-        </element>
-
-
         <element type="button" required="false">
             <name>separator_mails</name>
             <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>

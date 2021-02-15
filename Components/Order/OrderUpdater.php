@@ -4,11 +4,14 @@
 namespace MollieShopware\Components\Order;
 
 
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\History;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\ContainerAwareEventManager;
@@ -38,6 +41,11 @@ class OrderUpdater
      */
     private $eventManager;
 
+    /**
+     * @var ModelManager
+     */
+    private $modelManager;
+
 
     /**
      * @param Config $config
@@ -45,6 +53,7 @@ class OrderUpdater
      * @param $eventManager
      * @param $logger
      */
+    //TODO: add entity manager
     public function __construct(Config $config, $sOrder, $eventManager, $logger)
     {
         $this->config = $config;
@@ -112,29 +121,18 @@ class OrderUpdater
 
     /**
      * @param Order $order
-     *
-     * @throws \Zend_Db_Adapter_Exception
-     * @throws \Zend_Db_Statement_Exception
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    public function updateOrderHistoryUserToMollieUser(Order $order)
+    public function updateOrderHistoryComment(Order $order)
     {
-        $mollieUserId = $this->config->mollieShopwareUserId();
-
-        if (!$mollieUserId) {
-            return;
-        }
-
         /** @var History $lastOrderHistoryEntry */
         $lastOrderHistoryEntry = $order->getHistory()->last();
 
-        $query = Shopware()->Db()->prepare(
-            'UPDATE s_order_history SET userID = :mollieUserId WHERE id = :lastHistoryId'
-        );
-
-        $query->execute([
-            'mollieUserId' => $mollieUserId,
-            'lastHistoryId' => $lastOrderHistoryEntry->getId()
-        ]);
+        if(empty($lastOrderHistoryEntry->getComment())) {
+            $lastOrderHistoryEntry->setComment('Status updated by Mollie');
+            $this->modelManager->flush($lastOrderHistoryEntry);
+        }
     }
 
     /**

@@ -71,7 +71,15 @@ class Notifications
      * @param MollieStatusConverter $statusConverter
      * @param OrderCancellation $orderCancellation
      */
-    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, PaymentService $paymentService, OrderUpdater $orderUpdater, MollieStatusConverter $statusConverter, OrderCancellation $orderCancellation)
+    public function __construct(
+        LoggerInterface $logger,
+        Config $config,
+        TransactionRepository $repoTransactions,
+        OrderService $orderService,
+        PaymentService $paymentService,
+        OrderUpdater $orderUpdater,
+        MollieStatusConverter $statusConverter,
+        OrderCancellation $orderCancellation)
     {
         $this->logger = $logger;
         $this->config = $config;
@@ -154,16 +162,13 @@ class Notifications
             throw new PaymentStatusNotFoundException('Unable to get status from Mollie for this transaction or order!');
         }
 
-
         # -----------------------------------------------------------------------------------------------------
         # UPDATE PAYMENT STATUS + ORDER STATUS
 
         # verify if our order is failed and could be cancelled.
         #if so, then cancel it
         if (PaymentStatus::isFailedStatus($mollieStatus)) {
-
             $this->orderCancellation->cancelPlacedOrder($order);
-
         } else {
 
             # update our payment status from our notification data
@@ -175,10 +180,8 @@ class Notifications
             }
         }
 
-        $orderUpdater = new OrderUpdater($this->config, Shopware()->Modules()->Order());
-        $orderUpdater->updateOrderHistoryUserToMollieUser($order);
+        $this->orderUpdater->updateOrderHistoryComment($order);
 
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
-
 }

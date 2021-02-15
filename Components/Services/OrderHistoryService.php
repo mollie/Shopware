@@ -46,12 +46,6 @@ class OrderHistoryService
         $previousPaymentStatusId
     )
     {
-        /** @var User $user */
-        $user = null;
-
-        /** @var int|null $userId */
-        $userId = $this->config->mollieShopwareUserId();
-
         // Create a new history object
         $history = new History();
         $history->setOrder($order);
@@ -61,14 +55,6 @@ class OrderHistoryService
         $history->setPreviousPaymentStatus($this->getStatusById($previousPaymentStatusId));
         $history->setChangeDate(new \DateTime('now'));
         $history->setComment('Status updated by Mollie');
-
-        if ($userId !== null) {
-            $user = $this->getUserById($userId);
-        }
-
-        if ($user !== null) {
-            $history->setUser($user);
-        }
 
         try {
             $this->modelManager->persist($history);

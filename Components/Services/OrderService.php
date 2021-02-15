@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Logger;
 use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
@@ -177,6 +178,41 @@ class OrderService
             $mollieId = $transaction->getMollieId();
 
         return $mollieId;
+    }
+
+    /**
+     * @param int $orderId
+     * @param array|null $orderBy
+     * @param int|null $offset
+     * @param int|null $limit
+     * @return array|int|string
+     */
+    public function getOrderStatusHistory($orderId, $orderBy, $offset, $limit) {
+        $builder = $this->modelManager->createQueryBuilder();
+        $builder->select([
+            'history.changeDate',
+            'user.name as userName',
+            'history.previousOrderStatusId as prevOrderStatusId',
+            'history.orderStatusId as currentOrderStatusId',
+            'history.previousPaymentStatusId as prevPaymentStatusId',
+            'history.paymentStatusId as currentPaymentStatusId',
+            'history.comment as comment'
+        ]);
+        $builder->from(\Shopware\Models\Order\History::class, 'history')
+            ->leftJoin('history.user', 'user')
+            ->where('history.orderId = ?1')
+            ->setParameter(1, $orderId);
+
+        if (!empty($orderBy)) {
+            $builder->addOrderBy($orderBy);
+        }
+
+        if ($limit !== null) {
+            $builder->setFirstResult($offset)
+                ->setMaxResults($limit);
+        }
+
+        return $builder->getQuery()->getArrayResult();
     }
 
     /**
