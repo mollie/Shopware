@@ -25,6 +25,8 @@ class PaymentMethodService
 
     const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../Resources/views/frontend/plugins/payment';
 
+    const MOLLIE_ACTION_KEY = 'frontend/Mollie';
+
     /**
      * @var string
      */
@@ -242,7 +244,7 @@ class PaymentMethodService
             $paymentMethodName = 'mollie_' . strtolower($method->id);
 
             $newData = [
-                'action' => 'frontend/Mollie',
+                'action' => self::MOLLIE_ACTION_KEY,
                 'name' => $paymentMethodName,
                 'description' => (string)$method->description,
                 'additionalDescription' => $iconBuilder->getIconHTML($method),
@@ -274,6 +276,10 @@ class PaymentMethodService
             $method['active'] = 0;
         }
 
+        # always make sure our action is correctly set
+        # otherwise the payments won't even start and a finish page is visible directly
+        $method['action'] = self::MOLLIE_ACTION_KEY;
+        
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
     }
 
@@ -295,6 +301,10 @@ class PaymentMethodService
         $method['surcharge'] = $existingMethod->getSurcharge();
 
         $method['active'] = $existingMethod->getActive();
+
+        # always make sure our action is correctly set
+        # otherwise the payments won't even start and a finish page is visible directly
+        $method['action'] = self::MOLLIE_ACTION_KEY;
 
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
     }
@@ -499,8 +509,6 @@ class PaymentMethodService
      */
     private function isPaymentInList($methods, Payment $searchedMethod)
     {
-        $removed = false;
-
         /** @var Payment $remove */
         foreach ($methods as $method) {
 
