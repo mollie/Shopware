@@ -251,10 +251,10 @@ class FinishCheckoutFacade
         # but I'm not quite sure if its better to reload it again from the server due to some changes above.
         if ($transaction->isTypeOrder()) {
             $mollieOrder = $this->paymentService->getMollieOrder($swOrder);
-            $mollieStatus = $this->statusConverter->getOrderStatus($mollieOrder);
+            $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
         } else {
             $molliePayment = $this->paymentService->getMolliePayment($swOrder);
-            $mollieStatus = $this->statusConverter->getPaymentStatus($molliePayment);
+            $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
         }
 
 

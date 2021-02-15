@@ -472,7 +472,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $sOrder = Shopware()->Modules()->Order();
             $sBasket = Shopware()->Modules()->Basket();
 
-            $orderUpdater = new OrderUpdater($this->config, $sOrder);
+            $orderUpdater = new OrderUpdater(
+                $this->config,
+                $sOrder,
+                Shopware()->Container()->get('events'),
+                $this->logger
+            );
+
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
             $tokeAnonymizer = new TokenAnonymizer(

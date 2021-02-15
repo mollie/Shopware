@@ -132,7 +132,7 @@ class Notifications
             # get the order from the mollie api
             # and extract the status from its data
             $mollieOrder = $this->paymentService->getMollieOrder($order);
-            $mollieStatus = $this->statusConverter->getOrderStatus($mollieOrder);
+            $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
 
         } else {
 
@@ -147,7 +147,7 @@ class Notifications
             # get the payment from our molli api
             # and extract its status 
             $molliePayment = $this->paymentService->getMolliePayment($order, $transaction->getMolliePaymentId());
-            $mollieStatus = $this->statusConverter->getPaymentStatus($molliePayment);
+            $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
         }
 
         if ($mollieStatus === null) {

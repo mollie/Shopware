@@ -213,7 +213,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             # fire event about the shipping methods that
             # will be returned for the country
-            $this->eventManager->filter(
+            $shippingMethods = $this->eventManager->filter(
                 'Mollie_ApplePayDirect_getShippings_FilterResult',
                 $shippingMethods,
                 array(
