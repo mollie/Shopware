@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.7.2</version>
+    <version>1.7.3</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,12 +41,25 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
-    <changelog version="unreleased">
+    <changelog version="1.7.3">
         <changes lang="de">
-            - Fehler behoben beim Login mit Apple Pay Direct wenn bereits ein Kundenkonto für den Nutzer existiert
+            - Neues CLI Kommando zum Importieren/Aktualisieren von Zahlungsarten
+            - Neue Shopware Filter Events um selbst Einfluss auf Änderung von Zahlungs- sowie Bestellstatus nehmen zu können.
+              Dadurch kann der von Mollie verwendete Status überschrieben werden, und individuell auf eigene Einträge/Abläufe eingegangen werden.
+            - Optimierung der Imports von Zahlungsarten damit eigene Einstellungen wie z.B. "aktiv" erhalten bleiben und nicht mehr überschrieben werden.
+            - Problembehebung in seltenen Fällen in denen bei Zahlungsarten eine falsche "Action" in der Datenbank war, und man somit sofort auf die "Finish" Seite des Checkouts gelangte, ohne dass etwas durchgeführt wurde.
+            - Problembehebung in denen manchmal Zahlungs Icons bei einer frischen Installation gefehlt haben.
+            - Behebung von Kompatibilitätsproblemen mit Shopware 5.4, die zu Fehlern im Klarna Checkout führten.
+            - Behebung von Apple Pay Direct Problemen, wenn ein Express (Gast) Checkout mit einer E-mail durchgeführt wird, die auch als "echter" Kunde registriert ist.
         </changes>
         <changes lang="en">
-            - Fix error during login with Apple Pay Direct if account for customer already exists
+            - Add new CLI command to import/update payment methods
+            - Add new Shopware Filter Events for payment and status updates. You can now individually inject and use a custom status instead of the suggested one from Mollie.
+            - Improve Payment Method import/update functionality to keep custom settings like "active" when importing methods again.
+            - Fix very rare scenario where payment "actions" are not set correctly in the database, which leads to an immediate redirect to the checkout finish page without doing anything.
+            - Fix problem where sometimes payment method icons have not been imported correctly and thus where not visible.
+            - Fix compatibility problem with Shopware 5.4 when doing a checkout with Klarna.
+            - Fix error with Apple Pay Direct if an express (guest) checkout is done with an email that already exists as a "real" customer.
         </changes>
     </changelog>
 
