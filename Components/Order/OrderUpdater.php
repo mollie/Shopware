@@ -46,19 +46,19 @@ class OrderUpdater
      */
     private $modelManager;
 
-
     /**
      * @param Config $config
      * @param $sOrder
      * @param $eventManager
+     * @param ModelManager $modelManager
      * @param $logger
      */
-    //TODO: add entity manager
-    public function __construct(Config $config, $sOrder, $eventManager, $logger)
+    public function __construct(Config $config, $sOrder, $eventManager, ModelManager $modelManager, $logger)
     {
         $this->config = $config;
         $this->sOrder = $sOrder;
         $this->eventManager = $eventManager;
+        $this->modelManager = $modelManager;
         $this->logger = $logger;
     }
 

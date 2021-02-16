@@ -472,11 +472,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $sOrder = Shopware()->Modules()->Order();
             $sBasket = Shopware()->Modules()->Basket();
 
-            //TODO: add entity manager
             $orderUpdater = new OrderUpdater(
                 $this->config,
                 $sOrder,
                 Shopware()->Container()->get('events'),
+                $entityManager,
                 $this->logger
             );
 
