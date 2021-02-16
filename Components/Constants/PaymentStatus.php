@@ -24,6 +24,10 @@ class PaymentStatus
     const MOLLIE_PAYMENT_REFUNDED = 'refunded';
     const MOLLIE_PAYMENT_PARTIALLY_REFUNDED = 'partially_refunded';
 
+    /**
+     * @deprecated
+     */
+    const MOLLIE_PAYMENT_DELAYED = self::MOLLIE_PAYMENT_PENDING;
 
     /**
      * Gets if the provided payment status means that
