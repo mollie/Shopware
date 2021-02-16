@@ -9,13 +9,7 @@
             </div>
             <script type="text/javascript">
                 // This needs to be inline to force the script on offcanvas reload
-                var applePayContainer = $('.apple-pay--container--ajax-cart');
-
-                applePayContainer.children().each(function () {
-                    if (!$(this).is(':visible')) {
-                        applePayContainer.hide();
-                    }
-                });
+                initApplePay();
             </script>
         {/block}
     {/if}
