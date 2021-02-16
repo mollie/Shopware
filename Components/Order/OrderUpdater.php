@@ -6,13 +6,21 @@ namespace MollieShopware\Components\Order;
 
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
+use Psr\Log\LoggerInterface;
+use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
 
 class OrderUpdater
 {
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var Config
@@ -24,16 +32,24 @@ class OrderUpdater
      */
     private $sOrder;
 
+    /**
+     * @var ContainerAwareEventManager
+     */
+    private $eventManager;
+
 
     /**
-     * OrderUpdater constructor.
      * @param Config $config
      * @param $sOrder
+     * @param $eventManager
+     * @param $logger
      */
-    public function __construct(Config $config, $sOrder)
+    public function __construct(Config $config, $sOrder, $eventManager, $logger)
     {
         $this->config = $config;
         $this->sOrder = $sOrder;
+        $this->eventManager = $eventManager;
+        $this->logger = $logger;
     }
 
 
@@ -101,36 +117,36 @@ class OrderUpdater
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
-        $targetState = null;
+        $shopwareStatus = null;
         $ignoreState = false;
-        
+
         switch ($status) {
 
             case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-                $targetState = Status::PAYMENT_STATE_OPEN;
+                $shopwareStatus = Status::PAYMENT_STATE_OPEN;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
-                $targetState = $this->config->getAuthorizedPaymentStatusId();
+                $shopwareStatus = $this->config->getAuthorizedPaymentStatusId();
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_DELAYED:
-                $targetState = Status::PAYMENT_STATE_DELAYED;
+                $shopwareStatus = Status::PAYMENT_STATE_DELAYED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_PAID:
-                $targetState = Status::PAYMENT_STATE_COMPLETELY_PAID;
+                $shopwareStatus = Status::PAYMENT_STATE_COMPLETELY_PAID;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
             case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-                $targetState = Status::PAYMENT_STATE_RE_CREDITING;
+                $shopwareStatus = Status::PAYMENT_STATE_RE_CREDITING;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
             case PaymentStatus::MOLLIE_PAYMENT_FAILED:
             case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $targetState = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
+                $shopwareStatus = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
@@ -140,41 +156,71 @@ class OrderUpdater
                 break;
         }
 
+
+        $previousShopwareStatus = $shopwareStatus;
+
+        # send a filter event, so developer can adjust the status that will
+        # be used for the shopware payment status
+        $shopwareStatus = $this->eventManager->filter(
+            Events::UPDATE_ORDER_PAYMENT_STATUS,
+            $shopwareStatus,
+            array(
+                'molliePaymentStatus' => $status,
+                'order' => $order,
+            )
+        );
+
+        if ($previousShopwareStatus !== $shopwareStatus) {
+            $this->logger->info('Filter Event changed Payment Status for Order ' . $order->getNumber(),
+                array(
+                    'data' => array(
+                        'previousStatus' => $previousShopwareStatus,
+                        'newStatus' => $shopwareStatus
+                    )
+                )
+            );
+
+            # avoid state ignoring, because we have
+            # a custom handling now. so process everything the
+            # other plugin says
+            $ignoreState = false;
+        }
+
         if ($ignoreState) {
             return;
         }
 
-        if ($targetState === null) {
+        if ($shopwareStatus === null) {
             throw new PaymentStatusNotFoundException($status);
         }
 
         $this->sOrder->setPaymentStatus(
             $order->getId(),
-            $targetState,
+            $shopwareStatus,
             $sendMail
         );
     }
 
     /**
      * @param Order $order
-     * @param $status
+     * @param $mollieStatus
      * @param $sendMail
      * @throws OrderStatusNotFoundException
      */
-    private function updateOrderStatus(Order $order, $status, $sendMail)
+    private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
-        $targetState = null;
+        $shopwareStatus = null;
         $ignoreState = false;
 
-        switch ($status) {
+        switch ($mollieStatus) {
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-                $targetState = Status::ORDER_STATE_COMPLETED;
+                $shopwareStatus = Status::ORDER_STATE_COMPLETED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
             case PaymentStatus::MOLLIE_PAYMENT_FAILED:
             case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $targetState = Status::ORDER_STATE_CANCELLED_REJECTED;
+                $shopwareStatus = Status::ORDER_STATE_CANCELLED_REJECTED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
@@ -189,17 +235,48 @@ class OrderUpdater
                 break;
         }
 
+
+        $previousShopwareStatus = $shopwareStatus;
+
+        # send a filter event, so developer can adjust the status that will
+        # be used for the shopware order status
+        $shopwareStatus = $this->eventManager->filter(
+            Events::UPDATE_ORDER_STATUS,
+            $shopwareStatus,
+            array(
+                'mollieOrderStatus' => $mollieStatus,
+                'order' => $order,
+            )
+        );
+
+        if ($previousShopwareStatus !== $shopwareStatus) {
+            $this->logger->info('Filter Event changed Order Status for Order ' . $order->getNumber(),
+                array(
+                    'data' => array(
+                        'previousStatus' => $previousShopwareStatus,
+                        'newStatus' => $shopwareStatus
+                    )
+                )
+            );
+
+            # avoid state ignoring, because we have
+            # a custom handling now. so process everything the
+            # other plugin says
+            $ignoreState = false;
+        }
+
+
         if ($ignoreState) {
             return;
         }
 
-        if ($targetState === null) {
-            throw new OrderStatusNotFoundException($status);
+        if ($shopwareStatus === null) {
+            throw new OrderStatusNotFoundException($mollieStatus);
         }
 
         $this->sOrder->setOrderStatus(
             $order->getId(),
-            $targetState,
+            $shopwareStatus,
             $sendMail
         );
     }
