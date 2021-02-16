@@ -79,7 +79,8 @@ class Notifications
         PaymentService $paymentService,
         OrderUpdater $orderUpdater,
         MollieStatusConverter $statusConverter,
-        OrderCancellation $orderCancellation)
+        OrderCancellation $orderCancellation
+    )
     {
         $this->logger = $logger;
         $this->config = $config;
