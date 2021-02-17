@@ -154,7 +154,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             echo "";
             die();
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error when adding product to apple pay cart',
@@ -239,7 +239,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             echo json_encode($data);
             die();
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error loading shippings for Mollie Apple Pay Direct',
@@ -302,7 +302,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             echo json_encode($data);
             die();
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error setting shipping for Mollie Apple Pay Direct',
@@ -344,7 +344,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             echo "";
             die();
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error restoring cart after Mollie Apple Pay Direct',
@@ -384,7 +384,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             echo $response;
 
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error starting Mollie Apple Pay Direct session',
@@ -480,7 +480,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 ]
             );
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error starting Mollie Apple Pay Direct payment',
@@ -561,7 +561,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 ]
             );
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error finishing Mollie Apple Pay Direct payment',
