@@ -122,7 +122,7 @@ class MollieApiFactory
             // set the api key based on the configuration
             $client->setApiKey($apiKey);
 
-        } catch (\Throwable $ex) {
+        } catch (\Exception $ex) {
             $this->logger->error(
                 'Fatal error with Mollie API Key. Invalid Key: ' . $apiKey,
                 array(

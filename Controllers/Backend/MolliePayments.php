@@ -34,7 +34,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
             die($message);
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             $this->logger->error(
                 'Error when importing payment methods in Backend',

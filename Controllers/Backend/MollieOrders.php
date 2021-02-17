@@ -179,7 +179,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $this->returnSuccess('Order successfully refunded', $refund);
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $logger->error(
                 'Error when executing a full refund order in Shopware Backend',
@@ -254,7 +254,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $this->returnSuccess('Order line successfully refunded', $refund);
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $logger->error(
                 'Error when executing a partial refund order in Shopware Backend',
