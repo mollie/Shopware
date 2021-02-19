@@ -297,13 +297,3 @@ initApplePay();
 $.subscribe('plugin/swAjaxVariant/onRequestDataCompleted', function () {
     initApplePay();
 });
-
-// we need to (re)initialize it
-// because we are loaded within an AJAX request
-$.subscribe('plugin/swCollapseCart/onLoadCartFinished', function () {
-    initApplePay();
-});
-
-$.subscribe('plugin/swCollapseCart/onArticleAdded', function () {
-    initApplePay();
-});

@@ -7,6 +7,10 @@
             <div class="apple-pay--container apple-pay--container--ajax-cart">
                 {include 'frontend/plugins/payment/mollie_applepay_direct.tpl' }
             </div>
+            <script type="text/javascript">
+                // This needs to be inline to force the script on offcanvas reload
+                initApplePay();
+            </script>
         {/block}
     {/if}
 {/block}
