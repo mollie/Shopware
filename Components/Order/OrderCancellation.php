@@ -149,7 +149,7 @@ class OrderCancellation
         /** @var CurrentCustomer $currentCustomer */
         $currentCustomer = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
 
-        if ($currentCustomer->getCurrentId() === $order->getCustomer()->getId()) {
+        if ((int)$currentCustomer->getCurrentId() === (int)$order->getCustomer()->getId()) {
             $this->basketService->restoreBasket($order);
         }
     }

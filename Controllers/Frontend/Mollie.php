@@ -107,7 +107,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     }
 
     /**
-     * @throws ApiException
+     * @throws Exception
      */
     public function directAction()
     {
@@ -146,7 +146,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->redirect($session->getCheckoutUrl());
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error(
                 'Error when starting Mollie checkout',
@@ -204,7 +204,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             # the original shopware way
             $this->redirectToFinish($checkoutData->getTemporaryId());
 
-        } catch (Throwable $ex) {
+        }
+        catch (\Exception $ex) {
 
             $this->logger->error(
                 'Checkout failed when returning to shop!',
@@ -221,7 +222,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->redirectBack(self::ERROR_PAYMENT_FAILED);
 
-        } finally {
+        }
+        finally {
             if (!empty($transactionNumber)) {
                 $this->checkoutReturn->cleanupTransaction($transactionNumber);
             }
@@ -259,7 +261,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             echo json_encode($data, JSON_PRETTY_PRINT);
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             $this->logger->error(
                 'Error in Mollie Notification',
@@ -337,7 +339,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'success' => true,
             ]);
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->sendResponse([
                 'message' => $ex->getMessage(),
@@ -382,7 +384,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             die();
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->error('Error when showing Credit Card Components: ' . $ex->getMessage());
 
@@ -472,7 +474,13 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $sOrder = Shopware()->Modules()->Order();
             $sBasket = Shopware()->Modules()->Basket();
 
-            $orderUpdater = new OrderUpdater($this->config, $sOrder);
+            $orderUpdater = new OrderUpdater(
+                $this->config,
+                $sOrder,
+                Shopware()->Container()->get('events'),
+                $this->logger
+            );
+
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
             $tokeAnonymizer = new TokenAnonymizer(
@@ -548,7 +556,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderCancellation
             );
 
-        } catch (Throwable $ex) {
+        } catch (\Exception $ex) {
 
             $this->logger->emergency('Fatal Problem when preparing services! ' . $ex->getMessage());
 

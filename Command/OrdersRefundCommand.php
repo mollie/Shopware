@@ -95,7 +95,7 @@ class OrdersRefundCommand extends ShopwareCommand
 
             $io->success('Order ' . $orderNumber . ' was successfully refunded.');
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             $this->logger->error(
                 'Error when processing Refund for Order ' . $orderNumber . ' on CLI',

@@ -66,7 +66,7 @@ class PaymentImportCommand extends ShopwareCommand
 
             $io->success($importCount . ' Payment Methods have been updated successfully!');
 
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
 
             $this->logger->error(
                 'Error when importing payment methods on CLI',

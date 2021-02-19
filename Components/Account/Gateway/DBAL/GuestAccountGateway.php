@@ -89,6 +89,7 @@ class GuestAccountGateway implements GuestAccountGatewayInterface
             ->from(Customer::class, 'c')
             ->where($qb->expr()->like('c.email', ':email'))
             ->andWhere($qb->expr()->eq('c.active', 1))
+            ->andWhere($qb->expr()->eq('c.accountMode', Customer::ACCOUNT_MODE_FAST_LOGIN))
             ->setParameter(':email', $email);
 
         if ($this->shop->hasCustomerScope()) {
