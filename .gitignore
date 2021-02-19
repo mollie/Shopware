@@ -4,6 +4,7 @@ releases
 /*.sh
 /scoper.inc.php
 /UpdateVersionNumber.php
+/composer.lock
 
 
 .reports

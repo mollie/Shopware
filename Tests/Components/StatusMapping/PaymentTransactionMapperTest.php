@@ -19,8 +19,8 @@ class PaymentTransactionMapperTest extends TestCase
     {
         $result = PaymentTransactionMapper::mapStatus($status);
 
-        $this->assertSame($result['targetState'], $wantedStatus);
-        $this->assertSame($result['ignoreState'], $wantedIgnoreState);
+        $this->assertSame($result->getTargetStatus(), $wantedStatus);
+        $this->assertSame($result->isIgnoreState(), $wantedIgnoreState);
     }
 
     /**

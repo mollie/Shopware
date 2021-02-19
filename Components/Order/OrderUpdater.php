@@ -311,8 +311,8 @@ class OrderUpdater
             $result = PaymentTransactionMapper::mapStatus($mollieStatus);
         }
 
-        $targetState = $result['targetState'];
-        $ignoreState = $result['ignoreState'];
+        $targetState = $result->getTargetStatus();
+        $ignoreState = $result->isIgnoreState();
 
         $previousShopwareStatus = $targetState;
 

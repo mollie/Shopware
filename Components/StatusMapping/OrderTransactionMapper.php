@@ -7,13 +7,15 @@ namespace MollieShopware\Components\StatusMapping;
 
 
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\StatusMapping\DataStruct\StatusTransactionStruct;
+use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use Shopware\Models\Order\Status;
 
 class OrderTransactionMapper
 {
     /**
      * @param string $status
-     * @return array
+     * @return StatusTransactionStruct
      */
     public static function mapStatus($status)
     {
@@ -41,11 +43,10 @@ class OrderTransactionMapper
                 # impact on the order status at the moment
                 $ignoreState = true;
                 break;
+            default:
+                throw new OrderStatusNotFoundException('The given status could not be mapped!');
         }
 
-        return [
-            'targetState' => $targetState,
-            'ignoreState' => $ignoreState,
-        ];
+        return new StatusTransactionStruct($targetState, $ignoreState);
     }
 }
