@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Facades\FinishCheckout;
 
+use Exception;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\Config;
@@ -15,6 +16,7 @@ use MollieShopware\Exceptions\MollieOrderNotFound;
 use MollieShopware\Exceptions\MolliePaymentFailedException;
 use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
+use MollieShopware\Exceptions\PaymentMeanNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Facades\FinishCheckout\Models\CheckoutFinish;
 use MollieShopware\Facades\FinishCheckout\Services\ConfirmationMail;
@@ -186,6 +188,8 @@ class FinishCheckoutFacade
         # in case it was not created before the payment
         if (!$this->config->createOrderBeforePayment()) {
             try {
+                # ensure that the payment is set in sUserData
+                $this->ensurePaymentIsSet($transaction);
 
                 # create an order in shopware
                 $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
@@ -200,7 +204,7 @@ class FinishCheckoutFacade
                 $transaction->setOrderNumber($orderNumber);
                 $this->repoTransactions->save($transaction);
 
-            } catch (\Exception $ex) {
+            } catch (Exception $ex) {
                 # lets log that worst-case
                 $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionId);
                 throw $ex;
@@ -318,5 +322,32 @@ class FinishCheckoutFacade
             $transaction->setOrdermailVariables(null);
             $this->repoTransactions->save($transaction);
         }
+    }
+
+    /**
+     * @param Transaction $transaction
+     * @throws PaymentMeanNotFoundException
+     */
+    public function ensurePaymentIsSet($transaction)
+    {
+        $session = Shopware()->Session();
+        $sOrderVariables = $session->offsetGet('sOrderVariables');
+
+        if (!empty($sOrderVariables['sUserData']['additional']['payment']['id'])) {
+            return;
+        }
+
+        $paymentMethod = $transaction->getPaymentMethod();
+
+        $admin = Shopware()->Modules()->Admin();
+        $payment = $admin->sGetPaymentMean($paymentMethod);
+
+        if (!$payment) {
+            $this->logger->critical('Warning, Payment is empty in Session and can\'t be restored by PaymentMean: ' . $paymentMethod);
+            throw new PaymentMeanNotFoundException($paymentMethod);
+        }
+
+        $sOrderVariables['sUserData']['additional']['payment'] = $payment;
+        $session->offsetSet('sOrderVariables', $sOrderVariables);
     }
 }
