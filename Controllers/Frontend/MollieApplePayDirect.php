@@ -13,6 +13,7 @@ use MollieShopware\Components\Country\CountryIsoParser;
 use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
+use MollieShopware\Events\Events;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\CSRFWhitelistAware;
@@ -211,16 +212,31 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $shippingMethods = $this->prepareShippingMethods($dispatchMethods, $userCountry);
 
 
+            $previousShippingMethods = $shippingMethods;
+
             # fire event about the shipping methods that
             # will be returned for the country
             $shippingMethods = $this->eventManager->filter(
-                'Mollie_ApplePayDirect_getShippings_FilterResult',
+                Events::APPLEPAY_DIRECT_GET_SHIPPINGS,
                 $shippingMethods,
                 array(
                     'country' => $countryCode
                 )
             );
 
+            if ($previousShippingMethods !== $shippingMethods) {
+                # we just cant show a full long array here
+                # so we at least show that something might has changed (even if the count is the same)
+                $this->logger->info('Filter Event changed Apple Pay Direct Shipping Methods',
+                    array(
+                        'message' => 'Please note that we cannot show the long full list here, even if the count is the same, the content might have changed',
+                        'data' => array(
+                            'previousShippingsCount' => count($previousShippingMethods),
+                            'newShippingsCount' => count($shippingMethods)
+                        )
+                    )
+                );
+            }
 
             $cart = $this->handlerApplePay->buildApplePayCart();
             $formattedCart = $this->applePayFormatter->formatCart(
@@ -274,14 +290,26 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $shippingIdentifier = $this->Request()->getParam('identifier', '');
 
 
+            $previousShippingIdentifier = $shippingIdentifier;
+
             # fire event about the shipping methods that
             # will be set for the user
-            $this->eventManager->filter(
-                'Mollie_ApplePayDirect_setShipping_FilterResult',
+            $shippingIdentifier = $this->eventManager->filter(
+                Events::APPLEPAY_DIRECT_SET_SHIPPING,
                 $shippingIdentifier,
                 array()
             );
 
+            if ($previousShippingIdentifier !== $shippingIdentifier) {
+                $this->logger->info('Filter Event changed Apple Pay Direct Shipping Method to ' . $shippingIdentifier,
+                    array(
+                        'data' => array(
+                            'previousShipping' => $previousShippingIdentifier,
+                            'newShipping' => $shippingIdentifier
+                        )
+                    )
+                );
+            }
 
             if (!empty($shippingIdentifier)) {
                 $this->shipping->setCartShippingMethodID($shippingIdentifier);
