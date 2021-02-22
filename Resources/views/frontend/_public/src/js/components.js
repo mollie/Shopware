@@ -11,62 +11,62 @@ var cardToken = document.querySelector('#cardToken');
 
 if (cardToken !== undefined) {
     // Initialize Mollie Components instance
-    const mollie = Mollie('[mollie_profile_id]', {
+    var mollie = Mollie('[mollie_profile_id]', {
         locale: '[mollie_locale]',
         testmode: [mollie_testmode]
     });
 
     // Default properties
-    const properties = {
+    var properties = {
         styles: {
             base: {
                 backgroundColor: '#fff',
                 fontSize: '14px',
                 padding: '10px 10px',
                 '::placeholder': {
-                    color: 'rgba(68, 68, 68, 0.2)',
+                    color: 'rgba(68, 68, 68, 0.2)'
                 }
             },
             valid: {
-                color: '#090',
+                color: '#090'
             },
             invalid: {
-                backgroundColor: '#fff1f3',
-            },
+                backgroundColor: '#fff1f3'
+            }
         }
     };
 
-    const cardHolder = {
+    var cardHolder = {
         name: "cardHolder",
         id: "#cardHolder",
         errors: "cardHolderError"
     };
-    const cardNumber = {
+    var cardNumber = {
         name: "cardNumber",
         id: "#cardNumber",
         errors: "cardNumberError"
     };
-    const expiryDate = {
+    var expiryDate = {
         name: "expiryDate",
         id: "#expiryDate",
         errors: "expiryDateError"
     };
-    const verificationCode = {
+    var verificationCode = {
         name: "verificationCode",
         id: "#verificationCode",
         errors: "verificationCodeError"
     };
 
-    const inputs = [cardHolder, cardNumber, expiryDate, verificationCode];
+    var inputs = [cardHolder, cardNumber, expiryDate, verificationCode];
 
     // Event helpers
-    const setFocus = (componentName, isFocused) => {
-        const element = document.querySelector(componentName);
+    var setFocus = function (componentName, isFocused) {
+        var element = document.querySelector(componentName);
         element.classList.toggle("is-focused", isFocused);
-    };
+    }
 
-    const disableForm = () => {
-        let submitButtons = document.querySelectorAll('button[type="submit"]');
+    var disableForm = function () {
+        var submitButtons = document.querySelectorAll('button[type="submit"]');
         if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = true;
@@ -74,8 +74,8 @@ if (cardToken !== undefined) {
         }
     };
 
-    const enableForm = () => {
-        let submitButtons = document.querySelectorAll('button[type="submit"]');
+    var enableForm = function () {
+        var submitButtons = document.querySelectorAll('button[type="submit"]');
         if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = false;
@@ -84,18 +84,18 @@ if (cardToken !== undefined) {
     };
 
     // Elements
-    const form = document.getElementById('shippingPaymentForm');
+    var form = document.getElementById('shippingPaymentForm');
 
     // Create inputs
-    inputs.forEach((element, index, arr) => {
-        const component = mollie.createComponent(element.name, properties);
+    inputs.forEach(function(element, index, arr) {
+        var component = mollie.createComponent(element.name, properties);
         component.mount(element.id);
         arr[index][element.name] = component;
 
         // Handle errors
-        component.addEventListener('change', event => {
-            const componentContainer = document.getElementById(`${element.name}`);
-            const componentError = document.getElementById(`${element.errors}`);
+        component.addEventListener('change', function(event) {
+            var componentContainer = document.getElementById(element.name);
+            var componentError = document.getElementById(element.errors);
 
             if (event.error && event.touched) {
                 componentContainer.classList.add('error');
@@ -107,37 +107,45 @@ if (cardToken !== undefined) {
         });
 
         // Handle labels
-        component.addEventListener('focus', () => {
-            setFocus(`${element.id}`, true);
+        component.addEventListener('focus', function () {
+            setFocus(element.id, true);
         });
-        component.addEventListener('blur', () => {
-            setFocus(`${element.id}`, false);
+        component.addEventListener('blur', function () {
+            setFocus(element.id, false);
         });
     });
 
     // Submit handler
-    form.addEventListener('submit', async event => {
+    form.addEventListener('submit', function(event) {
         event.preventDefault();
         disableForm();
 
         // Reset possible form errors
-        const verificationErrors = document.getElementById(`${verificationCode.errors}`);
+        var verificationErrors = document.getElementById(verificationCode.errors);
         verificationErrors.textContent = '';
 
-        // Get a payment token
-        const { token, error } = await mollie.createToken();
+        var handleResult = function(token) {
+            // Add token to the form
+            var tokenInput = document.getElementById('cardToken');
+            tokenInput.setAttribute('value', token);
 
-        if (error) {
+            // Re-submit form to the server
+            form.submit();
+        };
+
+        var handleError = function(error) {
             enableForm();
             verificationErrors.textContent = error.message;
-            return;
-        }
+        };
 
-        // Add token to the form
-        const tokenInput = document.getElementById('cardToken');
-        tokenInput.setAttribute('value', token);
+        // Get a payment token
+        // const { token, error } = await mollie.createToken();
+        mollie.createToken().then(function(result) {
+            if (result.error) {
+                return handleError(error);
+            }
 
-        // Re-submit form to the server
-        form.submit();
+            return handleResult(result.token)
+        }).catch(handleError);
     });
 }

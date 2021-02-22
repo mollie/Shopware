@@ -86,11 +86,11 @@ function initApplePay() {
                 button.dataset.addproducturl,
                 {
                     number: button.dataset.productnumber,
-                    quantity: qty,
+                    quantity: qty
                 }
             ).done(function (data) {
-                }
-            );
+
+            });
         }
 
         /**

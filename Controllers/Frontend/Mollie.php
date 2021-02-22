@@ -376,6 +376,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             header('Content-Type: text/javascript');
 
+            $polyfill = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/promise.js');
+            echo $polyfill;
+
             $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
             $script = str_replace('[mollie_profile_id]', $mollieProfileId, $script);
             $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(), $script);
