@@ -47,11 +47,13 @@
             - Behebung von Kompatibilitätsproblemen mit PHP 5.6 im Checkout.
             - Fehlerbehebung von Apple Pay Direct bei Bestellung als Gast mit einer E-Mail Adresse, die bereits im Shop registriert ist.
             - Optimierung und Fehlerbehebung der Apple Pay Direct Darstellung im Offcanvas Warenkorb, u.A. für Themes wie "Themeware".
+            - Neue Logs bei Anpassungen von Versandarten in Apple Pay Direct via Events.
         </changes>
         <changes lang="en">
             - Fix compatibility issues with PHP 5.6 in the checkout.
             - Fix problem of Apple Pay Direct checkout if the email address of the guest user is already registered in the shop.
             - Optimization and fix of the Apple Pay Direct button in the offcanvas basket for better support of "Themeware" and other themes.
+            - Add logs on custom adjustments of shipping methods in Apple Pay Direct via events.
         </changes>
     </changelog>
 
