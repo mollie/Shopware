@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.7.3</version>
+    <version>1.7.4</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,14 +41,17 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
-    <changelog version="unreleased">
+
+    <changelog version="1.7.4">
         <changes lang="de">
-            - Im Themeware Plugin ist die Darstellung des Apple Pay Logos im Offcanvas nun korrigiert
-            - Fehler behoben beim Login mit Apple Pay Direct wenn bereits ein Kundenkonto für den Nutzer existiert
+            - Behebung von Kompatibilitätsproblemen mit PHP 5.6 im Checkout.
+            - Fehlerbehebung von Apple Pay Direct bei Bestellung als Gast mit einer E-Mail Adresse, die bereits im Shop registriert ist.
+            - Optimierung und Fehlerbehebung der Apple Pay Direct Darstellung im Offcanvas Warenkorb, u.A. für Themes wie "Themeware".
         </changes>
         <changes lang="en">
-            - The showing of apple pay at the offcanvas in the themeware plugin is now correct
-            - Fix error during login with Apple Pay Direct if account for customer already exists
+            - Fix compatibility issues with PHP 5.6 in the checkout.
+            - Fix problem of Apple Pay Direct checkout if the email address of the guest user is already registered in the shop.
+            - Optimization and fix of the Apple Pay Direct button in the offcanvas basket for better support of "Themeware" and other themes.
         </changes>
     </changelog>
 
