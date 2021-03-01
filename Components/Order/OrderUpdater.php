@@ -114,6 +114,7 @@ class OrderUpdater
      * @param $status
      * @param $sendMail
      * @throws PaymentStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
@@ -191,7 +192,7 @@ class OrderUpdater
         }
 
         if ($shopwareStatus === null) {
-            throw new PaymentStatusNotFoundException($status);
+            throw new PaymentStatusNotFoundException('Unable to get Shopware Payment Status from Mollie Payment Status: ' . $status);
         }
 
         $this->sOrder->setPaymentStatus(

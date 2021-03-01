@@ -6,11 +6,12 @@ class PaymentStatusNotFoundException extends \Exception
 {
 
     /**
-     * @param $status
+     * PaymentStatusNotFoundException constructor.
+     * @param $errorMessage
      */
-    public function __construct($status)
+    public function __construct($errorMessage)
     {
-        parent::__construct('Payment Status: ' . $status . ' not found!');
+        parent::__construct($errorMessage);
     }
 
 }
