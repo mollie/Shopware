@@ -70,6 +70,10 @@ class MollieStatusConverter
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_FAILED;
             }
 
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_EXPIRED] == $paymentsResult['total']) {
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_EXPIRED;
+            }
+
         } else {
 
             if ($order->isPaid()) {
@@ -80,6 +84,8 @@ class MollieStatusConverter
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_CANCELED;
             } else if ($order->isCompleted()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_COMPLETED;
+            } else if ($order->isExpired()) {
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_EXPIRED;
             }
 
         }
@@ -94,7 +100,6 @@ class MollieStatusConverter
         if ($this->refundStatus->isOrderPartiallyRefunded($order)) {
             $targetStatus = PaymentStatus::MOLLIE_PAYMENT_REFUNDED;
         }
-
 
         return $targetStatus;
     }

@@ -150,10 +150,9 @@ class Notifications
             $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
         }
 
-        if ($mollieStatus === null) {
-            throw new PaymentStatusNotFoundException('Unable to get status from Mollie for this transaction or order!');
+        if (empty($mollieStatus)) {
+            throw new PaymentStatusNotFoundException('Unable to get status from Mollie for transaction ' . $transactionID . '!');
         }
-
 
         # -----------------------------------------------------------------------------------------------------
         # UPDATE PAYMENT STATUS + ORDER STATUS
