@@ -65,7 +65,7 @@ class TransactionRepository extends ModelRepository
      * Get the most recent transaction for an order
      *
      * @param Order $order
-     * @return Transaction
+     * @return Transaction|null
      */
     public function getMostRecentTransactionForOrder(Order $order)
     {
