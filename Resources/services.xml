@@ -151,6 +151,8 @@
             <argument type="service" id="passwordencoder"/>
             <argument type="service"
                       id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="config"/>
         </service>
 
         <!-- Event Subscribers -->

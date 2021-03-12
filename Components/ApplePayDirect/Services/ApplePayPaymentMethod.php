@@ -14,7 +14,6 @@ class ApplePayPaymentMethod
      */
     private $paymentMethodService;
 
-
     /**
      * ApplePayPaymentMethod constructor.
      *
@@ -52,5 +51,20 @@ class ApplePayPaymentMethod
         } catch (\Exception $ex) {
             return false;
         }
+    }
+
+    public function isApplePayPaymentMethod(string $defaultPaymentMethod)
+    {
+        if (
+        !\in_array(
+            $defaultPaymentMethod,
+            [ShopwarePaymentMethod::APPLEPAY, ShopwarePaymentMethod::APPLEPAYDIRECT],
+            true
+        )
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }
