@@ -5,6 +5,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "*",
+    "phpstan/phpstan": "^0.12",
     "doctrine/collections": "1.6.4",
     "monolog/monolog": "1.25.3"
   },
