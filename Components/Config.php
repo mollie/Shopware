@@ -380,20 +380,6 @@ class Config
     }
 
     /**
-     * @return int|null
-     */
-    public function mollieShopwareUserId()
-    {
-        $userId = $this->get('mollie_shopware_user_id', null);
-
-        if ((string)$userId === '') {
-            return null;
-        }
-
-        return (int)$userId;
-    }
-
-    /**
      * Gets a list of restrictions for the
      * Apple Pay Direct integration.
      *
@@ -410,5 +396,4 @@ class Config
 
         return $restrictions;
     }
-
 }

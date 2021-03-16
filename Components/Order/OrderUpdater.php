@@ -1,9 +1,9 @@
 <?php
 
-
 namespace MollieShopware\Components\Order;
 
-
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Events\Events;
@@ -11,8 +11,11 @@ use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\ContainerAwareEventManager;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Order\History;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
+use sOrder;
 
 class OrderUpdater
 {
@@ -28,7 +31,7 @@ class OrderUpdater
     private $config;
 
     /**
-     * @var $sOrder
+     * @var sOrder
      */
     private $sOrder;
 
@@ -37,18 +40,24 @@ class OrderUpdater
      */
     private $eventManager;
 
+    /**
+     * @var ModelManager
+     */
+    private $modelManager;
 
     /**
      * @param Config $config
      * @param $sOrder
      * @param $eventManager
+     * @param ModelManager $modelManager
      * @param $logger
      */
-    public function __construct(Config $config, $sOrder, $eventManager, $logger)
+    public function __construct(Config $config, $sOrder, $eventManager, ModelManager $modelManager, $logger)
     {
         $this->config = $config;
         $this->sOrder = $sOrder;
         $this->eventManager = $eventManager;
+        $this->modelManager = $modelManager;
         $this->logger = $logger;
     }
 
@@ -56,98 +65,165 @@ class OrderUpdater
     /**
      * @param Order $order
      * @param $status
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws PaymentStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     public function updateShopwarePaymentStatus(Order $order, $status)
     {
-        $this->updatePaymentStatus(
+        $statusDidChange = $this->updatePaymentStatus(
             $order,
             $status,
             $this->config->isPaymentStatusMailEnabled()
         );
+
+        if (!$statusDidChange) {
+            return;
+        }
+
+        # update our status history and add the
+        # comment that is was done by Mollie
+        $this->updateOrderHistoryComment($order);
     }
 
     /**
      * @param Order $order
      * @param $status
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws PaymentStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     public function updateShopwarePaymentStatusWithoutMail(Order $order, $status)
     {
-        $this->updatePaymentStatus(
+        $statusDidChange = $this->updatePaymentStatus(
             $order,
             $status,
             false
         );
+
+        if (!$statusDidChange) {
+            return;
+        }
+
+        # update our status history and add the
+        # comment that is was done by Mollie
+        $this->updateOrderHistoryComment($order);
     }
 
     /**
      * @param Order $order
      * @param $status
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws OrderStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     public function updateShopwareOrderStatus(Order $order, $status)
     {
-        $this->updateOrderStatus(
+        $statusDidChange = $this->updateOrderStatus(
             $order,
             $status,
             $this->config->isPaymentStatusMailEnabled()
         );
+
+        if (!$statusDidChange) {
+            return;
+        }
+
+        # update our status history and add the
+        # comment that is was done by Mollie
+        $this->updateOrderHistoryComment($order);
     }
 
     /**
      * @param Order $order
      * @param $status
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws OrderStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     public function updateShopwareOrderStatusWithoutMail(Order $order, $status)
     {
-        $this->updateOrderStatus(
+        $statusDidChange = $this->updateOrderStatus(
             $order,
             $status,
             false
         );
+
+        if (!$statusDidChange) {
+            return;
+        }
+
+        # update our status history and add the
+        # comment that is was done by Mollie
+        $this->updateOrderHistoryComment($order);
+    }
+
+    /**
+     * This function updates our latest order history entry
+     * by appending "Mollie" as the invoker within
+     * the comment column.
+     *
+     * @param Order $order
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    private function updateOrderHistoryComment(Order $order)
+    {
+        /** @var History $lastEntry */
+        $lastEntry = $order->getHistory()->last();
+
+        if (!empty($lastEntry->getComment())) {
+            return;
+        }
+
+        $lastEntry->setComment('Status updated by Mollie');
+        $this->modelManager->flush($lastEntry);
     }
 
     /**
      * @param Order $order
      * @param $status
      * @param $sendMail
+     * @return bool
      * @throws PaymentStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
-        $shopwareStatus = null;
+        $newShopwareStatus = null;
         $ignoreState = false;
 
         switch ($status) {
 
             case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-                $shopwareStatus = Status::PAYMENT_STATE_OPEN;
+                $newShopwareStatus = Status::PAYMENT_STATE_OPEN;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
-                $shopwareStatus = $this->config->getAuthorizedPaymentStatusId();
+                $newShopwareStatus = $this->config->getAuthorizedPaymentStatusId();
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_DELAYED:
-                $shopwareStatus = Status::PAYMENT_STATE_DELAYED;
+                $newShopwareStatus = Status::PAYMENT_STATE_DELAYED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_PAID:
-                $shopwareStatus = Status::PAYMENT_STATE_COMPLETELY_PAID;
+                $newShopwareStatus = Status::PAYMENT_STATE_COMPLETELY_PAID;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
             case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-                $shopwareStatus = Status::PAYMENT_STATE_RE_CREDITING;
+                $newShopwareStatus = Status::PAYMENT_STATE_RE_CREDITING;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
             case PaymentStatus::MOLLIE_PAYMENT_FAILED:
             case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $shopwareStatus = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
+                $newShopwareStatus = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
@@ -158,25 +234,25 @@ class OrderUpdater
         }
 
 
-        $previousShopwareStatus = $shopwareStatus;
+        $previousShopwareStatus = $newShopwareStatus;
 
         # send a filter event, so developer can adjust the status that will
         # be used for the shopware payment status
-        $shopwareStatus = $this->eventManager->filter(
+        $newShopwareStatus = $this->eventManager->filter(
             Events::UPDATE_ORDER_PAYMENT_STATUS,
-            $shopwareStatus,
+            $newShopwareStatus,
             array(
                 'molliePaymentStatus' => $status,
                 'order' => $order,
             )
         );
 
-        if ($previousShopwareStatus !== $shopwareStatus) {
+        if ($previousShopwareStatus !== $newShopwareStatus) {
             $this->logger->info('Filter Event changed Payment Status for Order ' . $order->getNumber(),
                 array(
                     'data' => array(
                         'previousStatus' => $previousShopwareStatus,
-                        'newStatus' => $shopwareStatus
+                        'newStatus' => $newShopwareStatus
                     )
                 )
             );
@@ -188,40 +264,52 @@ class OrderUpdater
         }
 
         if ($ignoreState) {
-            return;
+            return false;
         }
 
-        if ($shopwareStatus === null) {
+        if ($newShopwareStatus === null) {
             throw new PaymentStatusNotFoundException('Unable to get Shopware Payment Status from Mollie Payment Status: ' . $status);
+        }
+
+        # verify if our status is indeed changing
+        # if not, simply do nothing
+        $isNewStatus = (string)$order->getPaymentStatus()->getId() !== (string)$newShopwareStatus;
+
+        if (!$isNewStatus) {
+            return false;
         }
 
         $this->sOrder->setPaymentStatus(
             $order->getId(),
-            $shopwareStatus,
+            $newShopwareStatus,
             $sendMail
         );
+
+        return true;
     }
 
     /**
      * @param Order $order
      * @param $mollieStatus
      * @param $sendMail
+     * @return bool
      * @throws OrderStatusNotFoundException
+     * @throws \Enlight_Event_Exception
      */
     private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
-        $shopwareStatus = null;
+        $newShopwareStatus = null;
         $ignoreState = false;
 
         switch ($mollieStatus) {
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-                $shopwareStatus = Status::ORDER_STATE_COMPLETED;
+                $newShopwareStatus = Status::ORDER_STATE_COMPLETED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
             case PaymentStatus::MOLLIE_PAYMENT_FAILED:
             case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $shopwareStatus = Status::ORDER_STATE_CANCELLED_REJECTED;
+                $newShopwareStatus = Status::ORDER_STATE_CANCELLED_REJECTED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
@@ -236,26 +324,25 @@ class OrderUpdater
                 break;
         }
 
-
-        $previousShopwareStatus = $shopwareStatus;
+        $previousShopwareStatus = $newShopwareStatus;
 
         # send a filter event, so developer can adjust the status that will
         # be used for the shopware order status
-        $shopwareStatus = $this->eventManager->filter(
+        $newShopwareStatus = $this->eventManager->filter(
             Events::UPDATE_ORDER_STATUS,
-            $shopwareStatus,
+            $newShopwareStatus,
             array(
                 'mollieOrderStatus' => $mollieStatus,
                 'order' => $order,
             )
         );
 
-        if ($previousShopwareStatus !== $shopwareStatus) {
+        if ($previousShopwareStatus !== $newShopwareStatus) {
             $this->logger->info('Filter Event changed Order Status for Order ' . $order->getNumber(),
                 array(
                     'data' => array(
                         'previousStatus' => $previousShopwareStatus,
-                        'newStatus' => $shopwareStatus
+                        'newStatus' => $newShopwareStatus
                     )
                 )
             );
@@ -268,18 +355,28 @@ class OrderUpdater
 
 
         if ($ignoreState) {
-            return;
+            return false;
         }
 
-        if ($shopwareStatus === null) {
+        if ($newShopwareStatus === null) {
             throw new OrderStatusNotFoundException($mollieStatus);
+        }
+
+        # verify if our status is indeed changing
+        # if not, simply do nothing
+        $isNewStatus = (string)$order->getOrderStatus()->getId() !== (string)$newShopwareStatus;
+
+        if (!$isNewStatus) {
+            return false;
         }
 
         $this->sOrder->setOrderStatus(
             $order->getId(),
-            $shopwareStatus,
+            $newShopwareStatus,
             $sendMail
         );
+
+        return true;
     }
 
 }
