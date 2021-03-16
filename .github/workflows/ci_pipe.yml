@@ -1,0 +1,124 @@
+name: CI Pipeline
+
+on: [ workflow_dispatch, pull_request ]
+
+jobs:
+
+  syntax_checks:
+    name: Syntax Checks | PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ '5.6', '7.1', '7.2', '7.3', '7.4' ]
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+
+      - name: PHP Syntax Checks
+        run: find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  unit_tests:
+    name: Unit Tests | PHP ${{ matrix.php }}
+    needs: syntax_checks
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+          php: [ '7.2', '7.3', '7.4' ]
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run PHPUnit
+        run: make test -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  analyzers:
+    name: Static Analyzers
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run PHPStan
+        run: make stan -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  e2e:
+    name: E2E Tests | Shopware ${{ matrix.shopware }}
+    needs: analyzers
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shopware: [ '5.6.4', '5.6.8', '5.6.9' ]
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: docker run --rm --env PHP_VERSION=7.4 -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Wait for Docker Container
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
+
+      - name: Dockware Output
+        run: docker logs shop
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+          docker exec shop bash -c 'php bin/console mollie:payments:import'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+      - name: Install Cypress
+        run: cd Tests/Cypress && make install -B
+
+      - name: Start Cypress
+        run: cd Tests/Cypress && make run url=http://localhost
+
+      - name: Store Cypress Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress_results
+          retention-days: 1
+          path: |
+            Tests/Cypress/cypress/videos
+            Tests/Cypress/cypress/screenshots
