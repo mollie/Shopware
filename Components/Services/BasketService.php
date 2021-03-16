@@ -8,6 +8,7 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\DependencyInjection\Container as DIContainer;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Detail;
@@ -16,6 +17,7 @@ use Shopware\Models\Order\Repository;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Voucher\Voucher;
 use Shopware_Components_Modules;
+use Symfony\Component\HttpFoundation\Request;
 use Zend_Db_Adapter_Exception;
 
 class BasketService
@@ -40,11 +42,16 @@ class BasketService
      */
     private $logger;
 
+    /** @var DIContainer */
+    private $container;
+
     /**
      * @param ModelManager $modelManager
      * @param LoggerInterface $logger
+     * @param DIContainer $container
+     * @throws Exception
      */
-    public function __construct(ModelManager $modelManager, LoggerInterface $logger)
+    public function __construct(ModelManager $modelManager, LoggerInterface $logger, $container)
     {
         $this->modelManager = $modelManager;
         $this->logger = $logger;
@@ -56,6 +63,8 @@ class BasketService
         $this->orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
         $this->db = Shopware()->Container()->get('db');
+
+        $this->container = $container;
     }
 
     /**
@@ -108,6 +117,13 @@ class BasketService
                             $order->setInvoiceAmount($order->getInvoiceAmount() - $orderDetail->getPrice());
                         }
                     } else {
+                        $attributes = $orderDetail->getAttribute();
+                        // if swagCustomProductsConfigurationHash exists for orderDetail restore it in request
+                        if (property_exists($attributes, 'swagCustomProductsConfigurationHash')) {
+                            $customProductsHash = $attributes->getSwagCustomProductsConfigurationHash();
+                            $this->container->get('front')->Request()->setParam('customProductsHash', $customProductsHash);
+                        }
+
                         // add product to basket
                         $id = $this->basketModule->sAddArticle(
                             $orderDetail->getArticleNumber(),
