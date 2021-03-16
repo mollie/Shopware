@@ -29,7 +29,7 @@ class StatusTransactionStruct
         return $this->targetStatus;
     }
 
-    public function setTargetStatus($targetStatus): void
+    public function setTargetStatus($targetStatus)
     {
         $this->targetStatus = $targetStatus;
     }
@@ -39,7 +39,7 @@ class StatusTransactionStruct
         return $this->ignoreState;
     }
 
-    public function setIgnoreState($ignoreState): void
+    public function setIgnoreState($ignoreState)
     {
         $this->ignoreState = $ignoreState;
     }
