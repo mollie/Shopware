@@ -143,6 +143,11 @@ class OrderBackendSubscriber implements SubscriberInterface
             return $this->processBatch($request);
         }
 
+        if ($request->getActionName() === 'getStatusHistory') {
+            $this->extendOrderStatusHistory($args->getSubject()->View(), $request);
+            return true;
+        }
+
         if ($request->getActionName() !== 'save') {
             return true;
         }
@@ -154,6 +159,39 @@ class OrderBackendSubscriber implements SubscriberInterface
         }
 
         return $this->shipOrderToMollie($orderId);
+    }
+
+    /**
+     * @param \Enlight_View_Default $view
+     * @param Enlight_Controller_Request_Request $request
+     */
+    private function extendOrderStatusHistory(\Enlight_View_Default $view, Enlight_Controller_Request_Request $request)
+    {
+        $orderId = $request->getParam('orderID');
+        $limit = $request->getParam('limit', 20);
+        $offset = $request->getParam('start', 0);
+        $sort = $request->getParam('sort', [['property' => 'history.changeDate', 'direction' => 'DESC']]);
+
+        /** @var Enlight_Components_Snippet_Namespace $namespace */
+        $namespace = Shopware()->Snippets()->getNamespace('backend/order');
+
+        //the backend order module have no function to create a new order so an order id must be passed.
+        if (empty($orderId)) {
+            $view->assign([
+                'success' => false,
+                'data' => $this->Request()->getParams(),
+                'message' => $namespace->get('no_order_id_passed', 'No valid order id passed.'),
+            ]);
+
+            return;
+        }
+
+        $history = $this->orderService->getOrderStatusHistory($orderId, $sort, $offset, $limit);
+
+        $view->assign([
+            'success' => true,
+            'data' => $history,
+        ]);
     }
 
     /**

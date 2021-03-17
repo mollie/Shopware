@@ -478,6 +478,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->config,
                 $sOrder,
                 Shopware()->Container()->get('events'),
+                $entityManager,
                 $this->logger
             );
 

@@ -439,25 +439,13 @@
             </options>
         </element>
 
-
-        <element type="text" scope="shop">
-            <name>mollie_shopware_user_id</name>
-            <label lang="de">Benutzer-ID für Mollie-Benutzer in Shopware</label>
-            <label lang="en">User ID for Mollie-user in Shopware</label>
-            <label lang="nl">Gebruikers ID voor Mollie-gebruiker in Shopware</label>
-            <options>
-                <position>15</position>
-            </options>
-        </element>
-
-
         <element type="button" required="false">
             <name>separator_mails</name>
             <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>16</position>
+                <position>15</position>
             </options>
         </element>
 
@@ -488,7 +476,7 @@
                 </option>
             </store>
             <options>
-                <position>17</position>
+                <position>16</position>
             </options>
         </element>
 
@@ -519,7 +507,7 @@
                 </option>
             </store>
             <options>
-                <position>18</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -530,7 +518,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>19</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -541,7 +529,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>20</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -552,7 +540,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>21</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -562,7 +550,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>22</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -576,7 +564,7 @@
             <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>23</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -590,7 +578,7 @@
             <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>24</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -600,7 +588,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>25</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -641,7 +629,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>26</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -651,7 +639,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>27</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -661,7 +649,7 @@
             <label lang="en">Payment term (Days)</label>
             <label lang="nl">Betalingstermijn (Dagen)</label>
             <options>
-                <position>28</position>
+                <position>27</position>
             </options>
         </element>
 
