@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">Mollie for Shopware</h1>
 
-[![Build Status](https://travis-ci.com/mollie/Shopware.svg?branch=master)](https://travis-ci.com/mollie/Shopware) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mollie/Shopware)   ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/mollie/Shopware/latest)
+![Build Status](https://github.com/svrunit/svrunit/actions/workflows/ci_pipe.yml/badge.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mollie/Shopware)   ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/mollie/Shopware/latest)
 
 
 

@@ -23,10 +23,15 @@ clean: ## Cleans all dependencies
 	rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
+
 test: ## Starts all Tests
-	php vendor/bin/phpunit --configuration=phpunit.xml
+	@php vendor/bin/phpunit --configuration=phpunit.xml
+
+stan: ## Starts the PHPStan Analyser
+	@php vendor/bin/phpstan analyse -c phpstan.neon
 
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
-	@cd .. && zip -qq -r -0 MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.reports*' '*.travis.yml*' '*/Tests*' '*/makefile' '*.DS_Store'
+	@cd .. && rm -rf MollieShopware-v$(PLUGIN_VERSION).zip
+	@cd .. && zip -qq -r -0 MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.reports*' '*/Tests*' '*/phpunit.xml' '*/phpstan.neon' '*/makefile' '*.DS_Store' '*.github'
