@@ -11,9 +11,10 @@ parameters:
         - Controllers/*
         - Facades/*
         - Gateways/*
-        - Models/*
         - Resources/*
         - Services/*
         - Subscriber/*
         - vendor/*
         - MollieShopware.php
+
+        
