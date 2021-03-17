@@ -1,7 +1,16 @@
 name: CI Pipeline
 
-on: [ workflow_dispatch, pull_request ]
-
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
+        
 jobs:
 
   syntax_checks:
