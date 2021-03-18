@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     branches:
       - master
-        
+
 jobs:
 
   syntax_checks:
@@ -38,8 +38,12 @@ jobs:
     needs: syntax_checks
     runs-on: ubuntu-latest
     strategy:
-        matrix:
-          php: [ '7.2', '7.3', '7.4' ]
+      matrix:
+        # Shopware Composer install only allows a few PHP versions due to this:
+        # mpdf/mpdf v7.1.9 requires php ^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0
+        # also the PHPUnit versions are not compatible between 5.* and >= 7.*
+        # so lets only do a few >= 7.2 for now
+        php: [ '7.2', '7.3' ]
     steps:
       - name: Clone Code
         uses: actions/checkout@v2
