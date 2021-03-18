@@ -22,11 +22,7 @@ class TransactionRepository extends ModelRepository
      * @throws \Exception
      *
      */
-    public function create(
-        Order $order = null,
-        \Mollie\Api\Resources\Order $mollieOrder = null,
-        \Mollie\Api\Resources\Payment $molliePayment = null
-    )
+    public function create(Order $order = null, $mollieOrder = null, $molliePayment = null)
     {
         $transaction = new Transaction();
         $transactionId = $this->getLastId() + 1;
