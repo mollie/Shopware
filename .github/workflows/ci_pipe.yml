@@ -130,7 +130,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: cypress_results
+          name: cypress_results_sw_v${{ matrix.shopware }}
           retention-days: 1
           path: |
             Tests/Cypress/cypress/videos
