@@ -28,6 +28,15 @@ class MollieGateway implements MollieGatewayInterface
 
 
     /**
+     * @param MollieApiClient $client
+     * @return void
+     */
+    public function switchClient(MollieApiClient $client)
+    {
+        $this->apiClient = $client;
+    }
+
+    /**
      * @param $orderId
      * @return \Mollie\Api\Resources\Order
      * @throws \Mollie\Api\Exceptions\ApiException

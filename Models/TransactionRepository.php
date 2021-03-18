@@ -9,43 +9,6 @@ use Shopware\Models\Order\Order;
 
 class TransactionRepository extends ModelRepository
 {
-    /**
-     * Create a new transaction for the given order with the given
-     * mollie Order object. This stores the mollie ID with the
-     * order so it can be recovered later.
-     *
-     * @param Order|null $order
-     * @param \Mollie\Api\Resources\Order|null $mollieOrder
-     * @param \Mollie\Api\Resources\Payment|null $molliePayment
-     *
-     * @return \MollieShopware\Models\Transaction
-     * @throws \Exception
-     *
-     */
-    public function create(Order $order = null, $mollieOrder = null, $molliePayment = null)
-    {
-        $transaction = new Transaction();
-        $transactionId = $this->getLastId() + 1;
-
-        if (!empty($transaction)) {
-            $transaction->setId($transactionId);
-            $transaction->setTransactionId('mollie_' . $transactionId);
-            $transaction->setSessionId(\Enlight_Components_Session::getId());
-
-            if (!empty($order))
-                $transaction->setOrderId($order->getId());
-
-            if (!empty($mollieOrder))
-                $transaction->setMollieId($mollieOrder->id);
-
-            if (!empty($molliePayment))
-                $transaction->setMolliePaymentId($molliePayment->id);
-
-            $this->save($transaction);
-        }
-
-        return $transaction;
-    }
 
     /**
      * @param Transaction $transaction
@@ -57,7 +20,7 @@ class TransactionRepository extends ModelRepository
     {
         $this->getEntityManager()->persist($transaction);
         $this->getEntityManager()->flush($transaction);
-            
+
         return $transaction;
     }
 
