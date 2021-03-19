@@ -97,7 +97,7 @@ class RefundService implements RefundInterface
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
             if (!$molliePayment->canBeRefunded()) {
-                throw new RefundFailedException('Payment cannot be refunded');
+                throw new RefundFailedException($order->getNumber(), 'Payment cannot be refunded');
             }
 
             $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $order->getInvoiceAmount());

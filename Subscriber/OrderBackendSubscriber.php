@@ -179,7 +179,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         if (empty($orderId)) {
             $view->assign([
                 'success' => false,
-                'data' => $this->Request()->getParams(),
+                'data' => $request->getParams(),
                 'message' => $namespace->get('no_order_id_passed', 'No valid order id passed.'),
             ]);
 

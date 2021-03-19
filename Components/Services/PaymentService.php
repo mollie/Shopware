@@ -112,6 +112,8 @@ class PaymentService
      */
     public function startMollieSession($paymentMethod, Transaction $transaction)
     {
+        $shopwareOrder = null;
+
         /** @var TransactionRepository $transactionRepo */
         $transactionRepo = Shopware()->container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
 
@@ -212,79 +214,6 @@ class PaymentService
         return $checkoutUrl;
     }
 
-    /**
-     * @param Order $order
-     * @param Transaction $transaction
-     * @param array $orderDetails
-     * @return string
-     * @throws ApiException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function startOrderTransaction(Order $order, Transaction $transaction, $orderDetails = array())
-    {
-        // variables
-        $checkoutUrl = '';
-        $mollieOrder = null;
-        $molliePayment = null;
-        $paymentMethod = $order->getPayment()->getName();
-
-        if (strstr($paymentMethod, 'klarna') ||
-            $this->config->useOrdersApiOnlyWhereMandatory() == false) {
-
-            // prepare the order for mollie
-            $mollieOrderPrepared = $this->prepareOrder($order, $orderDetails);
-
-            /** @var \Mollie\Api\Resources\Order $mollieOrder */
-            $mollieOrder = $this->apiClient->orders->create(
-                $mollieOrderPrepared
-            );
-
-            /** @var \MollieShopware\Models\OrderLinesRepository $orderLinesRepo */
-            $orderLinesRepo = Shopware()->container()->get('models')
-                ->getRepository('\MollieShopware\Models\OrderLines');
-
-            foreach ($mollieOrder->lines as $index => $line) {
-                // create new item
-                $item = new OrderLines();
-
-                // set variables
-                $item->setOrderId($order->getId());
-                $item->setMollieOrderlineId($line->id);
-
-                // save item
-                $orderLinesRepo->save($item);
-            }
-        } else {
-            // prepare the payment for mollie
-            $molliePaymentPrepared = $this->preparePayment($order);
-
-            /** @var \Mollie\Api\Resources\Payment $molliePayment */
-            $molliePayment = $this->apiClient->payments->create(
-                $molliePaymentPrepared
-            );
-        }
-
-        /** @var TransactionRepository $transactionRepo */
-        $transactionRepo = Shopware()->container()->get('models')
-            ->getRepository('\MollieShopware\Models\Transaction');
-
-        $transaction->setOrderId($order->getId());
-
-        if (!empty($mollieOrder)) {
-            $transaction->setMollieId($mollieOrder->id);
-            $checkoutUrl = $mollieOrder->getCheckoutUrl();
-        }
-
-        if (!empty($molliePayment)) {
-            $transaction->setMolliePaymentId(($molliePayment->id));
-            $checkoutUrl = $molliePayment->getCheckoutUrl();
-        }
-
-        $transactionRepo->save($transaction);
-
-        return $checkoutUrl;
-    }
 
     /**
      * @param Order $order
