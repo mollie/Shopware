@@ -6,7 +6,6 @@
          colors="true"
          executionOrder="random"
          forceCoversAnnotation="true">
-    <coverage/>
 
     <testsuites>
         <testsuite name="Mollie Test Suite">
@@ -39,7 +38,7 @@
 
     <logging>
         <log type="coverage-clover" target="./.reports/logs/clover.xml"/>
-        <log type="coverage-html" target="./.reports/coverage" charset="UTF-8" yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+        <log type="coverage-html" target="./.reports/coverage" lowUpperBound="35" highLowerBound="70"/>
     </logging>
 
 </phpunit>
