@@ -346,6 +346,8 @@ class BasketService
      */
     public function resetOrderDetailQuantity(Detail $orderDetail)
     {
+        $article = null;
+
         // reset quantity
         $orderDetail->setQuantity(0);
 

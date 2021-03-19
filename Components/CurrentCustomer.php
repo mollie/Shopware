@@ -48,41 +48,4 @@ class CurrentCustomer
         return $customer;
     }
 
-    /**
-     * Get attributes array for current customer
-     *
-     * @return array
-     */
-    public function getCurrentArray()
-    {
-        $userId = $this->getCurrentId();
-
-        if (empty($userId)) {
-            return [];
-        }
-
-        $user = $this->em->getConnection()->fetchAssoc('
-            SELECT * FROM s_user
-            WHERE id = ?
-        ', [ $this->getCurrentId() ]);
-
-        $attribute = $this->em->getConnection()->fetchAssoc('
-            SELECT * FROM s_user_attributes
-            WHERE userID = ?
-        ', [ $this->getCurrentId() ]);
-
-        $user['attribute'] = $attribute;
-
-        return $user;
-    }
-
-    /**
-     * Get whether the current customer is logged in
-     *
-     * @return boolean
-     */
-    public function isLoggedIn()
-    {
-        return !empty($this->session->sUserId);
-    }
 }

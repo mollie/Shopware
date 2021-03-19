@@ -2,19 +2,9 @@ parameters:
     level: 1
     paths:
         - .
+    bootstrapFiles:
+        - Client/vendor/autoload.php
     excludes_analyse:
-    # there is indeed a lot excluded
-    # we need to transition into phpstan slowly
         - Client/*
-        - Command/*
-        - Components/*
-        - Controllers/*
-        - Facades/*
-        - Gateways/*
         - Resources/*
-        - Services/*
-        - Subscriber/*
         - vendor/*
-        - MollieShopware.php
-
-        
