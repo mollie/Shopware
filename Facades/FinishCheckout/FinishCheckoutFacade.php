@@ -250,10 +250,10 @@ class FinishCheckoutFacade
         # please note, the payment/order is loaded again from Mollie! we would actually have it
         # but I'm not quite sure if its better to reload it again from the server due to some changes above.
         if ($transaction->isTypeOrder()) {
-            $mollieOrder = $this->paymentService->getMollieOrder($swOrder);
+            $mollieOrder = $this->paymentService->getMollieOrder($swOrder, $transaction);
             $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
         } else {
-            $molliePayment = $this->paymentService->getMolliePayment($swOrder);
+            $molliePayment = $this->paymentService->getMolliePayment($swOrder, $transaction);
             $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
         }
 

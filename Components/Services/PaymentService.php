@@ -15,6 +15,7 @@ use MollieShopware\Components\CustomConfig\CustomConfig;
 use MollieShopware\Components\MollieApi\LineItemsBuilder;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Exceptions\MollieOrderNotFound;
+use MollieShopware\Exceptions\MolliePaymentNotFound;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
@@ -229,18 +230,13 @@ class PaymentService
 
     /**
      * @param Order $order
+     * @param Transaction $transaction
      * @return \Mollie\Api\Resources\Order
      * @throws ApiException
      * @throws MollieOrderNotFound
      */
-    public function getMollieOrder(Order $order)
+    public function getMollieOrder(Order $order, Transaction $transaction)
     {
-        /** @var TransactionRepository $transactionRepo */
-        $transactionRepo = Shopware()->container()->get('models')->getRepository(Transaction::class);
-
-        /** @var Transaction $transaction */
-        $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
-
         // Set the correct API key for the order's shop
         $this->setApiKeyForSubShop($order);
 
@@ -255,30 +251,21 @@ class PaymentService
 
     /**
      * @param Order $order
-     * @param string $paymentId
+     * @param Transaction $transaction
      * @return Payment
      * @throws ApiException
+     * @throws MolliePaymentNotFound
      */
-    public function getMolliePayment(Order $order, $paymentId = '')
+    public function getMolliePayment(Order $order, Transaction $transaction)
     {
-        /** @var TransactionRepository $transactionRepo */
-        $transactionRepo = Shopware()->container()->get('models')->getRepository(
-            Transaction::class
-        );
-
-        /** @var Transaction $transaction */
-        $transaction = $transactionRepo->getMostRecentTransactionForOrder($order);
-
-        if (empty($paymentId))
-            $paymentId = $transaction->getMolliePaymentId();
-
         // Set the correct API key for the order's shop
         $this->setApiKeyForSubShop($order);
 
-        /** @var \Mollie\Api\Resources\Payment $molliePayment */
-        $molliePayment = $this->apiClient->payments->get(
-            $paymentId
-        );
+        $molliePayment = $this->gwMollie->getPayment($transaction->getMolliePaymentId());
+
+        if (!$molliePayment instanceof Payment) {
+            throw new MolliePaymentNotFound($order->getId());
+        }
 
         return $molliePayment;
     }
