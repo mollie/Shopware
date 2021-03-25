@@ -18,7 +18,6 @@ use Shopware\Components\Theme\LessDefinition;
 
 class ApplePayDirectSubscriber implements SubscriberInterface
 {
-
     public static function getSubscribedEvents()
     {
         return [
@@ -82,7 +81,6 @@ class ApplePayDirectSubscriber implements SubscriberInterface
             $view,
             Shopware()->Shop()
         );
-
     }
 
     /**
@@ -147,11 +145,8 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         $session = Shopware()->Session();
 
         if (!empty($view->sUserData['additional']['payment'])) {
-
             $payment = $view->sUserData['additional']['payment'];
-
         } elseif (!empty($session['sPaymentID'])) {
-
             $payment = $admin->sGetPaymentMeanById($session['sPaymentID'], $view->sUserData);
         }
 
@@ -169,5 +164,4 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         $userData['additional']['payment'] = $payment;
         $view->assign('sUserData', $userData);
     }
-
 }

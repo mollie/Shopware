@@ -371,13 +371,13 @@ class TransactionItemBuilderTest extends TestCase
      */
     public function getTaxRoundingData()
     {
-        return array(
-            'MOL-70, 1' => array(1.89, 1.14, 16, 12),
-            'MOL-70, 2' => array(1.78, 12.94, 16, 1),
-            'MOL-70, 3' => array(4.08, 29.61, 16, 1),
-            'MOL-70, 4' => array(14.57, 3.3, 16, 32),
-            'MOL-70, 5' => array(1.89, 1.1368, 16, 12),
-        );
+        return [
+            'MOL-70, 1' => [1.89, 1.14, 16, 12],
+            'MOL-70, 2' => [1.78, 12.94, 16, 1],
+            'MOL-70, 3' => [4.08, 29.61, 16, 1],
+            'MOL-70, 4' => [14.57, 3.3, 16, 32],
+            'MOL-70, 5' => [1.89, 1.1368, 16, 12],
+        ];
     }
 
     /**
@@ -421,5 +421,4 @@ class TransactionItemBuilderTest extends TestCase
 
         $this->assertEquals($expectedVatAmount, $item->getVatAmount());
     }
-
 }

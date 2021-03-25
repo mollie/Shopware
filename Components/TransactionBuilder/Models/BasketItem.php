@@ -184,5 +184,4 @@ class BasketItem
     {
         $this->isNetMode = $isNetMode;
     }
-
 }

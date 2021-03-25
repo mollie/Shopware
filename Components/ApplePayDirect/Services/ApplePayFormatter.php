@@ -8,10 +8,8 @@ use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart;
 use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayLineItem;
 use Shopware\Models\Shop\Shop;
 
-
 class ApplePayFormatter
 {
-
     const TEST_SUFFIX = "(Test Mode)";
 
     /**
@@ -42,12 +40,12 @@ class ApplePayFormatter
      */
     public function formatShippingMethod(array $method, $shippingCosts)
     {
-        return array(
+        return [
             'identifier' => $method['id'],
             'label' => $method['name'],
             'detail' => $method['description'],
             'amount' => $shippingCosts,
-        );
+        ];
     }
 
     /**
@@ -67,20 +65,20 @@ class ApplePayFormatter
         # -----------------------------------------------------
         # INITIAL DATA
         # -----------------------------------------------------
-        $data = array(
+        $data = [
             'label' => $shopName,
             'amount' => $this->prepareFloat($cart->getAmount()),
-            'items' => array(),
-        );
+            'items' => [],
+        ];
 
         # -----------------------------------------------------
         # SUBTOTAL
         # -----------------------------------------------------
-        $data['items'][] = array(
+        $data['items'][] = [
             'label' => $this->snippets->get('lineItemLabelSubtotal', 'SUBTOTAL'),
             'type' => 'final',
             'amount' => $this->prepareFloat($cart->getProductAmount()),
-        );
+        ];
 
         # -----------------------------------------------------
         # SHIPPING DATA
@@ -88,32 +86,32 @@ class ApplePayFormatter
         if ($cart->getShipping() instanceof ApplePayLineItem) {
             # we use the shipping name for the label
             # because that can be different, and is better than a generic name
-            $data['items'][] = array(
+            $data['items'][] = [
                 'label' => $cart->getShipping()->getName(),
                 'type' => 'final',
                 'amount' => $this->prepareFloat($cart->getShipping()->getPrice()),
-            );
+            ];
         }
 
         # -----------------------------------------------------
         # TAXES DATA
         # -----------------------------------------------------
         if ($cart->getTaxes() instanceof ApplePayLineItem) {
-            $data['items'][] = array(
+            $data['items'][] = [
                 'label' => $this->snippets->get('lineItemLabelTaxes', 'TAXES'),
                 'type' => 'final',
                 'amount' => $this->prepareFloat($cart->getTaxes()->getPrice()),
-            );
+            ];
         }
 
         # -----------------------------------------------------
         # TOTAL DATA
         # -----------------------------------------------------
-        $data['total'] = array(
+        $data['total'] = [
             'label' => $shopName,
             'amount' => $this->prepareFloat($cart->getAmount()),
             'type' => 'final',
-        );
+        ];
 
         return $data;
     }
@@ -134,5 +132,4 @@ class ApplePayFormatter
 
         return round($value, $countDecimals);
     }
-
 }

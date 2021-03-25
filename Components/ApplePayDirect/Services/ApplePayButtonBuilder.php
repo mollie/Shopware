@@ -107,5 +107,4 @@ class ApplePayButtonBuilder
 
         $view->assign(self::KEY_MOLLIE_APPLEPAY_BUTTON, $button->toArray());
     }
-
 }

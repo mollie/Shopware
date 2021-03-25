@@ -102,7 +102,6 @@ class ShopwareOrderUpdater
         }
 
         foreach ($mollieOrder->lines() as $orderLine) {
-
             $metadata = json_decode($orderLine->metadata, true);
 
             if (!is_array($metadata) || !isset($metadata['transaction_item_id'])) {
@@ -111,9 +110,7 @@ class ShopwareOrderUpdater
 
             /** @var \MollieShopware\Models\TransactionItem $transactionItem */
             foreach ($transaction->getItems() as $transactionItem) {
-
                 if ($transactionItem->getId() === (int)$metadata['transaction_item_id']) {
-
                     $transactionItem->setOrderLineId($orderLine->id);
 
                     $this->entityManger->persist($transactionItem);
@@ -127,9 +124,7 @@ class ShopwareOrderUpdater
 
             /** @var Detail $detail */
             foreach ($swOrder->getDetails() as $detail) {
-
                 foreach ($transaction->getItems() as $transactionItem) {
-
                     if ($detail->getAttribute() === null) {
                         continue;
                     }
@@ -140,7 +135,6 @@ class ShopwareOrderUpdater
                         && method_exists($detail->getAttribute(), 'setMollieOrderLineId')
                         && (int)$detail->getAttribute()->getBasketItemId() === $transactionItem->getBasketItemId()
                     ) {
-
                         $detail->getAttribute()->setMollieTransactionId($transaction->getMollieId());
                         $detail->getAttribute()->setMollieOrderLineId($transactionItem->getOrderLineId());
 
@@ -176,5 +170,4 @@ class ShopwareOrderUpdater
 
         return $transactionNumber;
     }
-
 }

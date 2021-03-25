@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\ApplePayDirect;
 
-
 use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 
@@ -46,5 +45,4 @@ interface ApplePayDirectHandlerInterface
      * @return mixed
      */
     public function getPaymentToken();
-
 }

@@ -83,25 +83,24 @@ class ShopwareOrderBuilder
 
             $this->logger->warning(
                 'Order is already existing for ' . $originalTransactionNumber . ' because Redirect-URL is called again!',
-                array(
-                    'error' => array(
+                [
+                    'error' => [
                         'reason' => 'This usually happens if the Mollie Redirect URL is called multiple times instead of just once! Then the order is only created the first time. It should not happen, but doesnt break anything!',
                         'solution' => 'Please verify why the user got sent back from Mollie to your shop again!',
-                    ),
-                    'data' => array(
+                    ],
+                    'data' => [
                         'orderID' => $existingOrder->getId(),
                         'orderNumber' => $existingOrder->getNumber(),
                         'mollieTransaction' => $originalTransactionNumber,
                         'shopwareTransaction' => $finalTransactionNumber,
-                    ),
-                )
+                    ],
+                ]
             );
 
             # attention, lets reuse this order number,
             # if we would continue with saveOrder, its not duplicated anymore (because the transaction number is correct now)
             # but there would always be another confirmation email being sent :(
             return $existingOrder->getNumber();
-
         } catch (OrderNotFoundException $ex) {
             # if we have no order, we can continue
             # by creating our new one
@@ -114,5 +113,4 @@ class ShopwareOrderBuilder
             $sendPaymentStatusMail
         );
     }
-
 }

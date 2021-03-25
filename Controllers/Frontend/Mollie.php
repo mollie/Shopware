@@ -30,7 +30,6 @@ use Shopware\Models\Order\Order;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 {
-
     const ERROR_PAYMENT_FAILED = 'Payment failed';
 
     const TOKEN_ANONYMIZER_PLACEHOLDER_COUNT = 4;
@@ -112,7 +111,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function directAction()
     {
         try {
-
             $this->loadServices();
 
             # persist the basket in the database
@@ -145,14 +143,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirect($session->getCheckoutUrl());
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when starting Mollie checkout',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             # in theory this is not catched,
@@ -162,7 +158,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirectBack(self::ERROR_PAYMENT_FAILED);
-
         } finally {
 
             # we always have to immediately clear the token in SUCCESS or FAILURE ways
@@ -180,7 +175,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function returnAction()
     {
         try {
-
             $this->loadServices();
 
             /** @var string $transactionNumber */
@@ -203,15 +197,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             # make sure to finish the order with
             # the original shopware way
             $this->redirectToFinish($checkoutData->getTemporaryId());
-
-        }
-        catch (\Exception $ex) {
-
+        } catch (\Exception $ex) {
             $this->logger->error(
                 'Checkout failed when returning to shop!',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
 
             # if we have a transaction number
@@ -221,9 +212,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirectBack(self::ERROR_PAYMENT_FAILED);
-
-        }
-        finally {
+        } finally {
             if (!empty($transactionNumber)) {
                 $this->checkoutReturn->cleanupTransaction($transactionNumber);
             }
@@ -238,7 +227,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
         try {
-
             $this->loadServices();
 
             /** @var string $transactionID */
@@ -254,26 +242,24 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->notifications->onNotify($transactionID, $paymentID);
 
-            $data = array(
+            $data = [
                 'success' => true,
                 'message' => 'The payment status for the order has been processed.'
-            );
+            ];
 
             echo json_encode($data, JSON_PRETTY_PRINT);
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error in Mollie Notification',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
 
-            $data = array(
+            $data = [
                 'success' => false,
                 'message' => 'There was a problem. Please see the logs for more.'
-            );
+            ];
 
             http_response_code(500);
             echo json_encode($data);
@@ -290,7 +276,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function retryAction()
     {
         try {
-
             $this->loadServices();
 
             $orderNumber = $this->Request()->getParam('orderNumber');
@@ -301,14 +286,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             if ($order instanceof Order) {
                 $this->orderCancellation->cancelAndRestoreByOrder($order);
             }
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error in retry action',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -324,7 +307,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
         try {
-
             $this->loadServices();
 
             // get the issuers from the IdealService, or return an error
@@ -338,10 +320,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'data' => $idealIssuers,
                 'success' => true,
             ]);
-
         } catch (\Exception $ex) {
-
-            $this->sendResponse([
+            $this->sendResponse(
+                [
                 'message' => $ex->getMessage(),
                 'success' => false],
                 500
@@ -355,7 +336,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function componentsAction()
     {
         try {
-
             $this->loadServices();
 
             /** @var MollieApiFactory $apiFactory */
@@ -383,9 +363,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             echo $script;
 
             die();
-
         } catch (\Exception $ex) {
-
             $this->logger->error('Error when showing Credit Card Components: ' . $ex->getMessage());
 
             $this->sendResponse(
@@ -441,7 +419,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $this->logger = Shopware()->Container()->get('mollie_shopware.components.logger');
 
         try {
-
             $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
             $this->applePay = $applePayFactory->createHandler();
 
@@ -556,14 +533,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $statusConverter,
                 $this->orderCancellation
             );
-
         } catch (\Exception $ex) {
-
             $this->logger->emergency('Fatal Problem when preparing services! ' . $ex->getMessage());
 
             throw $ex;
         }
     }
-
-
 }

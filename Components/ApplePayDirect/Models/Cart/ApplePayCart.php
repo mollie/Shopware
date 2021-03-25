@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Models\Cart;
 
-
 class ApplePayCart
 {
     
@@ -25,7 +24,7 @@ class ApplePayCart
      */
     public function __construct()
     {
-        $this->items = array();
+        $this->items = [];
 
         $this->shipping = null;
         $this->taxes = null;
@@ -111,5 +110,4 @@ class ApplePayCart
     {
         $this->taxes = new ApplePayLineItem("TAXES", '', 1, $price);
     }
-
 }

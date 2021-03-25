@@ -33,5 +33,4 @@ class ApplePayDomainFileDownloader
 
         file_put_contents($appleFolder . '/' . self::LOCAL_FILENAME, $content);
     }
-
 }

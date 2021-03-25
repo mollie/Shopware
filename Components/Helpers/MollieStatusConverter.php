@@ -73,21 +73,18 @@ class MollieStatusConverter
             if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_EXPIRED] == $paymentsResult['total']) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_EXPIRED;
             }
-
         } else {
-
             if ($order->isPaid()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_PAID;
-            } else if ($order->isAuthorized()) {
+            } elseif ($order->isAuthorized()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED;
-            } else if ($order->isCanceled()) {
+            } elseif ($order->isCanceled()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_CANCELED;
-            } else if ($order->isCompleted()) {
+            } elseif ($order->isCompleted()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_COMPLETED;
-            } else if ($order->isExpired()) {
+            } elseif ($order->isExpired()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_EXPIRED;
             }
-
         }
 
 
@@ -116,13 +113,13 @@ class MollieStatusConverter
 
         if ($refundStatus->isPaymentFullyRefunded($payment)) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_REFUNDED;
-        } else if ($refundStatus->isPaymentPartiallyRefunded($payment)) {
+        } elseif ($refundStatus->isPaymentPartiallyRefunded($payment)) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_REFUNDED;
-        } else if ($payment->isPaid()) {
+        } elseif ($payment->isPaid()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_PAID;
-        } elseif ($payment->isPending())
+        } elseif ($payment->isPending()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_DELAYED;
-        elseif ($payment->isAuthorized()) {
+        } elseif ($payment->isAuthorized()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED;
         } elseif ($payment->isOpen()) {
             $targetState = PaymentStatus::MOLLIE_PAYMENT_OPEN;
@@ -136,5 +133,4 @@ class MollieStatusConverter
 
         return $targetState;
     }
-
 }

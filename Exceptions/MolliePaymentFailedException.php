@@ -14,5 +14,4 @@ class MolliePaymentFailedException extends \Exception
     {
         parent::__construct('Payment failed for transaction: ' . $transactionID . ', ' . $message);
     }
-
 }

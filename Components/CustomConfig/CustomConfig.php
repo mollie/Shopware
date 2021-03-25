@@ -18,19 +18,19 @@ class CustomConfig
 
     /**
      * CustomConfig constructor.
-     * 
+     *
      * @param array $shopwareConfig
      */
     public function __construct($shopwareConfig)
     {
         # let's verify if we have a custom config for mollie
         # with that custom config its possible to use a different
-        # options for developers that might not be possible in 
+        # options for developers that might not be possible in
         # the default plugin
         if (isset($shopwareConfig[self::KEY_MOLLIE_CONFIG])) {
             $this->config = $shopwareConfig[self::KEY_MOLLIE_CONFIG];
         } else {
-            $this->config = array();
+            $this->config = [];
         }
     }
 
@@ -50,5 +50,4 @@ class CustomConfig
 
         return "";
     }
-
 }

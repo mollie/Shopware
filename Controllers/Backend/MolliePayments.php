@@ -33,14 +33,12 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $message = sprintf('%d Payment Methods were imported/updated', $importCount);
 
             die($message);
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when importing payment methods in Backend',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
 
             http_response_code(500);
@@ -55,5 +53,4 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
     {
         $this->logger = $this->container->get('mollie_shopware.components.logger');
     }
-
 }

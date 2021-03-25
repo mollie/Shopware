@@ -12,5 +12,4 @@ class TransactionNotFoundException extends \Exception
     {
         parent::__construct('Transaction ' . $transactionNumber . ' not found!');
     }
-
 }

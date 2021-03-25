@@ -5,7 +5,6 @@ namespace MollieShopware\Components\Account;
 use MollieShopware\Components\Account\Gateway\GuestAccountGatewayInterface;
 use Shopware\Components\Password\Manager;
 
-
 class Account
 {
 
@@ -62,7 +61,7 @@ class Account
 
     /**
      * Gets if the user is already signed in.
-     * 
+     *
      * @return bool
      */
     public function isLoggedIn()
@@ -118,12 +117,10 @@ class Account
 
         // Check login status
         if ($this->admin->sCheckUser()) {
-
             $this->gwGuestCustomer->updateShipping($this->session->offsetGet('sUserId'), $data['shipping']);
 
             $this->admin->sSYSTEM->_POST = ['sPayment' => $paymentMeanId];
             $this->admin->sUpdatePayment();
-
         } else {
             $encoderName = $this->pwdEncoder->getDefaultPasswordEncoderName();
             $data['auth']['encoderName'] = $encoderName;
@@ -156,5 +153,4 @@ class Account
 
         $this->admin->sLogin(true);
     }
-
 }

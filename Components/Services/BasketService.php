@@ -143,8 +143,9 @@ class BasketService
                 }
 
                 // append internal comment
-                if (!strstr($order->getInternalComment(), $commentText))
+                if (!strstr($order->getInternalComment(), $commentText)) {
                     $order = $this->appendInternalComment($order, $commentText);
+                }
 
                 // recalculate order
                 $order->calculateInvoiceAmount();
@@ -178,7 +179,7 @@ class BasketService
      * @param Detail $orderDetail
      * @throws Zend_Db_Adapter_Exception
      */
-    function addAttributes($id, Detail $orderDetail)
+    public function addAttributes($id, Detail $orderDetail)
     {
         // load all order basket attributes
         $orderBasketAttributes = $this->getOrderBasketAttributes($id);
@@ -286,9 +287,9 @@ class BasketService
         } catch (Exception $ex) {
             $this->logger->error(
                 'Error when loading voucher by ID: ' . $voucherId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -326,9 +327,9 @@ class BasketService
         } catch (Exception $ex) {
             $this->logger->error(
                 'Error when removing order detail: ' . $orderDetailId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 

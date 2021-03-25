@@ -47,8 +47,8 @@ class ApplePayButton
         $this->country = $country;
         $this->currency = $currency;
 
-        $this->displayOption = array();
-        $this->restrictionIds = array();
+        $this->displayOption = [];
+        $this->restrictionIds = [];
     }
 
     /**
@@ -88,13 +88,13 @@ class ApplePayButton
      */
     public function toArray()
     {
-        $data = array(
+        $data = [
             'active' => $this->active,
             'country' => $this->country,
             'currency' => $this->currency,
             'itemMode' => $this->isItemMode(),
-            'displayOptions' => array(),
-        );
+            'displayOptions' => [],
+        ];
 
         if ($this->isItemMode()) {
             $data['addNumber'] = $this->addNumber;
@@ -104,15 +104,13 @@ class ApplePayButton
         # make sure they are marked as "hidden"
         /** @var DisplayOption $option */
         foreach ($this->displayOption as $option) {
-
             $isRestricted = in_array($option->getId(), $this->restrictionIds, true);
 
-            $data['displayOptions'][$option->getSmartyKey()] = array(
+            $data['displayOptions'][$option->getSmartyKey()] = [
                 'visible' => !$isRestricted,
-            );
+            ];
         }
 
         return $data;
     }
-
 }

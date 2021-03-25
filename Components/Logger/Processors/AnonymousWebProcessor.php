@@ -45,5 +45,4 @@ class AnonymousWebProcessor extends WebProcessor
 
         return $record;
     }
-
 }

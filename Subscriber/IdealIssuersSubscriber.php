@@ -42,8 +42,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
 
             $view->assign('mollieIdealIssuers', $idealIssuers);
             $view->assign('mollieIssues', false);
-        }
-        catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             $view->assign('mollieIssues', true);
         }
 

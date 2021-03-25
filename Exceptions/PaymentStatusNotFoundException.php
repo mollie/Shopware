@@ -13,5 +13,4 @@ class PaymentStatusNotFoundException extends \Exception
     {
         parent::__construct($errorMessage);
     }
-
 }

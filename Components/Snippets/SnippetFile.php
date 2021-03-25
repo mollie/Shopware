@@ -40,5 +40,4 @@ class SnippetFile
     {
         return $this->file;
     }
-
 }

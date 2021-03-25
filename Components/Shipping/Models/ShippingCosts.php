@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Shipping\Models;
 
-
 class ShippingCosts
 {
 
@@ -57,5 +56,4 @@ class ShippingCosts
     {
         return $this->taxRate;
     }
-
 }

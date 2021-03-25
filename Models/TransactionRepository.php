@@ -54,15 +54,15 @@ class TransactionRepository extends ModelRepository
             /** @var Transaction $transaction */
             $transaction = $this->findOneBy([], ['id' => 'DESC']);
 
-            if (!empty($transaction))
+            if (!empty($transaction)) {
                 $id = $transaction->getId();
+            }
         } catch (\Exception $ex) {
-
             $this->getLogger()->error(
                 'Error when loading last ID',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -76,5 +76,4 @@ class TransactionRepository extends ModelRepository
     {
         return Shopware()->Container()->get('mollie_shopware.components.logger');
     }
-
 }

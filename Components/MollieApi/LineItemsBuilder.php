@@ -19,7 +19,6 @@ class LineItemsBuilder
 
         /** @var TransactionItem $item */
         foreach ($transaction->getItems() as $item) {
-
             $orderlines[] = [
                 'type' => $item->getType(),
                 'name' => $item->getName(),
@@ -68,5 +67,4 @@ class LineItemsBuilder
             'value' => $this->formatNumber($amount)
         ];
     }
-
 }
