@@ -3,19 +3,26 @@
 namespace MollieShopware\Gateways;
 
 use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\Payment;
 
 interface MollieGatewayInterface
 {
 
     /**
+     * @param MollieApiClient $client
+     */
+    public function switchClient(MollieApiClient $client);
+
+    /**
      * @param $orderId
-     * @return mixed
+     * @return Order
      */
     public function getOrder($orderId);
 
     /**
      * @param $paymentId
-     * @return mixed
+     * @return Payment
      */
     public function getPayment($paymentId);
 

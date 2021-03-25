@@ -27,6 +27,13 @@ class Transaction
     private $transactionId;
 
     /**
+     * @return int
+     *
+     * @ORM\Column(name="shop_id", type="integer", nullable=true)
+     */
+    private $shopId;
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="order_id", type="integer", nullable=true)
@@ -148,6 +155,8 @@ class Transaction
      */
     private $isShipped;
 
+
+
     public function getId()
     {
         return $this->id;
@@ -176,6 +185,22 @@ class Transaction
     public function setOrderId($orderId)
     {
         $this->orderId = $orderId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getShopId()
+    {
+        return (int)$this->shopId;
+    }
+
+    /**
+     * @param int $shopId
+     */
+    public function setShopId($shopId)
+    {
+        $this->shopId = $shopId;
     }
 
     public function getOrderNumber()

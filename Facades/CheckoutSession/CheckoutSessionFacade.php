@@ -261,15 +261,27 @@ class CheckoutSessionFacade
      * @param $basketSignature
      * @param $currency
      * @return Transaction
-     * @throws \Exception
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function buildTransaction($basketSignature, $currency)
     {
-        $transaction = $this->repoTransactions->create(null, null, null);
+        $transactionId = $this->repoTransactions->getLastId() + 1;
+
+        $transaction = new Transaction();
+        $transaction->setId($transactionId);
+        $transaction->setTransactionId('mollie_' . $transactionId);
+        $transaction->setSessionId(\Enlight_Components_Session::getId());
+        $transaction->setShopId(Shopware()->Shop()->getId());
         $transaction->setBasketSignature($basketSignature);
         $transaction->setLocale($this->localeFinder->getPaymentLocale());
         $transaction->setCurrency($currency);
         $transaction->setTotalAmount($this->controller->getAmount());
+
+        # now save our transaction immediately
+        # i dont know if some code below needs it from the DB ;)
+        $this->repoTransactions->save($transaction);
+
 
 
         $currentCustomerClass = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
@@ -331,6 +343,7 @@ class CheckoutSessionFacade
         }
 
         $transaction->setItems($transactionItems);
+
 
         return $transaction;
     }

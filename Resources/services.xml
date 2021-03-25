@@ -38,7 +38,7 @@
             <tag name="console.command"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
-            <argument type="service" id="mollie_shopware.api"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
