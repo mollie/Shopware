@@ -78,6 +78,12 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         /** @var Enlight_Controller_Request_RequestHttp $request */
         $request = $args->get('request');
 
+        if ($request->getActionName() === 'payment') {
+            $view = $args->getSubject()->View();
+            $paymentMeans =$this->removeApplePaymentMethodsFromPaymentMeans($view->sPaymentMeans);
+            $view->sPaymentMeans = $paymentMeans;
+        }
+
         if ($request->getActionName() !== 'login') {
             return;
         }
@@ -194,7 +200,6 @@ class ApplePayDirectSubscriber implements SubscriberInterface
             return;
         }
 
-
         /** @var Enlight_View $view */
         $view = $args->getSubject()->View();
 
@@ -263,5 +268,18 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         $userData = $view->getAssign('sUserData');
         $userData['additional']['payment'] = $payment;
         $view->assign('sUserData', $userData);
+    }
+
+    /**
+     * @param array $paymentMeans
+     * @return array
+     */
+    private function removeApplePaymentMethodsFromPaymentMeans(array $paymentMeans)
+    {
+        return array_filter($paymentMeans, function ($item) {
+            if(!in_array($item['name'], [ ShopwarePaymentMethod::APPLEPAYDIRECT, ShopwarePaymentMethod::APPLEPAY])) {
+                return true;
+            }
+        });
     }
 }
