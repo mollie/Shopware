@@ -26,7 +26,7 @@ clean: ## Cleans all dependencies
 # ------------------------------------------------------------------------------------------------------------
 
 test: ## Starts all Tests
-	@php vendor/bin/phpunit --configuration=phpunit.xml
+	@XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=phpunit.xml
 
 csfix: ## Starts the PHP CS Fixer
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php --dry-run
