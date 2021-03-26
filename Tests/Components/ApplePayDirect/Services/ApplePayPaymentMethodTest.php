@@ -15,8 +15,6 @@ class ApplePayPaymentMethodTest extends TestCase
         $this->paymentMethodService = new ApplePayPaymentMethod(
             $this->createMock(PaymentMethodService::class)
         );
-
-        require_once __DIR__ . '/../../../Shopware/Components/Plugin.php';
     }
 
     /**
