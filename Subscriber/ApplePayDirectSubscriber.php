@@ -88,14 +88,18 @@ class ApplePayDirectSubscriber implements SubscriberInterface
 
         $currentPaymentMethod = $this->modules->Admin()->sGetUserData()['additional']['payment']['name'];
 
-        if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
-            return;
+        try {
+            if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
+                return;
+            }
+
+            $userId = (int)$this->modules->Admin()->sGetUserData()['additional']['user']['id'];
+            $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
+
+            $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
+        } catch(Throwable $e) {
+            // prevent login to break if something goes wrong here
         }
-
-        $userId = (int)$this->modules->Admin()->sGetUserData()['additional']['user']['id'];
-        $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
-
-        $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
     }
 
     /**
@@ -112,14 +116,18 @@ class ApplePayDirectSubscriber implements SubscriberInterface
 
         $currentPaymentMethod = $this->modules->Admin()->sGetUserData()['additional']['payment']['name'];
 
-        if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
-            return;
+        try {
+            if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
+                return;
+            }
+
+            $userId = (int)$this->modules->Admin()->sGetUserData()['additional']['user']['id'];
+            $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
+
+            $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
+        } catch(Throwable $e) {
+            // prevent checkout finish to break if something goes wrong here
         }
-
-        $userId = (int)$this->modules->Admin()->sGetUserData()['additional']['user']['id'];
-        $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
-
-        $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
     }
 
     /**
