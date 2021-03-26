@@ -25,5 +25,4 @@ interface MollieGatewayInterface
      * @return Payment
      */
     public function getPayment($paymentId);
-
 }

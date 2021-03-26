@@ -115,9 +115,9 @@ class OrderBackendSubscriber implements SubscriberInterface
                     } catch (Exception $e) {
                         $this->logger->error(
                             'Error in onSendMail event',
-                            array(
+                            [
                                 'error' => $e->getMessage(),
-                            )
+                            ]
                         );
                     }
 
@@ -293,9 +293,9 @@ class OrderBackendSubscriber implements SubscriberInterface
         } catch (Exception $e) {
             $this->logger->error(
                 'Error when loading mollie ID in shipping',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
         }
 
@@ -337,9 +337,9 @@ class OrderBackendSubscriber implements SubscriberInterface
         } catch (Exception $e) {
             $this->logger->error(
                 'Error when shipping order to Mollie',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
         }
 

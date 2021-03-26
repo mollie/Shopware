@@ -55,5 +55,4 @@ class DisplayOption
     {
         return $this->name;
     }
-
 }

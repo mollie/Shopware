@@ -13,7 +13,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-
 class OrdersRefundCommand extends ShopwareCommand
 {
 
@@ -79,7 +78,6 @@ class OrdersRefundCommand extends ShopwareCommand
         $this->logger->info('Starting Refund on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
         try {
-
             $transaction = $this->orderService->getOrderTransactionByNumber($orderNumber);
 
             $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
@@ -94,14 +92,12 @@ class OrdersRefundCommand extends ShopwareCommand
             $this->logger->info('Refund Success on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
             $io->success('Order ' . $orderNumber . ' was successfully refunded.');
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when processing Refund for Order ' . $orderNumber . ' on CLI',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
 
             $io->error($e->getMessage());
@@ -129,5 +125,4 @@ class OrdersRefundCommand extends ShopwareCommand
             );
         }
     }
-
 }

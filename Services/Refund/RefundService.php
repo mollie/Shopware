@@ -87,13 +87,10 @@ class RefundService implements RefundInterface
 
 
         if ($transaction->isTypeOrder()) {
-
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
             $refund = $this->sendMollieOrderRefund($order, $mollieOrder, $mollie);
-
         } else {
-
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
             if (!$molliePayment->canBeRefunded()) {
@@ -156,9 +153,7 @@ class RefundService implements RefundInterface
                     break;
                 }
             }
-
         } else {
-
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
         }
 
@@ -290,7 +285,6 @@ class RefundService implements RefundInterface
         }
 
         if (!$order->getDetails()->isEmpty()) {
-
             foreach ($order->getDetails() as $detail) {
                 $this->updateRefundedItemsOnOrderDetail($detail, $detail->getQuantity());
             }
@@ -324,7 +318,6 @@ class RefundService implements RefundInterface
 
         // send status email
         if ($config->isPaymentStatusMailEnabled() && $config->sendRefundStatusMail()) {
-
             $mail = $sOrder->createStatusMail($order->getId(), $paymentStatusRefunded->getId());
 
             if ($mail) {
@@ -363,5 +356,4 @@ class RefundService implements RefundInterface
         $this->modelManager->persist($detail->getAttribute());
         $this->modelManager->flush($detail->getAttribute());
     }
-
 }

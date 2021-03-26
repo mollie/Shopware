@@ -12,5 +12,4 @@ class OrderStatusNotFoundException extends \Exception
     {
         parent::__construct('Order Status: ' . $status . ' not found!');
     }
-
 }

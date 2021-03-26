@@ -41,5 +41,4 @@ class ApplePayCartTest extends TestCase
         $this->assertEquals(1, $cart->getTaxes()->getQuantity());
         $this->assertEquals(4.49, $cart->getTaxes()->getPrice());
     }
-
 }

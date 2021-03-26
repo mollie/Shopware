@@ -133,7 +133,7 @@ class OrderSession
 
             # load our payments gateway to get storefront payment methods
             $gatewayPayments = Shopware()->Container()->get("shopware_storefront.payment_gateway");
-            $storefrontPaymentMethods = $gatewayPayments->getList(array($paymentMethod->getId()), $shopContext);
+            $storefrontPaymentMethods = $gatewayPayments->getList([$paymentMethod->getId()], $shopContext);
             $paymentMethod = $storefrontPaymentMethods[$paymentMethod->getId()];
 
             # convert a storerfront payment method using our legacy struct converter
@@ -163,5 +163,4 @@ class OrderSession
             'mobile_inactive' => $paymentMethod->getMobileInactive(),
         ];
     }
-
 }

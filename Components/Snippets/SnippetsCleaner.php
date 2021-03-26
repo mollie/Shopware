@@ -5,7 +5,6 @@ namespace MollieShopware\Components\Snippets;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
-
 class SnippetsCleaner
 {
 
@@ -58,7 +57,6 @@ class SnippetsCleaner
 
 
         foreach ($rows as $row) {
-
             if (!in_array($row['namespace'] . '/' . $row['name'], $keys)) {
 
                 /** @var QueryBuilder $qb */
@@ -78,18 +76,16 @@ class SnippetsCleaner
      */
     private function collectIniKeys()
     {
-        $keys = array();
+        $keys = [];
 
         /** @var SnippetFile $snippets */
         foreach ($this->pluginSnippetFiles as $snippets) {
-
             $fn = fopen($snippets->getFile(), "r");
 
             while (!feof($fn)) {
                 $line = fgets($fn);
 
                 if (strpos($line, '=') !== false) {
-
                     $key = trim(explode('=', $line, 2)[0]);
 
                     if (!in_array($key, $keys)) {
@@ -103,5 +99,4 @@ class SnippetsCleaner
 
         return $keys;
     }
-
 }

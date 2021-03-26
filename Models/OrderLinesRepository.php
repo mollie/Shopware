@@ -35,7 +35,7 @@ class OrderLinesRepository extends ModelRepository
         /** @var OrderLines[] $items */
         $items = $this->findBy(['orderId' => $order->getId()]);
 
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $result[] = [
                 'id' => $item->getMollieOrderlineId()
             ];

@@ -5,7 +5,6 @@ namespace MollieShopware\Tests\Services\TokenAnonymizer;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use PHPUnit\Framework\TestCase;
 
-
 class TokenAnonymizerTest extends TestCase
 {
 
@@ -94,5 +93,4 @@ class TokenAnonymizerTest extends TestCase
 
         $this->assertEquals('012345****', $anonymized);
     }
-
 }

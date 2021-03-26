@@ -128,7 +128,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function addProductAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -154,14 +153,12 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             echo "";
             die();
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when adding product to apple pay cart',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             http_response_code(500);
@@ -180,7 +177,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function getShippingsAction()
     {
         try {
-
             $this->loadServices();
 
 
@@ -219,22 +215,23 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $shippingMethods = $this->eventManager->filter(
                 Events::APPLEPAY_DIRECT_GET_SHIPPINGS,
                 $shippingMethods,
-                array(
+                [
                     'country' => $countryCode
-                )
+                ]
             );
 
             if ($previousShippingMethods !== $shippingMethods) {
                 # we just cant show a full long array here
                 # so we at least show that something might has changed (even if the count is the same)
-                $this->logger->info('Filter Event changed Apple Pay Direct Shipping Methods',
-                    array(
+                $this->logger->info(
+                    'Filter Event changed Apple Pay Direct Shipping Methods',
+                    [
                         'message' => 'Please note that we cannot show the long full list here, even if the count is the same, the content might have changed',
-                        'data' => array(
+                        'data' => [
                             'previousShippingsCount' => count($previousShippingMethods),
                             'newShippingsCount' => count($shippingMethods)
-                        )
-                    )
+                        ]
+                    ]
                 );
             }
 
@@ -246,27 +243,25 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
 
 
-            $data = array(
+            $data = [
                 'success' => true,
                 'cart' => $formattedCart,
                 'shippingmethods' => $shippingMethods,
-            );
+            ];
 
             echo json_encode($data);
             die();
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error loading shippings for Mollie Apple Pay Direct',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
-            $data = array(
+            $data = [
                 'success' => false,
-            );
+            ];
 
             echo json_encode($data);
             die();
@@ -282,7 +277,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function setShippingAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -297,17 +291,18 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $shippingIdentifier = $this->eventManager->filter(
                 Events::APPLEPAY_DIRECT_SET_SHIPPING,
                 $shippingIdentifier,
-                array()
+                []
             );
 
             if ($previousShippingIdentifier !== $shippingIdentifier) {
-                $this->logger->info('Filter Event changed Apple Pay Direct Shipping Method to ' . $shippingIdentifier,
-                    array(
-                        'data' => array(
+                $this->logger->info(
+                    'Filter Event changed Apple Pay Direct Shipping Method to ' . $shippingIdentifier,
+                    [
+                        'data' => [
                             'previousShipping' => $previousShippingIdentifier,
                             'newShipping' => $shippingIdentifier
-                        )
-                    )
+                        ]
+                    ]
                 );
             }
 
@@ -322,26 +317,24 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 $this->config->isTestmodeActive()
             );
 
-            $data = array(
+            $data = [
                 'success' => true,
                 'cart' => $formattedCart,
-            );
+            ];
 
             echo json_encode($data);
             die();
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error setting shipping for Mollie Apple Pay Direct',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
-            $data = array(
+            $data = [
                 'success' => false,
-            );
+            ];
 
             echo json_encode($data);
             die();
@@ -356,7 +349,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function restoreCartAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -371,14 +363,12 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             echo "";
             die();
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error restoring cart after Mollie Apple Pay Direct',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             http_response_code(500);
@@ -399,7 +389,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function createPaymentSessionAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -411,14 +400,12 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $response = $this->handlerApplePay->requestPaymentSession($domain, $validationUrl);
 
             echo $response;
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error starting Mollie Apple Pay Direct session',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             http_response_code(500);
@@ -436,7 +423,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function startPaymentAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -462,7 +448,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             # if we are not signed in, then we need to
             # create a new guest account and login as that one
             if (!$this->account->isLoggedIn()) {
-
                 $this->account->createGuestAccount(
                     $email,
                     $firstname,
@@ -507,14 +492,12 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                     'action' => 'finishPayment',
                 ]
             );
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error starting Mollie Apple Pay Direct payment',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             http_response_code(500);
@@ -528,7 +511,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     public function finishPaymentAction()
     {
         try {
-
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
@@ -588,14 +570,12 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                     'action' => 'direct',
                 ]
             );
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error finishing Mollie Apple Pay Direct payment',
-                array(
+                [
                     'error' => $ex->getMessage()
-                )
+                ]
             );
 
             http_response_code(500);
@@ -638,7 +618,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
     private function prepareShippingMethods(array $dispatchMethods, $userCountry)
     {
         $selectedMethod = null;
-        $otherMethods = array();
+        $otherMethods = [];
 
         $selectedMethodID = $this->shipping->getCartShippingMethodID();
 
@@ -658,7 +638,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             }
         }
 
-        $shippingMethods = array();
+        $shippingMethods = [];
 
         if ($selectedMethod !== null) {
             $shippingMethods[] = $selectedMethod;
@@ -676,5 +656,4 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
         return $shippingMethods;
     }
-
 }

@@ -43,5 +43,4 @@ class LocaleFinder
 
         return $locale;
     }
-
 }

@@ -3,7 +3,6 @@
 
 namespace MollieShopware\Components\Helpers;
 
-
 class MollieLineItemCleaner
 {
 
@@ -14,18 +13,17 @@ class MollieLineItemCleaner
      * This will lead to a correct mollie api request and avoid the
      * problem that the amount of line items does not match the
      * total sum of the order.
-     * 
+     *
      * @param array $orderlines
      * @return array
      */
     public function removeDuplicateDiscounts(array $orderlines)
     {
-        $newLines = array();
-        $cachedDiscountIDs = array();
+        $newLines = [];
+        $cachedDiscountIDs = [];
         
         /** @var array $line */
         foreach ($orderlines as $line) {
-
             if ($line['type'] !== 'discount') {
                 $newLines[] = $line;
                 continue;
@@ -43,5 +41,4 @@ class MollieLineItemCleaner
         
         return $newLines;
     }
-
 }

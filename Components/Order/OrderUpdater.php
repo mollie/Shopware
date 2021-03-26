@@ -208,20 +208,21 @@ class OrderUpdater
         $newShopwareStatus = $this->eventManager->filter(
             Events::UPDATE_ORDER_PAYMENT_STATUS,
             $newShopwareStatus,
-            array(
+            [
                 'molliePaymentStatus' => $status,
                 'order' => $order,
-            )
+            ]
         );
 
         if ($previousShopwareStatus !== $newShopwareStatus) {
-            $this->logger->info('Filter Event changed Payment Status for Order ' . $order->getNumber(),
-                array(
-                    'data' => array(
+            $this->logger->info(
+                'Filter Event changed Payment Status for Order ' . $order->getNumber(),
+                [
+                    'data' => [
                         'previousStatus' => $previousShopwareStatus,
                         'newStatus' => $newShopwareStatus
-                    )
-                )
+                    ]
+                ]
             );
 
             # avoid state ignoring, because we have
@@ -277,20 +278,21 @@ class OrderUpdater
         $newShopwareStatus = $this->eventManager->filter(
             Events::UPDATE_ORDER_STATUS,
             $targetState,
-            array(
+            [
                 'mollieOrderStatus' => $mollieStatus,
                 'order' => $order,
-            )
+            ]
         );
 
         if ($previousShopwareStatus !== $newShopwareStatus) {
-            $this->logger->info('Filter Event changed Order Status for Order ' . $order->getNumber(),
-                array(
-                    'data' => array(
+            $this->logger->info(
+                'Filter Event changed Order Status for Order ' . $order->getNumber(),
+                [
+                    'data' => [
                         'previousStatus' => $previousShopwareStatus,
                         'newStatus' => $newShopwareStatus
-                    )
-                )
+                    ]
+                ]
             );
 
             # avoid state ignoring, because we have

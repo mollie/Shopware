@@ -53,16 +53,15 @@ class ApplePayButtonTest extends TestCase
         $button = new ApplePayButton(true, 'NL', 'EUR');
         $button->setItemMode('ABC');
 
-        $expected = array(
+        $expected = [
             'active' => true,
             'country' => 'NL',
             'currency' => 'EUR',
             'itemMode' => true,
             'addNumber' => 'ABC',
-            'displayOptions' => array(),
-        );
+            'displayOptions' => [],
+        ];
 
         $this->assertEquals($expected, $button->toArray());
     }
-
 }

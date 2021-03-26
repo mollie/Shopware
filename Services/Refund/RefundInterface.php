@@ -33,5 +33,4 @@ interface RefundInterface
      * @return mixed
      */
     public function refundPartialOrderItem(Order $order, Detail $detail, Transaction $transaction, $orderLineID, $quantity);
-
 }

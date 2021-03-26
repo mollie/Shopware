@@ -19,16 +19,27 @@ dev: ## Installs all dev dependencies
 	@composer install
 
 clean: ## Cleans all dependencies
-	rm -rf vendor
-	rm -rf .reports | true
+	@rm -rf vendor
+	@rm -rf composer.lock
+	@rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
 
 test: ## Starts all Tests
 	@php vendor/bin/phpunit --configuration=phpunit.xml
 
+csfix: ## Starts the PHP CS Fixer
+	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php --dry-run
+
 stan: ## Starts the PHPStan Analyser
 	@php vendor/bin/phpstan analyse -c phpstan.neon
+
+# ------------------------------------------------------------------------------------------------------------
+
+pr: ## Prepares everything for a Pull Request
+	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
+	@make test -B
+	@make stan -B
 
 # ------------------------------------------------------------------------------------------------------------
 

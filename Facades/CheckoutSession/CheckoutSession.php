@@ -3,7 +3,6 @@
 
 namespace MollieShopware\Facades\CheckoutSession;
 
-
 use MollieShopware\Models\Transaction;
 
 class CheckoutSession
@@ -60,5 +59,4 @@ class CheckoutSession
     {
         return $this->checkoutUrl;
     }
-
 }

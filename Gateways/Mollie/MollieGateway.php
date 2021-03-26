@@ -7,7 +7,6 @@ use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 
-
 class MollieGateway implements MollieGatewayInterface
 {
 
@@ -64,5 +63,4 @@ class MollieGateway implements MollieGatewayInterface
 
         return $payment;
     }
-
 }

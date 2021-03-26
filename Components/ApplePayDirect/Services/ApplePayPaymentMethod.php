@@ -53,5 +53,4 @@ class ApplePayPaymentMethod
             return false;
         }
     }
-
 }

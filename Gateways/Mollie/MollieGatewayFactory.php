@@ -15,5 +15,4 @@ class MollieGatewayFactory
     {
         return new MollieGateway($client);
     }
-
 }

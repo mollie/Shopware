@@ -28,11 +28,10 @@ class Shopware_Controllers_Backend_MollieApplePayDirect extends Shopware_Control
 
         /** @var DisplayOption $options */
         foreach ($restrictions as $options) {
-
-            $data[] = array(
+            $data[] = [
                 'id' => $options->getId(),
                 'name' => $options->getName(),
-            );
+            ];
         }
 
         $this->view->assign([
@@ -40,5 +39,4 @@ class Shopware_Controllers_Backend_MollieApplePayDirect extends Shopware_Control
             'total' => count($data),
         ]);
     }
-
 }

@@ -16,5 +16,4 @@ class ShopwarePaymentMethod
      *
      */
     const APPLEPAY = MollieShopware::PAYMENT_PREFIX . PaymentMethod::APPLE_PAY;
-
 }

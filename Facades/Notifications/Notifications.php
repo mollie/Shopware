@@ -17,7 +17,6 @@ use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
 
-
 class Notifications
 {
 
@@ -133,7 +132,6 @@ class Notifications
             # and extract the status from its data
             $mollieOrder = $this->paymentService->getMollieOrder($order, $transaction);
             $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
-
         } else {
 
             # if have a payment ID sent by mollie, but our transaction
@@ -145,7 +143,7 @@ class Notifications
             }
 
             # get the payment from our molli api
-            # and extract its status 
+            # and extract its status
             $molliePayment = $this->paymentService->getMolliePayment($order, $transaction);
             $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
         }
@@ -160,9 +158,7 @@ class Notifications
         # verify if our order is failed and could be cancelled.
         #if so, then cancel it
         if (PaymentStatus::isFailedStatus($mollieStatus)) {
-
             $this->orderCancellation->cancelPlacedOrder($order);
-
         } else {
 
             # update our payment status from our notification data
@@ -176,5 +172,4 @@ class Notifications
 
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
-
 }

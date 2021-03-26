@@ -64,7 +64,7 @@ class TokenAnonymizer
      */
     private function getPlaceholder()
     {
-        return str_repeat($this->placeholderSymbol, $this->placeholderCount);;
+        return str_repeat($this->placeholderSymbol, $this->placeholderCount);
+        ;
     }
-
 }

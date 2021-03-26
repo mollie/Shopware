@@ -36,14 +36,13 @@ class BasketSnapshot
             return;
         }
 
-        $snapshot = array();
+        $snapshot = [];
 
         foreach ($basket->sGetBasketData()['content'] as $lineItem) {
-
-            $snapshot[] = array(
+            $snapshot[] = [
                 'ordernumber' => $lineItem['ordernumber'],
                 'quantity' => $lineItem['quantity'],
-            );
+            ];
         }
 
         $this->session->offsetSet(self::SESSION_KEY, $snapshot);
@@ -77,7 +76,6 @@ class BasketSnapshot
         $snapshot = $this->session->get(self::SESSION_KEY);
 
         foreach ($snapshot as $lineItem) {
-
             $ordernumber = $lineItem['ordernumber'];
             $qty = $lineItem['quantity'];
 
@@ -86,5 +84,4 @@ class BasketSnapshot
 
         $this->session->offsetSet(self::SESSION_KEY, null);
     }
-
 }

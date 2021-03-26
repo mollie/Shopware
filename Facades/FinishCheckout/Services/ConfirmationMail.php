@@ -50,7 +50,6 @@ class ConfirmationMail
          * or log an error if the e-mail could not be sent.
          */
         if (is_array($variables)) {
-
             $this->sOder->sUserData = $variables;
 
             if (isset($variables['additional']['charge_vat']) && $variables['additional']['charge_vat'] === false) {
@@ -60,5 +59,4 @@ class ConfirmationMail
             $this->sOder->sendMail($variables);
         }
     }
-
 }

@@ -38,11 +38,11 @@ class PaymentStatus
      */
     public static function isFailedStatus($status)
     {
-        $list = array(
+        $list = [
             PaymentStatus::MOLLIE_PAYMENT_CANCELED,
             PaymentStatus::MOLLIE_PAYMENT_FAILED,
             PaymentStatus::MOLLIE_PAYMENT_EXPIRED,
-        );
+        ];
 
         return (in_array($status, $list, true));
     }
@@ -57,14 +57,13 @@ class PaymentStatus
      */
     public static function isApprovedStatus($status)
     {
-        $list = array(
+        $list = [
             PaymentStatus::MOLLIE_PAYMENT_PAID,
             PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED,
             PaymentStatus::MOLLIE_PAYMENT_PENDING,
             PaymentStatus::MOLLIE_PAYMENT_OPEN,
-        );
+        ];
 
         return (in_array($status, $list, true));
     }
-
 }

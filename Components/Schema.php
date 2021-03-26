@@ -45,10 +45,14 @@ class Schema
         $tool = new SchemaTool($this->modelManager);
 
         // get the metadata of the class
-        $classesMeta = array_map(function($className) { return $this->modelManager->getClassMetadata($className); }, $classes);
+        $classesMeta = array_map(function ($className) {
+            return $this->modelManager->getClassMetadata($className);
+        }, $classes);
 
         // get the table names for the classes
-        $tableNames = array_map(function($cl) { return $cl->getTableName(); }, $classesMeta);
+        $tableNames = array_map(function ($cl) {
+            return $cl->getTableName();
+        }, $classesMeta);
 
         // get the sql to modify the tables
         // make sure to not drop any tables
@@ -56,10 +60,9 @@ class Schema
         $sqls = $tool->getUpdateSchemaSql($classesMeta, $noDrop);
 
         // extra safety filter to only modify tables used in this plugin
-        $filteredSqls = array_filter($sqls, function($sql) use ($tableNames) {
-            foreach( $tableNames as $table )
-            {
-                if( stripos($sql, $table) !== false ) {
+        $filteredSqls = array_filter($sqls, function ($sql) use ($tableNames) {
+            foreach ($tableNames as $table) {
+                if (stripos($sql, $table) !== false) {
                     return true;
                 }
             }
@@ -82,8 +85,7 @@ class Schema
         $updateSchemaSql = $this->getUpdateSchemaSql($classes);
         $conn = $this->modelManager->getConnection();
 
-        foreach( $updateSchemaSql as $sql )
-        {
+        foreach ($updateSchemaSql as $sql) {
             $conn->executeQuery($sql);
         }
     }

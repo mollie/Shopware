@@ -37,5 +37,4 @@ class BasketItemTest extends TestCase
 
         $this->assertEquals(10.0, $shipping->getUnitPrice());
     }
-
 }

@@ -146,5 +146,4 @@ class Shipping
             $costs->getTaxRate()
         );
     }
-
 }

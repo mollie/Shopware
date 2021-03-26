@@ -152,15 +152,12 @@ class FinishCheckoutFacade
         # we start by validating our order or payment with Mollie.
         # if this is not valid, we immediately stop any further processing
         if ($transaction->isTypeOrder()) {
-
             $mollieOrder = $this->gwMollie->getOrder($transaction->getMollieOrderId());
 
             if (!$this->statusValidator->didOrderCheckoutSucceed($mollieOrder)) {
                 throw new MolliePaymentFailedException($mollieOrder->id, 'The status validation of the Mollie order showed it was not successful!');
             }
-
         } else {
-
             $molliePayment = $this->gwMollie->getPayment($transaction->getMolliePaymentId());
 
             if (!$this->statusValidator->didPaymentCheckoutSucceed($molliePayment)) {
@@ -199,7 +196,6 @@ class FinishCheckoutFacade
                 # and immediately save it in case of upcoming errors
                 $transaction->setOrderNumber($orderNumber);
                 $this->repoTransactions->save($transaction);
-
             } catch (\Exception $ex) {
                 # lets log that worst-case
                 $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionId);
@@ -280,9 +276,9 @@ class FinishCheckoutFacade
                 # but at least we will log that the status wasn't updated
                 $this->logger->warning(
                     'The status of order: ' . $swOrder->getNumber() . ' has not been updated to: ' . $mollieStatus,
-                    array(
+                    [
                         'error' => $ex->getMessage()
-                    )
+                    ]
                 );
             }
         }
