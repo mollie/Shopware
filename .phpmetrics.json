@@ -1,0 +1,18 @@
+{
+    "includes": [
+        "./Command",
+        "./Components",
+        "./Controllers",
+        "./Events",
+        "./Exceptions",
+        "./Facades",
+        "./Gateways",
+        "./Models",
+        "./Services",
+        "./Subscriber",
+        "./Tests"
+    ],
+    "report": {
+        "html": "./.reports/metrics"
+    }
+}
