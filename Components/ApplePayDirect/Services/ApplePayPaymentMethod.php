@@ -53,6 +53,10 @@ class ApplePayPaymentMethod
         }
     }
 
+    /**
+     * @param string $defaultPaymentMethod
+     * @return bool
+     */
     public function isApplePayPaymentMethod(string $defaultPaymentMethod)
     {
         if (
