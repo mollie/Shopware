@@ -80,7 +80,7 @@ class ApplePayDirectSubscriber implements SubscriberInterface
 
         if ($request->getActionName() === 'payment') {
             $view = $args->getSubject()->View();
-            $paymentMeans =$this->removeApplePaymentMethodsFromPaymentMeans($view->sPaymentMeans);
+            $paymentMeans = $this->removeApplePaymentMethodsFromPaymentMeans($view->sPaymentMeans);
             $view->sPaymentMeans = $paymentMeans;
         }
 
@@ -103,7 +103,7 @@ class ApplePayDirectSubscriber implements SubscriberInterface
             $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
-        } catch(Throwable $e) {
+        } catch (Throwable $e) {
             // prevent login to break if something goes wrong here
         }
     }
@@ -131,7 +131,7 @@ class ApplePayDirectSubscriber implements SubscriberInterface
             $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
-        } catch(Throwable $e) {
+        } catch (Throwable $e) {
             // prevent checkout finish to break if something goes wrong here
         }
     }
@@ -277,7 +277,7 @@ class ApplePayDirectSubscriber implements SubscriberInterface
     private function removeApplePaymentMethodsFromPaymentMeans(array $paymentMeans)
     {
         return array_filter($paymentMeans, function ($item) {
-            if(!in_array($item['name'], [ ShopwarePaymentMethod::APPLEPAYDIRECT, ShopwarePaymentMethod::APPLEPAY])) {
+            if (!in_array($item['name'], [ShopwarePaymentMethod::APPLEPAYDIRECT, ShopwarePaymentMethod::APPLEPAY])) {
                 return true;
             }
         });
