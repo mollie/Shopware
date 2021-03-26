@@ -51,14 +51,13 @@ class IPAnonymizerTest extends TestCase
      */
     public function getIPData()
     {
-        return array(
-            'yes-correct-ip' => array('192.168.6.0', '192.168.6.255'),
-            'yes-ip-with-spaces-1' => array('192.168.6.0', '192.168.6.255 '),
-            'yes-ip-with-spaces-2' => array('192.168.6.0', ' 192.168.6.255'),
-            'no-invalid-with-spaces' => array('', ' 192.168 .6.255'),
-            'no-invalid-no-ip-1' => array('', '120 '),
-            'no-invalid-no-ip-2' => array('', 'test'),
-        );
+        return [
+            'yes-correct-ip' => ['192.168.6.0', '192.168.6.255'],
+            'yes-ip-with-spaces-1' => ['192.168.6.0', '192.168.6.255 '],
+            'yes-ip-with-spaces-2' => ['192.168.6.0', ' 192.168.6.255'],
+            'no-invalid-with-spaces' => ['', ' 192.168 .6.255'],
+            'no-invalid-no-ip-1' => ['', '120 '],
+            'no-invalid-no-ip-2' => ['', 'test'],
+        ];
     }
-
 }

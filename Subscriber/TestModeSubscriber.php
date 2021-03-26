@@ -3,7 +3,6 @@
 
 namespace MollieShopware\Subscriber;
 
-
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_View;
@@ -12,7 +11,6 @@ use MollieShopware\MollieShopware;
 
 class TestModeSubscriber implements SubscriberInterface
 {
-
     const TEST_SUFFIX = "(Mollie Test Mode)";
 
     /**
@@ -173,5 +171,4 @@ class TestModeSubscriber implements SubscriberInterface
 
         return $paymentMean;
     }
-
 }

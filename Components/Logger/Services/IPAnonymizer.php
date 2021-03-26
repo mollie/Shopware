@@ -52,5 +52,4 @@ class IPAnonymizer
     {
         return (filter_var($ip, FILTER_VALIDATE_IP) !== false);
     }
-
 }

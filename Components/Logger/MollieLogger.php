@@ -2,8 +2,8 @@
 
 namespace MollieShopware\Components\Logger;
 
-use MollieShopware\Components\Logger\Services\IPAnonymizer;
 use MollieShopware\Components\Logger\Processors\AnonymousWebProcessor;
+use MollieShopware\Components\Logger\Services\IPAnonymizer;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Monolog\Processor\IntrospectionProcessor;
@@ -55,7 +55,7 @@ class MollieLogger extends Logger
 
         $fileHandler = new RotatingFileHandler($filename, $retentionDays, $logLevel);
 
-        parent::__construct(self::CHANNEL, array($fileHandler));
+        parent::__construct(self::CHANNEL, [$fileHandler]);
     }
 
     /**
@@ -63,7 +63,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function debug($message, array $context = array())
+    public function debug($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::DEBUG);
 
@@ -78,7 +78,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function info($message, array $context = array())
+    public function info($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::INFO);
 
@@ -93,7 +93,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function notice($message, array $context = array())
+    public function notice($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::NOTICE);
 
@@ -108,7 +108,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function warning($message, array $context = array())
+    public function warning($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::WARNING);
 
@@ -123,7 +123,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function error($message, array $context = array())
+    public function error($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::ERROR);
 
@@ -142,7 +142,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function critical($message, array $context = array())
+    public function critical($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::CRITICAL);
 
@@ -161,7 +161,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function alert($message, array $context = array())
+    public function alert($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::ALERT);
 
@@ -180,7 +180,7 @@ class MollieLogger extends Logger
      * @param array $context
      * @return bool
      */
-    public function emergency($message, array $context = array())
+    public function emergency($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::EMERGENCY);
 
@@ -200,10 +200,10 @@ class MollieLogger extends Logger
      */
     private function buildProcessorRecord($logLevel)
     {
-        return array(
+        return [
             'level' => $logLevel,
-            'extra' => array()
-        );
+            'extra' => []
+        ];
     }
 
     /**
@@ -225,13 +225,13 @@ class MollieLogger extends Logger
      */
     private function extendInfoData(array $context, array $record)
     {
-        $additional = array(
+        $additional = [
             'session' => $this->sessionId,
-            'processors' => array(
+            'processors' => [
                 'uid' => $this->processorUid->__invoke($record)['extra'],
                 'web' => $this->webProcessor->__invoke($record)['extra'],
-            )
-        );
+            ]
+        ];
 
         return array_merge_recursive($context, $additional);
     }
@@ -244,16 +244,15 @@ class MollieLogger extends Logger
      */
     private function extendErrorData(array $context, array $introspection, array $record)
     {
-        $additional = array(
+        $additional = [
             'session' => $this->sessionId,
-            'processors' => array(
+            'processors' => [
                 'uid' => $this->processorUid->__invoke($record)['extra'],
                 'web' => $this->webProcessor->__invoke($record)['extra'],
                 'introspection' => $introspection,
-            )
-        );
+            ]
+        ];
 
         return array_merge_recursive($context, $additional);
     }
-
 }

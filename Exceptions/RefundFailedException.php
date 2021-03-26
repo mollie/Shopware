@@ -13,5 +13,4 @@ class RefundFailedException extends \Exception
     {
         parent::__construct('Mollie Refund failed for order: ' . $orderNumber . '! ' . $message);
     }
-
 }

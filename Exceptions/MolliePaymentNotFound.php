@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Exceptions;
 
-
 /**
  * @copyright 2021 dasistweb GmbH (https://www.dasistweb.de)
  */
@@ -16,5 +15,4 @@ class MolliePaymentNotFound extends \Exception
     {
         parent::__construct('Mollie payment for order : ' . $orderId . ' not found!');
     }
-
 }

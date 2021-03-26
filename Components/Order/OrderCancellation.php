@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Order;
 
-
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CurrentCustomer;
@@ -105,7 +104,6 @@ class OrderCancellation
 
         # make sure we have all status data cancelled as expected
         $this->cancelPlacedOrder($swOrder);
-
     }
 
     /**
@@ -124,7 +122,6 @@ class OrderCancellation
         );
 
         if ($this->config->cancelFailedOrders()) {
-
             $this->orderUpdater->updateShopwareOrderStatusWithoutMail(
                 $order,
                 PaymentStatus::MOLLIE_PAYMENT_CANCELED
@@ -134,7 +131,7 @@ class OrderCancellation
                 $this->paymentService->resetStock($order);
             }
 
-            if ($this->config->resetInvoiceAndShipping()){
+            if ($this->config->resetInvoiceAndShipping()) {
                 $this->paymentService->resetInvoiceAndShipping($order);
             }
         }
@@ -153,5 +150,4 @@ class OrderCancellation
             $this->basketService->restoreBasket($order);
         }
     }
-
 }

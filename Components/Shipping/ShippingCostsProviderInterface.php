@@ -11,5 +11,4 @@ interface ShippingCostsProviderInterface
      * @return ShippingCosts
      */
     public function getShippingCosts();
-
 }

@@ -9,7 +9,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-
 class PaymentImportCommand extends ShopwareCommand
 {
 
@@ -57,7 +56,6 @@ class PaymentImportCommand extends ShopwareCommand
         $io->title('MOLLIE Payment Methods Import');
 
         try {
-
             $this->logger->info('Starting payment methods import on CLI');
 
             $importCount = $this->paymentMethodService->installPaymentMethods(false);
@@ -65,18 +63,15 @@ class PaymentImportCommand extends ShopwareCommand
             $this->logger->info($importCount . ' Payment Methods have been successfully imported on CLI');
 
             $io->success($importCount . ' Payment Methods have been updated successfully!');
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when importing payment methods on CLI',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
 
             $io->error($e->getMessage());
         }
     }
-
 }

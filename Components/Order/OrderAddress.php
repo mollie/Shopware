@@ -100,5 +100,4 @@ class OrderAddress
     {
         return $this->country;
     }
-
 }

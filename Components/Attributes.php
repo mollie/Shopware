@@ -71,7 +71,6 @@ class Attributes
     public function remove($columnSpecs)
     {
         foreach ($columnSpecs as $spec) {
-
             $table = $spec[0];
             $columnSpec = $spec[1];
 

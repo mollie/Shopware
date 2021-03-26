@@ -41,5 +41,4 @@ interface GuestAccountGatewayInterface
      * @return mixed
      */
     public function getGuest($email);
-
 }

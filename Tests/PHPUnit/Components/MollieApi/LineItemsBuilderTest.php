@@ -52,30 +52,30 @@ class LineItemsBuilderTest extends TestCase
         $builder = new LineItemsBuilder();
         $lineItems = $builder->buildLineItems($transaction);
 
-        $expected = array(
-            array(
+        $expected = [
+            [
                 'type' => 'test_type',
                 'name' => 'Test Article',
                 'quantity' => 2,
-                'unitPrice' => array(
+                'unitPrice' => [
                     'currency' => 'CHF',
                     'value' => '29.90',
-                ),
-                'totalAmount' => array(
+                ],
+                'totalAmount' => [
                     'currency' => 'CHF',
                     'value' => '22.45',
-                ),
+                ],
                 'vatRate' => '16.00',
-                'vatAmount' => array(
+                'vatAmount' => [
                     'currency' => 'CHF',
                     'value' => '23.19',
-                ),
+                ],
                 'sku' => null,
                 'imageUrl' => null,
                 'productUrl' => null,
                 'metadata' => json_encode(['transaction_item_id' => 1520]),
-            )
-        );
+            ]
+        ];
 
         $this->assertEquals($expected, $lineItems);
     }
@@ -135,5 +135,4 @@ class LineItemsBuilderTest extends TestCase
         $this->assertEquals('Super Discount', $lineItems[1]['name']);
         $this->assertEquals('Super Discount', $lineItems[2]['name']);
     }
-
 }

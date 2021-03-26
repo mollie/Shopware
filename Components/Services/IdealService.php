@@ -23,8 +23,7 @@ class IdealService
         \Mollie\Api\MollieApiClient $mollieApi,
         \MollieShopware\Components\CurrentCustomer $customer,
         \Shopware\Components\Model\ModelManager$modelManager
-    )
-    {
+    ) {
         $this->mollieApi = $mollieApi;
         $this->customer = $customer;
         $this->modelManager = $modelManager;
@@ -41,14 +40,14 @@ class IdealService
         $paymentMethods = $this->mollieApi->methods->all(['include'=>'issuers']);
         $idealIssuers = [];
 
-        foreach($paymentMethods as $paymentMethod) {
-
+        foreach ($paymentMethods as $paymentMethod) {
             if ($paymentMethod->id === 'ideal') {
                 $issuers = $paymentMethod->issuers();
 
                 foreach ($issuers as $key => $issuer) {
-                    if ($issuer->id === $this->getSelectedIssuer())
+                    if ($issuer->id === $this->getSelectedIssuer()) {
                         $issuer->isSelected = true;
+                    }
 
                     $idealIssuers[] = $issuer;
                 }
@@ -99,13 +98,15 @@ class IdealService
         /** @var \Shopware\Models\Customer\Customer $customer */
         $customer = $this->customer->getCurrent();
 
-        if (empty($customer))
+        if (empty($customer)) {
             return '';
+        }
 
         $attributes = $customer->getAttribute();
 
-        if (!empty($attributes))
+        if (!empty($attributes)) {
             return $attributes->getMollieShopwareIdealIssuer();
+        }
 
         /**
          * In B2b a contact customer doesn't have attributes,

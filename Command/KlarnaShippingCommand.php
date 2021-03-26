@@ -24,8 +24,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class KlarnaShippingCommand extends ShopwareCommand
 {
-
-
     const LOG_PREFIX = 'CLI Klarna: ';
 
     /**
@@ -144,7 +142,6 @@ class KlarnaShippingCommand extends ShopwareCommand
 
         /** @var Transaction $transaction */
         foreach ($transactions as $transaction) {
-
             try {
 
                 /** @var Order|null $swOrder */
@@ -168,7 +165,6 @@ class KlarnaShippingCommand extends ShopwareCommand
                 # -------------------------------------------------------------------
 
                 if ($shopID <= 0) {
-
                     $tableView->addRow(
                         $this->buildRow(
                             $transaction->getId(),
@@ -201,7 +197,6 @@ class KlarnaShippingCommand extends ShopwareCommand
                     # now that we know in what shop it has been ordered (and thus, what API key we need),
                     # we can try to fetch the order from the Mollie API
                     $mollieOrder = $this->gwMollie->getOrder($mollieOrderID);
-
                 } catch (\Exception $ex) {
                     # "CLOSE" ORDERS THAT DO NOT EXIST IN MOLLIE ----------------------------------------------------------------
                     # if mollie does not contain that order
@@ -219,10 +214,10 @@ class KlarnaShippingCommand extends ShopwareCommand
 
                     $this->logger->error(
                         self::LOG_PREFIX . 'Order ' . $mollieOrderID . ' not found in Mollie',
-                        array(
-                            'data' => array(
+                        [
+                            'data' => [
                                 'shopId' => $shopID,
-                            ))
+                            ]]
                     );
 
                     $this->countFailed++;
@@ -276,7 +271,6 @@ class KlarnaShippingCommand extends ShopwareCommand
 
 
                 try {
-
                     $this->shipOrder(
                         $transaction,
                         $mollieOrder,
@@ -284,9 +278,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                         $tableView,
                         $shop
                     );
-
                 } catch (\Exception $ex) {
-
                     $tableView->addRow(
                         $this->buildRow(
                             $transaction->getId(),
@@ -303,9 +295,7 @@ class KlarnaShippingCommand extends ShopwareCommand
                     $this->countFailed++;
                     continue;
                 }
-
             } catch (\Exception $e) {
-
                 $this->countFailed++;
 
                 $io->error($e->getMessage());
@@ -338,7 +328,6 @@ class KlarnaShippingCommand extends ShopwareCommand
         } else {
             $io->success('Klarna Shipping successful');
         }
-
     }
 
     /**
@@ -373,7 +362,6 @@ class KlarnaShippingCommand extends ShopwareCommand
             $order = $this->repoOrders->find($transaction->getOrderId());
 
             return $order->getShop()->getId();
-
         } catch (EntityNotFoundException $ex) {
             return 0;
         }
@@ -525,10 +513,10 @@ class KlarnaShippingCommand extends ShopwareCommand
      */
     private function isShippablePaymentStatus(Transaction $transaction, Order $swOrder, Table $table, Shop $shop)
     {
-        $notShippableStates = array(
+        $notShippableStates = [
             Status::PAYMENT_STATE_OPEN,
             Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED
-        );
+        ];
 
         if (!in_array($swOrder->getPaymentStatus()->getId(), $notShippableStates, true)) {
             return true;
@@ -647,5 +635,4 @@ class KlarnaShippingCommand extends ShopwareCommand
             $message,
         ];
     }
-
 }

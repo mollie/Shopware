@@ -19,9 +19,9 @@ class Notifier
         if ($exception !== null) {
             self::getLogger()->error(
                 $error,
-                array(
+                [
                     'error' => $exception->getMessage()
-                )
+                ]
             );
         } else {
             self::getLogger()->error($error);
@@ -71,5 +71,4 @@ class Notifier
     {
         return Shopware()->Container()->get('mollie_shopware.components.logger');
     }
-
 }

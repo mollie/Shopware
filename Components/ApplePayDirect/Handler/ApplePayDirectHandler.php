@@ -8,7 +8,6 @@ use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart;
 use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
 use MollieShopware\Components\Shipping\Shipping;
 
-
 class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
 {
 
@@ -82,7 +81,6 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
 
         /** @var array $item */
         foreach ($this->basket->sGetBasketData()['content'] as $item) {
-
             $cart->addItem(
                 $item['ordernumber'],
                 $item['articlename'],
@@ -128,7 +126,7 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
     public function requestPaymentSession($domain, $validationUrl)
     {
         # attention!!!
-        # for the payment session request with apple 
+        # for the payment session request with apple
         # we must ALWAYS use the live api key
         # the test will never work!!!
         $responseString = $this->clientLive->wallets->requestApplePayPaymentSession(
@@ -182,5 +180,4 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
     {
         return $this->session->offsetGet(self::KEY_SESSION_PAYMENTTOKEN);
     }
-
 }

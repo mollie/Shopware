@@ -22,5 +22,4 @@ class PaymentMethodServiceTest extends TestCase
     {
         $this->assertEquals('frontend/Mollie', PaymentMethodService::MOLLIE_ACTION_KEY);
     }
-
 }

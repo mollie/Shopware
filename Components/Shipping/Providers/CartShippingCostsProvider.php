@@ -105,5 +105,4 @@ class CartShippingCostsProvider implements ShippingCostsProviderInterface
         // taxRate = (unroundedBrutto / unroundedNetto - 1) * 100, eg. (1.19 / 1 - 1) * 100 = 19.0
         return (round($order->getInvoiceShipping() / $order->getInvoiceShippingNet(), 2) - 1) * 100;
     }
-
 }

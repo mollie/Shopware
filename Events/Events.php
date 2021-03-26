@@ -24,5 +24,4 @@ interface Events
      *
      */
     const APPLEPAY_DIRECT_SET_SHIPPING = 'Mollie_ApplePayDirect_setShipping_FilterResult';
-
 }

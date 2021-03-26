@@ -12,7 +12,8 @@ class CurrentCustomer
 
     public function __construct(
         \Enlight_Components_Session_Namespace $session,
-        \Shopware\Components\Model\ModelManager $modelManager)
+        \Shopware\Components\Model\ModelManager $modelManager
+    )
     {
         $this->session = $session;
         $this->modelManager = $modelManager;
@@ -37,8 +38,9 @@ class CurrentCustomer
     {
         $userId = $this->getCurrentId();
 
-        if (empty($userId))
+        if (empty($userId)) {
             return null;
+        }
 
         /** @var \Shopware\Models\Customer\Customer $customer */
         $customer = $this->modelManager->getRepository(
@@ -47,5 +49,4 @@ class CurrentCustomer
 
         return $customer;
     }
-
 }

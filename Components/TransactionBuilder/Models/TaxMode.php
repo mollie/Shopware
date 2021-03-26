@@ -40,5 +40,4 @@ class TaxMode
     {
         return $this->netOrder;
     }
-
 }

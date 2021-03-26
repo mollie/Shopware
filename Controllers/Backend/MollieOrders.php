@@ -1,12 +1,12 @@
 <?php
 
-use MollieShopware\Services\Refund\RefundService;
-use MollieShopware\Models\Transaction;
-use Shopware\Models\Order\Status;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\Models\Transaction;
+use MollieShopware\Services\Refund\RefundService;
 use Shopware\Models\Order\Detail;
+use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
@@ -178,14 +178,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $logger->info('Full refund successful in Backend for Order: ' . $order->getNumber());
 
             $this->returnSuccess('Order successfully refunded', $refund);
-
         } catch (\Exception $ex) {
-
             $logger->error(
                 'Error when executing a full refund order in Shopware Backend',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
 
             $this->returnError($ex->getMessage());
@@ -253,14 +251,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $logger->info('Partial refund successful in Backend for Order: ' . $order->getNumber());
 
             $this->returnSuccess('Order line successfully refunded', $refund);
-
         } catch (\Exception $ex) {
-
             $logger->error(
                 'Error when executing a partial refund order in Shopware Backend',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
 
             $this->returnError($ex->getMessage());
@@ -295,7 +291,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             if ($order !== null && (string)$this->orderService->getMollieOrderId($order) !== '') {
                 $shippable = true;
             }
-
         } catch (Exception $e) {
             //
         }
@@ -341,8 +336,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
      */
     protected function returnJson($data, $httpCode = 200)
     {
-        if ($httpCode !== 200)
+        if ($httpCode !== 200) {
             http_response_code(intval($httpCode));
+        }
 
         header('Content-Type: application/json');
         echo json_encode($data);

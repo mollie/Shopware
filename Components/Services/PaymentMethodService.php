@@ -19,10 +19,8 @@ use Shopware\Components\Plugin\PaymentInstaller;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Payment\Repository as PaymentRepository;
 
-
 class PaymentMethodService
 {
-
     const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../Resources/views/frontend/plugins/payment';
 
     const MOLLIE_ACTION_KEY = 'frontend/Mollie';
@@ -113,7 +111,6 @@ class PaymentMethodService
         # update existing ones
         /** @var array $method */
         foreach ($updateMethods as $method) {
-
             $foundInstalledMethod = null;
 
             /** @var Payment $installedMethod */
@@ -148,7 +145,6 @@ class PaymentMethodService
         # is not coming from the mollie payments api anymore (deprecated ones)
 
         if ($forceActivate) {
-
             $existingMethods = $this->getInstalledMolliePayments();
 
             /** @var Payment $method */
@@ -240,7 +236,6 @@ class PaymentMethodService
 
         /** @var Method $method */
         foreach ($methods as $method) {
-
             $paymentMethodName = 'mollie_' . strtolower($method->id);
 
             $newData = [
@@ -358,7 +353,7 @@ class PaymentMethodService
      */
     private function getDeltaToInsert($installedMethods, $mollieMethods)
     {
-        $list = array();
+        $list = [];
 
         /** @var array $method */
         foreach ($mollieMethods as $method) {
@@ -389,7 +384,7 @@ class PaymentMethodService
      */
     private function getDeltaToUpdate($installedMethods, $mollieMethods)
     {
-        $list = array();
+        $list = [];
 
         /** @var array $method */
         foreach ($mollieMethods as $method) {
@@ -423,11 +418,10 @@ class PaymentMethodService
     {
         $existingMethods = array_merge($newMethods, $updateMethods);
 
-        $list = array();
+        $list = [];
 
         /** @var Payment $installed */
         foreach ($installedMethods as $installed) {
-
             $found = false;
             /** @var array $method */
             foreach ($existingMethods as $method) {
@@ -493,9 +487,9 @@ class PaymentMethodService
         } catch (ApiException $e) {
             $this->logger->error(
                 'Error when loading active payment methods from Mollie',
-                array(
+                [
                     'error' => $e->getMessage(),
-                )
+                ]
             );
         }
 
@@ -511,7 +505,6 @@ class PaymentMethodService
     {
         /** @var Payment $remove */
         foreach ($methods as $method) {
-
             if ($method->getName() === $searchedMethod->getName()) {
                 return true;
             }
@@ -519,5 +512,4 @@ class PaymentMethodService
 
         return false;
     }
-
 }

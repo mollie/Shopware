@@ -121,5 +121,4 @@ class TransactionItemBuilder
 
         return 'physical';
     }
-
 }

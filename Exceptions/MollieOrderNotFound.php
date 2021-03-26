@@ -12,5 +12,4 @@ class MollieOrderNotFound extends \Exception
     {
         parent::__construct('Mollie order : ' . $orderId . ' not found!');
     }
-
 }

@@ -41,8 +41,7 @@ class GuestAccountGateway implements GuestAccountGatewayInterface
         FormFactoryInterface $formFactory,
         ContextServiceInterface $contextService,
         RegisterServiceInterface $registerService
-    )
-    {
+    ) {
         $this->addressService = $addressService;
         $this->em = $em;
         $this->formFactory = $formFactory;
@@ -167,5 +166,4 @@ class GuestAccountGateway implements GuestAccountGatewayInterface
 
         return $qb->getQuery()->getArrayResult()[0];
     }
-
 }

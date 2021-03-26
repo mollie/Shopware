@@ -124,11 +124,10 @@ class PaymentService
         $orderLinesRepo = Shopware()->container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
 
 
-        # check if we have an existing order in 
+        # check if we have an existing order in
         # shopware for our transaction
         # if so load it and use it as meta data information
         if (!empty($transaction->getOrderId())) {
-
             $shopwareOrder = $orderRepo->find($transaction->getOrderId());
 
             $transaction->setOrderId($shopwareOrder->getId());
@@ -140,12 +139,10 @@ class PaymentService
 
 
         if ($useOrdersAPI) {
-
             $requestData = $this->prepareRequest($paymentMethod, $transaction, true);
             $mollieOrder = $this->apiClient->orders->create($requestData);
 
             foreach ($mollieOrder->lines as $index => $line) {
-
                 $item = new OrderLines();
 
                 if ($shopwareOrder instanceof Order) {
@@ -157,21 +154,16 @@ class PaymentService
 
                 $orderLinesRepo->save($item);
             }
-
         } else {
-
             $requestData = $this->prepareRequest($paymentMethod, $transaction);
             $molliePayment = $this->apiClient->payments->create($requestData);
         }
 
 
         if ($useOrdersAPI) {
-
             $transaction->setMollieId($mollieOrder->id);
             $checkoutUrl = $mollieOrder->getCheckoutUrl();
-
         } else {
-
             $transaction->setMolliePaymentId($molliePayment->id);
             $checkoutUrl = $molliePayment->getCheckoutUrl();
         }
@@ -195,16 +187,12 @@ class PaymentService
         # so we check for their payment methods and return our special checkout URL
         # to tell our calling function that we should redirect to the return url immediately.
         if (empty($checkoutUrl)) {
-
             if ($useOrdersAPI) {
-
                 if ($mollieOrder->method === PaymentMethod::CREDITCARD &&
                     $mollieOrder->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
                 }
-
             } else {
-
                 if ($molliePayment->method === PaymentMethod::CREDITCARD &&
                     $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
@@ -289,8 +277,9 @@ class PaymentService
 
         $paymentParameters['webhookUrl'] = $webhookUrl;
 
-        if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_')
+        if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_') {
             $paymentMethod = substr($paymentMethod, strlen('mollie_'));
+        }
 
         // set method specific parameters
         $paymentParameters = $this->preparePaymentParameters(
@@ -340,8 +329,9 @@ class PaymentService
                 $transaction->getOrderNumber() : 'Transaction ' . $paymentDescription;
 
             // add billing e-mail address
-            if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24)
+            if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24) {
                 $molliePrepared['billingEmail'] = $transaction->getCustomer()->getEmail();
+            }
 
             // prepare payment parameters
             $molliePrepared = $this->preparePaymentParameters(
@@ -436,10 +426,9 @@ class PaymentService
         $customConfig = new CustomConfig($this->customEnvironmentVariables);
 
         # if we have a custom webhook URL
-        # make sure to replace the original shop urls 
+        # make sure to replace the original shop urls
         # with the one we provide in here
         if (!empty($customConfig->getShopDomain())) {
-
             $host = Shopware()->Shop()->getHost();
 
             # replace old domain with
@@ -561,7 +550,6 @@ class PaymentService
         }
 
         if ((string)$paymentMethod === PaymentMethod::BANKTRANSFER) {
-
             $dueDateDays = $this->config->getBankTransferDueDateDays();
 
             if (!empty($dueDateDays)) {
@@ -598,20 +586,27 @@ class PaymentService
             $paymentsResult['total'] = count($payments);
 
             foreach ($payments as $payment) {
-                if ($payment->isPaid())
+                if ($payment->isPaid()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PAID]++;
-                if ($payment->isAuthorized())
+                }
+                if ($payment->isAuthorized()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED]++;
-                if ($payment->isPending())
+                }
+                if ($payment->isPending()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_DELAYED]++;
-                if ($payment->isOpen())
+                }
+                if ($payment->isOpen()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN]++;
-                if ($payment->isCanceled())
+                }
+                if ($payment->isCanceled()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_CANCELED]++;
-                if ($payment->isFailed())
+                }
+                if ($payment->isFailed()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_FAILED]++;
-                if ($payment->isExpired())
+                }
+                if ($payment->isExpired()) {
                     $paymentsResult[PaymentStatus::MOLLIE_PAYMENT_EXPIRED]++;
+                }
             }
         }
 

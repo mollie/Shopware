@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Models\UserData;
 
-
 class UserData
 {
 
@@ -118,5 +117,4 @@ class UserData
     {
         return $this->countryCode;
     }
-
 }

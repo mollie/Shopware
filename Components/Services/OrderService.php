@@ -56,12 +56,11 @@ class OrderService
             /** @var Order $order */
             $order = $orderRepo->find($orderId);
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading order by id: ' . $orderId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -90,12 +89,11 @@ class OrderService
             /** @var \Shopware\Models\Order\Detail $detail */
             $detail = $orderRepo->find($orderDetailId);
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading order detail by id: ' . $orderDetailId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -166,17 +164,17 @@ class OrderService
                 'orderId' => $order->getId()
             ]);
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading mollie order id',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
-        if (!empty($transaction))
+        if (!empty($transaction)) {
             $mollieId = $transaction->getMollieId();
+        }
 
         return $mollieId;
     }
@@ -243,17 +241,17 @@ class OrderService
                 'orderId' => $orderId
             ]);
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading mollie payment id of order: ' . $orderId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
-        if (!empty($transaction))
+        if (!empty($transaction)) {
             $molliePaymentId = $transaction->getMolliePaymentId();
+        }
 
         return $molliePaymentId;
     }
@@ -271,10 +269,11 @@ class OrderService
         $items = [];
 
         /** @var Order $order */
-        if ($orderId instanceof Order)
+        if ($orderId instanceof Order) {
             $order = $orderId;
-        else
+        } else {
             $order = $this->getOrderById($orderId);
+        }
 
         try {
             $orderDetails = $order->getDetails();
@@ -294,8 +293,9 @@ class OrderService
                     }
 
                     // clear tax if order is tax free
-                    if ($order->getTaxFree())
+                    if ($order->getTaxFree()) {
                         $unitPrice = $netPrice;
+                    }
 
                     // get total amount
                     $totalAmount = $unitPrice * $orderDetail->getQuantity();
@@ -303,8 +303,9 @@ class OrderService
                     // get vat amount
                     $vatAmount = $totalAmount * ($orderDetail->getTaxRate() / ($orderDetail->getTaxRate() + 100));
 
-                    if ($order->getTaxFree())
+                    if ($order->getTaxFree()) {
                         $vatAmount = 0;
+                    }
 
                     // build the order line array
                     $orderLine = [
@@ -320,20 +321,25 @@ class OrderService
                     ];
 
                     // set the order line type
-                    if (strstr($orderDetail->getNumber(), 'surcharge'))
+                    if (strstr($orderDetail->getNumber(), 'surcharge')) {
                         $orderLine['type'] = 'surcharge';
+                    }
 
-                    if (strstr($orderDetail->getNumber(), 'discount'))
+                    if (strstr($orderDetail->getNumber(), 'discount')) {
                         $orderLine['type'] = 'discount';
+                    }
 
-                    if ($orderDetail->getEsdArticle() > 0)
+                    if ($orderDetail->getEsdArticle() > 0) {
                         $orderLine['type'] = 'digital';
+                    }
 
-                    if ($orderDetail->getMode() == 2)
+                    if ($orderDetail->getMode() == 2) {
                         $orderLine['type'] = 'discount';
+                    }
 
-                    if ($unitPrice < 0)
+                    if ($unitPrice < 0) {
                         $orderLine['type'] = 'discount';
+                    }
 
                     // add the order line to items
                     $items[] = $orderLine;
@@ -342,9 +348,9 @@ class OrderService
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error when loading order lines',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -368,9 +374,9 @@ class OrderService
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error when loading order by session ID: ' . $sessionId,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -396,5 +402,4 @@ class OrderService
 
         return $order;
     }
-
 }

@@ -182,18 +182,18 @@ class CheckoutSessionFacade
 
         $this->logger->info(
             'Starting checkout for user: ' . $basketUserId . ' with payment: ' . $paymentShortName,
-            array(
-                'basket' => array(
+            [
+                'basket' => [
                     'amount' => $basketData['Amount'],
                     'quantity' => $basketData['Quantity'],
                     'payment' => $paymentShortName,
                     'user' => $basketUserId
-                ),
-                'tokens' => array(
+                ],
+                'tokens' => [
                     'creditcard' => $this->tokenAnonymizer->anonymize($tokenCreditCard),
                     'applepay' => $this->tokenAnonymizer->anonymize($tokenApplePay),
-                )
-            )
+                ]
+            ]
         );
 
         if (!$this->sBasket->sCountBasket()) {
@@ -347,5 +347,4 @@ class CheckoutSessionFacade
 
         return $transaction;
     }
-
 }

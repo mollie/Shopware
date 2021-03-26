@@ -31,7 +31,6 @@ use Shopware\Components\Routing\Context;
 
 class MollieShopware extends Plugin
 {
-
     const PLUGIN_VERSION = '1.7.5';
 
     const PAYMENT_PREFIX = 'mollie_';
@@ -186,8 +185,9 @@ class MollieShopware extends Plugin
         $this->updateAttributes();
 
         // set config value for upgraders from version 1.3
-        if (substr($context->getPlugin()->getVersion(), 0, strlen('1.3')) == '1.3')
+        if (substr($context->getPlugin()->getVersion(), 0, strlen('1.3')) == '1.3') {
             $this->writeConfig($context->getPlugin(), 'orders_api_only_where_mandatory', 'no');
+        }
 
         parent::update($context);
     }
@@ -276,12 +276,11 @@ class MollieShopware extends Plugin
                 OrderLines::class
             ]);
         } catch (Exception $ex) {
-
             $this->getPluginLogger()->error(
                 'Error when updating database tables',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
     }
@@ -297,12 +296,11 @@ class MollieShopware extends Plugin
             $schema->remove(TransactionItem::class);
             $schema->remove(OrderLines::class);
         } catch (Exception $ex) {
-
             $this->getPluginLogger()->error(
                 'Error when removing database tables',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
     }
@@ -510,12 +508,12 @@ class MollieShopware extends Plugin
     {
         $connection = $this->container->get('dbal_connection');
 
-        $iniFiles = array(
+        $iniFiles = [
             new SnippetFile(
                 'backend/mollie/general',
                 __DIR__ . '/Resources/snippets/backend/mollie/general.ini'
             )
-        );
+        ];
 
         $cleaner = new SnippetsCleaner($connection, $iniFiles);
 

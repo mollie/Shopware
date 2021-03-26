@@ -40,7 +40,7 @@ class Basket
      * @return BasketItem[]
      * @throws \Exception
      */
-    public function getBasketLines($userData = array())
+    public function getBasketLines($userData = [])
     {
         $items = [];
 
@@ -54,7 +54,6 @@ class Basket
        
             /** @var \Shopware\Models\Order\Basket $basketItem */
             foreach ($basketItems as $basketItem) {
-
                 $item = new BasketItem(
                     $basketItem->getId(),
                     $basketItem->getArticleId(),
@@ -71,7 +70,6 @@ class Basket
                 # update our basket item ID if we have that attribute
                 # i dont know why - isn't it in the ID already?, but let's keep with it for now
                 if ($basketItem !== null && $basketItem->getAttribute() !== null && method_exists($basketItem->getAttribute(), 'setBasketItemId')) {
-
                     $basketItem->getAttribute()->setBasketItemId($basketItem->getId());
 
                     $this->modelManager->persist($basketItem);
@@ -80,18 +78,15 @@ class Basket
 
                 $items[] = $item;
             }
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading basket lines',
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
         return $items;
     }
-
 }

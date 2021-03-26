@@ -5,8 +5,8 @@ namespace MollieShopware\Components\Services;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\CurrentCustomer;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Customer\Customer;
 use Shopware\Models\Attribute\Customer as CustomerAttribute;
+use Shopware\Models\Customer\Customer;
 
 class CreditCardService
 {
@@ -23,8 +23,7 @@ class CreditCardService
         MollieApiClient $apiClient,
         CurrentCustomer $customer,
         ModelManager $modelManager
-    )
-    {
+    ) {
         $this->apiClient = $apiClient;
         $this->customer = $customer;
         $this->modelManager = $modelManager;

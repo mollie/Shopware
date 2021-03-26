@@ -18,8 +18,7 @@ class ShopService
      */
     public function __construct(
         ModelManager $modelManager
-    )
-    {
+    ) {
         $this->modelManager = $modelManager;
     }
 

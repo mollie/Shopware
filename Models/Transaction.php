@@ -466,11 +466,13 @@ class Transaction
     {
         $transactionId = $this->getMolliePaymentId();
 
-        if (empty($transactionId))
+        if (empty($transactionId)) {
             $transactionId = $this->getMollieId();
+        }
 
-        if (empty($transactionId))
+        if (empty($transactionId)) {
             $transactionId = $this->getTransactionId();
+        }
 
         return $transactionId;
     }
@@ -487,5 +489,4 @@ class Transaction
     {
         return $this->mollieId;
     }
-
 }

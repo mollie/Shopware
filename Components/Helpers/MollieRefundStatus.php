@@ -76,5 +76,4 @@ class MollieRefundStatus
         # both of them are strings, but that's totally fine
         return ($orderValue !== $refundedValue);
     }
-
 }

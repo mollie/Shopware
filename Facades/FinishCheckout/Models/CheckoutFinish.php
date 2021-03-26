@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Facades\FinishCheckout\Models;
 
-
 class CheckoutFinish
 {
 
@@ -42,5 +41,4 @@ class CheckoutFinish
     {
         return $this->temporaryId;
     }
-
 }

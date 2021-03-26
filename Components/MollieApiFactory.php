@@ -121,13 +121,12 @@ class MollieApiFactory
 
             // set the api key based on the configuration
             $client->setApiKey($apiKey);
-
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Fatal error with Mollie API Key. Invalid Key: ' . $apiKey,
-                array(
+                [
                     'error' => $ex->getMessage(),
-                )
+                ]
             );
         }
 
@@ -164,5 +163,4 @@ class MollieApiFactory
             require_once __DIR__ . '/../Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php';
         }
     }
-
 }

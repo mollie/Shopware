@@ -12,7 +12,6 @@ use Shopware\Components\Theme\LessDefinition;
 
 class FrontendViewSubscriber implements SubscriberInterface
 {
-
     public static function getSubscribedEvents()
     {
         return [
@@ -152,5 +151,4 @@ class FrontendViewSubscriber implements SubscriberInterface
 
         return new ArrayCollection([$less]);
     }
-
 }

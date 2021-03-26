@@ -2,8 +2,8 @@
 
 namespace MollieShopware\Components\Base;
 
-use Shopware_Controllers_Frontend_Payment;
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware_Controllers_Frontend_Payment;
 
 abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_Payment implements CSRFWhitelistAware
 {
@@ -92,8 +92,7 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
                 $basket = $this->loadBasketFromSignature($signature);
                 $this->verifyBasketSignature($signature, $basket);
                 return true;
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 return false;
             }
         }
@@ -119,11 +118,13 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      */
     protected function redirectBack($error = null, $message = null)
     {
-        if ($error !== null)
+        if ($error !== null) {
             Shopware()->Session()->offsetSet('mollieError', $error);
+        }
 
-        if ($message !== null)
+        if ($message !== null) {
             Shopware()->Session()->offsetSet('mollieErrorMessage', $message);
+        }
 
         return $this->redirect(
             Shopware()->Front()->Router()->assemble([
@@ -232,13 +233,13 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      * @param $sessionId
      * @throws \Exception
      */
-    public function startSession($sessionId) {
+    public function startSession($sessionId)
+    {
         try {
             \Enlight_Components_Session::writeClose();
             \Enlight_Components_Session::setId($sessionId);
             \Enlight_Components_Session::start();
-        }
-        catch (\Exception $ex) {
+        } catch (\Exception $ex) {
             //
         }
     }

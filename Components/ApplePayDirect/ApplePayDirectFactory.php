@@ -8,7 +8,6 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Shipping\Shipping;
 
-
 class ApplePayDirectFactory
 {
 
@@ -79,5 +78,4 @@ class ApplePayDirectFactory
             $this->session
         );
     }
-
 }

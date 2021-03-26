@@ -53,5 +53,4 @@ class MollieShopSwitcher
 
         return $apiFactory->create($shopId);
     }
-
 }
