@@ -29,6 +29,8 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Routing\Context;
 
+
+
 class MollieShopware extends Plugin
 {
     const PLUGIN_VERSION = '1.7.5';
@@ -237,7 +239,7 @@ class MollieShopware extends Plugin
         # want to activate all payment methods
         $paymentMethodService->installPaymentMethods(true);
 
-        
+
         // download apple pay merchant domain verification file of mollie
         $downloader = new ApplePayDomainFileDownloader();
         $downloader->downloadDomainAssociationFile(Shopware()->DocPath());
