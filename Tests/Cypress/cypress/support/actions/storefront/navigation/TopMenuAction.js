@@ -1,6 +1,6 @@
 import NavigationRepository from 'Repositories/storefront/navigation/NavigationRepository';
 
-class TopMenu {
+class TopMenuAction {
 
     /**
      *
@@ -14,4 +14,4 @@ class TopMenu {
 
 }
 
-export default TopMenu;
+export default TopMenuAction;

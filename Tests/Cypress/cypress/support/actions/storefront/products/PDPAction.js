@@ -1,6 +1,6 @@
 import PDPRepository from 'Repositories/storefront/products/PDPRepository';
 
-class PDP {
+class PDPAction {
 
     /**
      *
@@ -14,4 +14,4 @@ class PDP {
 
 }
 
-export default PDP;
+export default PDPAction;

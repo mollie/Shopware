@@ -1,5 +1,9 @@
 {
+    "chromeWebSecurity": false,
+    "watchForFileChanges": false,
     "trashAssetsBeforeRuns": true,
+    "screenshotOnRunFailure": true,
+    "video": true,
     "devices": [
         {
             "key": "desktop",
