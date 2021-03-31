@@ -1,23 +1,27 @@
 import Devices from "Services/Devices";
 import Session from "Actions/utils/Session"
 // ------------------------------------------------------
-import TopMenu from 'Actions/storefront/navigation/TopMenu';
-import Login from 'Actions/storefront/Login';
-import Register from 'Actions/storefront/Register';
-import Listing from 'Actions/storefront/products/Listing';
-import PDP from 'Actions/storefront/products/PDP';
-import Checkout from 'Actions/storefront/checkout/Checkout';
+import TopMenuAction from 'Actions/storefront/navigation/TopMenuAction';
+import LoginAction from 'Actions/storefront/account/LoginAction';
+import RegisterAction from 'Actions/storefront/account/RegisterAction';
+import ListingAction from 'Actions/storefront/products/ListingAction';
+import PDPAction from 'Actions/storefront/products/PDPAction';
+import CheckoutAction from 'Actions/storefront/checkout/CheckoutAction';
 
 
 const devices = new Devices();
 const session = new Session();
 
-const topMenu = new TopMenu();
-const register = new Register();
-const login = new Login();
-const listing = new Listing();
-const pdp = new PDP();
-const checkout = new Checkout();
+const topMenu = new TopMenuAction();
+const register = new RegisterAction();
+const login = new LoginAction();
+const listing = new ListingAction();
+const pdp = new PDPAction();
+const checkout = new CheckoutAction();
+
+
+const user_email = "dev@localhost.de";
+const user_pwd = "MollieMollie111";
 
 
 beforeEach(() => {
@@ -27,10 +31,7 @@ beforeEach(() => {
     // be used over and over again.
     // remarks: ENV variables are not found in github - pretty weird
     // lets just do it in here! :)
-    register.doRegister(
-        "dev@localhost.de",
-        "MollieMollie111"
-    );
+    register.doRegister(user_email, user_pwd);
 
     // we just try to register above which might work or might not work.
     // then simply reset our session, so that we can do a plain login ;)
@@ -48,19 +49,11 @@ describe('Payment Methods', () => {
                 devices.setDevice(device);
             });
 
-            it('Payment Methods exist in Checkout', () => {
+            it('Mollie Payment Methods are available', () => {
 
                 cy.visit('/');
 
-                // remarks: ENV variables are not found in github - pretty weird
-                // lets just do it in here! :
-                login.doLogin(
-                    "dev@localhost.de",
-                    "MollieMollie111"
-                );
-
-                cy.contains('Willkommen');
-
+                login.doLogin(user_email, user_pwd);
 
                 topMenu.clickOnClothing();
 
@@ -68,14 +61,14 @@ describe('Payment Methods', () => {
 
                 pdp.addToCart();
 
-                checkout.continueToCheckout();
+                checkout.goToCheckoutInOffCanvas();
 
-                checkout.confirmSwitchPayment();
+                checkout.openPaymentSelectionOnConfirm();
 
                 // yes we require test mode, but this is
                 // the only chance to see if the plugin is being used, because
                 // every merchant might have different payment methods ;)
-                cy.contains('(Mollie Test Mode');
+                cy.contains('(Mollie Test Mode)');
             })
 
         })
