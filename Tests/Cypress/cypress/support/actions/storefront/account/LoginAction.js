@@ -1,6 +1,6 @@
 import LoginRepository from 'Repositories/storefront/account/LoginRepository';
 
-class Login {
+class LoginAction {
 
     /**
      *
@@ -21,4 +21,4 @@ class Login {
 
 }
 
-export default Login;
+export default LoginAction;

@@ -13,13 +13,14 @@ install: ## Installs all dependencies
 	npm install @cypress/webpack-preprocessor --save-dev --save .
 	npm install @cucumber/tag-expressions --save-dev --save .
 
+# ---------------------------------------------------------------------------------------------
+
 open-ui: ## Opens Cypress UI
 ifndef url
 	$(warning Please provide the URL argument to Start Cypress!)
 	@exit 1
 endif
 	CYPRESS_BASE_URL=$(url) ./node_modules/.bin/cypress open --env conf=dev
-
 
 # ---------------------------------------------------------------------------------------------
 
