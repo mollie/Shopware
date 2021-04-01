@@ -120,6 +120,9 @@ jobs:
           docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
           sleep 30
           docker logs shop
+          # now change the domain of our shop, mollie doesn't work with localhost
+          sudo echo "127.0.0.1 local.mollie.shop" | sudo tee -a /etc/hosts
+          docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = 'local.mollie.shop', hosts = '';\""
 
       - name: Upload into Docker
         run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
@@ -139,7 +142,7 @@ jobs:
         run: cd Tests/Cypress && make install -B
 
       - name: Start Cypress
-        run: cd Tests/Cypress && make run url=http://localhost
+        run: cd Tests/Cypress && make run url=http://local.mollie.shop
 
       - name: Store Cypress Results
         if: ${{ always() }}
