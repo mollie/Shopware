@@ -1,6 +1,6 @@
 import RegisterRepository from 'Repositories/storefront/account/RegisterRepository';
 
-class Register {
+class RegisterAction {
 
     /**
      *
@@ -32,4 +32,4 @@ class Register {
     }
 }
 
-export default Register;
+export default RegisterAction;

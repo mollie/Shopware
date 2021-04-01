@@ -1,6 +1,6 @@
 import ListingRepository from 'Repositories/storefront/products/ListingRepository';
 
-class Listing {
+class ListingAction {
 
     /**
      *
@@ -14,4 +14,4 @@ class Listing {
 
 }
 
-export default Listing;
+export default ListingAction;
