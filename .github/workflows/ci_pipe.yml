@@ -116,18 +116,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Start Docker
-        run: docker run --rm --env PHP_VERSION=7.4 -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+        run: |
+          docker run --rm --env -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
 
       - name: Upload into Docker
         run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
-
-      - name: Wait for Docker Container
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '30s'
-
-      - name: Dockware Output
-        run: docker logs shop
 
       - name: Install Plugin
         run: |
