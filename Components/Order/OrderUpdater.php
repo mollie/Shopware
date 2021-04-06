@@ -141,13 +141,12 @@ class OrderUpdater
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
-    public function updateShopwareOrderStatusWithoutMail(Order $order, $status, $isOrderTransaction)
+    public function updateShopwareOrderStatusWithoutMail(Order $order, $status)
     {
         $statusDidChange = $this->updateOrderStatus(
             $order,
             $status,
-            false,
-            $isOrderTransaction
+            false
         );
 
         if (!$statusDidChange) {
@@ -194,7 +193,7 @@ class OrderUpdater
     {
         $result = PaymentTransactionMapper::mapStatus($status);
 
-        $shopwareStatus = $result->getTargetStatus();
+        $newShopwareStatus = $result->getTargetStatus();
         $ignoreState = $result->isIgnoreState();
 
         $previousShopwareStatus = $newShopwareStatus;
