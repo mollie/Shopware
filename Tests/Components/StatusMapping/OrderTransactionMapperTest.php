@@ -61,8 +61,8 @@ class OrderTransactionMapperTest extends TestCase
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_PAID,
-                null,
-                true
+                Status::ORDER_STATE_COMPLETED,
+                false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_REFUNDED,

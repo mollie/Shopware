@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Order;
 
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Enlight_Event_Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Events\Events;
@@ -190,49 +191,15 @@ class OrderUpdater
      * @param $sendMail
      * @return bool
      * @throws PaymentStatusNotFoundException
-     * @throws \Enlight_Event_Exception
+     * @throws Enlight_Event_Exception
+     * @throws OrderStatusNotFoundException
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
-        $newShopwareStatus = null;
-        $ignoreState = false;
+        $result = PaymentTransactionMapper::mapStatus($status);
 
-        switch ($status) {
-
-            case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-                $newShopwareStatus = Status::PAYMENT_STATE_OPEN;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
-                $newShopwareStatus = $this->config->getAuthorizedPaymentStatusId();
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_PENDING:
-                $newShopwareStatus = Status::PAYMENT_STATE_DELAYED;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_PAID:
-                $newShopwareStatus = Status::PAYMENT_STATE_COMPLETELY_PAID;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
-            case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-                $newShopwareStatus = Status::PAYMENT_STATE_RE_CREDITING;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
-            case PaymentStatus::MOLLIE_PAYMENT_FAILED:
-            case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $newShopwareStatus = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-                # impact on the payment entry in shopware
-                # these are only states about the order
-                $ignoreState = true;
-                break;
-        }
-
+        $shopwareStatus = $result->getTargetStatus();
+        $ignoreState = $result->isIgnoreState();
 
         $previousShopwareStatus = $newShopwareStatus;
 
@@ -296,13 +263,9 @@ class OrderUpdater
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
-    private function updateOrderStatus(Order $order, $mollieStatus, $sendMail, $isOrderTransaction)
+    private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
-        if ($isOrderTransaction) {
-            $result = OrderTransactionMapper::mapStatus($mollieStatus);
-        } else {
-            $result = PaymentTransactionMapper::mapStatus($mollieStatus);
-        }
+        $result = OrderTransactionMapper::mapStatus($mollieStatus);
 
         $targetState = $result->getTargetStatus();
         $ignoreState = $result->isIgnoreState();
@@ -361,5 +324,4 @@ class OrderUpdater
 
         return true;
     }
-
 }

@@ -24,6 +24,7 @@ class OrderTransactionMapper
 
         switch ($status) {
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
+            case PaymentStatus::MOLLIE_PAYMENT_PAID:
                 $targetState = Status::ORDER_STATE_COMPLETED;
                 break;
 
@@ -35,7 +36,6 @@ class OrderTransactionMapper
 
             case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
             case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-            case PaymentStatus::MOLLIE_PAYMENT_PAID:
             case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
             case PaymentStatus::MOLLIE_PAYMENT_PENDING:
             case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:

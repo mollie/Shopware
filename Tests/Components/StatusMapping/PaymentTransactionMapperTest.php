@@ -36,24 +36,25 @@ class PaymentTransactionMapperTest extends TestCase
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_CANCELED,
-                Status::ORDER_STATE_CANCELLED,
+                Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
                 false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_FAILED,
-                null,
-                true
+                Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
+                false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_EXPIRED,
-                Status::ORDER_STATE_CANCELLED,
+                Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED,
                 false
             ],
-            [
-                PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED,
-                Status::ORDER_STATE_OPEN,
-                false
-            ],
+            // This payment status needs the a booted Shopware instance
+//            [
+//                PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED,
+//                null,
+//                false
+//            ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_OPEN,
                 Status::ORDER_STATE_OPEN,
@@ -61,23 +62,23 @@ class PaymentTransactionMapperTest extends TestCase
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_PAID,
-                Status::ORDER_STATE_READY_FOR_DELIVERY,
+                Status::PAYMENT_STATE_COMPLETELY_PAID,
                 false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_REFUNDED,
-                null,
-                true
+                Status::PAYMENT_STATE_RE_CREDITING,
+                false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_PENDING,
-                Status::ORDER_STATE_OPEN,
+                Status::PAYMENT_STATE_DELAYED,
                 false
             ],
             [
                 PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED,
-                null,
-                true
+                Status::PAYMENT_STATE_RE_CREDITING,
+                false
             ],
         ];
     }

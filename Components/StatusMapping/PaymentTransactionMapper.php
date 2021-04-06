@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace MollieShopware\Components\StatusMapping;
 
 
+use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\StatusMapping\DataStruct\StatusTransactionStruct;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
@@ -24,26 +25,36 @@ class PaymentTransactionMapper
 
         switch ($status) {
             case PaymentStatus::MOLLIE_PAYMENT_PAID:
-                $targetState = Status::ORDER_STATE_READY_FOR_DELIVERY;
+                $targetState = Status::PAYMENT_STATE_COMPLETELY_PAID;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-            case PaymentStatus::MOLLIE_PAYMENT_PENDING:
-            case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
                 $targetState = Status::ORDER_STATE_OPEN;
+                break;
+
+            case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
+                Shopware()->Container()->get('mollie_shopware.config')->getAuthorizedPaymentStatusId();
+                break;
+
+            case PaymentStatus::MOLLIE_PAYMENT_PENDING:
+                $targetState = Status::PAYMENT_STATE_DELAYED;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
-                $targetState = Status::ORDER_STATE_CANCELLED;
+            case PaymentStatus::MOLLIE_PAYMENT_FAILED:
+                $targetState = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
+                break;
+
+            case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
+            case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
+                $targetState = Status::PAYMENT_STATE_RE_CREDITING;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-            case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
-            case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-            case PaymentStatus::MOLLIE_PAYMENT_FAILED:
                 $ignoreState = true;
                 break;
+
             default:
                 throw new OrderStatusNotFoundException('The given status could not be mapped!');
         }
