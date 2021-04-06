@@ -1,10 +1,7 @@
 name: CI Pipeline
 
 on:
-  push:
-    branches:
-      - master
-  workflow_dispatch:
+  pull_request:
     branches:
       - master
 
@@ -100,8 +97,8 @@ jobs:
 
   # ------------------------------------------------------------------------------------------------------------------------
 
-  e2e:
-    name: E2E Tests | Shopware ${{ matrix.shopware }}
+  integration:
+    name: Integration Tests | Shopware ${{ matrix.shopware }}
     needs: phpcsfixer
     runs-on: ubuntu-latest
     strategy:
@@ -117,9 +114,6 @@ jobs:
           docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
           sleep 30
           docker logs shop
-          # now change the domain of our shop, mollie doesn't work with localhost
-          sudo echo "127.0.0.1 local.mollie.shop" | sudo tee -a /etc/hosts
-          docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = 'local.mollie.shop', hosts = '';\""
 
       - name: Upload into Docker
         run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
@@ -128,25 +122,4 @@ jobs:
         run: |
           docker exec shop bash -c 'php bin/console sw:plugin:refresh'
           docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
-          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
-          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
-          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
           docker exec shop bash -c 'php bin/console sw:cache:clear'
-          docker exec shop bash -c 'php bin/console mollie:payments:import'
-          docker exec shop bash -c 'php bin/console sw:cache:clear'
-
-      - name: Install Cypress
-        run: cd Tests/Cypress && make install -B
-
-      - name: Start Cypress
-        run: cd Tests/Cypress && make run url=http://local.mollie.shop
-
-      - name: Store Cypress Results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: cypress_results_sw_v${{ matrix.shopware }}
-          retention-days: 1
-          path: |
-            Tests/Cypress/cypress/videos
-            Tests/Cypress/cypress/screenshots
