@@ -6,10 +6,9 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Enlight_Event_Exception;
 use MollieShopware\Components\Config;
-use MollieShopware\Components\Constants\PaymentStatus;
-use MollieShopware\Events\Events;
 use MollieShopware\Components\StatusMapping\OrderTransactionMapper;
 use MollieShopware\Components\StatusMapping\PaymentTransactionMapper;
+use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use Psr\Log\LoggerInterface;
@@ -17,12 +16,10 @@ use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\History;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
 use sOrder;
 
 class OrderUpdater
 {
-
     /**
      * @var LoggerInterface
      */
@@ -121,13 +118,12 @@ class OrderUpdater
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
      */
-    public function updateShopwareOrderStatus(Order $order, $status, $isOrderTransaction)
+    public function updateShopwareOrderStatus(Order $order, $status)
     {
         $statusDidChange = $this->updateOrderStatus(
             $order,
             $status,
-            $this->config->isPaymentStatusMailEnabled(),
-            $isOrderTransaction
+            $this->config->isPaymentStatusMailEnabled()
         );
 
         if (!$statusDidChange) {
