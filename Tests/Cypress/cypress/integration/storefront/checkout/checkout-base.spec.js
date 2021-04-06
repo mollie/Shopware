@@ -1,6 +1,7 @@
 import Devices from "Services/Devices";
 import Session from "Actions/utils/Session"
 // ------------------------------------------------------
+import PluginAction from "Actions/backend/PluginAction";
 import TopMenuAction from 'Actions/storefront/navigation/TopMenuAction';
 import LoginAction from 'Actions/storefront/account/LoginAction';
 import RegisterAction from 'Actions/storefront/account/RegisterAction';
@@ -14,6 +15,7 @@ import IssuerScreenAction from 'Actions/mollie/IssuerScreenAction';
 const devices = new Devices();
 const session = new Session();
 
+const plugin = new PluginAction();
 const topMenu = new TopMenuAction();
 const register = new RegisterAction();
 const login = new LoginAction();
@@ -43,18 +45,24 @@ const payments = [
 ];
 
 
-beforeEach(() => {
+before(function () {
+
+    devices.setDevice(devices.getFirstDevice());
+
+    plugin.configure(true);
+
     // lets just do this over and over again here
     // its not possible to have that ONCE for now (at least for me haha)
     register.doRegister(user_email, user_pwd);
-    session.resetSession();
+})
+
+beforeEach(() => {
+    session.resetBrowserSession();
 });
 
 
 describe('Successful Checkout', () => {
-
     devices.getDevices().forEach(device => {
-
         context(devices.getDescription(device), () => {
 
             payments.forEach(payment => {
@@ -70,14 +78,10 @@ describe('Successful Checkout', () => {
                     login.doLogin(user_email, user_pwd);
 
                     topMenu.clickOnClothing();
-
                     listing.clickOnFirstProduct();
-
                     pdp.addToCart();
-
                     checkout.goToCheckoutInOffCanvas();
 
-                    // switch to our payment method
                     checkout.switchPaymentMethod(payment.name);
 
                     checkout.placeOrderOnConfirm();
@@ -113,16 +117,11 @@ describe('Successful Checkout', () => {
             })
 
         })
-
     })
-
 })
 
-
 describe('Failed Checkout', () => {
-
     devices.getDevices().forEach(device => {
-
         context(devices.getDescription(device), () => {
 
             beforeEach(() => {
@@ -136,15 +135,11 @@ describe('Failed Checkout', () => {
                 login.doLogin(user_email, user_pwd);
 
                 topMenu.clickOnClothing();
-
                 listing.clickOnFirstProduct();
-
                 pdp.addToCart();
-
                 checkout.goToCheckoutInOffCanvas();
 
                 checkout.switchPaymentMethod('PayPal');
-
                 checkout.placeOrderOnConfirm();
 
                 molliePayment.selectFailed();
@@ -159,8 +154,6 @@ describe('Failed Checkout', () => {
             })
 
         })
-
     })
-
 })
 

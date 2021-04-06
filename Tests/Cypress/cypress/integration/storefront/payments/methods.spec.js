@@ -35,7 +35,7 @@ beforeEach(() => {
 
     // we just try to register above which might work or might not work.
     // then simply reset our session, so that we can do a plain login ;)
-    session.resetSession();
+    session.resetBrowserSession();
 })
 
 

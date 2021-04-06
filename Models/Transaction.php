@@ -156,7 +156,6 @@ class Transaction
     private $isShipped;
 
 
-
     public function getId()
     {
         return $this->id;

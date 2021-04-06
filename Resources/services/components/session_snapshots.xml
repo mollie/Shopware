@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="mollie_shopware.components.session_snapshot.hash_generator" class="MollieShopware\Components\SessionSnapshot\Services\SessionHashGenerator\SessionHashGenerator"
+                 public="false">
+        </service>
+
+        <service id="mollie_shopware.components.session_snapshot.manager" class="MollieShopware\Components\SessionSnapshot\SessionSnapshotManager"
+                 public="true">
+            <argument type="service" id="mollie_shopware.components.session_snapshot.hash_generator"/>
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.components.transaction.payment_status_resolver" class="MollieShopware\Components\Transaction\PaymentStatusResolver"
+                 public="true">
+            <argument type="service" id="mollie_shopware.components.helpers.mollie_shop_switcher"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie.factory"/>
+            <argument type="service" id="mollie_shopware.components.helpers.status_converter"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
+        </service>
+
+    </services>
+</container>

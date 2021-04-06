@@ -6,10 +6,13 @@ class OrderNotFoundException extends \Exception
 {
 
     /**
-     * @param $orderNumber
+     * OrderNotFoundException constructor.
+     * @param $message
+     *
      */
-    public function __construct($orderNumber)
+    public function __construct($message)
     {
-        parent::__construct('Order ' . $orderNumber . ' not found!');
+        parent::__construct($message);
     }
+
 }

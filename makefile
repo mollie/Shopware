@@ -46,13 +46,6 @@ pr: ## Prepares everything for a Pull Request
 
 # ------------------------------------------------------------------------------------------------------------
 
-pr: ## Tests, prepares and fixes everything for a pull request
-	@make test -B
-	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
-	@make stan -B
-
-# ------------------------------------------------------------------------------------------------------------
-
 release: ## Creates a new ZIP package
 	@cd .. && rm -rf MollieShopware-v$(PLUGIN_VERSION).zip
 	@cd .. && zip -qq -r -0 MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.github' '*.reports*' '*/Tests*' '*/phpunit.xml' '*/phpstan.neon' '*/.phpmetrics.json' '*/.php_cs.php' '*/makefile' '*.DS_Store'

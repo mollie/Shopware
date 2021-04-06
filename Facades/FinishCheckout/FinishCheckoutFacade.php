@@ -11,6 +11,8 @@ use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
+use MollieShopware\Components\SessionSnapshot\Exceptions\InvalidSessionHashException;
+use MollieShopware\Components\SessionSnapshot\SessionSnapshotManager;
 use MollieShopware\Exceptions\MollieOrderNotFound;
 use MollieShopware\Exceptions\MolliePaymentFailedException;
 use MollieShopware\Exceptions\OrderNotFoundException;
@@ -21,6 +23,7 @@ use MollieShopware\Facades\FinishCheckout\Services\ConfirmationMail;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Gateways\MollieGatewayInterface;
+use MollieShopware\Models\SessionSnapshot\SessionSnapshot;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
@@ -90,6 +93,13 @@ class FinishCheckoutFacade
     private $confirmationMail;
 
     /**
+     * @var SessionSnapshotManager
+     */
+    private $sessionSnapshotManager;
+
+
+    /**
+     * FinishCheckoutFacade constructor.
      * @param Config $config
      * @param OrderService $orderService
      * @param PaymentService $paymentService
@@ -102,8 +112,9 @@ class FinishCheckoutFacade
      * @param MollieStatusConverter $statusConverter
      * @param OrderUpdater $orderUpdater
      * @param ConfirmationMail $confirmationMail
+     * @param SessionSnapshotManager $sessionSnapshotManagerx
      */
-    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail)
+    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail, SessionSnapshotManager $sessionSnapshotManager)
     {
         $this->config = $config;
         $this->orderService = $orderService;
@@ -117,11 +128,13 @@ class FinishCheckoutFacade
         $this->statusConverter = $statusConverter;
         $this->orderUpdater = $orderUpdater;
         $this->confirmationMail = $confirmationMail;
+        $this->sessionSnapshotManager = $sessionSnapshotManager;
     }
 
 
     /**
      * @param $transactionId
+     * @param $sessionHash
      * @return CheckoutFinish
      * @throws ApiException
      * @throws MollieOrderNotFound
@@ -130,9 +143,13 @@ class FinishCheckoutFacade
      * @throws TransactionNotFoundException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Enlight_Event_Exception
+     * @throws InvalidSessionHashException
+     * @throws \MollieShopware\Exceptions\MolliePaymentNotFound
      * @throws \MollieShopware\Exceptions\PaymentStatusNotFoundException
+     * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
      */
-    public function finishTransaction($transactionId)
+    public function finishTransaction($transactionId, $sessionHash, $controller)
     {
         $transaction = $this->repoTransactions->find($transactionId);
 
@@ -141,6 +158,42 @@ class FinishCheckoutFacade
         }
 
         # -------------------------------------------------------------------------------------------------------------
+        # RESTORE SESSION IF REQUIRED, AND THEN CLEAN ENTRY
+
+        if (!$this->config->createOrderBeforePayment()) {
+
+            # see if we have a snapshot of that session
+            # keep in mind, that might not exist all the time on multiple returns
+            $sessionSnapshot = $this->sessionSnapshotManager->findSnapshot($transaction->getId());
+
+            if ($sessionSnapshot instanceof SessionSnapshot) {
+
+                # check if we might have a LOST SESSION
+                # if so, try to restore it
+                if (!$this->sessionSnapshotManager->isOrderSessionExisting()) {
+
+                    # load our pending order from that session entry.
+                    # we do only restore and save an order if that order number is "0" and thus, has not been completed yet
+                    # TODO prüfen ob es mehrere geben kann!
+                    $pendingOrder = $this->orderService->getOrderBySessionId($transaction->getSessionId());
+
+                    # try to restore our session if its allowed for our order
+                    # if we didn't find any, just continue with the basic steps (multiple redirects can happen)
+                    if ($pendingOrder instanceof Order && (string)$pendingOrder->getNumber() === '0') {
+                        $this->logger->notice('Returning with empty session! Restoring Session for Transaction: ' . $transaction->getId());
+                        $this->sessionSnapshotManager->restoreSnapshot($sessionSnapshot, $sessionHash, $controller);
+                    }
+                }
+
+                # whenever we have a session snapshot here, always delete it.
+                # it's already restored now (if necessary) and can be removed from the database
+                $this->sessionSnapshotManager->delete($sessionSnapshot);
+            }
+        }
+
+
+        # -------------------------------------------------------------------------------------------------------------
+        # VALIDATE PAYMENT STATUS VALUES
 
         /** @var null|\Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = null;
@@ -166,6 +219,7 @@ class FinishCheckoutFacade
         }
 
         # -------------------------------------------------------------------------------------------------------------
+        # FINAL TRANSACTION NUMBER
 
         # get the real transaction number
         # which is either tr_xxxx or ord_xxxx depending on the type
@@ -179,28 +233,22 @@ class FinishCheckoutFacade
         }
 
 
-        # if our payment was successful, then we have to create a new Shopware order,
-        # in case it was not created before the payment
+        # our payment was successful!
+        # now we need to check if our order needs to be created after the payment (plugin configuration).
+        # if so, verify if our session needs to be restored, and then just create the Shopware order.
         if (!$this->config->createOrderBeforePayment()) {
-            try {
+            # create an order in shopware
+            $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
+                $transactionNumber,
+                $finalTransactionNumber,
+                $this->config->isPaymentStatusMailEnabled(),
+                $transaction->getBasketSignature()
+            );
 
-                # create an order in shopware
-                $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
-                    $transactionNumber,
-                    $finalTransactionNumber,
-                    $this->config->isPaymentStatusMailEnabled(),
-                    $transaction->getBasketSignature()
-                );
-
-                # update the order number in our transaction or the upcoming steps
-                # and immediately save it in case of upcoming errors
-                $transaction->setOrderNumber($orderNumber);
-                $this->repoTransactions->save($transaction);
-            } catch (\Exception $ex) {
-                # lets log that worst-case
-                $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionId);
-                throw $ex;
-            }
+            # update the order number in our transaction or the upcoming steps
+            # and immediately save it in case of upcoming errors
+            $transaction->setOrderNumber($orderNumber);
+            $this->repoTransactions->save($transaction);
         }
 
         # -------------------------------------------------------------------------------------------------------------
@@ -212,7 +260,7 @@ class FinishCheckoutFacade
 
         if (!$swOrder instanceof Order) {
             $this->logger->critical('Warning, Mollie is paid but no order exists in Shopware for transaction ' . $transactionId);
-            throw new OrderNotFoundException($orderNumber);
+            throw new OrderNotFoundException('Order with number: ' . $orderNumber . ' not found!');
         }
 
         # make sure our transaction is correctly linked to the order
@@ -315,4 +363,5 @@ class FinishCheckoutFacade
             $this->repoTransactions->save($transaction);
         }
     }
+
 }

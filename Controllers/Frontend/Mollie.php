@@ -2,7 +2,6 @@
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Profile;
-use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\Base\AbstractPaymentController;
 use MollieShopware\Components\Basket\Basket;
@@ -12,11 +11,9 @@ use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Order\OrderCancellation;
-use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\IdealService;
 use MollieShopware\Components\Services\OrderService;
-use MollieShopware\Components\Services\PaymentService;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Facades\CheckoutSession\CheckoutSessionFacade;
 use MollieShopware\Facades\FinishCheckout\FinishCheckoutFacade;
@@ -25,6 +22,7 @@ use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
+use MollieShopware\Models\SessionSnapshot\SessionSnapshot;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use Shopware\Models\Order\Order;
 
@@ -157,7 +155,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
             }
 
-            $this->redirectBack(self::ERROR_PAYMENT_FAILED);
+            $this->redirectToFailed();
         } finally {
 
             # we always have to immediately clear the token in SUCCESS or FAILURE ways
@@ -180,13 +178,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             /** @var string $transactionNumber */
             $transactionNumber = $this->Request()->getParam('transactionNumber');
 
+            /** @var string $sessionHash */
+            $sessionHash = (string)$this->Request()->getParam('sh');
+
             if (empty($transactionNumber)) {
                 throw new Exception('Missing Transaction Number');
             }
 
             $this->logger->debug('User is returning from Mollie for Transaction ' . $transactionNumber);
 
-            $checkoutData = $this->checkoutReturn->finishTransaction($transactionNumber);
+            $checkoutData = $this->checkoutReturn->finishTransaction($transactionNumber, $sessionHash, $this);
 
             $this->logger->info('Finished checkout for Transaction ' . $transactionNumber);
 
@@ -197,6 +198,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             # make sure to finish the order with
             # the original shopware way
             $this->redirectToFinish($checkoutData->getTemporaryId());
+
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Checkout failed when returning to shop!',
@@ -211,12 +213,35 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderCancellation->cancelAndRestoreByTransaction($transactionNumber);
             }
 
-            $this->redirectBack(self::ERROR_PAYMENT_FAILED);
+            $this->redirectToFailed();
+
         } finally {
             if (!empty($transactionNumber)) {
                 $this->checkoutReturn->cleanupTransaction($transactionNumber);
             }
         }
+    }
+
+    /**
+     * This redirect is used as "action in the middle" to add an
+     * error to the Shopware session.
+     * When we restore a session from a snapshot, it will only be set
+     * after a redirect. And this is why we first need to do a redirect to
+     * a "fail" action, and then add our custom errors in here and finally
+     * navigate back to the confirm page.
+     *
+     * @throws Exception
+     */
+    public function failedAction()
+    {
+        Shopware()->Session()->offsetSet('mollieError', self::ERROR_PAYMENT_FAILED);
+
+        $this->redirect(
+            Shopware()->Front()->Router()->assemble([
+                'controller' => 'checkout',
+                'action' => 'confirm'
+            ])
+        );
     }
 
     /**
@@ -295,7 +320,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        $this->redirectBack();
+        $this->redirectToFailed();
     }
 
     /**
@@ -323,8 +348,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         } catch (\Exception $ex) {
             $this->sendResponse(
                 [
-                'message' => $ex->getMessage(),
-                'success' => false],
+                    'message' => $ex->getMessage(),
+                    'success' => false],
                 500
             );
         }
@@ -434,6 +459,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->config = $config;
             $this->orderService = $orderService;
             $repoTransactions = $this->getTransactionRepository();
+            $repoSessionSnapshots = $this->container->get('models')->getRepository(SessionSnapshot::class);
+
 
             $this->localeFinder = new LocaleFinder();
 
@@ -451,13 +478,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $sOrder = Shopware()->Modules()->Order();
             $sBasket = Shopware()->Modules()->Basket();
 
-            $orderUpdater = new OrderUpdater(
-                $this->config,
-                $sOrder,
-                Shopware()->Container()->get('events'),
-                $entityManager,
-                $this->logger
-            );
+            $orderUpdater = Shopware()->Container()->get('mollie_shopware.components.order.order_updater');
+
+            $sessionSnapshotManger = Shopware()->Container()->get('mollie_shopware.components.session_snapshot.manager');
+
+            $paymentStatusResolver = Shopware()->Container()->get('mollie_shopware.components.transaction.payment_status_resolver');
+
 
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
@@ -467,15 +493,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 self::TOKEN_ANONYMIZER_MAX_LENGTH
             );
 
+            $this->orderCancellation = Shopware()->Container()->get('mollie_shopware.components.order.cancellation');
 
-            $this->orderCancellation = new OrderCancellation(
-                $config,
-                $repoTransactions,
-                $orderService,
-                $basketService,
-                $paymentService,
-                $orderUpdater
-            );
 
             $swOrderUpdater = new ShopwareOrderUpdater($this->config, $entityManager);
 
@@ -500,6 +519,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $basket,
                 $shipping,
                 $repoTransactions,
+                $repoSessionSnapshots,
                 $this->localeFinder,
                 $sBasket,
                 $swOrderBuilder,
@@ -520,7 +540,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $swOrderBuilder,
                 $statusConverter,
                 $orderUpdater,
-                $confirmationMail
+                $confirmationMail,
+                $sessionSnapshotManger
             );
 
             $this->notifications = new MollieShopware\Facades\Notifications\Notifications(
@@ -528,10 +549,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->config,
                 $repoTransactions,
                 $this->orderService,
-                $paymentService,
                 $orderUpdater,
-                $statusConverter,
-                $this->orderCancellation
+                $this->orderCancellation,
+                $sessionSnapshotManger,
+                $paymentStatusResolver
             );
         } catch (\Exception $ex) {
             $this->logger->emergency('Fatal Problem when preparing services! ' . $ex->getMessage());

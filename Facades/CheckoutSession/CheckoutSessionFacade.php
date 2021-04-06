@@ -11,10 +11,13 @@ use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\CreditCardService;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
+use MollieShopware\Components\SessionSnapshot\SessionSnapshotManager;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Models\SessionSnapshot\Repository;
+use MollieShopware\Models\SessionSnapshot\SessionSnapshot;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
@@ -74,6 +77,11 @@ class CheckoutSessionFacade
     private $repoTransactions;
 
     /**
+     * @var Repository
+     */
+    private $repoSessionSnapshots;
+
+    /**
      * @var LocaleFinder
      */
     private $localeFinder;
@@ -108,6 +116,11 @@ class CheckoutSessionFacade
      */
     private $creditCardService;
 
+    /**
+     * @var SessionSnapshotManager
+     */
+    private $sessionSnapshotManager;
+
 
     /**
      * @param Config $config
@@ -119,6 +132,7 @@ class CheckoutSessionFacade
      * @param Basket $basket
      * @param Shipping $shipping
      * @param TransactionRepository $repoTransactions
+     * @param Repository $repoSessionSnapshots
      * @param LocaleFinder $localeFinder
      * @param $sBasket
      * @param ShopwareOrderBuilder $swOrderBuilder
@@ -126,7 +140,7 @@ class CheckoutSessionFacade
      * @param ApplePayDirectHandler $applePay
      * @param CreditCardService $creditCard
      */
-    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, TransactionRepository $repoTransactions, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard)
+    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, TransactionRepository $repoTransactions, Repository $repoSessionSnapshots, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard)
     {
         $this->config = $config;
         $this->paymentService = $paymentService;
@@ -137,12 +151,15 @@ class CheckoutSessionFacade
         $this->basket = $basket;
         $this->shipping = $shipping;
         $this->repoTransactions = $repoTransactions;
+        $this->repoSessionSnapshots = $repoSessionSnapshots;
         $this->localeFinder = $localeFinder;
         $this->sBasket = $sBasket;
         $this->swOrderBuilder = $swOrderBuilder;
         $this->tokenAnonymizer = $anonymizer;
         $this->applePay = $applePay;
         $this->creditCardService = $creditCard;
+
+        $this->sessionSnapshotManager = Shopware()->Container()->get('mollie_shopware.components.session_snapshot.manager');
     }
 
 
@@ -168,12 +185,11 @@ class CheckoutSessionFacade
      */
     public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName)
     {
-        # immediately clear the restorable order
+        # immediately reset our previous order
         # just to make sure we don't have a previous one accidentally
         $this->restorableOrder = null;
 
         $basketData = $this->sBasket->sGetBasketData();
-
 
         # we want to log anonymized tokens
         # to see if they are used correctly.
@@ -210,6 +226,23 @@ class CheckoutSessionFacade
         $this->modelManager->flush();
 
 
+        # we need this variable for our payment request
+        # so its either empty or filled
+        $sessionSnapshotHash = '';
+
+
+        # if we create the order AFTER the payment
+        # we need to make sure to backup a snapshot of the session variables.
+        # if a browser switch or anything like that happens, the session might be gone
+        # and thus the order can NOT be saved...so we would need to restore the session
+        if (!$this->config->createOrderBeforePayment()) {
+            $sessionSnapshot = $this->sessionSnapshotManager->buildSnapshot($transaction->getId());
+            $this->repoSessionSnapshots->save($sessionSnapshot);
+
+            $sessionSnapshotHash = $sessionSnapshot->getHash();
+        }
+
+
         if ($this->config->createOrderBeforePayment()) {
 
             # create the order in our system.
@@ -243,7 +276,11 @@ class CheckoutSessionFacade
         # we prepare the request and send it to Mollie.
         # the response will create an URL that we need to redirect
         # the user to for further payment steps.
-        $checkoutUrl = $this->paymentService->startMollieSession($paymentShortName, $transaction);
+        $checkoutUrl = $this->paymentService->startMollieSession(
+            $paymentShortName,
+            $transaction,
+            $sessionSnapshotHash
+        );
 
         # some payment methods are approved and
         # paid immediately and don't require a redirect.
@@ -281,7 +318,6 @@ class CheckoutSessionFacade
         # now save our transaction immediately
         # i dont know if some code below needs it from the DB ;)
         $this->repoTransactions->save($transaction);
-
 
 
         $currentCustomerClass = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
