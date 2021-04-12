@@ -5,13 +5,14 @@ namespace MollieShopware\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use Enlight_Controller_Request_RequestHttp;
 use Enlight_Event_EventArgs;
+use Exception;
 use MollieShopware\Components\Account\Account;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandler;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectSetup;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use Psr\Log\LoggerInterface;
 use Shopware_Components_Modules;
-use Throwable;
 
 class ApplePaySubscriber implements SubscriberInterface
 {
@@ -31,12 +32,18 @@ class ApplePaySubscriber implements SubscriberInterface
     private $paymentMethodService;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param Shopware_Components_Modules|null $modules
      */
-    public function __construct(Account $accountService, ApplePayPaymentMethod $paymentMethodService, $modules)
+    public function __construct(Account $accountService, ApplePayPaymentMethod $paymentMethodService, LoggerInterface $logger, $modules)
     {
         $this->accountService = $accountService;
         $this->paymentMethodService = $paymentMethodService;
+        $this->logger = $logger;
         $this->modules = $modules;
     }
 
@@ -81,8 +88,8 @@ class ApplePaySubscriber implements SubscriberInterface
             $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
-        } catch (Throwable $e) {
-            // prevent login to break if something goes wrong here
+        } catch (Exception $e) {
+            $this->logger->warning('Error setting customer default payment method on login', [ 'message' => $e->getMessage() ]);
         }
     }
 
@@ -109,8 +116,8 @@ class ApplePaySubscriber implements SubscriberInterface
             $paymentId = $this->accountService->getCustomerDefaultNonApplePayPaymentMethod($userId);
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
-        } catch (Throwable $e) {
-            // prevent checkout finish to break if something goes wrong here
+        } catch (Exception $e) {
+            $this->logger->warning('Error setting customer default payment method on checkout finish', [ 'message' => $e->getMessage() ]);
         }
     }
 
