@@ -17,7 +17,6 @@ use MollieShopware\Components\Services\ShopService;
 use MollieShopware\Components\Snippets\SnippetFile;
 use MollieShopware\Components\Snippets\SnippetsCleaner;
 use MollieShopware\Models\OrderLines;
-use MollieShopware\Models\SessionSnapshot\SessionSnapshot;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
 use Psr\Log\LoggerInterface;
@@ -276,7 +275,6 @@ class MollieShopware extends Plugin
                 Transaction::class,
                 TransactionItem::class,
                 OrderLines::class,
-                SessionSnapshot::class,
             ]);
         } catch (Exception $ex) {
             $this->getPluginLogger()->error(
@@ -298,7 +296,6 @@ class MollieShopware extends Plugin
             $schema->remove(Transaction::class);
             $schema->remove(TransactionItem::class);
             $schema->remove(OrderLines::class);
-            $schema->remove(SessionSnapshot::class);
         } catch (Exception $ex) {
             $this->getPluginLogger()->error(
                 'Error when removing database tables',

@@ -6,8 +6,9 @@ export default class Session {
      * needs to be done.
      */
     resetBrowserSession() {
-        cy.clearCookies()
-        cy.clearLocalStorage()
+        // we have to clear cookies 2x to really make it work
+        cy.clearCookies();
+        cy.clearCookies();
 
         cy.visit('/', {
             onBeforeLoad: (win) => {
@@ -21,8 +22,10 @@ export default class Session {
      * This can be used in test runs to have a lost session.
      */
     resetSessionData() {
-        cy.clearCookies()
-        cy.clearLocalStorage()
+        cy.clearLocalStorage();
+        // we have to clear cookies 2x to really make it work
+        cy.clearCookies();
+        cy.clearCookies();
     }
 
 }

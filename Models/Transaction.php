@@ -155,6 +155,19 @@ class Transaction
      */
     private $isShipped;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="session_token", type="string", nullable=true)
+     */
+    private $sessionToken;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="created_at", type="datetime", nullable=true, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+     */
+    private $createdAt;
+
 
     public function getId()
     {
@@ -440,6 +453,30 @@ class Transaction
     {
         $this->isShipped = $isShipped;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSessionToken()
+    {
+        return $this->sessionToken;
+    }
+
+    /**
+     * @param string $sessionToken
+     */
+    public function setSessionToken($sessionToken)
+    {
+        $this->sessionToken = $sessionToken;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 
     /**

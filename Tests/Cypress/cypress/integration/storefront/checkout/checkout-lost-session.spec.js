@@ -30,21 +30,21 @@ const user_pwd = "MollieMollie111";
 
 const device = devices.getFirstDevice();
 
-describe('Setup', () => {
 
-    it('Prepare Plugin Configuration', () => {
+const configs = [
+    {name: "Config 1", createOrderBeforePayment: true},
+    {name: "Config 2", createOrderBeforePayment: false},
+];
 
-        devices.setDevice(device);
+configs.forEach(config => {
 
-        plugin.configure(false);
+    context("Checkout " + config.name, () => {
 
-        register.doRegister(user_email, user_pwd);
-    })
-})
-
-describe('Checkout with Lost Session', () => {
-
-    describe('Successful Checkout', () => {
+        before(() => {
+            devices.setDevice(device);
+            plugin.configure(config.createOrderBeforePayment);
+            register.doRegister(user_email, user_pwd);
+        });
 
         beforeEach(() => {
             devices.setDevice(device);
@@ -76,14 +76,6 @@ describe('Checkout with Lost Session', () => {
             // and we should still have a successful checkout
             cy.contains('Vielen Dank für Ihre Bestellung');
         })
-    })
-
-    describe('Failed Checkout', () => {
-
-        beforeEach(() => {
-            devices.setDevice(device);
-            session.resetBrowserSession();
-        });
 
         it('Error with PayPal', () => {
 
@@ -117,5 +109,4 @@ describe('Checkout with Lost Session', () => {
         })
 
     })
-
 })

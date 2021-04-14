@@ -23,7 +23,7 @@ export default class PluginAction {
         repoLogin.getPassword().clear().type('demo');
         repoLogin.getSubmitButton().click();
 
-        cy.wait(6000);
+        cy.wait(5000);
 
         // open plugin manager
         repoTopMenu.getSettings().click();

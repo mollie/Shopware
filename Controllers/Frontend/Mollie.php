@@ -17,17 +17,22 @@ use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Facades\CheckoutSession\CheckoutSessionFacade;
 use MollieShopware\Facades\FinishCheckout\FinishCheckoutFacade;
+use MollieShopware\Facades\FinishCheckout\RestoreSessionFacade;
 use MollieShopware\Facades\FinishCheckout\Services\ConfirmationMail;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
-use MollieShopware\Models\SessionSnapshot\SessionSnapshot;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
+use MollieShopware\Traits\Controllers\RedirectTrait;
 use Shopware\Models\Order\Order;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 {
+
+    use RedirectTrait;
+
+
     const ERROR_PAYMENT_FAILED = 'Payment failed';
 
     const TOKEN_ANONYMIZER_PLACEHOLDER_COUNT = 4;
@@ -54,6 +59,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @var FinishCheckoutFacade
      */
     private $checkoutReturn;
+
+    /**
+     * @var RestoreSessionFacade
+     */
+    private $restoreSessionFacade;
 
     /**
      * @var Notifications
@@ -109,6 +119,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function directAction()
     {
         try {
+
             $this->loadServices();
 
             # persist the basket in the database
@@ -155,7 +166,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
             }
 
-            $this->redirectToFailed();
+            $this->redirectToShopwareCheckoutFailed($this);
         } finally {
 
             # we always have to immediately clear the token in SUCCESS or FAILURE ways
@@ -165,83 +176,121 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
     /**
      * Returns the user from Mollie's checkout and processes his payment.
-     * If payment failed we restore the basket.
-     * If payment succeeded we show the /checkout/finish page
+     * We start to verify if we still have a session or if we need to
+     * restore the previous session from our payment token.
+     * Afterwards we ALWAYS redirect to the finishAction.
+     * This is done, because Shopware does automatically handle session restoring
+     * from tokens after the next redirect in case we need to restore it.
+     * Also the finishAction handles everything regarding payments and cancellations on errors.
      *
      * @throws Exception
      */
     public function returnAction()
     {
+        $transactionID = '';
+
         try {
+
             $this->loadServices();
 
-            /** @var string $transactionNumber */
-            $transactionNumber = $this->Request()->getParam('transactionNumber');
+            $transactionID = (string)$this->Request()->getParam('transactionNumber', '');
+            $paymentToken = (string)$this->Request()->getParam('token', '');
 
-            /** @var string $sessionHash */
-            $sessionHash = (string)$this->Request()->getParam('sh');
-
-            if (empty($transactionNumber)) {
+            if (empty($transactionID)) {
                 throw new Exception('Missing Transaction Number');
             }
 
-            $this->logger->debug('User is returning from Mollie for Transaction ' . $transactionNumber);
+            $this->logger->debug('User is returning from Mollie for Transaction ' . $transactionID);
 
-            $checkoutData = $this->checkoutReturn->finishTransaction($transactionNumber, $sessionHash, $this);
-
-            $this->logger->info('Finished checkout for Transaction ' . $transactionNumber);
-
-
-            # prepare the view data (i dont know why)
-            $this->view->assign('orderNumber', $checkoutData->getOrdernumber());
-
-            # make sure to finish the order with
-            # the original shopware way
-            $this->redirectToFinish($checkoutData->getTemporaryId());
+            $this->restoreSessionFacade->tryRestoreSession(
+                (int)$transactionID,
+                $paymentToken
+            );
 
         } catch (\Exception $ex) {
-            $this->logger->error(
-                'Checkout failed when returning to shop!',
+            $this->logger->warning(
+                'Error when verifying Session for Transaction: ' . $transactionID,
                 [
                     'error' => $ex->getMessage(),
                 ]
             );
-
-            # if we have a transaction number
-            # then make sure to cancel the order of the transaction if existing
-            if (!empty($transactionNumber)) {
-                $this->orderCancellation->cancelAndRestoreByTransaction($transactionNumber);
-            }
-
-            $this->redirectToFailed();
-
-        } finally {
-            if (!empty($transactionNumber)) {
-                $this->checkoutReturn->cleanupTransaction($transactionNumber);
-            }
         }
+
+        $this->redirectToMollieFinishPayment($this, $transactionID);
     }
 
     /**
-     * This redirect is used as "action in the middle" to add an
-     * error to the Shopware session.
-     * When we restore a session from a snapshot, it will only be set
-     * after a redirect. And this is why we first need to do a redirect to
-     * a "fail" action, and then add our custom errors in here and finally
-     * navigate back to the confirm page.
+     * This action finishes the actual payment process.
+     * We can always assume that we have a valid session in here because we
+     * are redirected from the returnAction which restores sessions if it
+     * got lost somehow.
      *
      * @throws Exception
      */
-    public function failedAction()
+    public function finishAction()
     {
-        Shopware()->Session()->offsetSet('mollieError', self::ERROR_PAYMENT_FAILED);
+        $transactionID = '';
 
-        $this->redirect(
-            Shopware()->Front()->Router()->assemble([
-                'controller' => 'checkout',
-                'action' => 'confirm'
-            ])
-        );
+        try {
+
+            $this->loadServices();
+
+            $transactionID = (string)$this->Request()->getParam('transactionNumber', '');
+
+            if (empty($transactionID)) {
+                throw new Exception('Missing Transaction Number');
+            }
+
+            # ---------------------------------------------------------------------------------------------
+
+            $checkoutData = $this->checkoutReturn->finishTransaction((int)$transactionID);
+
+            # ---------------------------------------------------------------------------------------------
+
+            $this->logger->info('Finished checkout for Transaction ' . $transactionID);
+
+            # always make sure to clean up all data
+            $this->checkoutReturn->cleanupTransaction($transactionID);
+
+            # make sure to finish the order with the original shopware way
+            $this->view->assign('orderNumber', $checkoutData->getOrdernumber());
+            $this->redirectToShopwareCheckoutFinish($this, $checkoutData->getTemporaryId());
+
+            return;
+
+        } catch (\Exception $ex) {
+            $this->logger->error(
+                'Checkout failed when finishing Order for Transaction: ' . $transactionID,
+                [
+                    'error' => $ex->getMessage(),
+                ]
+            );
+        }
+
+        # -----------------------------------------------------------------------------
+        # USE SECOND TRY/CATCH BECAUSE OUR CATCH HAS LOGIC THAT COULD FAIL!!
+
+        # if we had some errors make sure to
+        # cancel our order and navigate back to the confirm page
+        if (!empty($transactionID)) {
+
+            try {
+
+                $this->checkoutReturn->cleanupTransaction($transactionID);
+
+                $this->orderCancellation->cancelAndRestoreByTransaction($transactionID);
+
+            } catch (\Exception $ex) {
+                $this->logger->error(
+                    'Error when restoring cart on errors!',
+                    [
+                        'error' => $ex->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        $this->redirectToShopwareCheckoutFailed($this);
     }
 
     /**
@@ -320,7 +369,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
         }
 
-        $this->redirectToFailed();
+        $this->redirectToShopwareCheckoutFailed($this);
     }
 
     /**
@@ -449,9 +498,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
 
-
-            $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-
             $config = Shopware()->Container()->get('mollie_shopware.config');
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
@@ -459,8 +505,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->config = $config;
             $this->orderService = $orderService;
             $repoTransactions = $this->getTransactionRepository();
-            $repoSessionSnapshots = $this->container->get('models')->getRepository(SessionSnapshot::class);
-
 
             $this->localeFinder = new LocaleFinder();
 
@@ -480,7 +524,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $orderUpdater = Shopware()->Container()->get('mollie_shopware.components.order.order_updater');
 
-            $sessionSnapshotManger = Shopware()->Container()->get('mollie_shopware.components.session_snapshot.manager');
+            $sessionManager = Shopware()->Container()->get('mollie_shopware.components.session_manager');
 
             $paymentStatusResolver = Shopware()->Container()->get('mollie_shopware.components.transaction.payment_status_resolver');
 
@@ -518,14 +562,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $entityManager,
                 $basket,
                 $shipping,
-                $repoTransactions,
-                $repoSessionSnapshots,
                 $this->localeFinder,
                 $sBasket,
                 $swOrderBuilder,
                 $tokeAnonymizer,
                 $this->applePay,
-                $creditCardService
+                $creditCardService,
+                $repoTransactions,
+                $sessionManager
             );
 
             $this->checkoutReturn = new FinishCheckoutFacade(
@@ -540,8 +584,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $swOrderBuilder,
                 $statusConverter,
                 $orderUpdater,
-                $confirmationMail,
-                $sessionSnapshotManger
+                $confirmationMail
             );
 
             $this->notifications = new MollieShopware\Facades\Notifications\Notifications(
@@ -551,9 +594,17 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderService,
                 $orderUpdater,
                 $this->orderCancellation,
-                $sessionSnapshotManger,
+                $sessionManager,
                 $paymentStatusResolver
             );
+
+            $this->restoreSessionFacade = new RestoreSessionFacade(
+                $repoTransactions,
+                $sessionManager,
+                $orderService,
+                $this->logger
+            );
+
         } catch (\Exception $ex) {
             $this->logger->emergency('Fatal Problem when preparing services! ' . $ex->getMessage());
 

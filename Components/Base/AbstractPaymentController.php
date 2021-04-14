@@ -114,33 +114,6 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     }
 
     /**
-     * @throws \Exception
-     */
-    protected function redirectToFailed()
-    {
-        return $this->redirect(
-            Shopware()->Front()->Router()->assemble([
-                'controller' => 'Mollie',
-                'action' => 'failed'
-            ])
-        );
-    }
-
-    /**
-     * Redirect to success page
-     */
-    protected function redirectToFinish($uniqueId = '')
-    {
-        return $this->redirect(
-            Shopware()->Front()->Router()->assemble([
-                'controller' => 'checkout',
-                'action' => 'finish',
-                'sUniqueID' => $uniqueId
-            ])
-        );
-    }
-
-    /**
      * If it has an ordernumber, the order has already been saved
      * and the cart has been emptied
      *

@@ -6,7 +6,7 @@ export default class TopMenuRepository {
      * @returns {*}
      */
     getSettings() {
-        return cy.get('#hoverbutton-1251-btnInnerEl');
+        return cy.get('#hoverbutton-1251-btnInnerEl', {timeout: 8000});
     }
 
     /**
