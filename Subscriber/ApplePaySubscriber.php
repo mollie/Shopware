@@ -36,15 +36,19 @@ class ApplePaySubscriber implements SubscriberInterface
      */
     private $logger;
 
+
     /**
-     * @param Shopware_Components_Modules|null $modules
+     * ApplePaySubscriber constructor.
+     * @param Account $accountService
+     * @param ApplePayPaymentMethod $paymentMethodService
+     * @param LoggerInterface $logger
      */
-    public function __construct(Account $accountService, ApplePayPaymentMethod $paymentMethodService, LoggerInterface $logger, $modules)
+    public function __construct(Account $accountService, ApplePayPaymentMethod $paymentMethodService, LoggerInterface $logger)
     {
         $this->accountService = $accountService;
         $this->paymentMethodService = $paymentMethodService;
         $this->logger = $logger;
-        $this->modules = $modules;
+        $this->modules = Shopware()->Modules();
     }
 
     public static function getSubscribedEvents()
