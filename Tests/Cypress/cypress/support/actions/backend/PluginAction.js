@@ -32,7 +32,7 @@ export default class PluginAction {
         cy.wait(4000);
 
         // click on "installed" plugins
-        cy.get('#plugin-manager-container-container-1350').click({force: true});
+        repoTopMenu.getPluginManagerInstalled().click();
 
         // click on "edit" for Mollie
         cy.get('#gridview-1401-bd-2 > [colspan="8"] > .x-grid-table > tbody > :nth-child(2) > .x-grid-cell-actioncolumn-1400 > .x-grid-cell-inner > .x-action-col-0').click();
