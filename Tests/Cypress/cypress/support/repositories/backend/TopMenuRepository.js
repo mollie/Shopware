@@ -21,8 +21,8 @@ export default class TopMenuRepository {
      *
      * @returns {*}
      */
-    getPluginManagerInstalled() {
-        return cy.contains('Installiert');
+    getCachesPerformance() {
+        return cy.contains('Caches / Performance');
     }
 
 }

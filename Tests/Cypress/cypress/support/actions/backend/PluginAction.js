@@ -32,10 +32,12 @@ export default class PluginAction {
         cy.wait(4000);
 
         // click on "installed" plugins
-        repoTopMenu.getPluginManagerInstalled().click();
+        cy.contains('Installiert').click();
+
+        cy.wait(4000);
 
         // click on "edit" for Mollie
-        cy.get('#gridview-1401-bd-2 > [colspan="8"] > .x-grid-table > tbody > :nth-child(2) > .x-grid-cell-actioncolumn-1400 > .x-grid-cell-inner > .x-action-col-0').click();
+        cy.get('[data-qtip="Öffnen"]').first().click();
 
 
         // -----------------------------------------------------------------------
@@ -43,8 +45,7 @@ export default class PluginAction {
         cy.get('#base-element-select-2624-inputEl').clear().type(createOrderValue);
 
 
-        // click on save
-        cy.get('#button-2611').click();
+        cy.contains("Speichern").click();
 
 
         this._clearCaches();
@@ -55,17 +56,12 @@ export default class PluginAction {
      *
      */
     _clearCaches() {
-
-        // open cache manager
         repoTopMenu.getSettings().click();
-        cy.get('#menuitem-1104-textEl').click();
+        repoTopMenu.getCachesPerformance().click();
+        
+        cy.contains("Alle auswählen").click();
 
-        // click on "Cache" tab
-        cy.get('#tab-2822-btnInnerEl').click();
-        // select all caches
-        cy.get('#button-2686').click();
-        // clear cache
-        cy.get('#button-2687').click({force: true});
+        cy.contains("Leeren").click({force: true});
     }
 
 }
