@@ -130,14 +130,22 @@ Please use this command to run your PHPUnit tests.
 
 It is configured to include Code Coverage reports, so there will be a new report HTML file that you can open and use to improve your testing coverage.
 
-We do also require a description for every unit test!
-Sometimes tests might be a bit hard to understand, so we require an easy human-readable description what is really going on here!
-...you'll get used to it...promised!
-
 ```bash
 make test
 ```
 
+
+
+What are our requirements for PHP Unit Tests?
+
+* Function Description:
+  Sometimes tests might be a bit hard to understand, so we require an easy human-readable description what is really going on here!
+* Testing Structure:
+  Please avoid having every line set next to each other! Your test tells a story - please make sure a developer can easily understand that one.
+  Use paragraphs or whatever is necessary to have a really beautiful and easy to understand testing code.
+* Fakes or Mocks:
+  We'd be happy if you already design your code with interfaces, so you can easily create real fake objects for your tests.
+  If that's not possible, please use at least Mocks or Stubs for your tests.
 
 
 ### Cypress E2E
