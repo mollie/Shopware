@@ -124,7 +124,7 @@ class OrderService
 
     /**
      * @param $orderNumber
-     * @return Order
+     * @return ?Order
      */
     public function getShopwareOrderByNumber($orderNumber)
     {

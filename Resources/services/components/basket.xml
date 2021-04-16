@@ -6,7 +6,8 @@
 
     <services>
 
-        <service id="mollie_shopware.components.basket" class="MollieShopware\Components\Basket\Basket">
+        <service id="mollie_shopware.components.basket" class="MollieShopware\Components\Basket\Basket"
+                 public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>

@@ -6,14 +6,14 @@
 
     <services>
 
-        <service id="mollie_shopware.components.logger.factory"
-                 class="MollieShopware\Components\Logger\MollieLoggerFactory">
+        <service id="mollie_shopware.components.logger.factory" class="MollieShopware\Components\Logger\MollieLoggerFactory">
             <argument type="service" id="mollie_shopware.config"/>
             <argument>%kernel.logs_dir%/mollie_%kernel.environment%.log</argument>
             <argument>14</argument>
         </service>
 
-        <service id="mollie_shopware.components.logger" class="MollieShopware\Components\Logger\MollieLogger" public="true">
+        <service id="mollie_shopware.components.logger" class="MollieShopware\Components\Logger\MollieLogger"
+                 public="true">
             <factory service="mollie_shopware.components.logger.factory" method="createLogger"/>
         </service>
 

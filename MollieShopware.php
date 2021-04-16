@@ -20,6 +20,7 @@ use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\DependencyInjection\Bridge\Session;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -237,7 +238,7 @@ class MollieShopware extends Plugin
         # want to activate all payment methods
         $paymentMethodService->installPaymentMethods(true);
 
-        
+
         // download apple pay merchant domain verification file of mollie
         $downloader = new ApplePayDomainFileDownloader();
         $downloader->downloadDomainAssociationFile(Shopware()->DocPath());
@@ -273,7 +274,7 @@ class MollieShopware extends Plugin
             $schema->update([
                 Transaction::class,
                 TransactionItem::class,
-                OrderLines::class
+                OrderLines::class,
             ]);
         } catch (Exception $ex) {
             $this->getPluginLogger()->error(

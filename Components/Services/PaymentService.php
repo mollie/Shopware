@@ -106,12 +106,13 @@ class PaymentService
     /**
      * @param $paymentMethod
      * @param Transaction $transaction
+     * @param $paymentToken
      * @return string|null
      * @throws ApiException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function startMollieSession($paymentMethod, Transaction $transaction)
+    public function startMollieSession($paymentMethod, Transaction $transaction, $paymentToken)
     {
         $shopwareOrder = null;
 
@@ -139,7 +140,7 @@ class PaymentService
 
 
         if ($useOrdersAPI) {
-            $requestData = $this->prepareRequest($paymentMethod, $transaction, true);
+            $requestData = $this->prepareRequest($paymentMethod, $transaction, $paymentToken, true);
             $mollieOrder = $this->apiClient->orders->create($requestData);
 
             foreach ($mollieOrder->lines as $index => $line) {
@@ -155,7 +156,7 @@ class PaymentService
                 $orderLinesRepo->save($item);
             }
         } else {
-            $requestData = $this->prepareRequest($paymentMethod, $transaction);
+            $requestData = $this->prepareRequest($paymentMethod, $transaction, $paymentToken);
             $molliePayment = $this->apiClient->payments->create($requestData);
         }
 
@@ -261,18 +262,19 @@ class PaymentService
     /**
      * @param $paymentMethod
      * @param Transaction $transaction
+     * @param $paymentToken
      * @param false $ordersApi
      * @return array
      * @throws \Exception
      */
-    private function prepareRequest($paymentMethod, Transaction $transaction, $ordersApi = false)
+    private function prepareRequest($paymentMethod, Transaction $transaction, $paymentToken, $ordersApi = false)
     {
         // variables
         $molliePrepared = null;
         $paymentParameters = [];
 
         // get webhook and redirect URLs
-        $redirectUrl = $this->prepareRedirectUrl($transaction->getId());
+        $redirectUrl = $this->prepareRedirectUrl($transaction->getId(), $paymentToken);
         $webhookUrl = $this->prepareWebhookURL($transaction->getId());
 
         $paymentParameters['webhookUrl'] = $webhookUrl;
@@ -387,9 +389,10 @@ class PaymentService
 
     /**
      * @param $number
+     * @param $paymentToken
      * @return mixed|string
      */
-    private function prepareRedirectUrl($number)
+    private function prepareRedirectUrl($number, $paymentToken)
     {
         $assembleData = [
             'controller' => 'Mollie',
@@ -397,6 +400,10 @@ class PaymentService
             'transactionNumber' => $number,
             'forceSecure' => true
         ];
+
+        if (!empty((string)$paymentToken)) {
+            $assembleData['token'] = $paymentToken;
+        }
 
         $url = Shopware()->Front()->Router()->assemble($assembleData);
 

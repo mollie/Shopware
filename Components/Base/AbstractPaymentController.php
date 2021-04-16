@@ -81,8 +81,8 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      * When Shopware has no signature feature (Shopware < 5.3),
      * always return true
      *
-     * @param  string  $signature
-     * @param  integer $amount
+     * @param string $signature
+     * @param integer $amount
      * @return boolean
      */
     protected function checkSignature($signature)
@@ -103,49 +103,14 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     /**
      * Send a json response
      *
-     * @param  array   $data
-     * @param  integer $httpCode
+     * @param array $data
+     * @param integer $httpCode
      */
     protected function sendResponse(array $data = [], $httpCode = 200)
     {
         $this->Response()->setHttpResponseCode($httpCode);
         $this->Response()->setHeader('Content-type', 'application/json', true);
         $this->Response()->setBody(json_encode($data, JSON_PRETTY_PRINT));
-    }
-
-    /**
-     * Redirect back to the checkout
-     */
-    protected function redirectBack($error = null, $message = null)
-    {
-        if ($error !== null) {
-            Shopware()->Session()->offsetSet('mollieError', $error);
-        }
-
-        if ($message !== null) {
-            Shopware()->Session()->offsetSet('mollieErrorMessage', $message);
-        }
-
-        return $this->redirect(
-            Shopware()->Front()->Router()->assemble([
-                'controller' => 'checkout',
-                'action' => 'confirm'
-            ])
-        );
-    }
-
-    /**
-     * Redirect to success page
-     */
-    protected function redirectToFinish($uniqueId = '')
-    {
-        return $this->redirect(
-            Shopware()->Front()->Router()->assemble([
-                'controller' => 'checkout',
-                'action' => 'finish',
-                'sUniqueID' => $uniqueId
-            ])
-        );
     }
 
     /**

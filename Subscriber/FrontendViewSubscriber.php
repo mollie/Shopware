@@ -103,14 +103,15 @@ class FrontendViewSubscriber implements SubscriberInterface
             $view = $controller->view();
         }
 
-        if ($session !== null && $view !== null &&
-            ($session->mollieError || $session->mollieStatusError)) {
+        if ($session !== null && $view !== null && ($session->offsetGet('mollieError') || $session->offsetGet('mollieStatusError'))) {
+
             // assign errors to view
-            $view->assign('sMollieError', $session->mollieError);
-            $view->assign('sMollieStatusError', $session->mollieStatusError);
+            $view->assign('sMollieError', $session->offsetGet('mollieError'));
+            $view->assign('sMollieStatusError', $session->offsetGet('mollieStatusError'));
 
             // unset error, so it wont show up on next page view
-            $session->mollieStatusError = $session->mollieError = null;
+            $session->mollieStatusError = null;
+            $session->mollieError = null;
         }
     }
 

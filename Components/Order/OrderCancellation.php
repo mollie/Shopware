@@ -2,6 +2,9 @@
 
 namespace MollieShopware\Components\Order;
 
+
+use _PhpScoperd1ad3ba9842f\GuzzleHttp\TransferStats;
+use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CurrentCustomer;
@@ -46,17 +49,18 @@ class OrderCancellation
     private $orderUpdater;
 
     /**
+     * OrderCancellation constructor.
      * @param Config $config
-     * @param TransactionRepository $repoTransactions
+     * @param EntityManager $entityManager
      * @param OrderService $orderService
      * @param BasketService $basketService
      * @param PaymentService $paymentService
      * @param OrderUpdater $orderUpdater
      */
-    public function __construct(Config $config, TransactionRepository $repoTransactions, OrderService $orderService, BasketService $basketService, PaymentService $paymentService, OrderUpdater $orderUpdater)
+    public function __construct(Config $config, EntityManager $entityManager, OrderService $orderService, BasketService $basketService, PaymentService $paymentService, OrderUpdater $orderUpdater)
     {
         $this->config = $config;
-        $this->repoTransactions = $repoTransactions;
+        $this->repoTransactions = $entityManager->getRepository(Transaction::class);
         $this->orderService = $orderService;
         $this->basketService = $basketService;
         $this->paymentService = $paymentService;
@@ -100,7 +104,11 @@ class OrderCancellation
 
         # it's important to restore the order before the placed order is cancelled
         # otherwise the original quantity of the line items can't be restored
-        $this->restoreCartFromOrder($swOrder);
+        $currentCustomer = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
+        if ((int)$currentCustomer->getCurrentId() === (int)$swOrder->getCustomer()->getId()) {
+            $this->restoreCartFromOrder($swOrder);
+        }
+
 
         # make sure we have all status data cancelled as expected
         $this->cancelPlacedOrder($swOrder);
@@ -141,13 +149,9 @@ class OrderCancellation
      * @param Order $order
      * @throws \Exception
      */
-    private function restoreCartFromOrder(Order $order)
+    public function restoreCartFromOrder(Order $order)
     {
-        /** @var CurrentCustomer $currentCustomer */
-        $currentCustomer = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
-
-        if ((int)$currentCustomer->getCurrentId() === (int)$order->getCustomer()->getId()) {
-            $this->basketService->restoreBasket($order);
-        }
+        $this->basketService->restoreBasket($order);
     }
+
 }

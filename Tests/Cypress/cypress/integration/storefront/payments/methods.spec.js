@@ -26,6 +26,8 @@ const user_pwd = "MollieMollie111";
 
 beforeEach(() => {
 
+    devices.setDevice(devices.getFirstDevice());
+
     // always try to register, so that we have an account.
     // theres no assertion if it worked or not, so it can
     // be used over and over again.
@@ -35,7 +37,7 @@ beforeEach(() => {
 
     // we just try to register above which might work or might not work.
     // then simply reset our session, so that we can do a plain login ;)
-    session.resetSession();
+    session.resetBrowserSession();
 })
 
 

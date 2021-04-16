@@ -90,6 +90,7 @@ class FinishCheckoutFacade
     private $confirmationMail;
 
     /**
+     * FinishCheckoutFacade constructor.
      * @param Config $config
      * @param OrderService $orderService
      * @param PaymentService $paymentService
@@ -130,6 +131,8 @@ class FinishCheckoutFacade
      * @throws TransactionNotFoundException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Enlight_Event_Exception
+     * @throws \MollieShopware\Exceptions\MolliePaymentNotFound
      * @throws \MollieShopware\Exceptions\PaymentStatusNotFoundException
      */
     public function finishTransaction($transactionId)
@@ -141,6 +144,7 @@ class FinishCheckoutFacade
         }
 
         # -------------------------------------------------------------------------------------------------------------
+        # VALIDATE PAYMENT STATUS VALUES
 
         /** @var null|\Mollie\Api\Resources\Order $mollieOrder */
         $mollieOrder = null;
@@ -155,17 +159,18 @@ class FinishCheckoutFacade
             $mollieOrder = $this->gwMollie->getOrder($transaction->getMollieOrderId());
 
             if (!$this->statusValidator->didOrderCheckoutSucceed($mollieOrder)) {
-                throw new MolliePaymentFailedException($mollieOrder->id, 'The status validation of the Mollie order showed it was not successful!');
+                throw new MolliePaymentFailedException($mollieOrder->id, 'The payment failed. Please see the Mollie Dashboard for more!');
             }
         } else {
             $molliePayment = $this->gwMollie->getPayment($transaction->getMolliePaymentId());
 
             if (!$this->statusValidator->didPaymentCheckoutSucceed($molliePayment)) {
-                throw new MolliePaymentFailedException($molliePayment->id, 'The status validation of the Mollie payment showed it was not successful!');
+                throw new MolliePaymentFailedException($molliePayment->id, 'The payment failed. Please see the Mollie Dashboard for more!');
             }
         }
 
         # -------------------------------------------------------------------------------------------------------------
+        # FINAL TRANSACTION NUMBER
 
         # get the real transaction number
         # which is either tr_xxxx or ord_xxxx depending on the type
@@ -179,28 +184,22 @@ class FinishCheckoutFacade
         }
 
 
-        # if our payment was successful, then we have to create a new Shopware order,
-        # in case it was not created before the payment
+        # our payment was successful!
+        # now we need to check if our order needs to be created after the payment (plugin configuration).
+        # if so, verify if our session needs to be restored, and then just create the Shopware order.
         if (!$this->config->createOrderBeforePayment()) {
-            try {
+            # create an order in shopware
+            $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
+                $transactionNumber,
+                $finalTransactionNumber,
+                $this->config->isPaymentStatusMailEnabled(),
+                $transaction->getBasketSignature()
+            );
 
-                # create an order in shopware
-                $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
-                    $transactionNumber,
-                    $finalTransactionNumber,
-                    $this->config->isPaymentStatusMailEnabled(),
-                    $transaction->getBasketSignature()
-                );
-
-                # update the order number in our transaction or the upcoming steps
-                # and immediately save it in case of upcoming errors
-                $transaction->setOrderNumber($orderNumber);
-                $this->repoTransactions->save($transaction);
-            } catch (\Exception $ex) {
-                # lets log that worst-case
-                $this->logger->critical('Warning, Mollie is paid but no order could be created for transaction ' . $transactionId);
-                throw $ex;
-            }
+            # update the order number in our transaction or the upcoming steps
+            # and immediately save it in case of upcoming errors
+            $transaction->setOrderNumber($orderNumber);
+            $this->repoTransactions->save($transaction);
         }
 
         # -------------------------------------------------------------------------------------------------------------
@@ -212,7 +211,7 @@ class FinishCheckoutFacade
 
         if (!$swOrder instanceof Order) {
             $this->logger->critical('Warning, Mollie is paid but no order exists in Shopware for transaction ' . $transactionId);
-            throw new OrderNotFoundException($orderNumber);
+            throw new OrderNotFoundException('Order with number: ' . $orderNumber . ' not found!');
         }
 
         # make sure our transaction is correctly linked to the order
@@ -315,4 +314,5 @@ class FinishCheckoutFacade
             $this->repoTransactions->save($transaction);
         }
     }
+
 }

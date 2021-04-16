@@ -1,0 +1,164 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="mollie_shopware.components.helpers.status_converter" class="MollieShopware\Components\Helpers\MollieStatusConverter" public="false">
+            <argument type="service" id="mollie_shopware.payment_service"/>
+            <argument type="service" id="mollie_shopware.components.helpers.mollie_refund_status"/>
+        </service>
+
+        <service id="mollie_shopware.components.helpers.mollie_refund_status" class="MollieShopware\Components\Helpers\MollieRefundStatus" public="false">
+        </service>
+
+        <service id="mollie_shopware.components.helpers.mollie_shop_switcher" class="MollieShopware\Components\Helpers\MollieShopSwitcher" public="false">
+            <argument type="service" id="service_container"/>
+        </service>
+
+        <service id="mollie_shopware.components.shipping.provider.cart" class="MollieShopware\Components\Shipping\Providers\CartShippingCostsProvider" public="false">
+            <argument type="service" id="mollie_shopware.order_service"/>
+        </service>
+
+        <!-- _______________________________________________________________________________________________________ -->
+
+        <service id="mollie_shopware.components.transaction.payment_status_resolver"
+                 class="MollieShopware\Components\Transaction\PaymentStatusResolver"
+                 public="true">
+            <argument type="service" id="mollie_shopware.components.helpers.mollie_shop_switcher"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie.factory"/>
+            <argument type="service" id="mollie_shopware.components.helpers.status_converter"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
+        </service>
+
+        <service id="mollie_shopware.components.shipping" class="MollieShopware\Components\Shipping\Shipping">
+            <argument type="service" id="dbal_connection"/>
+            <argument type="service" id="session"/>
+            <argument type="service" id="mollie_shopware.components.shipping.provider.cart"/>
+        </service>
+
+        <service id="mollie_shopware.components.order_session" class="MollieShopware\Components\Order\OrderSession">
+            <argument type="service" id="legacy_struct_converter"/>
+            <argument type="service" id="session"/>
+        </service>
+
+        <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
+            <argument type="service" id="mollie_shopware.api_factory"/>
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie"/>
+            <argument>%shopware.custom%</argument>
+        </service>
+
+        <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService">
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.api"/>
+            <argument type="service" id="shopware.plugin_payment_installer"/>
+            <argument type="service" id="template"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument>%mollie_shopware.plugin_name%</argument>
+        </service>
+
+        <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService">
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+        <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService">
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument type="service" id="service_container"/>
+        </service>
+
+        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\Services\IdealService">
+            <argument type="service" id="mollie_shopware.api"/>
+            <argument type="service" id="mollie_shopware.customer"/>
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\Refund\RefundService">
+            <argument type="service" id="models"/>
+            <argument type="service" id="service_container"/>
+        </service>
+
+        <service id="mollie_shopware.credit_card_service" class="MollieShopware\Components\Services\CreditCardService">
+            <argument type="service" id="mollie_shopware.api"/>
+            <argument type="service" id="mollie_shopware.customer"/>
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.schema" class="MollieShopware\Components\Schema">
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.shop_service" class="MollieShopware\Components\Services\ShopService">
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.attributes" class="MollieShopware\Components\Attributes">
+            <argument type="service" id="models"/>
+            <argument type="service" id="shopware_attribute.crud_service"/>
+        </service>
+
+        <service id="mollie_shopware.config" class="MollieShopware\Components\Config">
+            <argument type="service" id="shopware.plugin.cached_config_reader"/>
+            <argument type="service" id="mollie_shopware.shop_service"/>
+        </service>
+
+        <service id="mollie_shopware.api_factory" class="MollieShopware\Components\MollieApiFactory">
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+        <service id="mollie_shopware.api" class="Mollie\Api\MollieApiClient">
+            <factory service="mollie_shopware.api_factory" method="create"/>
+        </service>
+
+        <service id="mollie_shopware.customer" class="MollieShopware\Components\CurrentCustomer">
+            <argument type="service" id="session"/>
+            <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.components.basket_snapshot.basket_snapshot"
+                 class="MollieShopware\Components\BasketSnapshot\BasketSnapshot">
+            <argument type="service" id="session"/>
+        </service>
+
+        <service id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"
+                 class="MollieShopware\Components\Account\Gateway\DBAL\GuestAccountGateway">
+            <argument type="service" id="shopware_account.address_service"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="shopware.form.factory"/>
+            <argument type="service" id="shopware_storefront.context_service"/>
+            <argument type="service" id="shopware_account.register_service"/>
+        </service>
+
+        <service id="mollie_shopware.components.account.account"
+                 class="MollieShopware\Components\Account\Account">
+            <argument type="service" id="session"/>
+            <argument type="service" id="passwordencoder"/>
+            <argument type="service"
+                      id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="config"/>
+        </service>
+
+        <service id="mollie_shopware.components.order.order_updater" class="MollieShopware\Components\Order\OrderUpdater" public="true">
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="events"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+        <service id="mollie_shopware.components.order.cancellation" class="MollieShopware\Components\Order\OrderCancellation">
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
+            <argument type="service" id="mollie_shopware.basket_service"/>
+            <argument type="service" id="mollie_shopware.payment_service"/>
+            <argument type="service" id="mollie_shopware.components.order.order_updater"/>
+        </service>
+
+    </services>
+</container>

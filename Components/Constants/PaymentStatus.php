@@ -4,6 +4,8 @@ namespace MollieShopware\Components\Constants;
 
 class PaymentStatus
 {
+    const MOLLIE_PAYMENT_UNKNOWN = 'unknown';
+
     const MOLLIE_PAYMENT_COMPLETED = 'completed';
     const MOLLIE_PAYMENT_PAID = 'paid';
     const MOLLIE_PAYMENT_AUTHORIZED = 'authorized';

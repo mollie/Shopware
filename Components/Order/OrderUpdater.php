@@ -46,16 +46,16 @@ class OrderUpdater
     private $modelManager;
 
     /**
+     * OrderUpdater constructor.
      * @param Config $config
-     * @param $sOrder
      * @param $eventManager
      * @param ModelManager $modelManager
      * @param $logger
      */
-    public function __construct(Config $config, $sOrder, $eventManager, ModelManager $modelManager, $logger)
+    public function __construct(Config $config, $eventManager, ModelManager $modelManager, $logger)
     {
         $this->config = $config;
-        $this->sOrder = $sOrder;
+        $this->sOrder = Shopware()->Modules()->Order();
         $this->eventManager = $eventManager;
         $this->modelManager = $modelManager;
         $this->logger = $logger;
