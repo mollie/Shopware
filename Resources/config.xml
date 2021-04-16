@@ -20,7 +20,7 @@
         </element>
 
 
-        <element required="false" type="text" scope="shop">
+        <element required="false" type="password" scope="shop">
             <name>api-key</name>
             <label lang="de">Live API-key</label>
             <label lang="en">Live API-key</label>
