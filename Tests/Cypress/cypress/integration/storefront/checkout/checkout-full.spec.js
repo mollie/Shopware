@@ -29,6 +29,8 @@ const mollieIssuer = new IssuerScreenAction();
 const user_email = "dev@localhost.de";
 const user_pwd = "MollieMollie111";
 
+const device = devices.getFirstDevice();
+
 
 const configs = [
     {name: "Config 1", createOrderBeforePayment: true},
@@ -55,7 +57,7 @@ configs.forEach(config => {
     context("Checkout " + config.name, () => {
 
         before(function () {
-            devices.setDevice(devices.getFirstDevice());
+            devices.setDevice(device);
             plugin.configure(config.createOrderBeforePayment);
             register.doRegister(user_email, user_pwd);
         })
@@ -65,73 +67,15 @@ configs.forEach(config => {
         });
 
         describe('Successful Checkout', () => {
-            devices.getDevices().forEach(device => {
-                context(devices.getDescription(device), () => {
+            context(devices.getDescription(device), () => {
 
-                    payments.forEach(payment => {
-
-                        beforeEach(() => {
-                            devices.setDevice(device);
-                        });
-
-                        it('Pay with ' + payment.name, () => {
-
-                            cy.visit('/');
-
-                            login.doLogin(user_email, user_pwd);
-
-                            topMenu.clickOnClothing();
-                            listing.clickOnFirstProduct();
-                            pdp.addToCart();
-                            checkout.goToCheckoutInOffCanvas();
-
-                            checkout.switchPaymentMethod(payment.name);
-
-                            checkout.placeOrderOnConfirm();
-
-                            // verify that we are on the mollie payment screen
-                            // and that our payment method is also visible somewhere in that url
-                            cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
-                            cy.url().should('include', payment.key);
-
-
-                            if (payment.key === 'klarnapaylater') {
-
-                                molliePayment.selectAuthorized();
-
-                            } else {
-
-                                if (payment.key === 'ideal') {
-                                    mollieIssuer.selectIDEAL();
-                                }
-
-                                if (payment.key === 'kbc') {
-                                    mollieIssuer.selectKBC();
-                                }
-
-                                molliePayment.selectPaid();
-                            }
-
-                            // we should now get back to the shop
-                            // with a successful order message
-                            cy.contains('Vielen Dank für Ihre Bestellung');
-                        })
-
-                    })
-
-                })
-            })
-        })
-
-        describe.skip('Failed Checkout', () => {
-            devices.getDevices().forEach(device => {
-                context(devices.getDescription(device), () => {
+                payments.forEach(payment => {
 
                     beforeEach(() => {
                         devices.setDevice(device);
                     });
 
-                    it('Pay with PayPal', () => {
+                    it('Pay with ' + payment.name, () => {
 
                         cy.visit('/');
 
@@ -142,21 +86,75 @@ configs.forEach(config => {
                         pdp.addToCart();
                         checkout.goToCheckoutInOffCanvas();
 
-                        checkout.switchPaymentMethod('PayPal');
+                        checkout.switchPaymentMethod(payment.name);
+
                         checkout.placeOrderOnConfirm();
 
-                        molliePayment.selectFailed();
+                        // verify that we are on the mollie payment screen
+                        // and that our payment method is also visible somewhere in that url
+                        cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
+                        cy.url().should('include', payment.key);
 
-                        // verify that we are back in the shop
-                        // and that our order payment has failed
-                        cy.url().should('include', '/checkout/confirm');
-                        cy.contains('Ihre Zahlung ist fehlgeschlagen');
 
-                        // also verify that we still have products in our cart
-                        cy.get('.row--product').should('be.visible');
+                        if (payment.key === 'klarnapaylater') {
+
+                            molliePayment.selectAuthorized();
+
+                        } else {
+
+                            if (payment.key === 'ideal') {
+                                mollieIssuer.selectIDEAL();
+                            }
+
+                            if (payment.key === 'kbc') {
+                                mollieIssuer.selectKBC();
+                            }
+
+                            molliePayment.selectPaid();
+                        }
+
+                        // we should now get back to the shop
+                        // with a successful order message
+                        cy.contains('Vielen Dank für Ihre Bestellung');
                     })
 
                 })
+
+            })
+        })
+
+        describe.skip('Failed Checkout', () => {
+            context(devices.getDescription(device), () => {
+
+                beforeEach(() => {
+                    devices.setDevice(device);
+                });
+
+                it('Pay with PayPal', () => {
+
+                    cy.visit('/');
+
+                    login.doLogin(user_email, user_pwd);
+
+                    topMenu.clickOnClothing();
+                    listing.clickOnFirstProduct();
+                    pdp.addToCart();
+                    checkout.goToCheckoutInOffCanvas();
+
+                    checkout.switchPaymentMethod('PayPal');
+                    checkout.placeOrderOnConfirm();
+
+                    molliePayment.selectFailed();
+
+                    // verify that we are back in the shop
+                    // and that our order payment has failed
+                    cy.url().should('include', '/checkout/confirm');
+                    cy.contains('Ihre Zahlung ist fehlgeschlagen');
+
+                    // also verify that we still have products in our cart
+                    cy.get('.row--product').should('be.visible');
+                })
+
             })
         })
 
