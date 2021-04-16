@@ -3,7 +3,13 @@
 namespace MollieShopware\Components\Account;
 
 use MollieShopware\Components\Account\Gateway\GuestAccountGatewayInterface;
+use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Password\Manager;
+use Shopware\Models\Customer\Customer;
+use Shopware\Models\Order\Order;
+use Shopware_Components_Config;
+use Throwable;
 
 class Account
 {
@@ -28,13 +34,29 @@ class Account
      */
     private $gwGuestCustomer;
 
+    /**
+     * @var ModelManager
+     */
+    private $modelManager;
+
+    /**
+     * @var Shopware_Components_Config
+     */
+    private $config;
 
     /**
      * @param \Enlight_Components_Session_Namespace $session
      * @param Manager $pwdEncoder
      * @param GuestAccountGatewayInterface $gwGuestCustomer
+     * @param ModelManager $modelManager
      */
-    public function __construct(\Enlight_Components_Session_Namespace $session, Manager $pwdEncoder, GuestAccountGatewayInterface $gwGuestCustomer)
+    public function __construct(
+        \Enlight_Components_Session_Namespace $session,
+        Manager $pwdEncoder,
+        GuestAccountGatewayInterface $gwGuestCustomer,
+        ModelManager $modelManager,
+        Shopware_Components_Config $config
+    )
     {
         # attention, modules doesnt exist in CLI
         $this->admin = Shopware()->Modules()->sAdmin();
@@ -42,6 +64,8 @@ class Account
         $this->session = $session;
         $this->pwdEncoder = $pwdEncoder;
         $this->gwGuestCustomer = $gwGuestCustomer;
+        $this->modelManager = $modelManager;
+        $this->config = $config;
     }
 
 
@@ -152,5 +176,61 @@ class Account
         $this->admin->sSYSTEM->_POST = $authData;
 
         $this->admin->sLogin(true);
+    }
+
+    /**
+     * @param int $customerId
+     * @param int $paymentId
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function updateCustomerDefaultPaymentMethod(int $customerId, int $paymentId)
+    {
+        $repository = $this->modelManager->getRepository(Customer::class);
+        $customer = $repository->find($customerId);
+
+        $customer->setPaymentId($paymentId);
+
+        $this->modelManager->persist($customer);
+        $this->modelManager->flush();
+    }
+
+    /**
+     * @param int $customerId
+     * @return mixed|null
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getCustomerDefaultNonApplePayPaymentMethod(int $customerId)
+    {
+        $paymentId = $this->config->get('defaultpayment');
+
+        $queryBuilder = $this->modelManager->createQueryBuilder();
+        $expr = $this->modelManager->getExpressionBuilder();
+
+        $queryBuilder
+            ->select('orders.paymentId')
+            ->from(Order::class, 'orders')
+            ->leftJoin('orders.payment', 'payment')
+            ->where('orders.customerId = :customerId')
+            ->andWhere($expr->neq('payment.name', ':applePayName'))
+            ->andWhere($expr->neq('payment.name', ':applePayDirectName'))
+            ->orderBy('orders.id', 'DESC')
+            ->setParameter('customerId', $customerId)
+            ->setParameter('applePayName', ShopwarePaymentMethod::APPLEPAY)
+            ->setParameter('applePayDirectName', ShopwarePaymentMethod::APPLEPAYDIRECT)
+            ->setMaxResults(1);
+
+        try {
+            $customerOrders = $queryBuilder->getQuery()->getSingleResult();
+        } catch (Throwable $e) {
+            return (int)$paymentId;
+        }
+
+        if (!empty($customerOrders)) {
+            $paymentId = $customerOrders['paymentId'];
+        }
+
+        return (int)$paymentId;
     }
 }

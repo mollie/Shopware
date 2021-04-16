@@ -151,6 +151,8 @@
             <argument type="service" id="passwordencoder"/>
             <argument type="service"
                       id="mollie_shopware.components.account.gateway.dbal.register_guest_customer_gateway"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="config"/>
         </service>
 
         <!-- Event Subscribers -->
@@ -174,6 +176,14 @@
         <service id="mollie_shopware.subscriber.order_backend" class="MollieShopware\Subscriber\OrderBackendSubscriber">
             <argument type="service" id="mollie_shopware.order_service"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
+            <tag name="shopware.event_subscriber"/>
+        </service>
+
+        <service id="mollie_shopware.subscriber.applepay" class="MollieShopware\Subscriber\ApplePaySubscriber">
+            <argument type="service" id="mollie_shopware.components.account.account"/>
+            <argument type="service" id="mollie_shopware.components.apple_pay_direct.services.payment_method"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument type="service" id="modules"/>
             <tag name="shopware.event_subscriber"/>
         </service>
 

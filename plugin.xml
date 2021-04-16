@@ -41,6 +41,14 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+    <changelog version="unreleased">
+        <changes lang="de">
+            - ApplePay und ApplePay Direct werden nun nicht mehr automatisch als Standard Zahlmethode am Kundenkonto gespeichert.
+        </changes>
+        <changes lang="en">
+            - ApplePay and ApplePay Direct are now no longer automatically saved as the default payment method on the customer account.
+        </changes>
+    </changelog>
 
     <changelog version="1.7.5">
         <changes lang="de">

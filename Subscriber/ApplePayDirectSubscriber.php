@@ -3,18 +3,32 @@
 namespace MollieShopware\Subscriber;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Util\Debug;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\NoResultException;
 use Enlight\Event\SubscriberInterface;
+use Enlight_Config;
+use Enlight_Controller_Front;
+use Enlight_Controller_Request_RequestHttp;
 use Enlight_Event_EventArgs;
 use Enlight_View;
+use MollieShopware\Components\Account\Account;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandler;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectSetup;
+use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Logger;
 use MollieShopware\MollieShopware;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Theme\LessDefinition;
+use Shopware\Models\Customer\Customer;
+use Shopware\Models\Order\Order;
+use Shopware_Components_Config;
+use Shopware_Components_Modules;
+use Throwable;
 
 class ApplePayDirectSubscriber implements SubscriberInterface
 {
@@ -28,7 +42,6 @@ class ApplePayDirectSubscriber implements SubscriberInterface
             'Enlight_Controller_Action_PostDispatch_Frontend_Checkout' => 'onFrontendCheckoutPostDispatch',
         ];
     }
-
 
     /**
      * @param Enlight_Event_EventArgs $args
@@ -93,7 +106,6 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
         }
-
 
         /** @var Enlight_View $view */
         $view = $args->getSubject()->View();
@@ -163,5 +175,18 @@ class ApplePayDirectSubscriber implements SubscriberInterface
         $userData = $view->getAssign('sUserData');
         $userData['additional']['payment'] = $payment;
         $view->assign('sUserData', $userData);
+    }
+
+    /**
+     * @param array $paymentMeans
+     * @return array
+     */
+    private function removeApplePaymentMethodsFromPaymentMeans(array $paymentMeans)
+    {
+        return array_filter($paymentMeans, function ($item) {
+            if (!in_array($item['name'], [ShopwarePaymentMethod::APPLEPAYDIRECT, ShopwarePaymentMethod::APPLEPAY])) {
+                return true;
+            }
+        });
     }
 }
