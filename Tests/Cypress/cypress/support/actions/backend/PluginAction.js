@@ -25,18 +25,20 @@ export default class PluginAction {
         cy.wait(5000);
 
         // open plugin manager
-        repoTopMenu.getSettings().click();
-        repoTopMenu.getPluginManager().click();
+        repoTopMenu.getSettings().click({force: true});
+        cy.wait(500);
+
+        repoTopMenu.getPluginManager().click({force: true});
 
         cy.wait(4000);
 
         // click on "installed" plugins
-        cy.contains('Installiert').click();
+        cy.contains('Installiert').click({force: true});
 
         cy.wait(2000);
 
         // click on "edit" for Mollie
-        cy.get('[data-qtip="Öffnen"]').first().click();
+        cy.get('[data-qtip="Öffnen"]').first().click({force: true});
 
 
         // -----------------------------------------------------------------------
@@ -46,7 +48,7 @@ export default class PluginAction {
 
         // -----------------------------------------------------------------------
 
-        cy.contains("Speichern").click();
+        cy.contains("Speichern").click({force: true});
 
         this._clearCaches();
     }
@@ -56,13 +58,16 @@ export default class PluginAction {
      *
      */
     _clearCaches() {
-        repoTopMenu.getSettings().click();
-        repoTopMenu.getCachesPerformance().click();
+
+        repoTopMenu.getSettings().click({force: true});
+        cy.wait(500);
+
+        repoTopMenu.getCachesPerformance().click({force: true});
 
         // select Caches tab
-        cy.get('[class="x-tab-inner"]').eq(1).click();
+        cy.get('[class="x-tab-inner"]').eq(1).click({force: true});
 
-        cy.contains("Alle auswählen").click();
+        cy.contains("Alle auswählen").click({force: true});
         cy.contains("Leeren").click({force: true});
     }
 
