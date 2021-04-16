@@ -15,7 +15,6 @@ export default class PluginAction {
 
         const createOrderValue = (createOrderBeforePayment) ? "Ja" : "Nein";
 
-
         cy.visit('/backend');
 
         // login in backend
@@ -34,7 +33,7 @@ export default class PluginAction {
         // click on "installed" plugins
         cy.contains('Installiert').click();
 
-        cy.wait(4000);
+        cy.wait(2000);
 
         // click on "edit" for Mollie
         cy.get('[data-qtip="Öffnen"]').first().click();
@@ -42,11 +41,12 @@ export default class PluginAction {
 
         // -----------------------------------------------------------------------
         // configure our plugin
+
         cy.get('#base-element-select-2624-inputEl').clear().type(createOrderValue);
 
+        // -----------------------------------------------------------------------
 
         cy.contains("Speichern").click();
-
 
         this._clearCaches();
     }
@@ -58,9 +58,11 @@ export default class PluginAction {
     _clearCaches() {
         repoTopMenu.getSettings().click();
         repoTopMenu.getCachesPerformance().click();
-        
-        cy.contains("Alle auswählen").click();
 
+        // select Caches tab
+        cy.get('[class="x-tab-inner"]').eq(1).click();
+
+        cy.contains("Alle auswählen").click();
         cy.contains("Leeren").click({force: true});
     }
 
