@@ -7,7 +7,7 @@ class PaymentStatus
     const MOLLIE_PAYMENT_COMPLETED = 'completed';
     const MOLLIE_PAYMENT_PAID = 'paid';
     const MOLLIE_PAYMENT_AUTHORIZED = 'authorized';
-    const MOLLIE_PAYMENT_DELAYED = 'pending';
+    const MOLLIE_PAYMENT_PENDING = 'pending';
     const MOLLIE_PAYMENT_OPEN = 'open';
     const MOLLIE_PAYMENT_CANCELED = 'canceled';
     const MOLLIE_PAYMENT_EXPIRED = 'expired';
@@ -56,7 +56,7 @@ class PaymentStatus
         $list = [
             PaymentStatus::MOLLIE_PAYMENT_PAID,
             PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED,
-            PaymentStatus::MOLLIE_PAYMENT_DELAYED,
+            PaymentStatus::MOLLIE_PAYMENT_PENDING,
             PaymentStatus::MOLLIE_PAYMENT_OPEN,
         ];
 

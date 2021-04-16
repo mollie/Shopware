@@ -6,6 +6,8 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\StatusConverter\OrderStatusConverter;
+use MollieShopware\Components\StatusConverter\PaymentStatusConverter;
 use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
@@ -194,44 +196,12 @@ class OrderUpdater
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
-        $newShopwareStatus = null;
-        $ignoreState = false;
+        $converter = new PaymentStatusConverter($this->config->getAuthorizedPaymentStatusId());
 
-        switch ($status) {
+        $newStatusData = $converter->getShopwarePaymentStatus($status);
 
-            case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-                $newShopwareStatus = Status::PAYMENT_STATE_OPEN;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
-                $newShopwareStatus = $this->config->getAuthorizedPaymentStatusId();
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_DELAYED:
-                $newShopwareStatus = Status::PAYMENT_STATE_DELAYED;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_PAID:
-                $newShopwareStatus = Status::PAYMENT_STATE_COMPLETELY_PAID;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
-            case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-                $newShopwareStatus = Status::PAYMENT_STATE_RE_CREDITING;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
-            case PaymentStatus::MOLLIE_PAYMENT_FAILED:
-            case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $newShopwareStatus = Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-                # impact on the payment entry in shopware
-                # these are only states about the order
-                $ignoreState = true;
-                break;
-        }
+        $newShopwareStatus = $newStatusData->getTargetStatus();
+        $ignoreState = $newStatusData->isIgnoreState();
 
 
         $previousShopwareStatus = $newShopwareStatus;
@@ -299,31 +269,12 @@ class OrderUpdater
      */
     private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
-        $newShopwareStatus = null;
-        $ignoreState = false;
+        $converter = new OrderStatusConverter();
 
-        switch ($mollieStatus) {
-            case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
-                $newShopwareStatus = Status::ORDER_STATE_COMPLETED;
-                break;
+        $newStatusData = $converter->getShopwareOrderStatus($mollieStatus);
 
-            case PaymentStatus::MOLLIE_PAYMENT_CANCELED:
-            case PaymentStatus::MOLLIE_PAYMENT_FAILED:
-            case PaymentStatus::MOLLIE_PAYMENT_EXPIRED:
-                $newShopwareStatus = Status::ORDER_STATE_CANCELLED_REJECTED;
-                break;
-
-            case PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED:
-            case PaymentStatus::MOLLIE_PAYMENT_OPEN:
-            case PaymentStatus::MOLLIE_PAYMENT_DELAYED:
-            case PaymentStatus::MOLLIE_PAYMENT_PAID:
-            case PaymentStatus::MOLLIE_PAYMENT_REFUNDED:
-            case PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED:
-                # these payment status entries have no
-                # impact on the order status at the moment
-                $ignoreState = true;
-                break;
-        }
+        $newShopwareStatus = $newStatusData->getTargetStatus();
+        $ignoreState = $newStatusData->isIgnoreState();
 
         $previousShopwareStatus = $newShopwareStatus;
 
