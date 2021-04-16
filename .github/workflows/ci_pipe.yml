@@ -100,9 +100,42 @@ jobs:
 
   # ------------------------------------------------------------------------------------------------------------------------
 
+  integration_tests:
+    name: Integration Tests | Shopware ${{ matrix.shopware }}
+    needs: phpcsfixer
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shopware: [ '5.3.0' ]
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+          docker exec shop bash -c 'php bin/console mollie:payments:import'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
   e2e:
     name: E2E Tests | Shopware ${{ matrix.shopware }}
-    needs: phpcsfixer
+    needs: integration_tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
