@@ -41,6 +41,8 @@ export default class PluginAction {
         cy.get('[data-qtip="Öffnen"]').first().click({force: true});
 
 
+        cy.wait(4000);
+
         // -----------------------------------------------------------------------
         // configure our plugin
 
