@@ -21,14 +21,14 @@ export default class PluginAction {
         repoLogin.getPassword().clear().type('demo');
         repoLogin.getSubmitButton().click();
         cy.log('Successfully logged in');
-        //cy.wait(5000);
+        cy.wait(5000);
 
         repoTopMenu.getSettings().click({force: true});
         repoTopMenu.getPluginManager().click({force: true});
-        //cy.wait(4000);
+        cy.wait(4000);
 
         cy.contains('Installiert').click({force: true});
-        // cy.wait(2000);
+        cy.wait(2000);
 
 
         cy.log('Open Mollie Configuration');
@@ -61,7 +61,7 @@ export default class PluginAction {
     _clearCaches() {
 
         repoTopMenu.getSettings().click({force: true});
-        // cy.wait(500);
+        cy.wait(500);
 
         repoTopMenu.getCachesPerformance().click({force: true});
 
