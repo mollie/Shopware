@@ -1,9 +1,9 @@
 import LoginRepository from 'Repositories/backend/LoginRepository';
 import TopMenuRepository from "Repositories/backend/TopMenuRepository";
 
-
 const repoLogin = new LoginRepository();
 const repoTopMenu = new TopMenuRepository();
+
 
 export default class PluginAction {
 
@@ -13,44 +13,43 @@ export default class PluginAction {
      */
     configure(createOrderBeforePayment) {
 
-        const createOrderValue = (createOrderBeforePayment) ? "Ja" : "Nein";
-
         cy.visit('/backend');
 
         // login in backend
+        cy.log('Starting Login');
         repoLogin.getEmail().clear().type('demo');
         repoLogin.getPassword().clear().type('demo');
         repoLogin.getSubmitButton().click();
+        cy.log('Successfully logged in');
+        //cy.wait(5000);
 
-        cy.wait(5000);
-
-        // open plugin manager
         repoTopMenu.getSettings().click({force: true});
-        cy.wait(500);
-
         repoTopMenu.getPluginManager().click({force: true});
+        //cy.wait(4000);
 
-        cy.wait(4000);
-
-        // click on "installed" plugins
         cy.contains('Installiert').click({force: true});
-
-        cy.wait(2000);
-
-        // click on "edit" for Mollie
-        cy.get('[data-qtip="Öffnen"]').first().click({force: true});
+        // cy.wait(2000);
 
 
-        cy.wait(4000);
+        cy.log('Open Mollie Configuration');
+        this._openPluginSettings('Mollie');
 
         // -----------------------------------------------------------------------
         // configure our plugin
 
-        cy.get('#base-element-select-2624-inputEl').clear().type(createOrderValue);
+        cy.log('Configure CreateOrderBeforePayment');
+        const valueCreateOrderBeforePayment = (createOrderBeforePayment) ? "Ja" : "Nein";
+        this._setConfiguration('Bestellung vor Zahlungsabschluss anlegen', valueCreateOrderBeforePayment);
 
         // -----------------------------------------------------------------------
 
+        cy.screenshot();
+
         cy.contains("Speichern").click({force: true});
+
+        cy.screenshot();
+
+        cy.log('Plugin successfully configured');
 
         this._clearCaches();
     }
@@ -62,7 +61,7 @@ export default class PluginAction {
     _clearCaches() {
 
         repoTopMenu.getSettings().click({force: true});
-        cy.wait(500);
+        // cy.wait(500);
 
         repoTopMenu.getCachesPerformance().click({force: true});
 
@@ -71,6 +70,37 @@ export default class PluginAction {
 
         cy.contains("Alle auswählen").click({force: true});
         cy.contains("Leeren").click({force: true});
+
+        cy.screenshot();
+
+        cy.log('Cache successfully configured');
+    }
+
+    /**
+     *
+     * @param pluginName
+     * @private
+     */
+    _openPluginSettings(pluginName) {
+        cy.contains('td', pluginName)
+            .parent('tr')
+            .within(() => {
+                cy.get('td').eq(1).get('[data-qtip="Öffnen"]').first().click({force: true});
+            });
+    }
+
+    /**
+     *
+     * @param label
+     * @param value
+     * @private
+     */
+    _setConfiguration(label, value) {
+        cy.contains('td', label)
+            .parent('tr')
+            .within(() => {
+                cy.get('td').eq(1).get('input').clear().type(value);
+            });
     }
 
 }
