@@ -59,7 +59,7 @@ configs.forEach(config => {
 
             topMenu.clickOnClothing();
             listing.clickOnFirstProduct();
-            pdp.addToCart();
+            pdp.addToCart(1);
             checkout.goToCheckoutInOffCanvas();
 
             checkout.switchPaymentMethod('PayPal');
@@ -85,7 +85,7 @@ configs.forEach(config => {
 
             topMenu.clickOnClothing();
             listing.clickOnFirstProduct();
-            pdp.addToCart();
+            pdp.addToCart(1);
             checkout.goToCheckoutInOffCanvas();
 
             checkout.switchPaymentMethod('PayPal');

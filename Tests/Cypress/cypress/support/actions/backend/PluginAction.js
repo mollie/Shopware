@@ -10,6 +10,7 @@ export default class PluginAction {
 
     /**
      *
+     * @param createOrderBeforePayment
      */
     configure(createOrderBeforePayment) {
 
@@ -19,7 +20,10 @@ export default class PluginAction {
         cy.log('Starting Login');
         repoLogin.getEmail().clear().type('demo');
         repoLogin.getPassword().clear().type('demo');
+        repoLogin.getLocale().click();
+        cy.contains('German (Germany)').click();
         repoLogin.getSubmitButton().click();
+
         cy.log('Successfully logged in');
         cy.wait(5000);
 
@@ -36,20 +40,29 @@ export default class PluginAction {
 
         // -----------------------------------------------------------------------
         // configure our plugin
+        cy.log('Start Plugin Configuration');
 
-        cy.log('Configure CreateOrderBeforePayment');
+        cy.log('Create Order Before Payment');
         const valueCreateOrderBeforePayment = (createOrderBeforePayment) ? "Ja" : "Nein";
-        this._setConfiguration('Bestellung vor Zahlungsabschluss anlegen', valueCreateOrderBeforePayment);
+        this._setConfigurationValue('Bestellung vor Zahlungsabschluss anlegen', valueCreateOrderBeforePayment);
 
         // -----------------------------------------------------------------------
 
-        cy.screenshot();
-
         cy.contains("Speichern").click({force: true});
 
-        cy.screenshot();
+        // create a screenshot of our configuration
+        cy.get('.detail-window').screenshot('plugin_configuration');
+
 
         cy.log('Plugin successfully configured');
+
+        // this is important to avoid side effects
+        // with same elements like x-tab-inner for upcoming actions
+        // in our ExtJS backend.
+        cy.get('.detail-window')
+            .within(() => {
+                return cy.get('.x-tool-close').click();
+            })
 
         this._clearCaches();
     }
@@ -64,14 +77,13 @@ export default class PluginAction {
         cy.wait(500);
 
         repoTopMenu.getCachesPerformance().click({force: true});
+        cy.wait(2000);
 
         // select Caches tab
         cy.get('[class="x-tab-inner"]').eq(1).click({force: true});
 
         cy.contains("Alle auswählen").click({force: true});
         cy.contains("Leeren").click({force: true});
-
-        cy.screenshot();
 
         cy.log('Cache successfully configured');
     }
@@ -95,7 +107,7 @@ export default class PluginAction {
      * @param value
      * @private
      */
-    _setConfiguration(label, value) {
+    _setConfigurationValue(label, value) {
         cy.contains('td', label)
             .parent('tr')
             .within(() => {

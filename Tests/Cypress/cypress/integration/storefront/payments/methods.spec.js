@@ -61,7 +61,7 @@ describe('Payment Methods', () => {
 
                 listing.clickOnFirstProduct();
 
-                pdp.addToCart();
+                pdp.addToCart(1);
 
                 checkout.goToCheckoutInOffCanvas();
 

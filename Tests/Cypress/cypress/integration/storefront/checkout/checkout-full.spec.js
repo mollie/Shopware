@@ -40,6 +40,7 @@ const configs = [
 const payments = [
     {key: 'paypal', name: 'PayPal'},
     {key: 'klarnapaylater', name: 'Pay later'},
+    {key: 'klarnasliceit', name: 'Slice it'},
     {key: 'ideal', name: 'iDEAL'},
     {key: 'sofort', name: 'SOFORT'},
     {key: 'eps', name: 'eps'},
@@ -48,7 +49,7 @@ const payments = [
     {key: 'przelewy24', name: 'Przelewy24'},
     {key: 'kbc', name: 'KBC'},
     {key: 'belfius', name: 'Belfius'},
-    // due to default components ENABLED currently not active {key: 'creditcard', name: 'Credit card'},
+    {key: 'banktransfer', name: 'Bank transfer'},
 ];
 
 
@@ -83,19 +84,10 @@ configs.forEach(config => {
 
                         topMenu.clickOnClothing();
                         listing.clickOnFirstProduct();
-                        pdp.addToCart();
+                        pdp.addToCart(4);
                         checkout.goToCheckoutInOffCanvas();
 
                         checkout.switchPaymentMethod(payment.name);
-
-                        let totalSum = 0;
-                        // grab the total sum of our order from the confirm page.
-                        // we also want to test what the user has to pay in Mollie.
-                        // this has to match!
-                        checkout.getTotalFromConfirm().then(total => {
-                            cy.log("Cart Total: " + total);
-                            totalSum = total;
-                        });
 
                         checkout.placeOrderOnConfirm();
 
@@ -103,10 +95,8 @@ configs.forEach(config => {
                         // and that our payment method is also visible somewhere in that url
                         cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
                         cy.url().should('include', payment.key);
-                        cy.get('.header__amount').contains(totalSum);
 
-
-                        if (payment.key === 'klarnapaylater') {
+                        if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 
                             molliePayment.selectAuthorized();
 
@@ -148,7 +138,7 @@ configs.forEach(config => {
 
                     topMenu.clickOnClothing();
                     listing.clickOnFirstProduct();
-                    pdp.addToCart();
+                    pdp.addToCart(1);
                     checkout.goToCheckoutInOffCanvas();
 
                     checkout.switchPaymentMethod('PayPal');

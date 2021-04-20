@@ -20,6 +20,15 @@ export default class LoginRepository {
      *
      * @returns {*}
      */
+    getLocale()
+    {
+        return cy.get('#ext-gen1051');
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
     getSubmitButton() {
         return cy.get('#button-1019');
     }
