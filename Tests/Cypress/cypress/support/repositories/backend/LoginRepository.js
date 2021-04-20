@@ -22,7 +22,7 @@ export default class LoginRepository {
      */
     getLocale()
     {
-        return cy.get('#ext-gen1051');
+        return cy.get('.x-form-arrow-trigger').eq(0);
     }
 
     /**
