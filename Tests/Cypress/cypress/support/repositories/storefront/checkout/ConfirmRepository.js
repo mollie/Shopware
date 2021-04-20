@@ -1,4 +1,4 @@
-class ConfirmRepository {
+export default class ConfirmRepository {
 
     /**
      *
@@ -20,10 +20,16 @@ class ConfirmRepository {
      *
      * @returns {*}
      */
+    getTotalSum() {
+        return cy.get('.entry--total > .entry--value');
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
     getSubmitButton() {
         return cy.get('.main--actions > .btn');
     }
 
 }
-
-export default ConfirmRepository;

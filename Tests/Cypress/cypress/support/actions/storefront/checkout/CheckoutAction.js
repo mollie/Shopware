@@ -44,6 +44,19 @@ class CheckoutAction {
 
     /**
      *
+     * @returns {*}
+     */
+    getTotalFromConfirm() {
+        return repoConfirm.getTotalSum().invoke('text').then((total) => {
+
+            total = total.replace("€", "");
+
+            return total;
+        });
+    }
+
+    /**
+     *
      */
     placeOrderOnConfirm() {
         repoConfirm.getTerms().check();
