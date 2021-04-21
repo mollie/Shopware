@@ -51,6 +51,10 @@ class MollieStatusConverter
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_PAID;
             }
 
+            if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_PENDING] == $paymentsResult['total']) {
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_PENDING;
+            }
+
             // fully authorized
             if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED] == $paymentsResult['total']) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED;
@@ -76,6 +80,8 @@ class MollieStatusConverter
         } else {
             if ($order->isPaid()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_PAID;
+            } elseif ($order->isPending()) {
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_PENDING;
             } elseif ($order->isAuthorized()) {
                 $targetStatus = PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED;
             } elseif ($order->isCanceled()) {

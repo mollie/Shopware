@@ -45,7 +45,7 @@ class OrderStatusConverter
                 break;
 
             default:
-                throw new PaymentStatusNotFoundException('Unable to get Shopware Order Status for Mollie Payment Status: ' . $molliePaymentStatus);
+                throw new PaymentStatusNotFoundException('Unable to convert Mollie Payment Status: ' . $molliePaymentStatus . ' to Shopware Order Status!');
         }
 
 
