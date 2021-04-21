@@ -113,7 +113,7 @@ class RestoreSessionFacade
      *
      * @return bool
      */
-    private function isOrderSessionExisting()
+    public function isOrderSessionExisting()
     {
         $variables = Shopware()->Session()->sOrderVariables;
 

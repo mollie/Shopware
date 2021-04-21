@@ -241,6 +241,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 throw new Exception('Missing Transaction Number');
             }
 
+            # now verify if we still have no session?!
+            # shouldn't happen in expected cases, because either it's there or it has been restored!
+            if (!$this->restoreSessionFacade->isOrderSessionExisting()) {
+                throw new Exception('Missing Session for Transaction: ' . $transactionID);
+            }
+
             # ---------------------------------------------------------------------------------------------
 
             $checkoutData = $this->checkoutReturn->finishTransaction((int)$transactionID);
