@@ -230,6 +230,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function finishAction()
     {
         $transactionID = '';
+        $hasSession = false;
 
         try {
 
@@ -241,9 +242,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 throw new Exception('Missing Transaction Number');
             }
 
+            $hasSession = $this->restoreSessionFacade->isOrderSessionExisting();
+
             # now verify if we still have no session?!
             # shouldn't happen in expected cases, because either it's there or it has been restored!
-            if (!$this->restoreSessionFacade->isOrderSessionExisting()) {
+            if (!$hasSession) {
                 throw new Exception('Missing Session for Transaction: ' . $transactionID);
             }
 
@@ -278,7 +281,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
         # if we had some errors make sure to
         # cancel our order and navigate back to the confirm page
-        if (!empty($transactionID)) {
+        if ($hasSession && !empty($transactionID)) {
 
             try {
 
