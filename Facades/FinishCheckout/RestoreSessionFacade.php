@@ -93,7 +93,7 @@ class RestoreSessionFacade
         $pendingOrder = $this->orderService->getOrderBySessionId($transaction->getSessionId());
 
         if (!$pendingOrder instanceof Order) {
-            throw new OrderNotFoundException('Order for Session ' . $transaction->getSessionId() . ' not found!');
+            throw new OrderNotFoundException('Pending Order for Session ' . $transaction->getSessionId() . ' not found!');
         }
 
         # we do only restore a session if that order number is "0"
