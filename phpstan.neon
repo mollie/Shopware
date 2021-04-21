@@ -8,3 +8,11 @@ parameters:
         - Client/*
         - Resources/*
         - vendor/*
+
+services:
+    - class: MollieShopware\Tests\PHPStan\Rules\NoStrictTypesRule
+      tags:
+        - phpstan.rules.rule
+    - class: MollieShopware\Tests\PHPStan\Rules\NoManufacturerRule
+      tags:
+        - phpstan.rules.rule
