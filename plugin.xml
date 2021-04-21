@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.7.5</version>
+    <version>1.8.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,12 +41,24 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
-    <changelog version="unreleased">
+    <changelog version="1.8.0">
         <changes lang="de">
-            - ApplePay und ApplePay Direct werden nun nicht mehr automatisch als Standard Zahlmethode am Kundenkonto gespeichert.
+            - Neue Zahlungsabläufe für bessere Stabilität in Ausnahmefällen wie "verlorenen Sessions" in denen die Bestellung nicht abgeschlossen wurde und in den Abbrüchen sichtbar war, bzw. Fehlermeldungen wie "paymentID must not be NULL" zu sehen waren.
+            - Der Live API Key ist nun in den Konfigurationen durch "Sterne"" maskiert.
+            - Die Status-Historie einer Bestellung im Backend zeigt nun ein Mollie Logo, wenn die Änderung durch Mollie ausgelöst wurde.
+            - Verbesserte Kompatibilität mit "Custom Products" Plugin. Konfigurierte Felder werden nun erfolgreich bei fehlerhaften Zahlungen wiederhergestellt.
+            - Verbesserte Aktualisierung des Bestellstatus durch Mollie. Nicht alle Zahlungsstatus führten zu einem passenden Bestellstatus.
+            - Verbessertes Klarna CLI Shipping Kommando mit weniger Warnungen und Fehlern, sowie optimierter Auto-Reparatur von fehlerhaften/abgebrochenen/abgelaufenen Bestellungen.
+            - ApplePay und ApplePay Direct werden nun nicht mehr als Standard Zahlungsmethode am Kundenkonto gespeichert.
         </changes>
         <changes lang="en">
-            - ApplePay and ApplePay Direct are now no longer automatically saved as the default payment method on the customer account.
+            - Brand new payment flows with improved stability for edge cases, such as a "lost sessions" which led to "missing orders" and "paymentID must not be NULL" errors.
+            - The Live API Key is now hidden under asterisks.
+            - The order status-history in the backend does now show a Mollie Logo for all transitions executed by Mollie.
+            - Added compatibility for "Custom Products". The custom fields are now restored correctly on failed payments.
+            - Improved "Update Order Status" transitions. Not all Mollie payment status led to a matching order status before.
+            - Improved Klarna CLI shipping command to have less warnings and errors and improve auto-repairing for failed/cancelled/expired orders.
+            - ApplePay and ApplePay Direct are now no longer saved as default payment method on the customer account.
         </changes>
     </changelog>
 
@@ -78,7 +90,7 @@
         <changes lang="de">
             - Neues CLI Kommando zum Importieren/Aktualisieren von Zahlungsarten
             - Neue Shopware Filter Events um selbst Einfluss auf Änderung von Zahlungs- sowie Bestellstatus nehmen zu können.
-              Dadurch kann der von Mollie verwendete Status überschrieben werden, und individuell auf eigene Einträge/Abläufe eingegangen werden.
+            Dadurch kann der von Mollie verwendete Status überschrieben werden, und individuell auf eigene Einträge/Abläufe eingegangen werden.
             - Optimierung der Imports von Zahlungsarten damit eigene Einstellungen wie z.B. "aktiv" erhalten bleiben und nicht mehr überschrieben werden.
             - Problembehebung in seltenen Fällen in denen bei Zahlungsarten eine falsche "Action" in der Datenbank war, und man somit sofort auf die "Finish" Seite des Checkouts gelangte, ohne dass etwas durchgeführt wurde.
             - Problembehebung in denen manchmal Zahlungs Icons bei einer frischen Installation gefehlt haben.
@@ -102,7 +114,7 @@
         </changes>
         <changes lang="en">
             - Addon to the multiple order fix. In some circumstances some mails still got sent several times.
-     </changes>
+        </changes>
     </changelog>
 
     <changelog version="1.7.1">
