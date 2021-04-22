@@ -184,7 +184,7 @@ class Account
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function updateCustomerDefaultPaymentMethod(int $customerId, int $paymentId)
+    public function updateCustomerDefaultPaymentMethod($customerId, $paymentId)
     {
         $repository = $this->modelManager->getRepository(Customer::class);
         $customer = $repository->find($customerId);
@@ -201,7 +201,7 @@ class Account
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    public function getCustomerDefaultNonApplePayPaymentMethod(int $customerId)
+    public function getCustomerDefaultNonApplePayPaymentMethod($customerId)
     {
         $paymentId = $this->config->get('defaultpayment');
 

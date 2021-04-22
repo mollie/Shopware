@@ -90,6 +90,13 @@ We do have a code style that we need for this project.
 To make it easy for you to use these standards, there are some make commands that you should use:
 
 ```bash
+
+## Check for PHP Syntax errors
+make phpcheck
+
+## Check for PHP version and minimum compatibility
+make phpmin 
+
 ## Starts the PHP CS Fixer (no-auto fixing -> please use PR command)
 make csfix
 

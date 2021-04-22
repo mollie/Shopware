@@ -357,7 +357,11 @@ class OrderService
         return $items;
     }
 
-    public function getOrderBySessionId(string $sessionId)
+    /**
+     * @param $sessionId
+     * @return Order|null
+     */
+    public function getOrderBySessionId($sessionId)
     {
         $order = null;
 
@@ -388,7 +392,7 @@ class OrderService
      * @return Order
      * @throws OrderNotFoundException
      */
-    public function getOrderByTransactionId(string $transactionId)
+    public function getOrderByTransactionId($transactionId)
     {
         /** @var \Shopware\Models\Order\Repository $orderRepo */
         $orderRepo = $this->modelManager->getRepository(Order::class);

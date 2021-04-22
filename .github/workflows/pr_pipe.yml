@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  syntax_checks:
+  php_checks:
     name: PHP Syntax Checks | PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
@@ -23,11 +23,11 @@ jobs:
           php-version: ${{ matrix.php }}
 
       - name: PHP Syntax Checks
-        run: make phpsyntax -B
+        run: make phpcheck -B
 
-  php_checks:
+  php_min:
     name: PHP 5.6 Compatibility
-    needs: syntax_checks
+    needs: php_checks
     runs-on: ubuntu-latest
     steps:
       - name: Clone Code
@@ -42,13 +42,13 @@ jobs:
         run: make dev -B
 
       - name: PHP Checks
-        run: make phpcheck -B
+        run: make phpmin -B
 
   # ------------------------------------------------------------------------------------------------------------------------
 
   unit_tests:
     name: Unit Tests | PHP ${{ matrix.php }}
-    needs: php_checks
+    needs: php_min
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -75,7 +75,7 @@ jobs:
   # ------------------------------------------------------------------------------------------------------------------------
 
   phpstan:
-    name: PHPStan Analyzer
+    name: PHPStan Analyser
     needs: unit_tests
     runs-on: ubuntu-latest
     steps:

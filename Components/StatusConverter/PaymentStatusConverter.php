@@ -23,7 +23,7 @@ class PaymentStatusConverter
      * PaymentTransactionMapper constructor.
      * @param int $authorizedPaymentStatus
      */
-    public function __construct(int $authorizedPaymentStatus)
+    public function __construct($authorizedPaymentStatus)
     {
         $this->authorizedPaymentStatus = $authorizedPaymentStatus;
     }
