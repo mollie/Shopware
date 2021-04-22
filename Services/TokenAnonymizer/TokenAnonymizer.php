@@ -25,7 +25,7 @@ class TokenAnonymizer
      * @param int $placeholderCount
      * @param int $maxLength
      */
-    public function __construct(string $placeholderSymbol, int $placeholderCount, int $maxLength)
+    public function __construct($placeholderSymbol, $placeholderCount, $maxLength)
     {
         $this->placeholderSymbol = $placeholderSymbol;
         $this->placeholderCount = $placeholderCount;
@@ -65,6 +65,6 @@ class TokenAnonymizer
     private function getPlaceholder()
     {
         return str_repeat($this->placeholderSymbol, $this->placeholderCount);
-        ;
     }
+
 }

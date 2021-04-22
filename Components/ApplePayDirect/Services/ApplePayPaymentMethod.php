@@ -57,7 +57,7 @@ class ApplePayPaymentMethod
      * @param string $defaultPaymentMethod
      * @return bool
      */
-    public function isApplePayPaymentMethod(string $defaultPaymentMethod)
+    public function isApplePayPaymentMethod($defaultPaymentMethod)
     {
         if (
         !\in_array(

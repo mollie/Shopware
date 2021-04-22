@@ -28,10 +28,10 @@ clean: ## Cleans all dependencies
 test: ## Starts all Tests
 	@XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=phpunit.xml
 
-phpsyntax: ## Starts the PHP syntax checks
+phpcheck: ## Starts the PHP syntax checks
 	@find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
 
-phpcheck: ## Starts the PHP compatibility checks
+phpmin: ## Starts the PHP compatibility checks
 	@php vendor/bin/phpcs -p --ignore=*/Client/*,*/Resources/*,*/Tests*,*/vendor/* --standard=PHPCompatibility --extensions=php --runtime-set testVersion 5.6 .
 
 csfix: ## Starts the PHP Coding Standard Analyser
