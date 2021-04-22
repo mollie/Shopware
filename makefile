@@ -13,7 +13,7 @@ help:
 # ------------------------------------------------------------------------------------------------------------
 
 install: ## Installs all production dependencies
-	@composer install --no-dev
+	@composer install --no-dev --no-scripts
 
 dev: ## Installs all dev dependencies
 	@composer install
@@ -28,7 +28,13 @@ clean: ## Cleans all dependencies
 test: ## Starts all Tests
 	@XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=phpunit.xml
 
-csfix: ## Starts the PHP CS Fixer
+phpsyntax: ## Starts the PHP syntax checks
+	@find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
+
+phpcheck: ## Starts the PHP compatibility checks
+	@php vendor/bin/phpcs -p --ignore=*/Client/*,*/Resources/*,*/Tests*,*/vendor/* --standard=PHPCompatibility --extensions=php --runtime-set testVersion 5.6 .
+
+csfix: ## Starts the PHP Coding Standard Analyser
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php --dry-run
 
 stan: ## Starts the PHPStan Analyser
@@ -41,6 +47,8 @@ metrics: ## Starts the PHPMetrics Analyser
 
 pr: ## Prepares everything for a Pull Request
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
+	@make phpsyntax -B
+	@make phpcheck -B
 	@make test -B
 	@make stan -B
 
