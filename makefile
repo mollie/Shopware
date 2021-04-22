@@ -47,8 +47,8 @@ metrics: ## Starts the PHPMetrics Analyser
 
 pr: ## Prepares everything for a Pull Request
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
-	@make phpsyntax -B
 	@make phpcheck -B
+	@make phpmin -B
 	@make test -B
 	@make stan -B
 
