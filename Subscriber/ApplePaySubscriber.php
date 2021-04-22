@@ -84,7 +84,7 @@ class ApplePaySubscriber implements SubscriberInterface
         $currentPaymentMethod = $this->modules->Admin()->sGetUserData()['additional']['payment']['name'];
 
         try {
-            if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
+            if ($this->paymentMethodService->isApplePayPaymentMethod((string)$currentPaymentMethod) === false) {
                 return;
             }
 
@@ -93,7 +93,7 @@ class ApplePaySubscriber implements SubscriberInterface
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
         } catch (Exception $e) {
-            $this->logger->warning('Error setting customer default payment method on login', [ 'message' => $e->getMessage() ]);
+            $this->logger->warning('Error setting customer default payment method on login', ['message' => $e->getMessage()]);
         }
     }
 
@@ -110,9 +110,9 @@ class ApplePaySubscriber implements SubscriberInterface
         }
 
         $currentPaymentMethod = $this->modules->Admin()->sGetUserData()['additional']['payment']['name'];
-
+   
         try {
-            if ($this->paymentMethodService->isApplePayPaymentMethod($currentPaymentMethod) === false) {
+            if ($this->paymentMethodService->isApplePayPaymentMethod((string)$currentPaymentMethod) === false) {
                 return;
             }
 
@@ -121,7 +121,7 @@ class ApplePaySubscriber implements SubscriberInterface
 
             $this->accountService->updateCustomerDefaultPaymentMethod($userId, $paymentId);
         } catch (Exception $e) {
-            $this->logger->warning('Error setting customer default payment method on checkout finish', [ 'message' => $e->getMessage() ]);
+            $this->logger->warning('Error setting customer default payment method on checkout finish', ['message' => $e->getMessage()]);
         }
     }
 

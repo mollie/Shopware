@@ -69,4 +69,26 @@ class ApplePayPaymentMethodTest extends TestCase
     {
         $this->assertTrue($this->paymentMethodService->isApplePayPaymentMethod($methodName));
     }
+
+    /**
+     * This test verifies that our function can be used with NULL.
+     * Somehow NULL is happening for some customers out there.
+     *
+     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod::isApplePayPaymentMethod
+     */
+    public function testIsNotApplePayWithNull()
+    {
+        $this->assertFalse($this->paymentMethodService->isApplePayPaymentMethod(null));
+    }
+
+    /**
+     * This test verifies that our function can be used with an empty string.
+     *
+     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod::isApplePayPaymentMethod
+     */
+    public function testIsNotApplePayWithEmptyString()
+    {
+        $this->assertFalse($this->paymentMethodService->isApplePayPaymentMethod(''));
+    }
+
 }
