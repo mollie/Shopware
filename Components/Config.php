@@ -146,7 +146,7 @@ class Config
      *
      * @return string
      */
-    public function apiKey()
+    public function getLiveApiKey()
     {
         /** @var string|null $key */
         $key = $this->get('api-key');
