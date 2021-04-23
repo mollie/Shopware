@@ -13,7 +13,7 @@ help:
 # ------------------------------------------------------------------------------------------------------------
 
 install: ## Installs all production dependencies
-	@composer install --no-dev --no-scripts
+	@composer install --no-dev
 
 dev: ## Installs all dev dependencies
 	@composer install
