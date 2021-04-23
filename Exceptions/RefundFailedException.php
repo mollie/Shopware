@@ -6,8 +6,8 @@ class RefundFailedException extends \Exception
 {
 
     /**
-     * @param $orderNumber
-     * @param $message
+     * @param string $orderNumber
+     * @param string $message
      */
     public function __construct($orderNumber, $message)
     {

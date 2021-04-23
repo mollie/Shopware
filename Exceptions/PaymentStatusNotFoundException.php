@@ -7,7 +7,7 @@ class PaymentStatusNotFoundException extends \Exception
 
     /**
      * PaymentStatusNotFoundException constructor.
-     * @param $errorMessage
+     * @param string $errorMessage
      */
     public function __construct($errorMessage)
     {

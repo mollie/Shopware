@@ -6,7 +6,7 @@ class TransactionNotFoundException extends \Exception
 {
 
     /**
-     * @param $transactionNumber
+     * @param string $transactionNumber
      */
     public function __construct($transactionNumber)
     {

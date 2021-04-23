@@ -11,8 +11,9 @@ export default class PluginAction {
     /**
      *
      * @param createOrderBeforePayment
+     * @param usePaymentsAPI
      */
-    configure(createOrderBeforePayment) {
+    configure(createOrderBeforePayment, usePaymentsAPI) {
 
         cy.visit('/backend');
 
@@ -45,6 +46,10 @@ export default class PluginAction {
         cy.log('Create Order Before Payment');
         const valueCreateOrderBeforePayment = (createOrderBeforePayment) ? "Ja" : "Nein";
         this._setConfigurationValue('Bestellung vor Zahlungsabschluss anlegen', valueCreateOrderBeforePayment);
+
+        cy.log('Use Payments API');
+        const valueUsePaymentsAPI = (usePaymentsAPI) ? "Ja" : "Nein";
+        this._setConfigurationValue('Nur Transaktionen in Mollie erstellen', valueUsePaymentsAPI);
 
         // -----------------------------------------------------------------------
 

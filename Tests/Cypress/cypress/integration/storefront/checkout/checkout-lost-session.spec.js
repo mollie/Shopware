@@ -32,18 +32,26 @@ const device = devices.getFirstDevice();
 
 
 const configs = [
-    {name: "Config 1", createOrderBeforePayment: true},
-    {name: "Config 2", createOrderBeforePayment: false},
+    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true,},
+    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true,},
+    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false,},
+    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false,},
 ];
 
 configs.forEach(config => {
 
-    context("Checkout " + config.name, () => {
+    context("Config: " + config.name, () => {
 
         before(() => {
             devices.setDevice(device);
-            plugin.configure(config.createOrderBeforePayment);
+
+            plugin.configure(
+                config.createOrderBeforePayment,
+                config.paymentsAPI
+            );
+
             register.doRegister(user_email, user_pwd);
+
         });
 
         beforeEach(() => {

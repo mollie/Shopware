@@ -7,8 +7,8 @@ class MolliePaymentFailedException extends \Exception
 
     /**
      * MolliePaymentFailedException constructor.
-     * @param $transactionID
-     * @param $message
+     * @param string $transactionID
+     * @param string $message
      */
     public function __construct($transactionID, $message)
     {

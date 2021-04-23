@@ -3,8 +3,9 @@
 namespace MollieShopware\Services\Refund;
 
 use Doctrine\ORM\EntityManager;
-use Exception;
+use Enlight_Components_Mail;
 use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\BaseResource;
 use Mollie\Api\Resources\Order as MollieOrder;
 use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Resources\Payment;
@@ -13,7 +14,6 @@ use Mollie\Api\Resources\Refund;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
-use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Exceptions\RefundFailedException;
 use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Gateways\MollieGatewayInterface;
@@ -51,22 +51,27 @@ class RefundService implements RefundInterface
 
     /**
      * @param EntityManager $modelManager
-     * @param $container
+     * @param ContainerInterface $container
      */
     public function __construct(EntityManager $modelManager, $container)
     {
         $this->modelManager = $modelManager;
         $this->shopSwitcher = new MollieShopSwitcher($container);
 
-        $this->repoOrderLines = $this->modelManager->getRepository(OrderLines::class);
-        $this->repoOrderStatus = $this->modelManager->getRepository(Status::class);
+        /** @var OrderLinesRepository repoOrderStatus */
+        $repoOrderLines = $this->modelManager->getRepository(OrderLines::class);
+        $this->repoOrderLines = $repoOrderLines;
+
+        /** @var \Shopware\Models\Order\Repository repoOrderStatus */
+        $repoOrderStatus = $this->modelManager->getRepository(Status::class);
+        $this->repoOrderStatus = $repoOrderStatus;
     }
 
 
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @return mixed|void
+     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -90,24 +95,28 @@ class RefundService implements RefundInterface
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
             $refund = $this->sendMollieOrderRefund($order, $mollieOrder, $mollie);
+
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
             if (!$molliePayment->canBeRefunded()) {
-                throw new RefundFailedException($order->getNumber(), 'Payment cannot be refunded');
+                throw new RefundFailedException((string)$order->getNumber(), 'Payment cannot be refunded');
             }
 
             $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $order->getInvoiceAmount());
         }
 
-        return $this->finishShopwareRefund($order, $config);
+        $this->finishShopwareRefund($order, $config);
+
+        /** @var Refund */
+        return $refund;
     }
 
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @param $amount
-     * @return mixed|void
+     * @param float $amount
+     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -146,8 +155,10 @@ class RefundService implements RefundInterface
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
-            /** @var Payment $payment */
-            foreach ($mollieOrder->payments() as $payment) {
+            /** @var Payment[] $payments */
+            $payments = $mollieOrder->payments();
+
+            foreach ($payments as $payment) {
                 if ($payment->status === PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED || $payment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $molliePayment = $payment;
                     break;
@@ -158,29 +169,32 @@ class RefundService implements RefundInterface
         }
 
         if (!$molliePayment instanceof Payment) {
-            throw new RefundFailedException($order->getNumber(), 'Mollie Payment for this order has not been found');
+            throw new RefundFailedException((string)$order->getNumber(), 'Mollie Payment for this order has not been found');
         }
 
         if (!$molliePayment->canBePartiallyRefunded()) {
-            throw new RefundFailedException($order->getNumber(), 'Payment cannot be partially refunded!');
+            throw new RefundFailedException((string)$order->getNumber(), 'Payment cannot be partially refunded!');
         }
 
         if ($molliePayment->getAmountRemaining() < $amount) {
-            throw new RefundFailedException($order->getNumber(), 'Provided refund amount not valid. Only ' . $molliePayment->getAmountRemaining() . ' is left for a refund in this payment.');
+            throw new RefundFailedException((string)$order->getNumber(), 'Provided refund amount not valid. Only ' . $molliePayment->getAmountRemaining() . ' is left for a refund in this payment.');
         }
 
         $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $amount);
 
         $this->finishShopwareRefund($order, $config);
+
+        /** @var Refund $refund */
+        return $refund;
     }
 
     /**
      * @param Order $order
      * @param Detail $detail
      * @param Transaction $transaction
-     * @param $orderLineID
-     * @param $quantity
-     * @return Refund|null
+     * @param string $orderLineID
+     * @param int $quantity
+     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -190,7 +204,7 @@ class RefundService implements RefundInterface
     public function refundPartialOrderItem(Order $order, Detail $detail, Transaction $transaction, $orderLineID, $quantity)
     {
         if (!$transaction->isTypeOrder()) {
-            throw new RefundFailedException($order->getNumber(), 'Line Item based partial refunds cannot be done for simple transactions!');
+            throw new RefundFailedException((string)$order->getNumber(), 'Line Item based partial refunds cannot be done for simple transactions!');
         }
 
         # get the configured API client and config for this order
@@ -208,7 +222,7 @@ class RefundService implements RefundInterface
         $orderLine = $mollieOrder->lines()->get($orderLineID);
 
         if (!$orderLine instanceof OrderLine) {
-            throw new RefundFailedException($order->getNumber(), 'Partial Order refund failed! Line with ID ' . $orderLineID . ' not found in order ' . $order->getNumber() . '!');
+            throw new RefundFailedException((string)$order->getNumber(), 'Partial Order refund failed! Line with ID ' . $orderLineID . ' not found in order ' . $order->getNumber() . '!');
         }
 
         $data = [
@@ -220,11 +234,11 @@ class RefundService implements RefundInterface
             ]
         ];
 
-        /** @var Refund $refund */
+        /** @var Refund|null $refund */
         $refund = $mollie->orderRefunds->createFor($mollieOrder, $data);
 
         if ($refund === null) {
-            throw new RefundFailedException($order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
+            throw new RefundFailedException((string)$order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
         }
 
         $this->updateRefundedItemsOnOrderDetail($detail, $quantity);
@@ -237,13 +251,14 @@ class RefundService implements RefundInterface
     /**
      * @param Order $order
      * @param MolliePayment $molliePayment
-     * @param $amountToRefund
+     * @param float $amountToRefund
      * @return \Mollie\Api\Resources\BaseResource
      * @throws RefundFailedException
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     private function sendMolliePaymentRefund(Order $order, MolliePayment $molliePayment, $amountToRefund)
     {
+        /** @var BaseResource|null $refund */
         $refund = $molliePayment->refund([
             'amount' => [
                 'currency' => $order->getCurrency(),
@@ -252,7 +267,7 @@ class RefundService implements RefundInterface
         ]);
 
         if ($refund === null) {
-            throw new RefundFailedException($order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
+            throw new RefundFailedException((string)$order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
         }
 
         return $refund;
@@ -272,7 +287,7 @@ class RefundService implements RefundInterface
     {
         $mollieShipmentLines = $this->repoOrderLines->getShipmentLines($order);
 
-        /** @var Refund $refund */
+        /** @var Refund|null $refund */
         $refund = $mollie->orderRefunds->createFor(
             $mollieOrder,
             [
@@ -281,7 +296,7 @@ class RefundService implements RefundInterface
         );
 
         if ($refund === null) {
-            throw new RefundFailedException($order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
+            throw new RefundFailedException((string)$order->getNumber(), 'Refund API Call failed for order: ' . $order->getNumber());
         }
 
         if (!$order->getDetails()->isEmpty()) {
@@ -304,7 +319,10 @@ class RefundService implements RefundInterface
     {
         # somehow it always says it cannot use modules in the constructor...synthetic service stuff
         # lets just keep it here for now
-        $sOrder = Shopware()->Modules()->Order();
+        /** @var \Shopware_Components_Modules $modules */
+        $modules = Shopware()->Modules();
+
+        $sOrder = $modules->Order();
 
         /** @var Status $paymentStatusRefunded */
         $paymentStatusRefunded = $this->repoOrderStatus->find(Status::PAYMENT_STATE_RE_CREDITING);
@@ -318,9 +336,12 @@ class RefundService implements RefundInterface
 
         // send status email
         if ($config->isPaymentStatusMailEnabled() && $config->sendRefundStatusMail()) {
+
+            /** @var Enlight_Components_Mail|null $mail */
             $mail = $sOrder->createStatusMail($order->getId(), $paymentStatusRefunded->getId());
 
             if ($mail) {
+
                 $sOrder->sendStatusMail($mail);
             }
         }
@@ -329,8 +350,9 @@ class RefundService implements RefundInterface
     }
 
     /**
-     * @param $detail
-     * @param $quantity
+     * @param Detail $detail
+     * @param int $quantity
+     * @return void
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -348,12 +370,16 @@ class RefundService implements RefundInterface
             return;
         }
 
-        $mollieReturn = $detail->getAttribute()->getMollieReturn();
+
+        $attribute = $detail->getAttribute();
+
+        $mollieReturn = $attribute->getMollieReturn();
+
         $mollieReturn += $quantity;
 
-        $detail->getAttribute()->setMollieReturn($mollieReturn);
+        $attribute->setMollieReturn($mollieReturn);
 
-        $this->modelManager->persist($detail->getAttribute());
-        $this->modelManager->flush($detail->getAttribute());
+        $this->modelManager->persist($attribute);
+        $this->modelManager->flush($attribute);
     }
 }

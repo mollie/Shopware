@@ -6,7 +6,7 @@ class OrderStatusNotFoundException extends \Exception
 {
 
     /**
-     * @param $status
+     * @param string $status
      */
     public function __construct($status)
     {
