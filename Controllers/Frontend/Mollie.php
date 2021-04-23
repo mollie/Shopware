@@ -610,7 +610,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->restoreSessionFacade = new RestoreSessionFacade(
                 $repoTransactions,
                 $sessionManager,
-                $orderService,
                 $this->logger
             );
 

@@ -161,9 +161,15 @@ class Notifications
         # -----------------------------------------------------------------------------------------------------
         # ALWAYS DELETE PAYMENT TOKEN IF AN ORDER EXISTS
         # it should actually be already removed, but let's be better safe than sorry :)
-        $this->sessionManager->deleteSessionToken($transaction);
+        # but only if we create orders AFTER the payment.
+        # otherwise we would have a race condition, because our order already exists when we
+        # would come back without a session in the frontend. this webhooks is faster
+        # and so it wouldn't be possible to restore it.
+        if ($this->config->createOrderBeforePayment() === false) {
+            $this->sessionManager->deleteSessionToken($transaction);
+        }
 
-
+        
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
 

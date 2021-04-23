@@ -29,7 +29,7 @@ export default class PluginAction {
 
         repoTopMenu.getSettings().click({force: true});
         repoTopMenu.getPluginManager().click({force: true});
-        cy.wait(4000);
+        cy.wait(5000);
 
         cy.contains('Installiert').click({force: true});
         cy.wait(2000);
@@ -48,7 +48,7 @@ export default class PluginAction {
 
         // -----------------------------------------------------------------------
 
-        cy.contains("Speichern").click({force: true});
+        cy.get(".save-button").click({force: true});
 
         // create a screenshot of our configuration
         cy.get('.detail-window').screenshot('plugin_configuration');

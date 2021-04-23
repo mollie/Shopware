@@ -10,6 +10,8 @@ export default class Session {
         cy.clearCookies();
         cy.clearCookies();
 
+        cy.clearLocalStorage();
+
         cy.visit('/', {
             onBeforeLoad: (win) => {
                 win.sessionStorage.clear()
