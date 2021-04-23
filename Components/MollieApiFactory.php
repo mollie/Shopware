@@ -47,7 +47,7 @@ class MollieApiFactory
 
         # either use the test or the live api key
         # depending on our sub shop configuration
-        $apiKey = ($this->config->isTestmodeActive()) ? $this->config->getTestApiKey() : $this->config->apiKey();
+        $apiKey = ($this->config->isTestmodeActive()) ? $this->config->getTestApiKey() : $this->config->getLiveApiKey();
 
         return $this->buildApiClient(
             $apiKey
@@ -67,7 +67,7 @@ class MollieApiFactory
         $this->config->setShop($shopId);
 
         return $this->buildApiClient(
-            $this->config->apiKey()
+            $this->config->getLiveApiKey()
         );
     }
 
