@@ -146,6 +146,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                         'controller' => 'Mollie',
                         'action' => 'return',
                         'transactionNumber' => $session->getTransaction()->getId(),
+                        'token' => $session->getTransaction()->getSessionToken(),
                     ]
                 );
                 return;
