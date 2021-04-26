@@ -32,7 +32,7 @@ use Shopware\Components\Routing\Context;
 
 class MollieShopware extends Plugin
 {
-    const PLUGIN_VERSION = '1.8.0';
+    const PLUGIN_VERSION = '1.8.1';
 
     const PAYMENT_PREFIX = 'mollie_';
 
