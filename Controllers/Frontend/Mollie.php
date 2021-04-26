@@ -139,14 +139,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             # some payment methods do not require a redirect to mollie.
             # these are automatically approved and thus we
-            # have to immediately redirect to the return action.
+            # have to immediately redirect to the finish action.
             if (!$session->isRedirectToMollieRequired()) {
                 $this->redirect(
                     [
                         'controller' => 'Mollie',
-                        'action' => 'return',
+                        'action' => 'finish',
                         'transactionNumber' => $session->getTransaction()->getId(),
-                        'token' => $session->getTransaction()->getSessionToken(),
+                        'express' => true,
                     ]
                 );
                 return;
@@ -238,6 +238,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->loadServices();
 
             $transactionID = (string)$this->Request()->getParam('transactionNumber', '');
+            $express = (bool)$this->Request()->getParam('express', false);
 
             if (empty($transactionID)) {
                 throw new Exception('Missing Transaction Number');
@@ -247,7 +248,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             # now verify if we still have no session?!
             # shouldn't happen in expected cases, because either it's there or it has been restored!
-            if (!$hasSession) {
+            # we do not verify for Express checkouts, because somehow Apple Pay Direct has no session?!
+            if (!$express && !$hasSession) {
                 throw new Exception('Missing Session for Transaction: ' . $transactionID);
             }
 
