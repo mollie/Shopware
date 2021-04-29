@@ -41,17 +41,16 @@ class TransactionItemBuilder
         # this means we need to calculate the correct gross price for Mollie
         if ($this->taxMode->isChargeTaxes() && $this->taxMode->isNetOrder()) {
             $unitPrice = $unitPrice * ($taxRate + 100) / 100;
+
+            # skip shipping line item, its not 100% the same afterwards...
         }
 
-        # first round our single values
         $netPrice = round($netPrice, 2);
-        $unitPrice = round($unitPrice, 2);
+
 
         # now calculate the total amount
         # and make sure to round it again
         $totalAmount = $unitPrice * $quantity;
-        $totalAmount = round($totalAmount, 2);
-
 
         # this line is from the Mollie API
         # it tells us how the vat amount has to be calculated
