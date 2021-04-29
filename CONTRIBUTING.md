@@ -83,7 +83,32 @@ I promise - this is so much more fun when creating new features!
 
 
 
-### 3. Code Style
+### 3. Code Architecture
+You might think that the architecture is a bit "wild". That is in fact the truth.
+The plugin has been grown through the help of quite a lot of people.
+We now try to improve the overall quality step by step.
+
+You might now ask where to place your files and how to design your changes?
+Please read this as a small guide:
+
+#### Components
+If you have a functionality that is a centralized way to archieve a certain goal, then
+it might be a component. 
+I't important that this functionality should imply any custom behaviour of the plugin itself.
+Think about separations of concerns and pay attention if the functionality is really part of 
+the plugin or if it could be used in any other software too (if designed correctly).
+
+#### Gateways
+We try to use gateways for a centralized communication to external services, such as the Mollie API.
+This is not yet done obviously, but it's the goal.
+
+#### Services
+If your functionality is wrapped in a central place, but has nothing to do with the plugin itself, please place it in the services section.
+
+"Nothing to do" means, that it's designed independently of the Mollie plugin and that it could be placed in any other software out there.
+
+
+### 4. Code Style
 
 We do have a code style that we need for this project.
 
@@ -106,7 +131,7 @@ make stan
 
 
 
-### 4. Code Quality
+### 5. Code Quality
 
 No must-have, but always happy about improvements! 
 Use the built-in `PHPMetrics Analyzer` to dig deeper into complexity, dependencies, coupling, violations and more.
