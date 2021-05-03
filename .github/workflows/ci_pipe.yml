@@ -193,6 +193,9 @@ jobs:
       - name: Start Cypress
         run: cd Tests/Cypress && make run url=http://local.mollie.shop
 
+      - name: Download Shopware Logs
+        run: docker cp shop:/var/www/html/var/log/. $(pwd)/shop_logs
+
       - name: Store Cypress Results
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -200,5 +203,6 @@ jobs:
           name: cypress_results_sw_v${{ matrix.shopware }}
           retention-days: 1
           path: |
+            $(pwd)/shop_logs
             Tests/Cypress/cypress/videos
             Tests/Cypress/cypress/screenshots

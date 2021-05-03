@@ -26,7 +26,7 @@ export default class PluginAction {
         repoLogin.getSubmitButton().click();
 
         cy.log('Successfully logged in');
-        cy.wait(5000);
+        cy.wait(7000);
 
         repoTopMenu.getSettings().click({force: true});
         repoTopMenu.getPluginManager().click({force: true});

@@ -96,6 +96,8 @@ configs.forEach(config => {
 
                         checkout.switchPaymentMethod(payment.name);
 
+                        cy.screenshot();
+
                         checkout.placeOrderOnConfirm();
 
                         // verify that we are on the mollie payment screen
