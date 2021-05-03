@@ -1,27 +1,42 @@
 <?php
 
-namespace MollieShopware\Tests\Components\MollieApi;
+namespace MollieShopware\Tests\Components\Mollie\Builder;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use MollieShopware\Components\MollieApi\LineItemsBuilder;
+use MollieShopware\Components\Mollie\Builder\Payment\PaymentLineItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
+use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use PHPUnit\Framework\TestCase;
 
-class LineItemsBuilderTest extends TestCase
+
+class PaymentLineItemBuilderTest extends TestCase
 {
 
     /**
+     * @var PaymentLineItemBuilder
+     */
+    private $builder;
+
+
+    /**
+     *
+     */
+    public function setUp(): void
+    {
+        $this->builder = new PaymentLineItemBuilder();
+    }
+
+
+    /**
      * This test verifies that the line items in the
-     * request for Mollie are build correctly.
-     * We simply use the transaction and convert it into the JSON array.
+     * request for Mollie are built correctly from our transaction.
+     * We simply use the transaction and convert it into the line item array.
      * No additional calculation must be made in that case!
      * That's why we do not have correctly calculated sum and VAT values in here!
      * We always just use the values from the transaction.
      *
-     * @covers \MollieShopware\Components\MollieApi\LineItemsBuilder::buildLineItems
-     * @covers \MollieShopware\Components\MollieApi\LineItemsBuilder::formatNumber
-     * @covers \MollieShopware\Components\MollieApi\LineItemsBuilder::formatNumberWithCurrency
+     * @covers \MollieShopware\Components\Mollie\Builder\Payment\PaymentLineItemBuilder::buildLineItems
      *
      * @ticket MOL-70
      */
@@ -49,32 +64,23 @@ class LineItemsBuilderTest extends TestCase
 
         # now convert our built transaction
         # into a JSON request parameter structure
-        $builder = new LineItemsBuilder();
-        $lineItems = $builder->buildLineItems($transaction);
+        $lineItems = $this->builder->buildLineItems($transaction);
 
         $expected = [
-            [
-                'type' => 'test_type',
-                'name' => 'Test Article',
-                'quantity' => 2,
-                'unitPrice' => [
-                    'currency' => 'CHF',
-                    'value' => '29.90',
-                ],
-                'totalAmount' => [
-                    'currency' => 'CHF',
-                    'value' => '22.45',
-                ],
-                'vatRate' => '16.00',
-                'vatAmount' => [
-                    'currency' => 'CHF',
-                    'value' => '23.19',
-                ],
-                'sku' => null,
-                'imageUrl' => null,
-                'productUrl' => null,
-                'metadata' => json_encode(['transaction_item_id' => 1520]),
-            ]
+            new PaymentLineItem(
+                'test_type',
+                'Test Article',
+                2,
+                'CHF',
+                29.90,
+                22.45,
+                16.00,
+                23.19,
+                null,
+                null,
+                null,
+                json_encode(['transaction_item_id' => 1520])
+            ),
         ];
 
         $this->assertEquals($expected, $lineItems);
@@ -91,8 +97,8 @@ class LineItemsBuilderTest extends TestCase
      *
      * @ticket MOL-15
      *
-     * @covers \MollieShopware\Components\MollieApi\LineItemsBuilder::buildLineItems
-     * @covers \MollieShopware\Components\Helpers\MollieLineItemCleaner::removeDuplicateDiscounts
+     * @covers \MollieShopware\Components\Mollie\Builder\Payment\PaymentLineItemBuilder::buildLineItems
+     * @covers \MollieShopware\Components\Mollie\Services\LineItemCleaner\MollieLineItemCleaner::removeDuplicateDiscounts
      */
     public function testRemoveDuplicatePromotions()
     {
@@ -127,12 +133,13 @@ class LineItemsBuilderTest extends TestCase
 
         # now convert our built transaction
         # into a JSON request parameter structure
-        $builder = new LineItemsBuilder();
-        $lineItems = $builder->buildLineItems($transaction);
+        /** @var PaymentLineItem[] $lineItems */
+        $lineItems = $this->builder->buildLineItems($transaction);
 
         $this->assertEquals(3, count($lineItems));
-        $this->assertEquals('Test Article', $lineItems[0]['name']);
-        $this->assertEquals('Super Discount', $lineItems[1]['name']);
-        $this->assertEquals('Super Discount', $lineItems[2]['name']);
+        $this->assertEquals('Test Article', $lineItems[0]->getName());
+        $this->assertEquals('Super Discount', $lineItems[1]->getName());
+        $this->assertEquals('Super Discount', $lineItems[2]->getName());
     }
+
 }

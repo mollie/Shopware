@@ -1,7 +1,9 @@
 <?php
 
+namespace MollieShopware\Components\Mollie\Services\LineItemCleaner;
 
-namespace MollieShopware\Components\Helpers;
+
+use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 
 class MollieLineItemCleaner
 {
@@ -14,31 +16,32 @@ class MollieLineItemCleaner
      * problem that the amount of line items does not match the
      * total sum of the order.
      *
-     * @param array $orderlines
-     * @return array
+     * @param PaymentLineItem[] $orderlines
+     * @return PaymentLineItem[]
      */
     public function removeDuplicateDiscounts(array $orderlines)
     {
         $newLines = [];
         $cachedDiscountIDs = [];
-        
-        /** @var array $line */
+
         foreach ($orderlines as $line) {
-            if ($line['type'] !== 'discount') {
+
+            if ($line->getType() !== 'discount') {
                 $newLines[] = $line;
                 continue;
             }
 
             # only add our discounts once.
             # the identifier is the name + price.
-            $id = $line['name'] . $line['unitPrice']['value'];
+            $id = $line->getName() . $line->getUnitPrice();
 
             if (!in_array($id, $cachedDiscountIDs)) {
                 $newLines[] = $line;
                 $cachedDiscountIDs[] = $id;
             }
         }
-        
+
         return $newLines;
     }
+
 }

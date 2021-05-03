@@ -1,6 +1,6 @@
 <?php
 
-namespace MollieShopware\Components\MollieApi;
+namespace MollieShopware\Components\Mollie;
 
 use Exception;
 use Mollie\Api\MollieApiClient;

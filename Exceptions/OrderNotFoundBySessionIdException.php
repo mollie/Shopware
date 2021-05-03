@@ -5,7 +5,7 @@ namespace MollieShopware\Exceptions;
 class OrderNotFoundBySessionIdException extends \Exception
 {
     /**
-     * @param $sessionId
+     * @param string $sessionId
      */
     public function __construct($sessionId)
     {

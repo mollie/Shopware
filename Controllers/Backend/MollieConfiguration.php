@@ -1,7 +1,7 @@
 <?php
 
 use Doctrine\ORM\EntityManager;
-use MollieShopware\Components\MollieApi\MollieApiTester;
+use MollieShopware\Components\Mollie\MollieApiTester;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;

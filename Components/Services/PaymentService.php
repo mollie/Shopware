@@ -11,8 +11,9 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
-use MollieShopware\Components\CustomConfig\CustomConfig;
-use MollieShopware\Components\MollieApi\LineItemsBuilder;
+use MollieShopware\Components\Mollie\Builder\MolliePaymentBuilder;
+use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
+use MollieShopware\Components\Mollie\Services\TransactionUUID\UnixTimestampGenerator;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Exceptions\MollieOrderNotFound;
 use MollieShopware\Exceptions\MolliePaymentNotFound;
@@ -21,8 +22,13 @@ use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
+use MollieShopware\MollieShopware;
+use MollieShopware\Services\Mollie\Payments\PaymentFactory;
+use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
+use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
+use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
+use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
 
 class PaymentService
 {
@@ -38,17 +44,17 @@ class PaymentService
 
 
     /**
-     * @var MollieApiFactory $apiFactory
+     * @var MollieApiFactory
      */
     protected $apiFactory;
 
     /**
-     * @var \Mollie\Api\MollieApiClient $apiClient
+     * @var \Mollie\Api\MollieApiClient
      */
     protected $apiClient;
 
     /**
-     * @var Config $config
+     * @var Config
      */
     protected $config;
 
@@ -62,12 +68,44 @@ class PaymentService
      */
     private $gwMollie;
 
+    /**
+     * @var PaymentFactory
+     */
+    private $paymentFactory;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repoTransactions;
+
+    /**
+     * @var \Shopware\Models\Order\Repository
+     */
+    private $orderRepo;
+
+    /**
+     * @var CreditCardService $creditCardService
+     */
+    private $creditCardService;
+
+    /**
+     * @var ApplePayDirectFactory $applePayFactory
+     */
+    private $applePayFactory;
+
+    /**
+     * @var IdealService $idealService
+     */
+    private $idealService;
+
+    private $orderLinesRepo;
+
 
     /**
      * @param MollieApiFactory $apiFactory
      * @param Config $config
-     * @param array $customEnvironmentVariables
      * @param MollieGatewayInterface $gwMollie
+     * @param array $customEnvironmentVariables
      * @throws ApiException
      */
     public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
@@ -77,6 +115,16 @@ class PaymentService
         $this->config = $config;
         $this->gwMollie = $gwMollie;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
+
+        $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
+        $this->repoTransactions = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
+        $this->orderRepo = Shopware()->Models()->getRepository(Order::class);
+
+        $this->creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
+        $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+        $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
+
+        $this->paymentFactory = new PaymentFactory();
     }
 
     /**
@@ -104,10 +152,22 @@ class PaymentService
     }
 
     /**
+     * @param Order $order
+     * @throws ApiException
+     */
+    public function setApiKeyForSubShop(Order $order)
+    {
+        // Use the order's shop in the in the config service
+        $this->config->setShop($order->getShop()->getId());
+
+        $this->apiClient = $this->apiFactory->create($order->getShop()->getId());
+    }
+
+    /**
      * @param $paymentMethod
      * @param Transaction $transaction
      * @param $paymentToken
-     * @return string|null
+     * @return string
      * @throws ApiException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -116,33 +176,101 @@ class PaymentService
     {
         $shopwareOrder = null;
 
-        /** @var TransactionRepository $transactionRepo */
-        $transactionRepo = Shopware()->container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
-
-        /** @var \Shopware\Models\Order\Repository $orderRepo */
-        $orderRepo = Shopware()->Models()->getRepository(Order::class);
-
-        $orderLinesRepo = Shopware()->container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
-
-
-        # check if we have an existing order in
-        # shopware for our transaction
+        # check if we have an existing order in shopware for our transaction
         # if so load it and use it as meta data information
         if (!empty($transaction->getOrderId())) {
-            $shopwareOrder = $orderRepo->find($transaction->getOrderId());
+            $shopwareOrder = $this->orderRepo->find($transaction->getOrderId());
 
             $transaction->setOrderId($shopwareOrder->getId());
         }
 
+        # convert our mollie_xyz to "xyz" only
+        $cleanPaymentMethod = str_replace(MollieShopware::PAYMENT_PREFIX, '', $paymentMethod);
 
-        /** @var bool $useOrdersAPI */
-        $useOrdersAPI = strstr($paymentMethod, 'klarna') || $this->config->useOrdersApiOnlyWhereMandatory() == false;
+        # figure out if we are using the orders API or the payments API
+        $useOrdersAPI = $this->shouldUseOrdersAPI($cleanPaymentMethod);
 
+
+        # ------------------------------------------------------------------------------------------------------
+
+        $paymentMethod = $this->paymentFactory->createByPaymentName($cleanPaymentMethod);
+
+        if ($paymentMethod === null) {
+            throw new \Exception('Payment Request for payment: ' . $cleanPaymentMethod . ' not implemented yet!');
+        }
+
+        # ------------------------------------------------------------------------------------------------------
+        # BUILD OUR ORDER DATA
+
+        $paymentBuilder = new MolliePaymentBuilder(
+            new TransactionUUID(new UnixTimestampGenerator()),
+            $this->customEnvironmentVariables
+        );
+
+        $paymentData = $paymentBuilder->buildPayment($transaction, $paymentToken);
+
+        $paymentMethod->setPayment($paymentData);
+
+        # some payment methods require additional specific data
+        # we just check those types and set our data if required
+
+        if ($paymentMethod instanceof ApplePay) {
+
+            $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();
+
+            if (!empty($aaToken)) {
+                /** @var ApplePay $paymentMethod */
+                $paymentMethod->setPaymentToken($aaToken);
+            }
+        }
+
+        if ($paymentMethod instanceof IDeal) {
+
+            $issuer = $this->idealService->getSelectedIssuer();
+
+            if (!empty($issuer)) {
+                /** @var IDeal $paymentMethod */
+                $paymentMethod->setIssuer($issuer);
+            }
+        }
+
+        if ($paymentMethod instanceof CreditCard) {
+
+            $ccToken = $this->creditCardService->getCardToken();
+
+            if (!empty($ccToken)) {
+                /** @var CreditCard $paymentMethod */
+                $paymentMethod->setPaymentToken($ccToken);
+            }
+        }
+
+        if ($paymentMethod instanceof BankTransfer) {
+
+            $dueDateDays = $this->config->getBankTransferDueDateDays();
+
+            if (!empty($dueDateDays)) {
+                /** @var BankTransfer $paymentMethod */
+                $paymentMethod->setDueDateDays($dueDateDays);
+            }
+        }
+
+        # ------------------------------------------------------------------------------------------------------
 
         if ($useOrdersAPI) {
-            $requestData = $this->prepareRequest($paymentMethod, $transaction, $paymentToken, true);
-            $mollieOrder = $this->apiClient->orders->create($requestData);
 
+            $requestBody = $paymentMethod->buildBodyOrdersAPI();
+
+            # create a new ORDER in mollie
+            # using our orders api request body
+            $mollieOrder = $this->apiClient->orders->create($requestBody);
+
+            # update the orderId field of our transaction
+            # this helps us to see the difference to a transaction
+            $transaction->setMollieId($mollieOrder->id);
+
+            # also update the line item references
+            # every shopware line item is linked to the
+            # matching line item in the mollie order
             foreach ($mollieOrder->lines as $index => $line) {
                 $item = new OrderLines();
 
@@ -153,35 +281,44 @@ class PaymentService
                 $item->setTransactionId($transaction->getId());
                 $item->setMollieOrderlineId($line->id);
 
-                $orderLinesRepo->save($item);
+                $this->orderLinesRepo->save($item);
             }
-        } else {
-            $requestData = $this->prepareRequest($paymentMethod, $transaction, $paymentToken);
-            $molliePayment = $this->apiClient->payments->create($requestData);
-        }
 
-
-        if ($useOrdersAPI) {
-            $transaction->setMollieId($mollieOrder->id);
+            # grab our final checkout url for the user
             $checkoutUrl = $mollieOrder->getCheckoutUrl();
+
         } else {
+
+            $requestBody = $paymentMethod->buildBodyPaymentsAPI();
+
+            # create a new PAYMENT in mollie
+            # using our payments api request body
+            $molliePayment = $this->apiClient->payments->create($requestBody);
+
+            # update the paymentID field of our transaction
+            # this helps us to see the difference to an order
             $transaction->setMolliePaymentId($molliePayment->id);
+
+            # grab our final checkout url for the user
             $checkoutUrl = $molliePayment->getCheckoutUrl();
         }
 
+        # ------------------------------------------------------------------------------------------------------
 
+        # now make sure to do the final steps
+        # that are required for all types (payments and orders)
+        # and finally update that transaction in our database
         $transaction->setPaymentMethod($paymentMethod);
         $transaction->setIsShipped(false);
 
+        $this->repoTransactions->save($transaction);
 
-        $transactionRepo->save($transaction);
+        # ------------------------------------------------------------------------------------------------------
 
+        # reset card token on customer attribute
+        $this->creditCardService->setCardToken('');
 
-        // Reset card token on customer attribute
-        /** @var \MollieShopware\Components\Services\CreditCardService $creditCardService */
-        $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
-        $creditCardService->setCardToken('');
-
+        # ------------------------------------------------------------------------------------------------------
 
         # some payment methods with credit card, e.g. "non-3d-secure" or apple pay
         # have no checkout url, because they might already be paid immediately.
@@ -204,17 +341,25 @@ class PaymentService
         return $checkoutUrl;
     }
 
-
     /**
-     * @param Order $order
-     * @throws ApiException
+     * @param $paymentMethod
+     * @return bool
      */
-    public function setApiKeyForSubShop(Order $order)
+    private function shouldUseOrdersAPI($paymentMethod)
     {
-        // Use the order's shop in the in the config service
-        $this->config->setShop($order->getShop()->getId());
+        if (!$this->config->useOrdersApiOnlyWhereMandatory()) {
+            return true;
+        }
 
-        $this->apiClient = $this->apiFactory->create($order->getShop()->getId());
+        if ($paymentMethod === PaymentMethod::KLARNA_PAY_LATER) {
+            return true;
+        }
+
+        if ($paymentMethod === PaymentMethod::KLARNA_SLICE_IT) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -258,229 +403,6 @@ class PaymentService
 
         return $molliePayment;
     }
-
-    /**
-     * @param $paymentMethod
-     * @param Transaction $transaction
-     * @param $paymentToken
-     * @param false $ordersApi
-     * @return array
-     * @throws \Exception
-     */
-    private function prepareRequest($paymentMethod, Transaction $transaction, $paymentToken, $ordersApi = false)
-    {
-        // variables
-        $molliePrepared = null;
-        $paymentParameters = [];
-
-        // get webhook and redirect URLs
-        $redirectUrl = $this->prepareRedirectUrl($transaction->getId(), $paymentToken);
-        $webhookUrl = $this->prepareWebhookURL($transaction->getId());
-
-        $paymentParameters['webhookUrl'] = $webhookUrl;
-
-        if (substr($paymentMethod, 0, strlen('mollie_')) == 'mollie_') {
-            $paymentMethod = substr($paymentMethod, strlen('mollie_'));
-        }
-
-        // set method specific parameters
-        $paymentParameters = $this->preparePaymentParameters(
-            $paymentMethod,
-            $paymentParameters
-        );
-
-
-        // create prepared order array
-        $molliePrepared = [
-            'amount' => $this->getPriceArray(
-                $transaction->getCurrency(),
-                round($transaction->getTotalAmount(), 2)
-            ),
-            'redirectUrl' => $redirectUrl,
-            'webhookUrl' => $webhookUrl,
-            'locale' => $transaction->getLocale(),
-            'method' => $paymentMethod,
-        ];
-
-        $paymentDescription = (string)(time() . $transaction->getId() . substr($transaction->getBasketSignature(), -4));
-
-        // add extra parameters depending on using the Orders API or the Payments API
-        if ($ordersApi) {
-            // get order lines
-            $lineItemBuilder = new LineItemsBuilder();
-            $orderLines = $lineItemBuilder->buildLineItems($transaction);
-
-            // set order parameters
-            $molliePrepared['orderNumber'] = strlen($transaction->getOrderNumber()) ?
-                (string)$transaction->getOrderNumber() : $paymentDescription;
-
-            $molliePrepared['lines'] = $orderLines;
-            $molliePrepared['billingAddress'] = $this->getAddress(
-                $transaction->getCustomer()->getDefaultBillingAddress(),
-                $transaction->getCustomer()
-            );
-            $molliePrepared['shippingAddress'] = $this->getAddress(
-                $transaction->getCustomer()->getDefaultShippingAddress(),
-                $transaction->getCustomer()
-            );
-            $molliePrepared['payment'] = $paymentParameters;
-            $molliePrepared['metadata'] = [];
-        } else {
-            // add description
-            $molliePrepared['description'] = strlen($transaction->getOrderNumber()) ? 'Order ' .
-                $transaction->getOrderNumber() : 'Transaction ' . $paymentDescription;
-
-            // add billing e-mail address
-            if ($paymentMethod == PaymentMethod::BANKTRANSFER || $paymentMethod == PaymentMethod::P24) {
-                $molliePrepared['billingEmail'] = $transaction->getCustomer()->getEmail();
-            }
-
-            // prepare payment parameters
-            $molliePrepared = $this->preparePaymentParameters(
-                $paymentMethod,
-                $molliePrepared
-            );
-        }
-
-
-        if ((string)$paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
-            # assign the payment token
-            $molliePrepared['method'] = PaymentMethod::APPLE_PAY;
-        }
-
-        return $molliePrepared;
-    }
-
-    /**
-     * @param $currency
-     * @param $amount
-     * @param int $decimals
-     * @return array
-     */
-    private function getPriceArray($currency, $amount, $decimals = 2)
-    {
-        return [
-            'currency' => $currency,
-            'value' => number_format($amount, $decimals, '.', ''),
-        ];
-    }
-
-    /**
-     * @param $address
-     * @param \Shopware\Models\Customer\Customer $customer
-     * @return array
-     */
-    private function getAddress($address, \Shopware\Models\Customer\Customer $customer)
-    {
-        $country = $address->getCountry();
-
-        return [
-            'title' => $address->getSalutation() . '.',
-            'givenName' => $address->getFirstName(),
-            'familyName' => $address->getLastName(),
-            'email' => $customer->getEmail(),
-            'streetAndNumber' => $address->getStreet(),
-            'streetAdditional' => $address->getAdditionalAddressLine1(),
-            'postalCode' => $address->getZipCode(),
-            'city' => $address->getCity(),
-            'country' => $country ? $country->getIso() : 'NL',
-        ];
-    }
-
-    /**
-     * @param $number
-     * @param $paymentToken
-     * @return mixed|string
-     */
-    private function prepareRedirectUrl($number, $paymentToken)
-    {
-        $assembleData = [
-            'controller' => 'Mollie',
-            'action' => 'return',
-            'transactionNumber' => $number,
-            'forceSecure' => true
-        ];
-
-        if (!empty((string)$paymentToken)) {
-            $assembleData['token'] = $paymentToken;
-        }
-
-        $url = Shopware()->Front()->Router()->assemble($assembleData);
-
-        return $url;
-    }
-
-    /**
-     * @param $number
-     * @return mixed|string
-     * @throws \Exception
-     */
-    private function prepareWebhookURL($number)
-    {
-        $assembleData = [
-            'controller' => 'Mollie',
-            'action' => 'notify',
-            'transactionNumber' => $number,
-            'forceSecure' => true
-        ];
-
-        $url = Shopware()->Front()->Router()->assemble($assembleData);
-
-
-        # check if we have a custom
-        # configuration for mollie and see
-        # if we have to use the custom shop base URL
-        $customConfig = new CustomConfig($this->customEnvironmentVariables);
-
-        # if we have a custom webhook URL
-        # make sure to replace the original shop urls
-        # with the one we provide in here
-        if (!empty($customConfig->getShopDomain())) {
-            $host = Shopware()->Shop()->getHost();
-
-            # replace old domain with
-            # new custom domain
-            $url = str_replace($host, $customConfig->getShopDomain(), $url);
-        }
-
-        return $url;
-    }
-
-    /**
-     * Get the id of the chosen ideal issuer from database
-     *
-     * @return string
-     */
-    protected function getIdealIssuer()
-    {
-        /** @var IdealService $idealService */
-        $idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
-        return $idealService->getSelectedIssuer();
-    }
-
-    /**
-     * Returns the token for a credit card payment.
-     *
-     * @return string
-     */
-    protected function getCreditCardToken()
-    {
-        /** @var CreditCardService $creditCardService */
-        $creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
-        return $creditCardService->getCardToken();
-    }
-
-    /**
-     * @return string
-     * @throws ApiException
-     */
-    protected function getApplePayPaymentToken()
-    {
-        /** @var ApplePayDirectFactory $applePayFactory */
-        $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
-        return $applePayFactory->createHandler()->getPaymentToken();
-    }
-
 
     /**
      * Ship the order
@@ -530,42 +452,6 @@ class PaymentService
         return false;
     }
 
-    /**
-     * Prepare the payment parameters based on the payment method's requirements
-     *
-     * @param $paymentMethod
-     * @param array $paymentParameters
-     *
-     * @return array
-     */
-    private function preparePaymentParameters($paymentMethod, array $paymentParameters)
-    {
-        if ((string)$paymentMethod === PaymentMethod::IDEAL) {
-            $paymentParameters['issuer'] = $this->getIdealIssuer();
-        }
-
-        if ((string)$paymentMethod === PaymentMethod::CREDITCARD) {
-            if ($this->config->enableCreditCardComponent() === true &&
-                (string)$this->getCreditCardToken() !== '') {
-                $paymentParameters['cardToken'] = $this->getCreditCardToken();
-            }
-        }
-
-        if ((string)$paymentMethod === PaymentMethod::APPLEPAY_DIRECT) {
-            # assign the payment token
-            $paymentParameters["applePayPaymentToken"] = $this->getApplePayPaymentToken();
-        }
-
-        if ((string)$paymentMethod === PaymentMethod::BANKTRANSFER) {
-            $dueDateDays = $this->config->getBankTransferDueDateDays();
-
-            if (!empty($dueDateDays)) {
-                $paymentParameters['dueDate'] = date('Y-m-d', strtotime(' + ' . $dueDateDays . ' day'));
-            }
-        }
-
-        return $paymentParameters;
-    }
 
     /**
      * Retrieve payments result for order
@@ -683,4 +569,5 @@ class PaymentService
         $entityManager->persist($transaction);
         $entityManager->flush();
     }
+
 }

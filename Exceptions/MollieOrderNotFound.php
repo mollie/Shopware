@@ -6,7 +6,7 @@ class MollieOrderNotFound extends \Exception
 {
 
     /**
-     * @param $orderId
+     * @param int $orderId
      */
     public function __construct($orderId)
     {

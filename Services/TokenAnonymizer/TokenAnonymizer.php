@@ -34,8 +34,8 @@ class TokenAnonymizer
 
 
     /**
-     * @param $value
-     * @return false|string
+     * @param string|null $value
+     * @return string
      */
     public function anonymize($value)
     {

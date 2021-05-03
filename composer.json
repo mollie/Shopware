@@ -22,7 +22,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "MollieShopware\\": "./"
+            "MollieShopware\\": "./",
+            "MollieShopware\\Tests\\": "./Tests/PHPUnit/"
         }
     },
     "scripts": {

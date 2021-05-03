@@ -1,0 +1,22 @@
+parameters:
+    level: 8
+    paths:
+        - ./Exceptions
+        - ./Services
+    bootstrapFiles:
+        - Client/vendor/autoload.php
+    excludes_analyse:
+        - Client/*
+        - Resources/*
+        - vendor/*
+    ignoreErrors:
+        - '#Call to method getMollieReturn\(\) on an unknown class Shopware\\Models\\Attribute\\OrderDetail#'
+        - '#Call to method setMollieReturn\(\) on an unknown class Shopware\\Models\\Attribute\\OrderDetail#'
+
+services:
+    - class: MollieShopware\Tests\PHPStan\Rules\NoStrictTypesRule
+      tags:
+        - phpstan.rules.rule
+    - class: MollieShopware\Tests\PHPStan\Rules\NoManufacturerRule
+      tags:
+        - phpstan.rules.rule

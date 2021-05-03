@@ -38,7 +38,8 @@ csfix: ## Starts the PHP Coding Standard Analyser
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php --dry-run
 
 stan: ## Starts the PHPStan Analyser
-	@php vendor/bin/phpstan analyse -c phpstan.neon
+	@php vendor/bin/phpstan analyse -c .phpstan.neon
+	@php vendor/bin/phpstan analyse -c .phpstan.lvl8.neon
 
 metrics: ## Starts the PHPMetrics Analyser
 	@php vendor/bin/phpmetrics --config=.phpmetrics.json

@@ -7,7 +7,7 @@ class OrderNotFoundException extends \Exception
 
     /**
      * OrderNotFoundException constructor.
-     * @param $message
+     * @param string $message
      *
      */
     public function __construct($message)
