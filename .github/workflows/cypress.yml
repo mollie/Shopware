@@ -1,10 +1,7 @@
 name: Cypress Tests
 
 on:
-  push:
-    branches:
-      - test/pipeline
-
+  workflow_dispatch:
 
 jobs:
 
