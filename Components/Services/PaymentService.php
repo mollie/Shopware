@@ -24,6 +24,7 @@ use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\MollieShopware;
 use MollieShopware\Services\Mollie\Payments\PaymentFactory;
+use MollieShopware\Services\Mollie\Payments\PaymentInterface;
 use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
@@ -164,7 +165,7 @@ class PaymentService
     }
 
     /**
-     * @param $paymentMethod
+     * @param $paymentMethodName
      * @param Transaction $transaction
      * @param $paymentToken
      * @return string
@@ -172,7 +173,7 @@ class PaymentService
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function startMollieSession($paymentMethod, Transaction $transaction, $paymentToken)
+    public function startMollieSession($paymentMethodName, Transaction $transaction, $paymentToken)
     {
         $shopwareOrder = null;
 
@@ -185,7 +186,7 @@ class PaymentService
         }
 
         # convert our mollie_xyz to "xyz" only
-        $cleanPaymentMethod = str_replace(MollieShopware::PAYMENT_PREFIX, '', $paymentMethod);
+        $cleanPaymentMethod = str_replace(MollieShopware::PAYMENT_PREFIX, '', $paymentMethodName);
 
         # figure out if we are using the orders API or the payments API
         $useOrdersAPI = $this->shouldUseOrdersAPI($cleanPaymentMethod);
@@ -193,9 +194,10 @@ class PaymentService
 
         # ------------------------------------------------------------------------------------------------------
 
-        $paymentMethod = $this->paymentFactory->createByPaymentName($cleanPaymentMethod);
+        /** @var PaymentInterface|null $paymentMethodObject */
+        $paymentMethodObject = $this->paymentFactory->createByPaymentName($cleanPaymentMethod);
 
-        if ($paymentMethod === null) {
+        if ($paymentMethodObject === null) {
             throw new \Exception('Payment Request for payment: ' . $cleanPaymentMethod . ' not implemented yet!');
         }
 
@@ -209,48 +211,48 @@ class PaymentService
 
         $paymentData = $paymentBuilder->buildPayment($transaction, $paymentToken);
 
-        $paymentMethod->setPayment($paymentData);
+        $paymentMethodObject->setPayment($paymentData);
 
         # some payment methods require additional specific data
         # we just check those types and set our data if required
 
-        if ($paymentMethod instanceof ApplePay) {
+        if ($paymentMethodObject instanceof ApplePay) {
 
             $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();
 
             if (!empty($aaToken)) {
-                /** @var ApplePay $paymentMethod */
-                $paymentMethod->setPaymentToken($aaToken);
+                /** @var ApplePay $paymentMethodObject */
+                $paymentMethodObject->setPaymentToken($aaToken);
             }
         }
 
-        if ($paymentMethod instanceof IDeal) {
+        if ($paymentMethodObject instanceof IDeal) {
 
             $issuer = $this->idealService->getSelectedIssuer();
 
             if (!empty($issuer)) {
-                /** @var IDeal $paymentMethod */
-                $paymentMethod->setIssuer($issuer);
+                /** @var IDeal $paymentMethodObject */
+                $paymentMethodObject->setIssuer($issuer);
             }
         }
 
-        if ($paymentMethod instanceof CreditCard) {
+        if ($paymentMethodObject instanceof CreditCard) {
 
             $ccToken = $this->creditCardService->getCardToken();
 
             if (!empty($ccToken)) {
-                /** @var CreditCard $paymentMethod */
-                $paymentMethod->setPaymentToken($ccToken);
+                /** @var CreditCard $paymentMethodObject */
+                $paymentMethodObject->setPaymentToken($ccToken);
             }
         }
 
-        if ($paymentMethod instanceof BankTransfer) {
+        if ($paymentMethodObject instanceof BankTransfer) {
 
             $dueDateDays = $this->config->getBankTransferDueDateDays();
 
             if (!empty($dueDateDays)) {
-                /** @var BankTransfer $paymentMethod */
-                $paymentMethod->setDueDateDays($dueDateDays);
+                /** @var BankTransfer $paymentMethodObject */
+                $paymentMethodObject->setDueDateDays($dueDateDays);
             }
         }
 
@@ -258,7 +260,7 @@ class PaymentService
 
         if ($useOrdersAPI) {
 
-            $requestBody = $paymentMethod->buildBodyOrdersAPI();
+            $requestBody = $paymentMethodObject->buildBodyOrdersAPI();
 
             # create a new ORDER in mollie
             # using our orders api request body
@@ -289,7 +291,7 @@ class PaymentService
 
         } else {
 
-            $requestBody = $paymentMethod->buildBodyPaymentsAPI();
+            $requestBody = $paymentMethodObject->buildBodyPaymentsAPI();
 
             # create a new PAYMENT in mollie
             # using our payments api request body
@@ -305,10 +307,11 @@ class PaymentService
 
         # ------------------------------------------------------------------------------------------------------
 
+
         # now make sure to do the final steps
         # that are required for all types (payments and orders)
         # and finally update that transaction in our database
-        $transaction->setPaymentMethod($paymentMethod);
+        $transaction->setPaymentMethod($paymentMethodName);
         $transaction->setIsShipped(false);
 
         $this->repoTransactions->save($transaction);
