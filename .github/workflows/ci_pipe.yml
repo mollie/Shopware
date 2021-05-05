@@ -193,8 +193,13 @@ jobs:
       - name: Start Cypress
         run: cd Tests/Cypress && make run url=http://local.mollie.shop
 
-      - name: Download Shopware Logs
-        run: docker cp shop:/var/www/html/var/log/. $(pwd)/shop_logs
+      - name: Download Logs
+        if: ${{ always() }}
+        run: |
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/shopware
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/apache
+          docker cp shop:/var/www/html/var/log/. $(pwd)/Tests/Cypress/cypress/logs/shopware
+          docker cp shop:/var/log/php/. $(pwd)/Tests/Cypress/cypress/logs/apache
 
       - name: Store Cypress Results
         if: ${{ always() }}
@@ -203,6 +208,7 @@ jobs:
           name: cypress_results_sw_v${{ matrix.shopware }}
           retention-days: 1
           path: |
-            $(pwd)/shop_logs
+            Tests/Cypress/cypress/logs
             Tests/Cypress/cypress/videos
             Tests/Cypress/cypress/screenshots
+
