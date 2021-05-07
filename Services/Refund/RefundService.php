@@ -106,8 +106,6 @@ class RefundService implements RefundInterface
             $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $order->getInvoiceAmount());
         }
 
-        $this->finishShopwareRefund($order, $config);
-
         /** @var Refund */
         return $refund;
     }
@@ -182,8 +180,6 @@ class RefundService implements RefundInterface
 
         $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $amount);
 
-        $this->finishShopwareRefund($order, $config);
-
         /** @var Refund $refund */
         return $refund;
     }
@@ -242,8 +238,6 @@ class RefundService implements RefundInterface
         }
 
         $this->updateRefundedItemsOnOrderDetail($detail, $quantity);
-
-        $this->finishShopwareRefund($order, $config);
 
         return $refund;
     }
@@ -306,47 +300,6 @@ class RefundService implements RefundInterface
         }
 
         return $refund;
-    }
-
-    /**
-     * @param Order $order
-     * @param Config $config
-     * @return bool
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    private function finishShopwareRefund(Order $order, Config $config)
-    {
-        # somehow it always says it cannot use modules in the constructor...synthetic service stuff
-        # lets just keep it here for now
-        /** @var \Shopware_Components_Modules $modules */
-        $modules = Shopware()->Modules();
-
-        $sOrder = $modules->Order();
-
-        /** @var Status $paymentStatusRefunded */
-        $paymentStatusRefunded = $this->repoOrderStatus->find(Status::PAYMENT_STATE_RE_CREDITING);
-
-        // set the payment status
-        $order->setPaymentStatus($paymentStatusRefunded);
-
-        // save the order
-        $this->modelManager->persist($order);
-        $this->modelManager->flush();
-
-        // send status email
-        if ($config->isPaymentStatusMailEnabled() && $config->sendRefundStatusMail()) {
-
-            /** @var Enlight_Components_Mail|null $mail */
-            $mail = $sOrder->createStatusMail($order->getId(), $paymentStatusRefunded->getId());
-
-            if ($mail) {
-
-                $sOrder->sendStatusMail($mail);
-            }
-        }
-
-        return true;
     }
 
     /**

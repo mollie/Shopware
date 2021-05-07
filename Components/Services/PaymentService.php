@@ -121,10 +121,6 @@ class PaymentService
         $this->repoTransactions = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
         $this->orderRepo = Shopware()->Models()->getRepository(Order::class);
 
-        $this->creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
-        $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
-        $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
-
         $this->paymentFactory = new PaymentFactory();
     }
 
@@ -175,6 +171,15 @@ class PaymentService
      */
     public function startMollieSession($paymentMethodName, Transaction $transaction, $paymentToken)
     {
+        # ATTENTION
+        # we have to do this here now,
+        # otherwise the shipping command in the backend won't work because somehow
+        # a shop service is somewhere used in there...
+        $this->creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
+        $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+        $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
+
+
         $shopwareOrder = null;
 
         # check if we have an existing order in shopware for our transaction
