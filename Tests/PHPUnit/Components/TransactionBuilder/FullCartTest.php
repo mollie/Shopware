@@ -3,103 +3,183 @@
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 
-use Doctrine\Common\Collections\ArrayCollection;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
 
 
 class FullCartTest extends TestCase
 {
 
+    /**
+     * @var BasketLineItemFixture
+     */
+    private $itemsFixture;
+
 
     /**
-     * This test verifies that the property is correctly
-     * set in the built transaction item.
+     *
+     */
+    public function setUp(): void
+    {
+        $this->itemsFixture = new BasketLineItemFixture();
+    }
+
+    /**
+     * This test verifies the correct amounts for a B2B net based shop.
+     * In this type of shop, the article prices are maintained in net prices.
+     * This means the prices need to be converted into gross prices for Mollie.
+     * The shipping line item however is maintained in gross in Shopware.
+     * To avoid wrong calculations, we just reuse that gross price instead of
+     * calculating it from the (1 cent off) net price of Shopware.
      *
      * @covers \MollieShopware\Models\TransactionItem::getVatRate
      * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
-    public function testTaxRate()
+    public function testChargeTaxesInNetShop()
     {
-        $taxMode = new TaxMode(true, true);
-
-        $basketItem1 = $this->buildItem(5.9, 10, 19);
-        $basketItem2 = $this->buildItem(6.9, 10, 19);
-        $basketItemShipping = $this->buildShipping(6.71, 1, 19);
-
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
         $transaction->setId(1);
 
 
-        $builder = new TransactionItemBuilder($taxMode);
+        # item 1, net price
+        $basketItem1 = $this->itemsFixture->buildProductItemNet(5.9, 10, 19);
+
+        # item 2, net price
+        $basketItem2 = $this->itemsFixture->buildProductItemNet(6.9, 10, 19);
+
+        # item 3, gross price
+        $basketItemShipping = $this->itemsFixture->buildProductItemGross(7.99, 1, 19);
+
+
         $item1 = $builder->buildTransactionItem($transaction, $basketItem1);
         $item2 = $builder->buildTransactionItem($transaction, $basketItem2);
         $itemShipping = $builder->buildTransactionItem($transaction, $basketItemShipping);
 
-        $items = new ArrayCollection();
-        $items->add($item1);
-        $items->add($item2);
-        $items->add($itemShipping);
+
+        $totalGrossSum = $item1->getTotalAmount() + $item2->getTotalAmount() + $itemShipping->getTotalAmount();
 
 
-        $transaction->setItems($items);
-
-        $totalSum = $item1->getTotalAmount() + $item2->getTotalAmount() + $itemShipping->getTotalAmount();
-
-        #   $this->assertEquals(16, $item1->getTotalAmount());
-        #  $this->assertEquals(16, $item2->getTotalAmount());
-        $this->assertEquals(160.28, $totalSum);
-
-        # The amount of the order does not match the total amount from the order lines. Expected order amount to be €160.28 but got €160.31.
-    }
-
-
-    /**
-     * @param $unitPrice
-     * @param $quantity
-     * @param $taxRate
-     * @return BasketItem
-     */
-    private function buildItem($unitPrice, $quantity, $taxRate)
-    {
-        return new BasketItem(
-            1560,
-            55,
-            'ART-55',
-            0,
-            0,
-            'My Article',
-            $unitPrice,
-            0.0,
-            $quantity,
-            $taxRate
-        );
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(70.21, $item1->getTotalAmount());
+        $this->assertEquals(82.11, $item2->getTotalAmount());
+        $this->assertEquals(7.99, $itemShipping->getTotalAmount());
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(160.31, $totalGrossSum);
     }
 
     /**
-     * @param $unitPrice
-     * @param $quantity
-     * @param $taxRate
-     * @return BasketItem
+     *
      */
-    private function buildShipping($unitPrice, $quantity, $taxRate)
+    public function testChargeTaxesInNetShop2()
     {
-        return new BasketItem(
-            1560,
-            55,
-            'shipping_fee',
-            0,
-            0,
-            'My Article',
-            $unitPrice,
-            0.0,
-            $quantity,
-            $taxRate
-        );
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
+
+        $transaction = new Transaction();
+        $transaction->setId(1);
+
+        $basketItem1 = $this->itemsFixture->buildProductItemNet(16.8, 66, 19);
+        $basketItemShipping = $this->itemsFixture->buildProductItemGross(7.99, 1, 19);
+
+        $item1 = $builder->buildTransactionItem($transaction, $basketItem1);
+        $itemShipping = $builder->buildTransactionItem($transaction, $basketItemShipping);
+
+        $totalGrossSum = $item1->getTotalAmount() + $itemShipping->getTotalAmount();
+
+
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(1319.34, $item1->getTotalAmount());
+        $this->assertEquals(7.99, $itemShipping->getTotalAmount());
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(1327.33, $totalGrossSum);
+    }
+
+    /**
+     *
+     * @covers \MollieShopware\Models\TransactionItem::getVatRate
+     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     */
+    public function testChargeTaxesInGrossShop()
+    {
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
+
+        $transaction = new Transaction();
+        $transaction->setId(1);
+
+
+        # item 1, net price
+        $basketItem1 = $this->itemsFixture->buildProductItemGross(24.99, 10, 19);
+
+        # item 2, net price
+        $basketItem2 = $this->itemsFixture->buildProductItemGross(14.15, 1, 19);
+
+        # item 3, gross price
+        $basketItemShipping = $this->itemsFixture->buildProductItemGross(7.99, 1, 19);
+
+
+        $item1 = $builder->buildTransactionItem($transaction, $basketItem1);
+        $item2 = $builder->buildTransactionItem($transaction, $basketItem2);
+        $itemShipping = $builder->buildTransactionItem($transaction, $basketItemShipping);
+
+
+        $totalGrossSum = $item1->getTotalAmount() + $item2->getTotalAmount() + $itemShipping->getTotalAmount();
+
+
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(249.9, $item1->getTotalAmount());
+        $this->assertEquals(14.15, $item2->getTotalAmount());
+        $this->assertEquals(7.99, $itemShipping->getTotalAmount());
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(272.04, $totalGrossSum);
+    }
+
+    /**
+     * This test verifies that the items are correctly calculated without
+     * any taxes if this is not turned on for the shop
+     *
+     * @covers \MollieShopware\Models\TransactionItem::getVatRate
+     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     */
+    public function testNoTaxCharging()
+    {
+        $taxMode = new TaxMode(false);
+        $builder = new TransactionItemBuilder($taxMode);
+
+        $transaction = new Transaction();
+        $transaction->setId(1);
+
+
+        # item 1, net price
+        $basketItem1 = $this->itemsFixture->buildProductItemNet(100, 2, 19);
+
+        # item 2, net price
+        $basketItem2 = $this->itemsFixture->buildProductItemNet(10, 1, 19);
+
+        # item 3, gross price
+        $basketItemShipping = $this->itemsFixture->buildProductItemNet(6.71, 1, 19);
+
+
+        $item1 = $builder->buildTransactionItem($transaction, $basketItem1);
+        $item2 = $builder->buildTransactionItem($transaction, $basketItem2);
+        $itemShipping = $builder->buildTransactionItem($transaction, $basketItemShipping);
+
+
+        $totalGrossSum = $item1->getTotalAmount() + $item2->getTotalAmount() + $itemShipping->getTotalAmount();
+
+
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(200, $item1->getTotalAmount());
+        $this->assertEquals(10, $item2->getTotalAmount());
+        $this->assertEquals(6.71, $itemShipping->getTotalAmount());
+        # ---------------------------------------------------------------------------
+        $this->assertEquals(216.71, $totalGrossSum);
     }
 
 }

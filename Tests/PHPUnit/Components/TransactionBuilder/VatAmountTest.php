@@ -2,42 +2,37 @@
 
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
 
 
-class TaxesTest extends TestCase
+class VatAmountTest extends TestCase
 {
 
 
     /**
-     * This test verifies that the property is correctly
-     * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getVatRate
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     * @var BasketLineItemFixture
      */
-    public function testTaxRate()
+    private $itemFixtures;
+
+
+    /**
+     *
+     */
+    public function setUp(): void
     {
-        $taxMode = new TaxMode(true, false);
-
-        $transaction = new Transaction();
-        $transaction->setId(1);
-
-        $item = $this->buildItem(116, 2, 16);
-
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $item);
-
-        $this->assertEquals(16, $item->getVatRate());
+        $this->itemFixtures = new BasketLineItemFixture();
     }
+
 
     /**
      * This test verifies that we correctly charge taxes
      * if we have a tax mode that tells us to do this.
+     * We enable tax charging, provide a gross priced item and
+     * verify that the vat amount is correct.
      *
      * @covers \MollieShopware\Models\TransactionItem::getVatRate
      * @covers \MollieShopware\Models\TransactionItem::getVatAmount
@@ -45,24 +40,24 @@ class TaxesTest extends TestCase
      *
      * @ticket MOL-70
      */
-    public function testTaxesAreCharged()
+    public function testVatAmountAdded()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
         $transaction->setId(1);
 
-        $item = $this->buildItem(116, 2, 16);
+        $basketItem = $this->itemFixtures->buildProductItemGross(116, 2, 16);
 
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $item);
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
 
         $this->assertEquals(16, $item->getVatRate());
         $this->assertEquals(16 * 2, $item->getVatAmount());
     }
 
     /**
-     * This test verifies that our vat amount is 0
+     * This test verifies that our vat amount is 0.00,
      * if we have a tax mode that does not charge any taxes.
      *
      * @covers \MollieShopware\Models\TransactionItem::getVatRate
@@ -71,17 +66,17 @@ class TaxesTest extends TestCase
      *
      * @ticket MOL-70
      */
-    public function testTaxFree()
+    public function testNoVatAmountOnTaxFree()
     {
-        $taxMode = new TaxMode(false, false);
+        $taxMode = new TaxMode(false);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
-        $transaction->setId(15);
+        $transaction->setId(1);
 
-        $item = $this->buildItem(116, 1, 16);
+        $basketItem = $this->itemFixtures->buildProductItemGross(116, 2, 16);
 
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $item);
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
 
         $this->assertEquals(0, $item->getVatRate());
         $this->assertEquals(0, $item->getVatAmount());
@@ -94,24 +89,11 @@ class TaxesTest extends TestCase
     public function getVatAmountGrossPricesData()
     {
         return [
-            # $expectedVatAmount, $grossPrice, $taxRate, $quantity
             'MOL-70, 1' => [1.89, 1.14, 16, 12],
             'MOL-70, 2' => [1.78, 12.94, 16, 1],
             'MOL-70, 3' => [4.08, 29.61, 16, 1],
             'MOL-70, 4' => [14.57, 3.3, 16, 32],
-            'MOL-70, 5' => [1.89, 1.1368, 16, 12],
-        ];
-    }
-
-    /**
-     * @return array[]
-     */
-    public function getVatAmounNetPricesData()
-    {
-        return [
-            # $expectedVatAmount, $netPrice, $taxRate, $quantity
-            'MOL-423, 1' => [11.21, 5.9, 19, 10],
-            'MOL-423, 2' => [13.11, 6.9, 19, 10],
+            'MOL-70, 5' => [1.57, 1.1368, 16, 10],
         ];
     }
 
@@ -135,17 +117,29 @@ class TaxesTest extends TestCase
      */
     public function testVatAmountWithGrossPrices($expectedVatAmount, $grossPrice, $taxRate, $quantity)
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
         $transaction->setId(1);
 
-        $item = $this->buildItem($grossPrice, $quantity, $taxRate);
+        $basketItem = $this->itemFixtures->buildProductItemGross($grossPrice, $quantity, $taxRate);
 
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $item);
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
 
         $this->assertEquals($expectedVatAmount, $item->getVatAmount());
+    }
+
+
+    /**
+     * @return array[]
+     */
+    public function getVatAmountNetPricesData()
+    {
+        return [
+            'MOL-423, 1' => [11.21, 5.9, 19, 10],
+            'MOL-423, 2' => [13.11, 6.9, 19, 10],
+        ];
     }
 
     /**
@@ -155,7 +149,7 @@ class TaxesTest extends TestCase
      * This test covers rounding of taxes for shops where the
      * unit price of the product is the NET price.
      *
-     * @dataProvider getVatAmounNetPricesData
+     * @dataProvider getVatAmountNetPricesData
      * @ticket MOL-423
      *
      * @covers       \MollieShopware\Models\TransactionItem::getVatAmount
@@ -168,39 +162,17 @@ class TaxesTest extends TestCase
      */
     public function testVatAmountWithNetPrices($expectedVatAmount, $netPrice, $taxRate, $quantity)
     {
-        $taxMode = new TaxMode(true, true);
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
         $transaction->setId(1);
 
-        $item = $this->buildItem($netPrice, $quantity, $taxRate);
+        $basketItem = $this->itemFixtures->buildProductItemNet($netPrice, $quantity, $taxRate);
 
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $item);
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
 
         $this->assertEquals($expectedVatAmount, $item->getVatAmount());
-    }
-
-    /**
-     * @param $unitPrice
-     * @param $quantity
-     * @param $taxRate
-     * @return BasketItem
-     */
-    private function buildItem($unitPrice, $quantity, $taxRate)
-    {
-        return new BasketItem(
-            1560,
-            55,
-            'ART-55',
-            0,
-            0,
-            'My Article',
-            $unitPrice,
-            0.0,
-            $quantity,
-            $taxRate
-        );
     }
 
 }

@@ -324,20 +324,25 @@ class CheckoutSessionFacade
         }
 
 
+        $transactionItems = new \Doctrine\Common\Collections\ArrayCollection();
+
+        $articlePricesAreNet = $transaction->getNet();
+
+
         # build our tax mode depending on the configuration from above
-        $taxMode = new TaxMode(!$transaction->getTaxFree(), $transaction->getNet());
+        $taxMode = new TaxMode(!$transaction->getTaxFree());
         $transactionBuilder = new TransactionItemBuilder($taxMode);
 
-
-        $transactionItems = new \Doctrine\Common\Collections\ArrayCollection();
 
         /** @var BasketItem[] $basketLines */
         $basketLines = $this->basket->getBasketLines($this->controller->getUser());
 
-        /** @var BasketItem $basketItem */
         foreach ($basketLines as $basketItem) {
-            # build our new transaction item from the basket line.
-            # this must be perfectly rounded!
+
+            # find out if our article price is gross or net.
+            # we set that information for the line item.
+            $basketItem->setIsGrossPrice(!$articlePricesAreNet);
+
             $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $basketItem);
             $transactionItems->add($transactionItem);
         }
@@ -346,23 +351,20 @@ class CheckoutSessionFacade
         /** @var BasketItem $shippingItem */
         $shippingItem = $this->shipping->getCartShippingCosts();
 
-        # if we have shipping costs
-        # then convert them to a transaction item too
         if ($shippingItem->getUnitPrice() > 0) {
 
-            # our articles are all correctly set to gross or net
-            # price depending on the shop setting.
-            # but shipping will always return gross AND net in different fields.
-            # our transaction builder will automatically convert NET to GROSS
-            # so we need to make sure to set the net price manually in that case.
-            $shippingItem->setNetMode($taxMode->isNetOrder());
+            # if we have a shipping price of 7.99, Shopware would
+            # create 6.71 as net price from it. If we would calculate it
+            # back to gross, we would end up with 7.98.
+            # thus we always have to make sure, we use the (correct) gross price
+            # when building our transaction item.
+            $shippingItem->setIsGrossPrice(true);
 
             $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $shippingItem);
             $transactionItems->add($transactionItem);
         }
 
         $transaction->setItems($transactionItems);
-
 
         return $transaction;
     }

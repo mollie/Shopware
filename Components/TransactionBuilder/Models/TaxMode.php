@@ -10,19 +10,14 @@ class TaxMode
      */
     private $chargeTaxes;
 
-    /**
-     * @var bool
-     */
-    private $netOrder;
 
     /**
-     * @param bool $chargeTaxes
-     * @param bool $isNetOrder
+     * TaxMode constructor.
+     * @param $chargeTaxes
      */
-    public function __construct($chargeTaxes, $isNetOrder)
+    public function __construct($chargeTaxes)
     {
         $this->chargeTaxes = $chargeTaxes;
-        $this->netOrder = $isNetOrder;
     }
 
     /**
@@ -33,11 +28,4 @@ class TaxMode
         return $this->chargeTaxes;
     }
 
-    /**
-     * @return bool
-     */
-    public function isNetOrder()
-    {
-        return $this->netOrder;
-    }
 }

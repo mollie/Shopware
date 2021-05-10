@@ -8,7 +8,7 @@ use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use PHPUnit\Framework\TestCase;
 
-class TransactionDataTest extends TestCase
+class TransactionItemTest extends TestCase
 {
 
     /**
@@ -25,14 +25,14 @@ class TransactionDataTest extends TestCase
         $this->sampleItem = new BasketItem(
             1560,
             55,
-            'article-123',
+            'ART-55',
             0,
             0,
             'My Article',
-            116.0,
-            100.0,
+            119,
+            100,
             2,
-            16
+            19
         );
     }
 
@@ -46,7 +46,7 @@ class TransactionDataTest extends TestCase
      */
     public function testArticleId()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
 
         $transaction = new Transaction();
         $transaction->setId(15);
@@ -66,7 +66,7 @@ class TransactionDataTest extends TestCase
      */
     public function testBasketItemId()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
 
         $transaction = new Transaction();
         $transaction->setId(15);
@@ -86,7 +86,7 @@ class TransactionDataTest extends TestCase
      */
     public function testName()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
 
         $transaction = new Transaction();
         $transaction->setId(15);
@@ -95,6 +95,26 @@ class TransactionDataTest extends TestCase
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
         $this->assertEquals('My Article', $item->getName());
+    }
+
+    /**
+     * This test verifies that the property is correctly
+     * set in the built transaction item.
+     *
+     * @covers \MollieShopware\Models\TransactionItem::getQuantity
+     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     */
+    public function testQuantity()
+    {
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
+
+        $transaction = new Transaction();
+        $transaction->setId(15);
+
+        $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
+
+        $this->assertEquals(2, $item->getQuantity());
     }
 
     /**
@@ -123,7 +143,8 @@ class TransactionDataTest extends TestCase
      */
     public function testType($expectedType, $ordernumber, $esdArticle, $mode, $unitPrice)
     {
-        $taxMode = new TaxMode(false, false);
+        $taxMode = new TaxMode(false);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $basket = new BasketItem(
             1560,
@@ -139,33 +160,13 @@ class TransactionDataTest extends TestCase
         );
 
         $transaction = new Transaction();
-        $transaction->setId(15);
+        $transaction->setId(1);
 
-        $builder = new TransactionItemBuilder($taxMode);
         $item = $builder->buildTransactionItem($transaction, $basket);
 
         $this->assertEquals($expectedType, $item->getType());
     }
 
-    /**
-     * This test verifies that the property is correctly
-     * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getQuantity
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
-     */
-    public function testQuantity()
-    {
-        $taxMode = new TaxMode(true, false);
-
-        $transaction = new Transaction();
-        $transaction->setId(15);
-
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
-
-        $this->assertEquals(2, $item->getQuantity());
-    }
 
     /**
      * This test verifies that the property is correctly
@@ -176,15 +177,15 @@ class TransactionDataTest extends TestCase
      */
     public function testUnitPrice()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
 
         $transaction = new Transaction();
         $transaction->setId(15);
 
-        $builder = new TransactionItemBuilder($taxMode);
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
-        $this->assertEquals(116, $item->getUnitPrice());
+        $this->assertEquals(119, $item->getUnitPrice());
     }
 
     /**
@@ -196,61 +197,18 @@ class TransactionDataTest extends TestCase
      */
     public function testNetPrice()
     {
-        $taxMode = new TaxMode(true, false);
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode);
+
+        # mark our item as NET line item
+        $this->sampleItem->setIsGrossPrice(false);
 
         $transaction = new Transaction();
         $transaction->setId(15);
 
-        $builder = new TransactionItemBuilder($taxMode);
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
         $this->assertEquals(100, $item->getNetPrice());
     }
-
-    /**
-     * If we have a NET order, then our unit price is a NET price.
-     * The builder will convert this price to a gross price and
-     * use that for the transaction item that will be passed on to Mollie.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getNetPrice
-     * @covers \MollieShopware\Models\TransactionItem::getUnitPrice
-     * @covers \MollieShopware\Models\TransactionItem::getTotalAmount
-     * @covers \MollieShopware\Models\TransactionItem::getVatAmount
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
-     *
-     * @ticket MOL-70
-     */
-    public function testGrossPricesAreChargedForNetOrders()
-    {
-        $taxMode = new TaxMode(true, true);
-
-        $basket = new BasketItem(
-            1560,
-            55,
-            'ART-55',
-            0,
-            0,
-            'My Article',
-            100,
-            100,
-            2,
-            16
-        );
-
-        $transaction = new Transaction();
-        $transaction->setId(15);
-
-        $builder = new TransactionItemBuilder($taxMode);
-        $item = $builder->buildTransactionItem($transaction, $basket);
-
-        # we assert that our net price is not touched
-        $this->assertEquals(100, $item->getNetPrice());
-        # our 100,00 NET is converted to a GROSS
-        $this->assertEquals(116, $item->getUnitPrice());
-        # and the same is the new gross multiplied with the quantity
-        $this->assertEquals(2 * 116, $item->getTotalAmount());
-        $this->assertEquals(2 * 16, $item->getVatAmount());
-    }
-
 
 }
