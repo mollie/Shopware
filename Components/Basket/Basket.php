@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Repository;
 
-class Basket
+class Basket implements BasketInterface
 {
 
     /**

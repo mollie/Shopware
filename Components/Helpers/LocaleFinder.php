@@ -8,7 +8,7 @@ class LocaleFinder
     /**
      * @return string
      */
-    public function getPaymentLocale()
+    public function getPaymentLocale($locale)
     {
         // mollie locales
         $mollieLocales = [
@@ -33,8 +33,6 @@ class LocaleFinder
             'lt_LT',
         ];
 
-        // get shop locale
-        $locale = Shopware()->Shop()->getLocale()->getLocale();
 
         // set default locale on empty or not supported shop locale
         if (empty($locale) || !in_array($locale, $mollieLocales)) {

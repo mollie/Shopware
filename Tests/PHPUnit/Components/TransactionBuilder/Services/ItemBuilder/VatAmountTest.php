@@ -3,7 +3,7 @@
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
-use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
@@ -34,10 +34,6 @@ class VatAmountTest extends TestCase
      * We enable tax charging, provide a gross priced item and
      * verify that the vat amount is correct.
      *
-     * @covers \MollieShopware\Models\TransactionItem::getVatRate
-     * @covers \MollieShopware\Models\TransactionItem::getVatAmount
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
-     *
      * @ticket MOL-70
      */
     public function testVatAmountAdded()
@@ -59,10 +55,6 @@ class VatAmountTest extends TestCase
     /**
      * This test verifies that our vat amount is 0.00,
      * if we have a tax mode that does not charge any taxes.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getVatRate
-     * @covers \MollieShopware\Models\TransactionItem::getVatAmount
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      *
      * @ticket MOL-70
      */
@@ -107,9 +99,6 @@ class VatAmountTest extends TestCase
      * @dataProvider getVatAmountGrossPricesData
      * @ticket MOL-70
      *
-     * @covers       \MollieShopware\Models\TransactionItem::getVatAmount
-     * @covers       \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
-     *
      * @param float $expectedVatAmount
      * @param float $grossPrice
      * @param int $taxRate
@@ -151,9 +140,6 @@ class VatAmountTest extends TestCase
      *
      * @dataProvider getVatAmountNetPricesData
      * @ticket MOL-423
-     *
-     * @covers       \MollieShopware\Models\TransactionItem::getVatAmount
-     * @covers       \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      *
      * @param float $expectedVatAmount
      * @param float $netPrice

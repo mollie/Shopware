@@ -1,0 +1,189 @@
+<?php
+
+namespace MollieShopware\Tests\Components\TransactionBuilder;
+
+
+use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
+use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Models\TransactionItem;
+use MollieShopware\Tests\Utils\Fakes\Basket\FakeBasket;
+use MollieShopware\Tests\Utils\Fakes\Session\FakeSession;
+use MollieShopware\Tests\Utils\Fakes\Shipping\FakeShipping;
+use MollieShopware\Tests\Utils\Fakes\Transaction\FakeTransactionRepository;
+use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
+use PHPUnit\Framework\TestCase;
+
+
+class TransactionBuilderTest extends TestCase
+{
+
+    /**
+     * @var BasketLineItemFixture
+     */
+    private $itemsFixture;
+
+
+    /**
+     *
+     */
+    public function setUp(): void
+    {
+        $this->itemsFixture = new BasketLineItemFixture();
+    }
+
+
+    /**
+     * @return array[]
+     */
+    public function getCheckoutNetShopData()
+    {
+        return [
+            'Case 1' => [160.31, [5.9, 10, 59 + 11.20], [6.9, 10, 69 + 13.10], [7.99, 1, 7.99]],
+            'Case 2' => [620.05, [6.9, 66, 455.40 + 86.46], [5.9, 10, 59 + 11.20], [7.99, 1, 7.99]],
+        ];
+    }
+
+    /**
+     * This test verifies the correct amounts for a B2B net based shop.
+     * In this type of shop, the article prices are maintained in net prices.
+     * This means the prices need to be converted into gross prices for Mollie.
+     * The shipping line item however is maintained in gross in Shopware.
+     * To avoid wrong calculations, we just reuse that gross price instead of
+     * calculating it from the (1 cent off) net price of Shopware.
+     *
+     * @dataProvider getCheckoutNetShopData
+     *
+     * @param $shopwareTotalAmount
+     * @param $product1
+     * @param $product2
+     * @param $product3
+     */
+    public function testTransactionNetShop($shopwareTotalAmount, $product1, $product2, $product3)
+    {
+        $builder = new TransactionBuilder(
+            new FakeSession('session-123'),
+            new FakeTransactionRepository(),
+            new FakeBasket([
+                $this->itemsFixture->buildProductItemNet($product1[0], $product1[1], 19),
+                $this->itemsFixture->buildProductItemNet($product2[0], $product2[1], 19)
+            ]),
+            new FakeShipping(
+                $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
+            )
+        );
+
+        # ---------------------------------------------------------------------------
+
+        $transaction = $builder->buildTransaction(
+            'signature-123',
+            'EUR',
+            $shopwareTotalAmount,
+            2,
+            [],
+            'de-DE',
+            null,
+            false,
+            true
+        );
+
+        # ---------------------------------------------------------------------------
+
+        $this->assertEquals(false, $transaction->getTaxFree());
+        $this->assertEquals(true, $transaction->getNet());
+
+        $this->assertEquals(6, $transaction->getId());
+        $this->assertEquals('mollie_6', $transaction->getTransactionId());
+
+        $this->assertEquals(2, $transaction->getShopId());
+        $this->assertEquals('session-123', $transaction->getSessionId());
+        $this->assertEquals('signature-123', $transaction->getBasketSignature());
+
+        $this->assertEquals('de-DE', $transaction->getLocale());
+        $this->assertEquals('EUR', $transaction->getCurrency());
+
+        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
+        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
+        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
+        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
+
+        $this->assertEquals(null, $transaction->getCustomerId());
+        $this->assertEquals(null, $transaction->getCustomer());
+        $this->assertEquals(null, $transaction->getOrderNumber());
+        $this->assertEquals(null, $transaction->getOrderId());
+    }
+
+
+    /**
+     * @return array[]
+     */
+    public function getCheckoutGrossShopData()
+    {
+        return [
+            'Case 1' => [1387.23, [19.99, 66, 1319.34], [5.99, 10, 59.90], [7.99, 1, 7.99]],
+        ];
+    }
+
+    /**
+     *
+     * @dataProvider  getCheckoutGrossShopData
+     *
+     * @param $shopwareTotalAmount
+     * @param $product1
+     * @param $product2
+     * @param $product3
+     */
+    public function testTransactionGrossShop($shopwareTotalAmount, $product1, $product2, $product3)
+    {
+        $builder = new TransactionBuilder(
+            new FakeSession('session-123'),
+            new FakeTransactionRepository(),
+            new FakeBasket([
+                $this->itemsFixture->buildProductItemGross($product1[0], $product1[1], 19),
+                $this->itemsFixture->buildProductItemGross($product2[0], $product2[1], 19)
+            ]),
+            new FakeShipping(
+                $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
+            )
+        );
+
+        # ---------------------------------------------------------------------------
+
+        $transaction = $builder->buildTransaction(
+            'signature-123',
+            'EUR',
+            $shopwareTotalAmount,
+            2,
+            [],
+            'de-DE',
+            null,
+            false,
+            false
+        );
+
+        # ---------------------------------------------------------------------------
+
+        $this->assertEquals(false, $transaction->getTaxFree());
+        $this->assertEquals(false, $transaction->getNet());
+
+        $this->assertEquals(6, $transaction->getId());
+        $this->assertEquals('mollie_6', $transaction->getTransactionId());
+
+        $this->assertEquals(2, $transaction->getShopId());
+        $this->assertEquals('session-123', $transaction->getSessionId());
+        $this->assertEquals('signature-123', $transaction->getBasketSignature());
+
+        $this->assertEquals('de-DE', $transaction->getLocale());
+        $this->assertEquals('EUR', $transaction->getCurrency());
+
+        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
+        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
+        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
+        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
+
+        $this->assertEquals(null, $transaction->getCustomerId());
+        $this->assertEquals(null, $transaction->getCustomer());
+        $this->assertEquals(null, $transaction->getOrderNumber());
+        $this->assertEquals(null, $transaction->getOrderId());
+    }
+
+}

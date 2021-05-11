@@ -444,7 +444,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
             $script = str_replace('[mollie_profile_id]', $mollieProfileId, $script);
-            $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(), $script);
+            $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(Shopware()->Shop()->getLocale()->getLocale()), $script);
             $script = str_replace('[mollie_testmode]', ($mollieTestMode === true) ? 'true' : 'false', $script);
             echo $script;
 

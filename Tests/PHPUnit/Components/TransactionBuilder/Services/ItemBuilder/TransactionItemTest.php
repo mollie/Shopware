@@ -4,7 +4,7 @@ namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
-use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use PHPUnit\Framework\TestCase;
 
@@ -40,9 +40,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getArticleId
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testArticleId()
     {
@@ -60,9 +57,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getBasketItemId
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testBasketItemId()
     {
@@ -80,9 +74,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getName
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testName()
     {
@@ -100,9 +91,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getQuantity
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testQuantity()
     {
@@ -130,10 +118,6 @@ class TransactionItemTest extends TestCase
      *              ["discount", "ord-123", 0, 0, -10.0]
      *              ["physical", "ord-123", 0, 0, 19.99]
      *              ["shipping_fee", "shipping_fee", 0, 0, 19.99]
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getType
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::getOrderType
      *
      * @param string $expectedType
      * @param string $ordernumber
@@ -171,9 +155,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getUnitPrice
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testUnitPrice()
     {
@@ -191,9 +172,6 @@ class TransactionItemTest extends TestCase
     /**
      * This test verifies that the property is correctly
      * set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getNetPrice
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
      */
     public function testNetPrice()
     {

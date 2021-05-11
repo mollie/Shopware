@@ -8,7 +8,7 @@ use Enlight_Components_Session_Namespace;
 use MollieShopware\Components\Shipping\Models\ShippingCosts;
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 
-class Shipping
+class Shipping implements ShippingInterface
 {
 
     /**
@@ -146,4 +146,5 @@ class Shipping
             $costs->getTaxRate()
         );
     }
+
 }

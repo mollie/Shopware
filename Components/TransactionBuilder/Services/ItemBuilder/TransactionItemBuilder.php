@@ -1,6 +1,6 @@
 <?php
 
-namespace MollieShopware\Components\TransactionBuilder;
+namespace MollieShopware\Components\TransactionBuilder\Services\ItemBuilder;
 
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
@@ -47,7 +47,7 @@ class TransactionItemBuilder
             $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
 
             # then rounds that sum
-        #    $unitPriceGross = round($unitPriceGross, 2);
+            $unitPriceGross = round($unitPriceGross, 2);
 
         } else {
             $unitPriceGross = $unitPrice;

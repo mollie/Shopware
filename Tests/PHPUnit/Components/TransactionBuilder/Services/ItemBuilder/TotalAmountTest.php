@@ -4,7 +4,7 @@ namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
-use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
@@ -29,10 +29,9 @@ class TotalAmountTest extends TestCase
 
 
     /**
-     * This test verifies that the property is correctly set in the built transaction item.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getTotalAmount
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     * This test verifies that our total amount is correctly calculated as gross price.
+     * We have a gross priced article, so we verify the correct total amount
+     * wit a high quantity.
      */
     public function testTotalAmountGrossPrice()
     {
@@ -50,12 +49,9 @@ class TotalAmountTest extends TestCase
     }
 
     /**
-     * This test verifies that the property is correctly set in the built transaction item.
-     * We use a net priced article and a very high quantity
-     * and verify the rounded final sum.
-     *
-     * @covers \MollieShopware\Models\TransactionItem::getTotalAmount
-     * @covers \MollieShopware\Components\TransactionBuilder\TransactionItemBuilder::buildTransactionItem
+     * This test verifies that our total amount is correctly calculated as gross price.
+     * We have a net priced article with a high quantity.
+     * In this case, we also test the correct rounding for the total amount.
      */
     public function testTotalAmountWithNetPrice()
     {
