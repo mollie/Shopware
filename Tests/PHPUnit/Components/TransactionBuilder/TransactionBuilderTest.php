@@ -102,15 +102,19 @@ class TransactionBuilderTest extends TestCase
             true
         );
 
+        $itemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+
         # ---------------------------------------------------------------------------
 
         $this->assertEquals(false, $transaction->getTaxFree());
         $this->assertEquals(true, $transaction->getNet());
 
-        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
-        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
-        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
-        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
+        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
+        $this->assertEquals($shopwareTotalAmount, $itemSum, 'Sum of line items does not match total sum');
+
+        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
+        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
+        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
     }
 
 
@@ -161,15 +165,19 @@ class TransactionBuilderTest extends TestCase
             false
         );
 
+        $itemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+
         # ---------------------------------------------------------------------------
 
         $this->assertEquals(false, $transaction->getTaxFree());
         $this->assertEquals(false, $transaction->getNet());
 
-        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
-        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
-        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
-        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
+        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
+        $this->assertEquals($shopwareTotalAmount, $itemSum, 'Sum of line items does not match total sum');
+
+        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
+        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
+        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
     }
 
 
