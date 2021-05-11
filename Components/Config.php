@@ -246,16 +246,6 @@ class Config
     }
 
     /**
-     * Whether to send status mails to the customer when the payment has been refunded
-     *
-     * @return boolean
-     */
-    public function sendRefundStatusMail()
-    {
-        return $this->get('send_refund_status_mail', 'no') == 'yes';
-    }
-
-    /**
      * Whether to automatically reset stock after a failed or canceled payment
      *
      * @return boolean
