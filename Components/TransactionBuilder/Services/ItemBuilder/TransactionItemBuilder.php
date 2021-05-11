@@ -46,7 +46,9 @@ class TransactionItemBuilder
             # shopware calculates gross
             $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
 
-            # then rounds that sum
+            # also round that sum
+            # Shopware does the same, and also Mollie needs
+            # unit prices with 2 decimals
             $unitPriceGross = round($unitPriceGross, 2);
 
         } else {
@@ -58,10 +60,12 @@ class TransactionItemBuilder
         $totalAmount = $unitPriceGross * $quantity;
         $totalAmount = round($totalAmount, 2);
 
+
         # this line is from the Mollie API
         # it tells us how the vat amount has to be calculated
         # https://docs.mollie.com/reference/v2/orders-api/create-order
         $vatAmount = $totalAmount * ($taxRate / ($taxRate + 100));
+
         # also round in the end!
         $vatAmount = round($vatAmount, 2);
 
