@@ -53,7 +53,6 @@ class TransactionItemBuilder
             # shopware calculates gross
             $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
 
-
             if ($this->roundAfterTax) {
                 # also round that sum
                 # Shopware does the same, and also Mollie needs

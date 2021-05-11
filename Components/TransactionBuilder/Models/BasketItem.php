@@ -180,7 +180,7 @@ class BasketItem
     /**
      * @return bool
      */
-    public function isGrossPrice(): bool
+    public function isGrossPrice()
     {
         return $this->isGrossPrice;
     }

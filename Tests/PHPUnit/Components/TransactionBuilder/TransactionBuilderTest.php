@@ -53,9 +53,12 @@ class TransactionBuilderTest extends TestCase
     public function getCheckoutNetShopData()
     {
         return [
-            'Case 1' => [22.15, [6.0, 1, 6.00 + 1.14], [5.9, 1, 5.9 + 1.12], [7.99, 1, 7.99]],
-            'Case 2' => [149.60, [6.0, 10, 60.0 + 11.40], [5.9, 10, 59 + 11.21], [7.99, 1, 7.99]],
-            'Case 4' => [620.05, [6.9, 66, 541.86], [5.9, 10, 70.2], [7.99, 1, 7.99]],
+            'Case 1' => [22.15, true, [6.0, 1, 6.00 + 1.14], [5.9, 1, 5.9 + 1.12], [7.99, 1, 7.99]],
+            'Case 2' => [620.05, true, [6.9, 66, 541.86], [5.9, 10, 70.2], [7.99, 1, 7.99]],
+            'Case 2 - Round After Tax' => [149.59, true, [6.0, 10, 60.0 + 11.40], [5.9, 10, 59 + 11.20], [7.99, 1, 7.99]],
+            'Case 2 - No Round After Tax' => [149.60, false, [6.0, 10, 60.0 + 11.40], [5.9, 10, 59 + 11.21], [7.99, 1, 7.99]],
+            'Case 3 - Round After Tax' => [2177.59, true, [3.8, 480, 2169.6], [0, 0, 0], [7.99, 1, 7.99]],
+            'Case 3 - No Round After Tax' => [2178.55, false, [3.8, 480, 2170.56], [0, 0, 0], [7.99, 1, 7.99]],
         ];
     }
 
@@ -66,15 +69,19 @@ class TransactionBuilderTest extends TestCase
      * The shipping line item however is maintained in gross in Shopware.
      * To avoid wrong calculations, we just reuse that gross price instead of
      * calculating it from the (1 cent off) net price of Shopware.
+     * Also, we have a separate setting in Shopware "Round After Tax". Depending on this configuration
+     * the calculated gross prices are different in Shopware! This means we also
+     * need to consider this to get the same results as Shopware.
      *
      * @dataProvider getCheckoutNetShopData
      *
      * @param $shopwareTotalAmount
+     * @param bool $roundAfterTax
      * @param $product1
      * @param $product2
      * @param $product3
      */
-    public function testTransactionNetShop($shopwareTotalAmount, $product1, $product2, $product3)
+    public function testTransactionNetShop($shopwareTotalAmount, $roundAfterTax, $product1, $product2, $product3)
     {
         $builder = new TransactionBuilder(
             new FakeSession('session-123'),
@@ -86,7 +93,7 @@ class TransactionBuilderTest extends TestCase
             new FakeShipping(
                 $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
             ),
-            false
+            $roundAfterTax
         );
 
         # ---------------------------------------------------------------------------
@@ -103,7 +110,7 @@ class TransactionBuilderTest extends TestCase
             true
         );
 
-        $itemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+        $mollieItemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
 
         # ---------------------------------------------------------------------------
 
@@ -111,7 +118,7 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals(true, $transaction->getNet());
 
         $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
-        $this->assertEquals($shopwareTotalAmount, $itemSum, 'Sum of line items does not match total sum');
+        $this->assertEquals($shopwareTotalAmount, $mollieItemSum, 'Mollie Validation: Sum of line items does not match total sum');
 
         $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
         $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
@@ -125,20 +132,27 @@ class TransactionBuilderTest extends TestCase
     public function getCheckoutGrossShopData()
     {
         return [
-            'Case 1' => [1387.23, [19.99, 66, 1319.34], [5.99, 10, 59.90], [7.99, 1, 7.99]],
+            'Case 1 - Round After Tax' => [1387.23, true, [19.99, 66, 1319.34], [5.99, 10, 59.90], [7.99, 1, 7.99]],
+            'Case 1 - No Round After Tax' => [1387.23, false, [19.99, 66, 1319.34], [5.99, 10, 59.90], [7.99, 1, 7.99]],
         ];
     }
 
     /**
+     * This test verifies that we get the correct transaction data for a simple gross based online shop.
+     * We have 2 products with gross price, as well as an additional shipping item.
+     * Also, we have a separate setting in Shopware "Round After Tax". Depending on this configuration
+     * the calculated gross prices are different in Shopware! This means we also
+     * need to consider this to get the same results as Shopware.
      *
      * @dataProvider  getCheckoutGrossShopData
      *
      * @param $shopwareTotalAmount
+     * @param $roundAfterTax
      * @param $product1
      * @param $product2
      * @param $product3
      */
-    public function testTransactionGrossShop($shopwareTotalAmount, $product1, $product2, $product3)
+    public function testTransactionGrossShop($shopwareTotalAmount, $roundAfterTax, $product1, $product2, $product3)
     {
         $builder = new TransactionBuilder(
             new FakeSession('session-123'),
@@ -150,7 +164,7 @@ class TransactionBuilderTest extends TestCase
             new FakeShipping(
                 $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
             ),
-            false
+            $roundAfterTax
         );
 
         # ---------------------------------------------------------------------------
@@ -167,7 +181,7 @@ class TransactionBuilderTest extends TestCase
             false
         );
 
-        $itemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+        $mollieItemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
 
         # ---------------------------------------------------------------------------
 
@@ -175,7 +189,7 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals(false, $transaction->getNet());
 
         $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
-        $this->assertEquals($shopwareTotalAmount, $itemSum, 'Sum of line items does not match total sum');
+        $this->assertEquals($shopwareTotalAmount, $mollieItemSum, 'Mollie Validation: Sum of line items does not match total sum');
 
         $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
         $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
