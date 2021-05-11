@@ -299,17 +299,13 @@ class CheckoutSessionFacade
         $isNet = false;
 
 
-        if (isset($userData['additional']) && (!isset($userData['additional']['charge_vat']) || empty($userData['additional']['charge_vat']))) {
+        if (isset($this->controller->getUser()['additional']) && (!isset($this->controller->getUser()['additional']['charge_vat']) || empty($this->controller->getUser()['additional']['charge_vat']))) {
             $isTaxFree = true;
         }
 
-        $hasAdditional = isset($userData['additional']);
-        $showNetExists = isset($userData['additional']['show_net']);
-        $showNetIsFalse = empty($userData['additional']['show_net']);
-
         # set transaction as net order
         # e.g. show_net = false means its a NET order
-        if ($hasAdditional && (!$showNetExists || $showNetIsFalse)) {
+        if (isset($this->controller->getUser()['additional']) && (!isset($this->controller->getUser()['additional']['show_net']) || empty($this->controller->getUser()['additional']['show_net']))) {
             $isNet = true;
         }
 
