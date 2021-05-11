@@ -10,6 +10,7 @@ use MollieShopware\Tests\Utils\Fakes\Shipping\FakeShipping;
 use MollieShopware\Tests\Utils\Fakes\Transaction\FakeTransactionRepository;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
+use Shopware\Models\Customer\Customer;
 
 
 class TransactionBuilderTest extends TestCase
@@ -20,6 +21,10 @@ class TransactionBuilderTest extends TestCase
      */
     private $itemsFixture;
 
+    /**
+     * @var TransactionBuilder
+     */
+    private $sampleBuilder;
 
     /**
      *
@@ -27,6 +32,17 @@ class TransactionBuilderTest extends TestCase
     public function setUp(): void
     {
         $this->itemsFixture = new BasketLineItemFixture();
+
+        $this->sampleBuilder = new TransactionBuilder(
+            new FakeSession('session-123'),
+            new FakeTransactionRepository(),
+            new FakeBasket([
+                $this->itemsFixture->buildProductItemGross(19.99, 1, 19),
+            ]),
+            new FakeShipping(
+                $this->itemsFixture->buildProductItemGross(7.99, 1, 19)
+            )
+        );
     }
 
 
@@ -89,25 +105,10 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals(false, $transaction->getTaxFree());
         $this->assertEquals(true, $transaction->getNet());
 
-        $this->assertEquals(6, $transaction->getId());
-        $this->assertEquals('mollie_6', $transaction->getTransactionId());
-
-        $this->assertEquals(2, $transaction->getShopId());
-        $this->assertEquals('session-123', $transaction->getSessionId());
-        $this->assertEquals('signature-123', $transaction->getBasketSignature());
-
-        $this->assertEquals('de-DE', $transaction->getLocale());
-        $this->assertEquals('EUR', $transaction->getCurrency());
-
         $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
         $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
         $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
         $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
-
-        $this->assertEquals(null, $transaction->getCustomerId());
-        $this->assertEquals(null, $transaction->getCustomer());
-        $this->assertEquals(null, $transaction->getOrderNumber());
-        $this->assertEquals(null, $transaction->getOrderId());
     }
 
 
@@ -163,6 +164,33 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals(false, $transaction->getTaxFree());
         $this->assertEquals(false, $transaction->getNet());
 
+        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
+        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
+        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
+        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
+    }
+
+
+    /**
+     * This test verifies that all our secondary data is correctly set.
+     * That includes things like locale, currency and more.
+     */
+    public function testOtherTransactionData()
+    {
+        $transaction = $this->sampleBuilder->buildTransaction(
+            'signature-123',
+            'EUR',
+            19.99 + 7.99,
+            2,
+            [],
+            'de-DE',
+            null,
+            false,
+            false
+        );
+
+        # ---------------------------------------------------------------------------
+
         $this->assertEquals(6, $transaction->getId());
         $this->assertEquals('mollie_6', $transaction->getTransactionId());
 
@@ -173,15 +201,36 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals('de-DE', $transaction->getLocale());
         $this->assertEquals('EUR', $transaction->getCurrency());
 
-        $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount());
-        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount());
-        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount());
-        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount());
-
         $this->assertEquals(null, $transaction->getCustomerId());
         $this->assertEquals(null, $transaction->getCustomer());
         $this->assertEquals(null, $transaction->getOrderNumber());
         $this->assertEquals(null, $transaction->getOrderId());
+    }
+
+    /**
+     * This test verifies that our customer is correctly set
+     * if an object has been provided.
+     */
+    public function testCustomer()
+    {
+        $customer = new Customer();
+
+        $transaction = $this->sampleBuilder->buildTransaction(
+            'signature-123',
+            'EUR',
+            19.99 + 7.99,
+            2,
+            [],
+            'de-DE',
+            $customer,
+            false,
+            false
+        );
+
+        # ---------------------------------------------------------------------------
+
+        $this->assertEquals(null, $transaction->getCustomerId());
+        $this->assertSame($customer, $transaction->getCustomer());
     }
 
 }
