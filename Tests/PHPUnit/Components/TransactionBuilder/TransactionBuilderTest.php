@@ -4,8 +4,6 @@ namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 
 use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
-use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
-use MollieShopware\Models\TransactionItem;
 use MollieShopware\Tests\Utils\Fakes\Basket\FakeBasket;
 use MollieShopware\Tests\Utils\Fakes\Session\FakeSession;
 use MollieShopware\Tests\Utils\Fakes\Shipping\FakeShipping;
