@@ -91,7 +91,7 @@ configs.forEach(config => {
 
                         topMenu.clickOnClothing();
                         listing.clickOnFirstProduct();
-                        pdp.addToCart(4);
+                        pdp.addToCart(66);
                         checkout.goToCheckoutInOffCanvas();
 
                         checkout.switchPaymentMethod(payment.name);
