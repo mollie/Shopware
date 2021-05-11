@@ -36,12 +36,30 @@ class TotalAmountTest extends TestCase
     public function testTotalAmountGrossPrice()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(1);
 
         $basketItem = $this->itemFixtures->buildProductItemGross(19.99, 66, 19);
+
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
+
+        $this->assertEquals(1319.34, $item->getTotalAmount());
+    }
+
+    /**
+     *
+     */
+    public function testTotalAmountWithNetPriceRoundAfterTax()
+    {
+        $taxMode = new TaxMode(true);
+        $builder = new TransactionItemBuilder($taxMode, true);
+
+        $basketItem = $this->itemFixtures->buildProductItemNet(16.8, 66, 19);
+
+        $transaction = new Transaction();
+        $transaction->setId(1);
 
         $item = $builder->buildTransactionItem($transaction, $basketItem);
 
@@ -56,7 +74,7 @@ class TotalAmountTest extends TestCase
     public function testTotalAmountWithNetPrice()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $basketItem = $this->itemFixtures->buildProductItemNet(16.8, 66, 19);
 
@@ -65,7 +83,7 @@ class TotalAmountTest extends TestCase
 
         $item = $builder->buildTransactionItem($transaction, $basketItem);
 
-        $this->assertEquals(1319.34, $item->getTotalAmount());
+        $this->assertEquals(1319.47, $item->getTotalAmount());
     }
 
 }

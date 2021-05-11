@@ -41,7 +41,8 @@ class TransactionBuilderTest extends TestCase
             ]),
             new FakeShipping(
                 $this->itemsFixture->buildProductItemGross(7.99, 1, 19)
-            )
+            ),
+            false
         );
     }
 
@@ -84,7 +85,8 @@ class TransactionBuilderTest extends TestCase
             ]),
             new FakeShipping(
                 $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
-            )
+            ),
+            false
         );
 
         # ---------------------------------------------------------------------------
@@ -147,7 +149,8 @@ class TransactionBuilderTest extends TestCase
             ]),
             new FakeShipping(
                 $this->itemsFixture->buildProductItemGross($product3[0], $product3[1], 19)
-            )
+            ),
+            false
         );
 
         # ---------------------------------------------------------------------------

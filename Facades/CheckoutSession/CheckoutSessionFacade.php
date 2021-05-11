@@ -283,11 +283,16 @@ class CheckoutSessionFacade
      */
     private function buildTransaction($basketSignature, $currency)
     {
+
+        $roundAfterTax = Shopware()->Config()->offsetGet('roundNetAfterTax');
+
+
         $builder = new TransactionBuilder(
             new \MollieShopware\Components\TransactionBuilder\Services\Session\Session(),
             $this->repoTransactions,
             $this->basket,
-            $this->shipping
+            $this->shipping,
+            (bool)$roundAfterTax
         );
 
         $currentCustomerClass = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());

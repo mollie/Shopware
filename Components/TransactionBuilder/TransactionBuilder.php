@@ -38,19 +38,26 @@ class TransactionBuilder
      */
     private $basket;
 
+    /**
+     * @var bool
+     */
+    private $roundAfterTax;
+
 
     /**
      * @param SessionInterface $session
      * @param TransactionRepositoryInterface $repoTransactions
      * @param BasketInterface $basket
      * @param ShippingInterface $shipping
+     * @param $roundAfterTax
      */
-    public function __construct(SessionInterface $session, TransactionRepositoryInterface $repoTransactions, BasketInterface $basket, ShippingInterface $shipping)
+    public function __construct(SessionInterface $session, TransactionRepositoryInterface $repoTransactions, BasketInterface $basket, ShippingInterface $shipping, $roundAfterTax)
     {
         $this->session = $session;
         $this->repoTransactions = $repoTransactions;
         $this->shipping = $shipping;
         $this->basket = $basket;
+        $this->roundAfterTax = $roundAfterTax;
     }
 
 
@@ -105,7 +112,7 @@ class TransactionBuilder
 
         # build our tax mode depending on the configuration from above
         $taxMode = new TaxMode(!$transaction->getTaxFree());
-        $transactionBuilder = new TransactionItemBuilder($taxMode);
+        $transactionBuilder = new TransactionItemBuilder($taxMode, $this->roundAfterTax);
 
 
         /** @var BasketItem[] $basketLines */

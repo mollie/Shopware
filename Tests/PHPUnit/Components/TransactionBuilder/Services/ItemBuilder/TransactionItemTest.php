@@ -48,7 +48,7 @@ class TransactionItemTest extends TestCase
         $transaction = new Transaction();
         $transaction->setId(15);
 
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
         $this->assertEquals(55, $item->getArticleId());
@@ -65,7 +65,7 @@ class TransactionItemTest extends TestCase
         $transaction = new Transaction();
         $transaction->setId(15);
 
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
         $this->assertEquals(1560, $item->getBasketItemId());
@@ -82,7 +82,7 @@ class TransactionItemTest extends TestCase
         $transaction = new Transaction();
         $transaction->setId(15);
 
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
         $item = $builder->buildTransactionItem($transaction, $this->sampleItem);
 
         $this->assertEquals('My Article', $item->getName());
@@ -95,7 +95,7 @@ class TransactionItemTest extends TestCase
     public function testQuantity()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(15);
@@ -128,7 +128,7 @@ class TransactionItemTest extends TestCase
     public function testType($expectedType, $ordernumber, $esdArticle, $mode, $unitPrice)
     {
         $taxMode = new TaxMode(false);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $basket = new BasketItem(
             1560,
@@ -159,7 +159,7 @@ class TransactionItemTest extends TestCase
     public function testUnitPrice()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(15);
@@ -176,7 +176,7 @@ class TransactionItemTest extends TestCase
     public function testNetPrice()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         # mark our item as NET line item
         $this->sampleItem->setIsGrossPrice(false);

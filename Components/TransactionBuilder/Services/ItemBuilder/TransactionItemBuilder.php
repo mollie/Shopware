@@ -15,13 +15,20 @@ class TransactionItemBuilder
      */
     private $taxMode;
 
+    /**
+     * @var bool
+     */
+    private $roundAfterTax;
+
 
     /**
      * @param TaxMode $taxMode
+     * @param $roundAfterTax
      */
-    public function __construct(TaxMode $taxMode)
+    public function __construct(TaxMode $taxMode, $roundAfterTax)
     {
         $this->taxMode = $taxMode;
+        $this->roundAfterTax = $roundAfterTax;
     }
 
 
@@ -46,10 +53,13 @@ class TransactionItemBuilder
             # shopware calculates gross
             $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
 
-            # also round that sum
-            # Shopware does the same, and also Mollie needs
-            # unit prices with 2 decimals
-            $unitPriceGross = round($unitPriceGross, 2);
+
+            if ($this->roundAfterTax) {
+                # also round that sum
+                # Shopware does the same, and also Mollie needs
+                # unit prices with 2 decimals
+                $unitPriceGross = round($unitPriceGross, 2);
+            }
 
         } else {
             $unitPriceGross = $unitPrice;

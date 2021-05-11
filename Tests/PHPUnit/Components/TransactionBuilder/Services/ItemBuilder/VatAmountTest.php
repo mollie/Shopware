@@ -39,7 +39,7 @@ class VatAmountTest extends TestCase
     public function testVatAmountAdded()
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(1);
@@ -61,7 +61,7 @@ class VatAmountTest extends TestCase
     public function testNoVatAmountOnTaxFree()
     {
         $taxMode = new TaxMode(false);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(1);
@@ -107,7 +107,7 @@ class VatAmountTest extends TestCase
     public function testVatAmountWithGrossPrices($expectedVatAmount, $grossPrice, $taxRate, $quantity)
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(1);
@@ -149,7 +149,7 @@ class VatAmountTest extends TestCase
     public function testVatAmountWithNetPrices($expectedVatAmount, $netPrice, $taxRate, $quantity)
     {
         $taxMode = new TaxMode(true);
-        $builder = new TransactionItemBuilder($taxMode);
+        $builder = new TransactionItemBuilder($taxMode, false);
 
         $transaction = new Transaction();
         $transaction->setId(1);
