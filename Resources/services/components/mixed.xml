@@ -48,6 +48,7 @@
             <argument type="service" id="mollie_shopware.api_factory"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="mollie_shopware.gateways.mollie"/>
+            <argument type="service" id="mollie_shopware.customer"/>
             <argument>%shopware.custom%</argument>
         </service>
 
@@ -71,9 +72,8 @@
             <argument type="service" id="service_container"/>
         </service>
 
-        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\Services\IdealService">
-            <argument type="service" id="mollie_shopware.api"/>
-            <argument type="service" id="mollie_shopware.customer"/>
+        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\iDEAL\iDEAL">
+            <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument type="service" id="models"/>
         </service>
 
