@@ -52,6 +52,11 @@ class ConfirmationMail
         if (is_array($variables)) {
             $this->sOder->sUserData = $variables;
 
+            if (!is_array($this->sOder->sBasketData)) {
+                $this->sOder->sBasketData = [];
+            }
+            $this->sOder->sBasketData['sCurrencyName'] = $transaction->getCurrency();
+
             if (isset($variables['additional']['charge_vat']) && $variables['additional']['charge_vat'] === false) {
                 $this->sOder->sNet = true;
             }
