@@ -250,11 +250,24 @@ class OrderUpdater
             return false;
         }
 
-        $this->sOrder->setPaymentStatus(
-            $order->getId(),
-            $newShopwareStatus,
-            $sendMail
-        );
+        try {
+
+            $this->sOrder->setPaymentStatus(
+                $order->getId(),
+                $newShopwareStatus,
+                $sendMail
+            );
+
+        } catch (\Zend_Mail_Protocol_Exception $ex) {
+            # never ever break if only an email cannot be sent
+            # lets just add a log here.
+            $this->logger->warning(
+                'Problem when sending payment status update email for order: ' . $order->getNumber(),
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
+        }
 
         return true;
     }
@@ -323,11 +336,25 @@ class OrderUpdater
             return false;
         }
 
-        $this->sOrder->setOrderStatus(
-            $order->getId(),
-            $newShopwareStatus,
-            $sendMail
-        );
+
+        try {
+
+            $this->sOrder->setOrderStatus(
+                $order->getId(),
+                $newShopwareStatus,
+                $sendMail
+            );
+
+        } catch (\Zend_Mail_Protocol_Exception $ex) {
+            # never ever break if only an email cannot be sent
+            # lets just add a log here.
+            $this->logger->warning(
+                'Problem when sending order status update email for order: ' . $order->getNumber(),
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
+        }
 
         return true;
     }

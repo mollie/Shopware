@@ -286,7 +286,20 @@ class FinishCheckoutFacade
         # then send the order confirmation mail NOW,
         # if the mollie payment is valid
         if ($this->config->createOrderBeforePayment() && PaymentStatus::isApprovedStatus($mollieStatus)) {
-            $this->confirmationMail->sendConfirmationEmail($transaction);
+            try {
+
+                $this->confirmationMail->sendConfirmationEmail($transaction);
+
+            } catch (\Exception $ex) {
+                # never ever break if only an email cannot be sent
+                # lets just add a log here.
+                $this->logger->warning(
+                    'Problem when sending confirmation email for order: ' . $swOrder->getNumber(),
+                    [
+                        'error' => $ex->getMessage()
+                    ]
+                );
+            }
         }
 
         return new CheckoutFinish(
