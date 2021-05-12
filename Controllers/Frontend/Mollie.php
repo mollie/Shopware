@@ -15,6 +15,7 @@ use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\IdealService;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Shipping\Shipping;
+use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
 use MollieShopware\Facades\CheckoutSession\CheckoutSessionFacade;
 use MollieShopware\Facades\FinishCheckout\FinishCheckoutFacade;
 use MollieShopware\Facades\FinishCheckout\RestoreSessionFacade;
@@ -444,7 +445,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
             $script = str_replace('[mollie_profile_id]', $mollieProfileId, $script);
-            $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(), $script);
+            $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(Shopware()->Shop()->getLocale()->getLocale()), $script);
             $script = str_replace('[mollie_testmode]', ($mollieTestMode === true) ? 'true' : 'false', $script);
             echo $script;
 
@@ -565,6 +566,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 new MollieRefundStatus()
             );
 
+
+            # get the configuration from the Shopware Backend about
+            # the rounding after the tax.
+            # This makes a huge difference for net-based shops where we have to calculate
+            # the gross price for Mollie.
+            $roundAfterTax = Shopware()->Config()->offsetGet('roundNetAfterTax');
+
+            $transactionBuilder = new TransactionBuilder(
+                new \MollieShopware\Components\TransactionBuilder\Services\Session\Session(),
+                $repoTransactions,
+                $basket,
+                $shipping,
+                (bool)$roundAfterTax
+            );
+
+
             $this->checkout = new CheckoutSessionFacade(
                 $config,
                 $paymentService,
@@ -581,7 +598,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->applePay,
                 $creditCardService,
                 $repoTransactions,
-                $sessionManager
+                $sessionManager,
+                $transactionBuilder
             );
 
             $this->checkoutReturn = new FinishCheckoutFacade(

@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
 
-class TransactionRepository extends ModelRepository
+class TransactionRepository extends ModelRepository implements TransactionRepositoryInterface
 {
 
     /**

@@ -4,6 +4,7 @@ namespace MollieShopware\Facades\CheckoutSession;
 
 use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\Basket\Basket;
+use MollieShopware\Components\Basket\BasketInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\Helpers\LocaleFinder;
@@ -13,18 +14,14 @@ use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
 use MollieShopware\Components\SessionManager\SessionManager;
 use MollieShopware\Components\Shipping\Shipping;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
-use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
-use MollieShopware\Components\TransactionBuilder\TransactionItemBuilder;
+use MollieShopware\Components\Shipping\ShippingInterface;
+use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use Psr\Log\LoggerInterface;
-use Shopware\Components\DependencyInjection\Bridge\Session;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
 use Shopware_Controllers_Frontend_Payment;
 
 class CheckoutSessionFacade
@@ -61,12 +58,12 @@ class CheckoutSessionFacade
     private $modelManager;
 
     /**
-     * @var Basket
+     * @var BasketInterface
      */
     private $basket;
 
     /**
-     * @var Shipping
+     * @var ShippingInterface
      */
     private $shipping;
 
@@ -115,6 +112,11 @@ class CheckoutSessionFacade
      */
     private $repoTransactions;
 
+    /**
+     * @var TransactionBuilder
+     */
+    private $transactionBuilder;
+
 
     /**
      * CheckoutSessionFacade constructor.
@@ -134,8 +136,9 @@ class CheckoutSessionFacade
      * @param CreditCardService $creditCard
      * @param TransactionRepository $repoTransactions
      * @param SessionManager $sessionManager
+     * @param TransactionBuilder $transactionBuilder
      */
-    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager)
+    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager, TransactionBuilder $transactionBuilder)
     {
         $this->config = $config;
         $this->paymentService = $paymentService;
@@ -153,6 +156,7 @@ class CheckoutSessionFacade
         $this->creditCardService = $creditCard;
         $this->repoTransactions = $repoTransactions;
         $this->sessionManager = $sessionManager;
+        $this->transactionBuilder = $transactionBuilder;
     }
 
 
@@ -286,83 +290,40 @@ class CheckoutSessionFacade
      */
     private function buildTransaction($basketSignature, $currency)
     {
-        $transactionId = $this->repoTransactions->getLastId() + 1;
-
-        $transaction = new Transaction();
-        $transaction->setId($transactionId);
-        $transaction->setTransactionId('mollie_' . $transactionId);
-        $transaction->setSessionId(\Enlight_Components_Session::getId());
-        $transaction->setShopId(Shopware()->Shop()->getId());
-        $transaction->setBasketSignature($basketSignature);
-        $transaction->setLocale($this->localeFinder->getPaymentLocale());
-        $transaction->setCurrency($currency);
-        $transaction->setTotalAmount($this->controller->getAmount());
-
-        # now save our transaction immediately
-        # i dont know if some code below needs it from the DB ;)
-        $this->repoTransactions->save($transaction);
-
-
         $currentCustomerClass = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
         $customer = $currentCustomerClass->getCurrent();
 
-        if ($customer instanceof Customer) {
-            $transaction->setCustomer($customer);
-            $transaction->setCustomerId($customer->getId());
-        }
+        $locale = $this->localeFinder->getPaymentLocale(Shopware()->Shop()->getLocale()->getLocale());
+
+        $isTaxFree = false;
+        $isNet = false;
 
 
-        // set transaction as tax free
         if (isset($this->controller->getUser()['additional']) && (!isset($this->controller->getUser()['additional']['charge_vat']) || empty($this->controller->getUser()['additional']['charge_vat']))) {
-            $transaction->setTaxFree(true);
+            $isTaxFree = true;
         }
 
         # set transaction as net order
         # e.g. show_net = false means its a NET order
         if (isset($this->controller->getUser()['additional']) && (!isset($this->controller->getUser()['additional']['show_net']) || empty($this->controller->getUser()['additional']['show_net']))) {
-            $transaction->setNet(true);
+            $isNet = true;
         }
 
+        $shopId = Shopware()->Shop()->getId();
 
-        # build our tax mode depending on the configuration from above
-        $taxMode = new TaxMode(!$transaction->getTaxFree(), $transaction->getNet());
-        $transactionBuilder = new TransactionItemBuilder($taxMode);
+        $transaction = $this->transactionBuilder->buildTransaction(
+            $basketSignature,
+            $currency,
+            $this->controller->getAmount(),
+            $shopId,
+            $this->controller->getUser(),
+            $locale,
+            $customer,
+            $isTaxFree,
+            $isNet
+        );
 
-
-        $transactionItems = new \Doctrine\Common\Collections\ArrayCollection();
-
-        /** @var BasketItem[] $basketLines */
-        $basketLines = $this->basket->getBasketLines($this->controller->getUser());
-
-        /** @var BasketItem $basketItem */
-        foreach ($basketLines as $basketItem) {
-            # build our new transaction item from the basket line.
-            # this must be perfectly rounded!
-            $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $basketItem);
-            $transactionItems->add($transactionItem);
-        }
-
-
-        /** @var BasketItem $shippingItem */
-        $shippingItem = $this->shipping->getCartShippingCosts();
-
-        # if we have shipping costs
-        # then convert them to a transaction item too
-        if ($shippingItem->getUnitPrice() > 0) {
-
-            # our articles are all correctly set to gross or net
-            # price depending on the shop setting.
-            # but shipping will always return gross AND net in different fields.
-            # our transaction builder will automatically convert NET to GROSS
-            # so we need to make sure to set the net price manually in that case.
-            $shippingItem->setNetMode($taxMode->isNetOrder());
-
-            $transactionItem = $transactionBuilder->buildTransactionItem($transaction, $shippingItem);
-            $transactionItems->add($transactionItem);
-        }
-
-        $transaction->setItems($transactionItems);
-
+        $this->repoTransactions->save($transaction);
 
         return $transaction;
     }

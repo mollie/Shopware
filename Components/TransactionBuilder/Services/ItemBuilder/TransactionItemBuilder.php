@@ -1,6 +1,6 @@
 <?php
 
-namespace MollieShopware\Components\TransactionBuilder;
+namespace MollieShopware\Components\TransactionBuilder\Services\ItemBuilder;
 
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
@@ -15,13 +15,20 @@ class TransactionItemBuilder
      */
     private $taxMode;
 
+    /**
+     * @var bool
+     */
+    private $roundAfterTax;
+
 
     /**
      * @param TaxMode $taxMode
+     * @param $roundAfterTax
      */
-    public function __construct(TaxMode $taxMode)
+    public function __construct(TaxMode $taxMode, $roundAfterTax)
     {
         $this->taxMode = $taxMode;
+        $this->roundAfterTax = $roundAfterTax;
     }
 
 
@@ -37,27 +44,38 @@ class TransactionItemBuilder
         $taxRate = $basketItem->getTaxRate();
         $quantity = $basketItem->getQuantity();
 
-        # we have a net order.
-        # this means we need to calculate the correct gross price for Mollie
-        if ($this->taxMode->isChargeTaxes() && $this->taxMode->isNetOrder()) {
-            $unitPrice = $unitPrice * ($taxRate + 100) / 100;
-        }
 
-        # first round our single values
-        $netPrice = round($netPrice, 2);
-        $unitPrice = round($unitPrice, 2);
+        # if we charge taxes but our line item is
+        # not already a gross price, then we need to calculate
+        # it into a gross price.
+        if ($basketItem->isGrossPrice() === false && $this->taxMode->isChargeTaxes()) {
+
+            # shopware calculates gross
+            $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
+
+            if ($this->roundAfterTax) {
+                # also round that sum
+                # Shopware does the same, and also Mollie needs
+                # unit prices with 2 decimals
+                $unitPriceGross = round($unitPriceGross, 2);
+            }
+
+        } else {
+            $unitPriceGross = $unitPrice;
+        }
 
         # now calculate the total amount
         # and make sure to round it again
-        $totalAmount = $unitPrice * $quantity;
+        $totalAmount = $unitPriceGross * $quantity;
         $totalAmount = round($totalAmount, 2);
 
 
         # this line is from the Mollie API
         # it tells us how the vat amount has to be calculated
         # https://docs.mollie.com/reference/v2/orders-api/create-order
-        # also round in the end
         $vatAmount = $totalAmount * ($taxRate / ($taxRate + 100));
+
+        # also round in the end!
         $vatAmount = round($vatAmount, 2);
 
 
@@ -69,17 +87,14 @@ class TransactionItemBuilder
         }
 
 
-        $type = $this->getOrderType($basketItem, $unitPrice);
-
-
         $item = new TransactionItem();
+        $item->setType($this->getOrderType($basketItem, $unitPriceGross));
         $item->setTransaction($transaction);
         $item->setArticleId($basketItem->getArticleId());
         $item->setBasketItemId($basketItem->getId());
         $item->setName($basketItem->getName());
-        $item->setType($type);
         $item->setQuantity($basketItem->getQuantity());
-        $item->setUnitPrice($unitPrice);
+        $item->setUnitPrice($unitPriceGross);
         $item->setNetPrice($netPrice);
         $item->setTotalAmount($totalAmount);
         $item->setVatRate($taxRate);

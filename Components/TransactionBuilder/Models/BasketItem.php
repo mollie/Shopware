@@ -58,7 +58,7 @@ class BasketItem
     /**
      * @var bool
      */
-    private $isNetMode;
+    private $isGrossPrice;
 
 
     /**
@@ -86,7 +86,7 @@ class BasketItem
         $this->quantity = $quantity;
         $this->taxRate = $taxRate;
 
-        $this->isNetMode = false;
+        $this->isGrossPrice = true;
     }
 
     /**
@@ -142,10 +142,6 @@ class BasketItem
      */
     public function getUnitPrice()
     {
-        if ($this->isNetMode) {
-            return $this->unitPriceNet;
-        }
-
         return $this->unitPrice;
     }
 
@@ -174,14 +170,19 @@ class BasketItem
     }
 
     /**
-     * Enable or disable net mode.
-     * If enabled, the returned unit price
-     * will be the net price.
-     *
-     * @param bool $isNetMode
+     * @param $isGrossPrice
      */
-    public function setNetMode($isNetMode)
+    public function setIsGrossPrice($isGrossPrice)
     {
-        $this->isNetMode = $isNetMode;
+        $this->isGrossPrice = $isGrossPrice;
     }
+
+    /**
+     * @return bool
+     */
+    public function isGrossPrice()
+    {
+        return $this->isGrossPrice;
+    }
+
 }

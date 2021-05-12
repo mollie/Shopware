@@ -4,8 +4,7 @@
          bootstrap="vendor/autoload.php"
          cacheResult="false"
          colors="true"
-         executionOrder="random"
-         forceCoversAnnotation="true">
+         executionOrder="random">
 
     <testsuites>
         <testsuite name="Mollie Test Suite">
