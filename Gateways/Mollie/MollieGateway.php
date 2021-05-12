@@ -3,6 +3,8 @@
 namespace MollieShopware\Gateways\Mollie;
 
 use Mollie\Api\MollieApiClient;
+use Mollie\Api\Resources\Issuer;
+use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
@@ -62,6 +64,33 @@ class MollieGateway implements MollieGatewayInterface
         $payment = $this->apiClient->payments->get($paymentId);
 
         return $payment;
+    }
+
+    /**
+     * @return Issuer[]
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function getIdealIssuers()
+    {
+        $paymentMethods = $this->apiClient->methods->allActive(
+            [
+                'include' => 'issuers'
+            ]
+        );
+
+        $issuers = [];
+
+        foreach ($paymentMethods as $paymentMethod) {
+
+            if ($paymentMethod->id === PaymentMethod::IDEAL) {
+                foreach ($paymentMethod->issuers() as $key => $issuer) {
+                    $issuers[] = $issuer;
+                }
+                break;
+            }
+        }
+
+        return $issuers;
     }
 
 }

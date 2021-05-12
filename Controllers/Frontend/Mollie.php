@@ -6,13 +6,14 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\Base\AbstractPaymentController;
 use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\Helpers\LocaleFinder;
 use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
+use MollieShopware\Components\iDEAL\iDEALInterface;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
-use MollieShopware\Components\Services\IdealService;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Facades\CheckoutSession\CheckoutSessionFacade;
@@ -25,6 +26,7 @@ use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use MollieShopware\Traits\Controllers\RedirectTrait;
+use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
@@ -89,6 +91,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @var LocaleFinder
      */
     private $localeFinder;
+
+    /**
+     * @var iDEALInterface
+     */
+    private $iDEAL;
+
+    /**
+     * @var CurrentCustomer
+     */
+    private $customers;
 
 
     /**
@@ -393,24 +405,37 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
         try {
+
             $this->loadServices();
 
-            // get the issuers from the IdealService, or return an error
-            /** @var IdealService $ideal */
-            $idealService = $this->container->get('mollie_shopware.ideal_service');
+            $customer = $this->customers->getCurrent();
+
+            if (!$customer instanceof Customer) {
+                throw new \Exception('No active customer found for iDEAL AJAX list');
+            }
 
             /** @var array $idealIssuers */
-            $idealIssuers = $idealService->getIssuers();
+            $idealIssuers = $this->iDEAL->getIssuers($customer);
 
             $this->sendResponse([
                 'data' => $idealIssuers,
                 'success' => true,
             ]);
+
         } catch (\Exception $ex) {
+
+            $this->logger->error(
+                'Error iDEAL issuer AJAX action.',
+                [
+                    'error' => $ex->getMessage(),
+                ]
+            );
+
             $this->sendResponse(
                 [
                     'message' => $ex->getMessage(),
-                    'success' => false],
+                    'success' => false
+                ],
                 500
             );
         }
@@ -513,6 +538,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $config = Shopware()->Container()->get('mollie_shopware.config');
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+
+            $this->iDEAL = $this->container->get('mollie_shopware.components.ideal');
+            $this->customers = $this->container->get('mollie_shopware.customer');
+
 
             $this->config = $config;
             $this->orderService = $orderService;

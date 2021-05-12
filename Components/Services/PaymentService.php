@@ -11,6 +11,8 @@ use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\CurrentCustomer;
+use MollieShopware\Components\iDEAL\iDEALInterface;
 use MollieShopware\Components\Mollie\Builder\MolliePaymentBuilder;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\UnixTimestampGenerator;
@@ -29,6 +31,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
+use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
 
 class PaymentService
@@ -95,26 +98,34 @@ class PaymentService
     private $applePayFactory;
 
     /**
-     * @var IdealService $idealService
+     * @var iDEALInterface $idealService
      */
     private $idealService;
+
+    /**
+     * @var CurrentCustomer
+     */
+    private $customer;
 
     private $orderLinesRepo;
 
 
     /**
+     * PaymentService constructor.
      * @param MollieApiFactory $apiFactory
      * @param Config $config
      * @param MollieGatewayInterface $gwMollie
+     * @param CurrentCustomer $currentCustomer
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, CurrentCustomer $currentCustomer, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->gwMollie = $gwMollie;
+        $this->customer = $currentCustomer;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
         $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
@@ -232,12 +243,18 @@ class PaymentService
         }
 
         if ($paymentMethodObject instanceof IDeal) {
+            # test if we have a current customer (we should have one)
+            # if so, get his selected iDeal issuer.
+            # if an issuer has been set, then also use it for our payment,
+            # otherwise just continue without a prefilled issuer.
+            $currentCustomer = $this->customer->getCurrent();
 
-            $issuer = $this->idealService->getSelectedIssuer();
-
-            if (!empty($issuer)) {
-                /** @var IDeal $paymentMethodObject */
-                $paymentMethodObject->setIssuer($issuer);
+            if ($currentCustomer instanceof Customer) {
+                $issuer = $this->idealService->getCustomerIssuer($currentCustomer);
+                if (!empty($issuer)) {
+                    /** @var IDeal $paymentMethodObject */
+                    $paymentMethodObject->setIssuer($issuer);
+                }
             }
         }
 
