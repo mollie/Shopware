@@ -145,7 +145,10 @@ class BankTransferTest extends TestCase
         $ordersAPI = $this->payment->buildBodyOrdersAPI();
 
         $this->assertEquals($expectedDueDate, $paymentsAPI['dueDate']);
-        $this->assertEquals($expectedDueDate, $ordersAPI['payment']['dueDate']);
+
+        # attention, Mollie Devs confirmed that the Orders API
+        # does NOT use the dueDate, but the expiresAt field for BankTransfer!
+        $this->assertEquals($expectedDueDate, $ordersAPI['expiresAt']);
     }
 
 }

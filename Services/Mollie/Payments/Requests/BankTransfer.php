@@ -65,8 +65,10 @@ class BankTransfer extends AbstractPayment implements PaymentInterface
     {
         $data = parent::buildBodyOrdersAPI();
 
+        # attention, Mollie Devs confirmed that the Orders API
+        # does NOT use the dueDate, but the expiresAt field for BankTransfer!
         if ($this->dueDateDays !== null) {
-            $data['payment']['dueDate'] = $this->getDueDate();
+            $data['expiresAt'] = $this->getDueDate();
         }
 
         return $data;
