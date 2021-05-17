@@ -2,13 +2,12 @@
 
 namespace MollieShopware\Command;
 
+use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Config;
-use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\ShippingCommand\ShippingCommandFacade;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
-use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
 use Shopware\Components\Model\ModelManager;
@@ -18,13 +17,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class KlarnaShippingCommand extends ShopwareCommand
+class ShippingCommand extends ShopwareCommand
 {
 
     /**
      *
      */
-    const LOG_PREFIX = 'CLI Klarna: ';
+    const LOG_PREFIX = 'CLI Shipping: ';
 
     /**
      * @var ShippingCommandFacade
@@ -32,9 +31,9 @@ class KlarnaShippingCommand extends ShopwareCommand
     private $facade;
 
     /**
-     * @var TransactionRepository
+     * @var EntityManager
      */
-    private $repoTransactions;
+    private $entityManager;
 
 
     /**
@@ -48,9 +47,11 @@ class KlarnaShippingCommand extends ShopwareCommand
     {
         parent::__construct($name);
 
+        $this->entityManager = $modelManager;
+
         $repoShops = $modelManager->getRepository(Shop::class);
         $repoOrders = $modelManager->getRepository(Order::class);
-        $this->repoTransactions = $modelManager->getRepository(Transaction::class);
+        $repoTransactions = $modelManager->getRepository(Transaction::class);
 
         $this->facade = new ShippingCommandFacade(
             self::LOG_PREFIX,
@@ -60,7 +61,7 @@ class KlarnaShippingCommand extends ShopwareCommand
             $logger,
             $repoShops,
             $repoOrders,
-            $this->repoTransactions
+            $repoTransactions
         );
     }
 
@@ -70,8 +71,8 @@ class KlarnaShippingCommand extends ShopwareCommand
     public function configure()
     {
         $this
-            ->setName('mollie:ship:klarna')
-            ->setDescription('Ship completed Klarna orders');
+            ->setName('mollie:ship:orders')
+            ->setDescription('Ship completed orders');
     }
 
     /**
@@ -83,16 +84,22 @@ class KlarnaShippingCommand extends ShopwareCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('MOLLIE Klarna Ship Command');
-        $io->text('Searching for all non-shipped Klarna orders and mark them as shipped if the status is correct...');
+        $io->title('MOLLIE Ship Command');
+        $io->text('Searching for all non-shipped orders and mark them as shipped if the status is correct...');
+
+
+        $qb = $this->entityManager->createQueryBuilder();
 
         /** @var Transaction[] $transactions */
-        $transactions = $this->repoTransactions->findBy(
-            [
-                'isShipped' => false,
-                'paymentMethod' => 'mollie_' . PaymentMethod::KLARNA_PAY_LATER
-            ]
-        );
+        $transactions = $qb->select('t')
+            ->from(Transaction::class, 't')
+            ->where($qb->expr()->like('t.mollieId', ':mollieId'))
+            ->andWhere($qb->expr()->eq('t.isShipped', ':shipped'))
+            ->setParameter(':mollieId', 'ord_%')
+            ->setParameter(':shipped', false)
+            ->getQuery()
+            ->getResult();
+
 
         if ($transactions === null || !is_array($transactions)) {
             $io->success("No Mollie Transactions found!");

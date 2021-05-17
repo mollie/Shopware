@@ -14,6 +14,14 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
+        <service id="mollie_shopware.shipping_command" class="MollieShopware\Command\ShippingCommand">
+            <tag name="console.command"/>
+            <argument type="service" id="mollie_shopware.config"/>
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
         <service id="mollie_shopware.command.orders_refund_command" class="MollieShopware\Command\OrdersRefundCommand">
             <tag name="console.command"/>
             <argument type="service" id="mollie_shopware.services.refund_service"/>
