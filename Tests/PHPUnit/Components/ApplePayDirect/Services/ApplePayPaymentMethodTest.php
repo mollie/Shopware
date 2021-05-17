@@ -8,16 +8,66 @@ use PHPUnit\Framework\TestCase;
 
 class ApplePayPaymentMethodTest extends TestCase
 {
-    private $paymentMethodService;
 
+    /**
+     * @var ApplePayPaymentMethod
+     */
+    private $applepay;
+
+
+    /**
+     *
+     */
     public function setUp(): void
     {
-        $this->paymentMethodService = new ApplePayPaymentMethod(
+        $this->applepay = new ApplePayPaymentMethod(
             $this->createMock(PaymentMethodService::class)
         );
     }
 
-    public function provideNonApplePaymentMethods()
+    /**
+     * Tests if isApplePayPaymentMethod will return false if given
+     * method name is not name of Apple Pay method
+     *
+     * @dataProvider getNonApplePaymentMethods
+     */
+    public function testNonApplePayMethods($methodName)
+    {
+        $this->assertFalse($this->applepay->isApplePayPaymentMethod($methodName));
+    }
+
+    /**
+     * Tests if isApplePayPaymentMethod will return true if given
+     * method name is name of Apple Pay method
+     *
+     * @dataProvider getApplePaymentMethods
+     */
+    public function testApplePayMethods($methodName)
+    {
+        $this->assertTrue($this->applepay->isApplePayPaymentMethod($methodName));
+    }
+
+    /**
+     * This test verifies that our function can be used with NULL.
+     * Somehow NULL is happening for some customers out there.
+     */
+    public function testIsNotApplePayWithNull()
+    {
+        $this->assertFalse($this->applepay->isApplePayPaymentMethod(null));
+    }
+
+    /**
+     * This test verifies that our function can be used with an empty string.
+     */
+    public function testIsNotApplePayWithEmptyString()
+    {
+        $this->assertFalse($this->applepay->isApplePayPaymentMethod(''));
+    }
+
+    /**
+     * @return \string[][]
+     */
+    public function getNonApplePaymentMethods()
     {
         return [
             ['mollie_creditcard'],
@@ -40,55 +90,15 @@ class ApplePayPaymentMethodTest extends TestCase
         ];
     }
 
-    public function provideApplePaymentMethods()
+    /**
+     * @return \string[][]
+     */
+    public function getApplePaymentMethods()
     {
         return [
             ['mollie_applepay'],
             ['mollie_applepaydirect'],
         ];
-    }
-
-    /**
-     * Tests if isApplePayPaymentMethod will return false if given method name is not name of Apple Pay method
-     *
-     * @dataProvider provideNonApplePaymentMethods
-     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod
-     */
-    public function testIsApplePaymentMethodWillReturnFalseOnOtherMethod($methodName)
-    {
-        $this->assertFalse($this->paymentMethodService->isApplePayPaymentMethod($methodName));
-    }
-
-    /**
-     * Tests if isApplePayPaymentMethod will return true if given method name is name of Apple Pay method
-     *
-     * @dataProvider provideApplePaymentMethods
-     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod
-     */
-    public function testIsApplePaymentMethodWillReturnOnApplePayMethod($methodName)
-    {
-        $this->assertTrue($this->paymentMethodService->isApplePayPaymentMethod($methodName));
-    }
-
-    /**
-     * This test verifies that our function can be used with NULL.
-     * Somehow NULL is happening for some customers out there.
-     *
-     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod::isApplePayPaymentMethod
-     */
-    public function testIsNotApplePayWithNull()
-    {
-        $this->assertFalse($this->paymentMethodService->isApplePayPaymentMethod(null));
-    }
-
-    /**
-     * This test verifies that our function can be used with an empty string.
-     *
-     * @covers       \MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod::isApplePayPaymentMethod
-     */
-    public function testIsNotApplePayWithEmptyString()
-    {
-        $this->assertFalse($this->paymentMethodService->isApplePayPaymentMethod(''));
     }
 
 }

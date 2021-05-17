@@ -28,8 +28,6 @@ class OrderNumberBuilderTest extends TestCase
     /**
      * This test verifies that the order number is filled correctly in requests of the Orders API.
      * If our transaction does not have an existing Shopware order number, we use as fallback value.
-     *
-     * @covers \MollieShopware\Components\Mollie\Builder\Payment\OrderNumberBuilder::buildOrderNumber
      */
     public function testOrderNumberNoOrder()
     {
@@ -47,8 +45,6 @@ class OrderNumberBuilderTest extends TestCase
      * This test verifies that the order number is filled correctly in requests of the Orders API.
      * If our transaction has an existing Shopware order, we always use this
      * order number instead of the fallback value.
-     *
-     * @covers \MollieShopware\Components\Mollie\Builder\Payment\OrderNumberBuilder::buildOrderNumber
      */
     public function testOrderNumberWithOrder()
     {

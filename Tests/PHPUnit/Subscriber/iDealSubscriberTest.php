@@ -12,8 +12,6 @@ class iDealSubscriberTest extends TestCase
     /**
      * This test verifies that our required subscribers
      * are not changed without recognizing it.
-     *
-     * @covers IdealIssuersSubscriber::getSubscribedEvents
      */
     public function testSubscribedEvents()
     {

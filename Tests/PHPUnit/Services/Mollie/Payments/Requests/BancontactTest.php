@@ -61,8 +61,6 @@ class BancontactTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\Bancontact
      */
     public function testPaymentsAPI()
     {
@@ -86,8 +84,6 @@ class BancontactTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\Bancontact
      */
     public function testOrdersAPI()
     {

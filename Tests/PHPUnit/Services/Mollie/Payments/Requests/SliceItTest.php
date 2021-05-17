@@ -63,8 +63,6 @@ class SliceItTest extends TestCase
      * for our payment is correct.
      * Please note, Klarna does not work with the payments API
      * so this is just an empty array
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\SliceIt
      */
     public function testPaymentsAPI()
     {
@@ -76,8 +74,6 @@ class SliceItTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\SliceIt
      */
     public function testOrdersAPI()
     {

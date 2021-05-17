@@ -36,8 +36,6 @@ class PaymentLineItemBuilderTest extends TestCase
      * That's why we do not have correctly calculated sum and VAT values in here!
      * We always just use the values from the transaction.
      *
-     * @covers \MollieShopware\Components\Mollie\Builder\Payment\PaymentLineItemBuilder::buildLineItems
-     *
      * @ticket MOL-70
      */
     public function testBuildLineItems()
@@ -96,9 +94,6 @@ class PaymentLineItemBuilderTest extends TestCase
      * should remain in the list of items.
      *
      * @ticket MOL-15
-     *
-     * @covers \MollieShopware\Components\Mollie\Builder\Payment\PaymentLineItemBuilder::buildLineItems
-     * @covers \MollieShopware\Components\Mollie\Services\LineItemCleaner\MollieLineItemCleaner::removeDuplicateDiscounts
      */
     public function testRemoveDuplicatePromotions()
     {

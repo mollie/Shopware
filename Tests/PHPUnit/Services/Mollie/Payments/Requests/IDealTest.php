@@ -60,8 +60,6 @@ class IDealTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\IDeal::buildBodyPaymentsAPI
      */
     public function testPaymentsAPI()
     {
@@ -85,8 +83,6 @@ class IDealTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\IDeal::buildBodyOrdersAPI
      */
     public function testOrdersAPI()
     {
@@ -119,8 +115,6 @@ class IDealTest extends TestCase
     /**
      * This test verifies that we can set a prefilled issuer
      * to automatically use that one for the payment.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\IDeal::setIssuer
      */
     public function setIssuer()
     {

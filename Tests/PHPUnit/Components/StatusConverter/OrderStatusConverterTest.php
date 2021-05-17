@@ -19,7 +19,6 @@ class OrderStatusConverterTest extends TestCase
      * - https://docs.mollie.com/orders/status-changes
      *
      * @dataProvider getStatusMappings
-     * @covers       \MollieShopware\Components\StatusConverter\OrderStatusConverter::getShopwareOrderStatus
      *
      * @param $status
      * @param $expectedStatus

@@ -60,8 +60,6 @@ class ApplePayTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\ApplePay
      */
     public function testPaymentsAPI()
     {
@@ -85,8 +83,6 @@ class ApplePayTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\ApplePay
      */
     public function testOrdersAPI()
     {
@@ -119,8 +115,6 @@ class ApplePayTest extends TestCase
     /**
      * This test verifies that our optional payment token
      * is correctly added if provided
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\ApplePay::setPaymentToken
      */
     public function testPaymentToken()
     {

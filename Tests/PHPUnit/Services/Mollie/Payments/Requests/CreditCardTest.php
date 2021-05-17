@@ -60,8 +60,6 @@ class CreditCardTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\CreditCard
      */
     public function testPaymentsAPI()
     {
@@ -85,8 +83,6 @@ class CreditCardTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\CreditCard
      */
     public function testOrdersAPI()
     {
@@ -119,8 +115,6 @@ class CreditCardTest extends TestCase
     /**
      * This test verifies that we can set a custom card token
      * to automatically use that card for the payment.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\CreditCard::setPaymentToken
      */
     public function testCardToken()
     {

@@ -60,8 +60,6 @@ class Przelewy24Test extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\Przelewy24
      */
     public function testPaymentsAPI()
     {
@@ -86,8 +84,6 @@ class Przelewy24Test extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\Przelewy24
      */
     public function testOrdersAPI()
     {
@@ -121,8 +117,6 @@ class Przelewy24Test extends TestCase
      * This test verifies that our billing email is
      * correctly existing where necessary.
      * Please keep in mind, this must NOT exist in the orders API!
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\Przelewy24
      */
     public function testBillingMail()
     {

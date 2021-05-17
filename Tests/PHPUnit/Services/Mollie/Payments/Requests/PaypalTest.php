@@ -62,8 +62,6 @@ class PaypalTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\PayPal
      */
     public function testPaymentsAPI()
     {
@@ -87,8 +85,6 @@ class PaypalTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\PayPal
      */
     public function testOrdersAPI()
     {

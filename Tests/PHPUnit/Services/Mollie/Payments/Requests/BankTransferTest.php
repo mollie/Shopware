@@ -60,8 +60,6 @@ class BankTransferTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\BankTransfer
      */
     public function testPaymentsAPI()
     {
@@ -86,8 +84,6 @@ class BankTransferTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\BankTransfer
      */
     public function testOrdersAPI()
     {
@@ -122,8 +118,6 @@ class BankTransferTest extends TestCase
      * This test verifies that our billing email is
      * correctly existing where necessary.
      * Please keep in mind, this must NOT exist in the orders API!
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\BankTransfer
      */
     public function testBillingMail()
     {
@@ -138,8 +132,6 @@ class BankTransferTest extends TestCase
      * This test verifies that we can set a custom due date for our payment.
      * We set the due date in DAYS and it will automatically calculate
      * the date time for the request.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\BankTransfer::setDueDateDays
      */
     public function testDueDate()
     {

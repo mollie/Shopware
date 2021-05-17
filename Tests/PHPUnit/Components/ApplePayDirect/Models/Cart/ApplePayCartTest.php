@@ -11,9 +11,6 @@ class ApplePayCartTest extends TestCase
     /**
      * This test verifies that the shipping
      * can be set correctly
-     *
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart::setShipping
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart::getShipping
      */
     public function testShipping()
     {
@@ -28,9 +25,6 @@ class ApplePayCartTest extends TestCase
     /**
      * This test verifies that the taxes
      * can be set correctly.
-     *
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart::setTaxes
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart::getTaxes
      */
     public function testCurrency()
     {

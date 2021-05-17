@@ -49,7 +49,10 @@ class TotalAmountTest extends TestCase
     }
 
     /**
-     *
+     * This test verifies that we have the correct total amount
+     * if we also have the configuration in Shopware to "round after taxes".
+     * In this case, it will convert the net price into a gross price, and immediately
+     * round that price before proceeding.
      */
     public function testTotalAmountWithNetPriceRoundAfterTax()
     {

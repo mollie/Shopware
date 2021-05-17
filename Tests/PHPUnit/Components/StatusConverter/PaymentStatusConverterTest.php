@@ -25,7 +25,6 @@ class PaymentStatusConverterTest extends TestCase
      * - https://docs.mollie.com/orders/status-changes
      *
      * @dataProvider getStatusMappings
-     * @covers       \MollieShopware\Components\StatusConverter\PaymentStatusConverter::getShopwarePaymentStatus
      *
      * @param $status
      * @param $expectedStatus

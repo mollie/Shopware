@@ -11,8 +11,6 @@ class TokenAnonymizerTest extends TestCase
     /**
      * This test verifies that we get an empty string
      * if we have an invalid value that is just NULL.
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testAnonymizeNull()
     {
@@ -25,8 +23,6 @@ class TokenAnonymizerTest extends TestCase
     /**
      * This test verifies that we get an empty string
      * if we have an empty string..
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testAnonymizeEmpty()
     {
@@ -39,8 +35,6 @@ class TokenAnonymizerTest extends TestCase
     /**
      * This test verifies that we get an empty string
      * if we have an invalid text with only spaces.
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testAnonymizeSpaces()
     {
@@ -53,8 +47,6 @@ class TokenAnonymizerTest extends TestCase
     /**
      * This test verifies we successfully anonymize the
      * last 4 digits of our provided string value.
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testAnonymizeValue()
     {
@@ -69,8 +61,6 @@ class TokenAnonymizerTest extends TestCase
      * number of letters that should be anonymized, then we
      * make sure to see the first letter, and then add wildcards
      * with the number that we have provided.
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testAnonymizeValueIsTooShort()
     {
@@ -83,8 +73,6 @@ class TokenAnonymizerTest extends TestCase
     /**
      * This test verifies that we correctly trim to the
      * provided max length of the anonmyized string
-     *
-     * @covers \MollieShopware\Services\TokenAnonymizer\TokenAnonymizer
      */
     public function testMaxLength()
     {

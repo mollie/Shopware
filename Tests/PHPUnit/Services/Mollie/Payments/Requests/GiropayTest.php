@@ -60,8 +60,6 @@ class GiropayTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     *
-     * @covers  \MollieShopware\Services\Mollie\Payments\Requests\Giropay
      */
     public function testPaymentsAPI()
     {
@@ -85,8 +83,6 @@ class GiropayTest extends TestCase
     /**
      * This test verifies that the Orders-API request
      * for our payment is correct.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Requests\Giropay
      */
     public function testOrdersAPI()
     {

@@ -17,8 +17,6 @@ class NumberFormatterTest extends TestCase
     /**
      * This test verifies that a FLOAT value is
      * always converted to a 2 decimal string.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Formatters\NumberFormatter::formatNumber
      */
     public function testFloat()
     {
@@ -32,8 +30,6 @@ class NumberFormatterTest extends TestCase
     /**
      * This test verifies that an INT value is
      * always converted to a 2 decimal string.
-     *
-     * @covers \MollieShopware\Services\Mollie\Payments\Formatters\NumberFormatter::formatNumber
      */
     public function testInteger()
     {

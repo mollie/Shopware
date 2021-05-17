@@ -11,9 +11,6 @@ class ApplePayButtonTest extends TestCase
     /**
      * This test verifies that item mode is OFF
      * for the default button configuration
-     *
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton::isItemMode
      */
     public function testItemModeOff()
     {
@@ -25,10 +22,6 @@ class ApplePayButtonTest extends TestCase
     /**
      * This test verifies that item mode is ON
      * if a certain product is been assigned.
-     *
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton::setItemMode
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton::isItemMode
      */
     public function testItemModeOn()
     {
@@ -43,10 +36,6 @@ class ApplePayButtonTest extends TestCase
      * button is correct for the storefront.
      * It also needs to contain the product number
      * if we have item mode ON.
-     *
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton::isItemMode
-     * @covers \MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton::toArray
      */
     public function testFormatButton()
     {
