@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.1</version>
+    <version>1.8.2</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -40,6 +40,30 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+
+    <changelog version="1.8.2">
+        <changes lang="de">
+            - Verbesserte Kompatibilität von Rundungen in (B2B) Netto-Preis basierten Shops und in Kombination mit der Shopware Einstellung "Netto-Bestellungen konsequent auf 2 Stellen runden".
+            - Mollie ignoriert nun E-Mail Fehler beim Checkout und in Webhooks. Wir erstellen trotzdem WARNING Log Einträge, um darauf hinzuweisen, dass etwas schief lief.
+            - Es werden nun keine Mehrfach-Mails bei Rückerstattungen mehr geschickt. Dies passierte durch das Mollie Dashboard Feature für verzögerte Rückerstattungen. Es wird nun erst eine Mail verschickt, nachdem die offizielle Information erhalten wurde (nach ca. 2 Stunden.)
+            - Entfernen der nicht mehr benötigten Konfiguration "Rückerstatungs-Mail senden". Diese E-Mail wird bereits durch den Wechsel des Zahlstatus versendet, sofern aktiviert.
+            - Verbesserte iDEAL Issuer Integration mit Log-Einträgen für Fehlerfälle.
+            - Interne Optimierung aller Zahlarten für einfachere zahlungsspezifische Erweiterung in zukünftigen Versionen.
+            - Problembehebung der fehlerhaften "Zahlungsziel" Einstellung bei Bank Transfer in Kombination mit der Einstellung, dass auch Bestellungen bei Mollie erstellt werden.
+            - Problembehebung der fehlenden "Währungs" Information in Bestellbestätigungs E-Mails.
+        </changes>
+        <changes lang="en">
+            - Increase compatibility of rounding in (B2B) "net-price" based shops and in combination with the Shopware configuration "Net orders consistently round to 2 digits".
+            - Mollie does now ignore email errors during the checkout and in webhooks. We still add WARNINGS to the log file to let you know something went wrong.
+            - Avoid sending duplicate refund emails, due to the delayed/pending refund feature of the Mollie Dashboard. Only 1 email is now sent as soon as the official refund information has been received (after 2 hours).
+            - Remove unused configuration "Send Refund Status Mail". Mails will be sent anyway on transition changes, if enabled.
+            - Improve iDEAL issuer list integration and add logs in case of problems.
+            - Refactor all payment methods (internally) in order to allow easier payment specific features in upcoming releases.
+            - Fix problem of broken "due date" with Bank Transfer if also orders are created in Mollie.
+            - Fix problem of missing "currency" information in order confirmation email.
+        </changes>
+    </changelog>
 
     <changelog version="1.8.1">
         <changes lang="de">
