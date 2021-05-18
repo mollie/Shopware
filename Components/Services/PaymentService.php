@@ -111,21 +111,18 @@ class PaymentService
 
 
     /**
-     * PaymentService constructor.
      * @param MollieApiFactory $apiFactory
      * @param Config $config
      * @param MollieGatewayInterface $gwMollie
-     * @param CurrentCustomer $currentCustomer
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, CurrentCustomer $currentCustomer, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->gwMollie = $gwMollie;
-        $this->customer = $currentCustomer;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
         $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
@@ -189,7 +186,7 @@ class PaymentService
         $this->creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
         $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
         $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
-
+        $this->customer = Shopware()->Container()->get('mollie_shopware.customer');
 
         $shopwareOrder = null;
 
