@@ -1,11 +1,11 @@
 import OffCanvasRepository from 'Repositories/storefront/checkout/OffCanvasRepository';
 import ConfirmRepository from 'Repositories/storefront/checkout/ConfirmRepository';
-import PaymentsRepository from 'Repositories/storefront/checkout/PaymentsRepository';
+import PaymentsAction from "Actions/storefront/checkout/PaymentsAction";
 
 
+const paymentsAction = new PaymentsAction();
 const repoOffCanvas = new OffCanvasRepository();
 const repoConfirm = new ConfirmRepository();
-const repoPayments = new PaymentsRepository();
 
 
 class CheckoutAction {
@@ -33,13 +33,13 @@ class CheckoutAction {
         repoConfirm.getSwitchPaymentMethodsButton().click();
 
         // click on the name of the payment
-        cy.contains(paymentName).click();
+        paymentsAction.selectPayment(paymentName);
 
         // attention, there is a modal popup appearing
         // so its not immediately available, lets just wait
         // until our payment method has been successfully selected
         cy.wait(3000);
-        repoPayments.getSubmitButton().click();
+        paymentsAction.submitPage();
     }
 
     /**

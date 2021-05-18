@@ -3,6 +3,11 @@ import Session from "Actions/utils/Session"
 // ------------------------------------------------------
 import LoginAction from 'Actions/storefront/account/LoginAction';
 import RegisterAction from 'Actions/storefront/account/RegisterAction';
+import TopMenuAction from "Actions/storefront/navigation/TopMenuAction";
+import ListingAction from "Actions/storefront/products/ListingAction";
+import PDPAction from "Actions/storefront/products/PDPAction";
+import CheckoutAction from "Actions/storefront/checkout/CheckoutAction";
+import PaymentsAction from "Actions/storefront/checkout/PaymentsAction";
 
 
 const devices = new Devices();
@@ -10,6 +15,12 @@ const session = new Session();
 
 const register = new RegisterAction();
 const login = new LoginAction();
+const topMenu = new TopMenuAction();
+const listing = new ListingAction();
+const pdp = new PDPAction();
+const checkout = new CheckoutAction();
+const payments = new PaymentsAction();
+
 
 const user_email = "dev@localhost.de";
 const user_pwd = "MollieMollie111";
@@ -27,6 +38,26 @@ describe('iDEAL Issuers', () => {
     beforeEach(() => {
         session.resetBrowserSession();
     });
+
+
+    it('Issuer List on payment selection page', () => {
+
+        cy.visit('/');
+        login.doLogin(user_email, user_pwd);
+
+        topMenu.clickOnClothing();
+        listing.clickOnFirstProduct();
+        pdp.addToCart(1);
+        checkout.goToCheckoutInOffCanvas();
+
+        checkout.openPaymentSelectionOnConfirm();
+
+        payments.selectPayment('iDEAL');
+
+        // now verify that we have an existing list
+        // of issuers by simply selecting one of them
+        payments.selectIDealIssuer('bunq');
+    })
 
 
     it('Ajax Route working for signed in users', () => {
