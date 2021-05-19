@@ -11,6 +11,11 @@ export default class PaymentsAction {
      */
     selectPayment(name) {
         cy.contains(name).click();
+
+        // attention, there is a modal popup appearing
+        // so its not immediately available, lets just wait
+        // until our payment method has been successfully selected
+        cy.wait(3000);
     }
 
     /**
