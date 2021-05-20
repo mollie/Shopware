@@ -51,7 +51,7 @@ class DescriptionBuilderTest extends TestCase
 
         $description = $this->builder->buildDescription($transaction, 'uuid-123');
 
-        $this->assertEquals('Order uuid-123', $description);
+        $this->assertEquals('Order 20001', $description);
     }
 
 }

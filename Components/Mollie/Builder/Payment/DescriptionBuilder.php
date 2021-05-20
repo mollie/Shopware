@@ -15,8 +15,10 @@ class DescriptionBuilder
      */
     public function buildDescription(Transaction $transaction, $uniqueID)
     {
-        if (!empty($transaction->getOrderNumber())) {
-            return 'Order ' . $uniqueID;
+        $orderNumber = (string)$transaction->getOrderNumber();
+
+        if (!empty($orderNumber)) {
+            return 'Order ' . $orderNumber;
         }
 
         return 'Transaction ' . $uniqueID;
