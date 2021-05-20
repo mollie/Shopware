@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.2</version>
+    <version>1.8.3</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,17 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.8.3">
+        <changes lang="de">
+            - Problembehebung bei dem eine falsche Bestellnummer für die Transaktion in Mollie verwendet wurde in Kombination mit "Bestellung vor Zahlung erstellen".
+            - Problembehebung mit niederländischer Übersetzung in Shopware Backend.
+        </changes>
+        <changes lang="en">
+            - Fix problem where wrong order number has been used for Mollie transaction in combination with "create order before payment".
+            - Fix problem with broken dutch translation in Shopware backend
+        </changes>
+    </changelog>
 
     <changelog version="1.8.2">
         <changes lang="de">
