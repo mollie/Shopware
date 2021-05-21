@@ -175,9 +175,14 @@ class OrderUpdater
      */
     private function updateOrderHistoryComment(Order $order)
     {
-        /** @var History $lastEntry */
+        /** @var History|false $lastEntry */
         $lastEntry = $order->getHistory()->last();
 
+        if (!$lastEntry instanceof History) {
+            return;
+        }
+
+        # do not update previous comments
         if (!empty($lastEntry->getComment())) {
             return;
         }
