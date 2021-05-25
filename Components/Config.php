@@ -328,7 +328,7 @@ class Config
     /**
      * @return int
      */
-    public function getOrdersShipOnStatus()
+    public function getKlarnaShipOnStatus()
     {
         return (int)$this->get('klarna_ship_on_status', Status::ORDER_STATE_COMPLETELY_DELIVERED);
     }

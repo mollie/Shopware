@@ -311,7 +311,7 @@ class OrderBackendSubscriber implements SubscriberInterface
         $orderStatusId = Status::ORDER_STATE_COMPLETELY_DELIVERED;
 
         if ($subShopConfig !== null) {
-            $orderStatusId = $subShopConfig->getOrdersShipOnStatus();
+            $orderStatusId = $subShopConfig->getKlarnaShipOnStatus();
         }
 
         if ($order->getOrderStatus()->getId() !== $orderStatusId) {
