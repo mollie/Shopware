@@ -67,7 +67,7 @@ class MollieStatusConverter
 
             // fully open
             if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_OPEN] == $paymentsResult['total']) {
-                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_COMPLETED;
+                $targetStatus = PaymentStatus::MOLLIE_PAYMENT_OPEN;
             }
 
             if ($paymentsResult[PaymentStatus::MOLLIE_PAYMENT_FAILED] == $paymentsResult['total']) {
