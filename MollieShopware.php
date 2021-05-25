@@ -137,6 +137,7 @@ class MollieShopware extends Plugin
             $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/model/order_history.js');
+            $view->extendsTemplate('backend/mollie_extend_order/view/detail/overview.js');
             $view->extendsTemplate('backend/mollie_extend_order/view/detail/order-history.js');
             $view->extendsTemplate('backend/mollie_extend_order_detail/view/detail/position.js');
         }

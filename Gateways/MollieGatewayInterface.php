@@ -18,6 +18,16 @@ interface MollieGatewayInterface
     public function switchClient(MollieApiClient $client);
 
     /**
+     * @return string
+     */
+    public function getOrganizationId();
+
+    /**
+     * @return string
+     */
+    public function getProfileId();
+
+    /**
      * @param $orderId
      * @return Order
      */

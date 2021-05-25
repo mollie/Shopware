@@ -25,16 +25,14 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
     }
 
     /**
-     * Get the most recent transaction for an order
-     *
-     * @param Order $order
-     * @return Transaction|null
+     * @param int $orderId
+     * @return Transaction
      */
-    public function getMostRecentTransactionForOrder(Order $order)
+    public function getTransactionByOrder($orderId)
     {
         /** @var Transaction $transaction */
         $transaction = $this->findOneBy([
-            'orderId' => $order->getId()
+            'orderId' => $orderId
         ]);
 
         return $transaction;
