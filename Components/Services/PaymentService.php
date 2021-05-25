@@ -14,6 +14,7 @@ use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\iDEAL\iDEALInterface;
 use MollieShopware\Components\Mollie\Builder\MolliePaymentBuilder;
+use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\UnixTimestampGenerator;
 use MollieShopware\Components\MollieApiFactory;
@@ -430,12 +431,13 @@ class PaymentService
      * Ship the order
      *
      * @param string $mollieId
+     * @param Order $shopwareOrder
      *
      * @return bool|\Mollie\Api\Resources\Shipment|null
      *
      * @throws \Exception
      */
-    public function sendOrder($mollieId)
+    public function sendOrder($mollieId, $shopwareOrder)
     {
         $mollieOrder = null;
 
@@ -463,7 +465,11 @@ class PaymentService
             }
 
             try {
-                $result = $mollieOrder->shipAll();
+
+                $mollieShipping = new MollieShipping($this->gwMollie);
+
+                $result = $mollieShipping->shipOrder($shopwareOrder, $mollieOrder);
+
             } catch (\Exception $ex) {
                 throw new \Exception('The order can\'t be shipped.');
             }

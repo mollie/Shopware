@@ -7,6 +7,7 @@ use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
+use Mollie\Api\Resources\Shipment;
 
 interface MollieGatewayInterface
 {
@@ -32,5 +33,14 @@ interface MollieGatewayInterface
      * @return Issuer[]
      */
     public function getIdealIssuers();
+
+    /**
+     * @param Order $mollieOrder
+     * @param string $carrier
+     * @param string $trackingNumber
+     * @param string $trackingUrl
+     * @return Shipment
+     */
+    public function shipOrder(Order $mollieOrder, $carrier, $trackingNumber, $trackingUrl);
 
 }

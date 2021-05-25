@@ -3,8 +3,10 @@
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Services\Refund\RefundService;
+use Shopware\Models\Dispatch\Dispatch;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Status;
 
@@ -37,8 +39,16 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         parent::preDispatch();
     }
 
+
+    /**
+     *
+     */
     public function shipAction()
     {
+
+        /** @var \Psr\Log\LoggerInterface $logger */
+        $logger = $this->container->get('mollie_shopware.components.logger');
+
         try {
             /** @var \Enlight_Controller_Request_Request $request */
             $request = $this->Request();
@@ -55,6 +65,10 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
             $this->paymentService = $this->container->get('mollie_shopware.payment_service');
 
+            /** @var \MollieShopware\Gateways\Mollie\MollieGatewayFactory $gwMollie */
+            $gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
+
+
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->orderService->getOrderById(
                 $request->getParam('orderId')
@@ -68,6 +82,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $shopSwitcher = new MollieShopSwitcher($this->container);
             $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
             $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
+
+            /** @var \MollieShopware\Gateways\MollieGatewayInterface $gwMollie */
+            $gwMollie = $gwMollieFactory->create($this->apiClient);
 
 
             $mollieId = $this->orderService->getMollieOrderId($order);
@@ -101,7 +118,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError($errorMessage);
             }
 
-            $result = $mollieOrder->shipAll();
+            $mollieShipping = new MollieShipping($gwMollie);
+
+            $result = $mollieShipping->shipOrder($order, $mollieOrder);
 
             if ($result) {
                 /** @var Transaction|null $transaction */
@@ -131,6 +150,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order status could not be set to shipped at Mollie');
             }
         } catch (\Exception $ex) {
+
+            $logger->error(
+                'Error when starting shipping in Shopware Backend',
+                [
+                    'error' => $ex->getMessage(),
+                ]
+            );
+
             $this->returnError($ex->getMessage());
         }
     }

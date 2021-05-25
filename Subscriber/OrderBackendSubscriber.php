@@ -333,7 +333,8 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService->switchConfig($subShopConfig);
             $paymentService->switchApiClient($subShopApiClient);
 
-            $paymentService->sendOrder($mollieId);
+            $paymentService->sendOrder($mollieId, $order);
+
         } catch (Exception $e) {
             $this->logger->error(
                 'Error when shipping order to Mollie',

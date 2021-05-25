@@ -4,6 +4,8 @@ namespace MollieShopware\Gateways\Mollie;
 
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
+use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\Shipment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\MollieGatewayInterface;
@@ -91,6 +93,30 @@ class MollieGateway implements MollieGatewayInterface
         }
 
         return $issuers;
+    }
+
+    /**
+     * @param Order $mollieOrder
+     * @param string $carrier
+     * @param string $trackingNumber
+     * @param string $trackingUrl
+     * @return Shipment
+     */
+    public function shipOrder(Order $mollieOrder, $carrier, $trackingNumber, $trackingUrl)
+    {
+        if (empty($trackingNumber)) {
+            return $mollieOrder->shipAll();
+        }
+
+        $options = [
+            'tracking' => [
+                'carrier' => $carrier,
+                'code' => $trackingNumber,
+                'url' => $trackingUrl,
+            ],
+        ];
+
+        return $mollieOrder->shipAll($options);
     }
 
 }
