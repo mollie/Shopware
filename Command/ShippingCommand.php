@@ -4,6 +4,7 @@ namespace MollieShopware\Command;
 
 use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\ShippingCommand\ShippingCommandFacade;
 use MollieShopware\Gateways\MollieGatewayInterface;
@@ -57,6 +58,7 @@ class ShippingCommand extends ShopwareCommand
             self::LOG_PREFIX,
             $config,
             $gwMollie,
+            new MollieShipping($gwMollie),
             new MollieStatusValidator(),
             $logger,
             $repoShops,

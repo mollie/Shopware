@@ -6,6 +6,7 @@ namespace MollieShopware\Facades\ShippingCommand;
 use Doctrine\ORM\EntityNotFoundException;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
@@ -68,6 +69,10 @@ class ShippingCommandFacade
      */
     private $repoTransactions;
 
+    /**
+     * @var MollieShipping
+     */
+    private $mollieShipping;
 
     /**
      * @var int
@@ -94,18 +99,20 @@ class ShippingCommandFacade
      * @param $LOG_PREFIX
      * @param Config $config
      * @param MollieGatewayInterface $gwMollie
+     * @param MollieShipping $mollieShipping
      * @param MollieStatusValidator $statusValidator
      * @param LoggerInterface $logger
      * @param \Shopware\Models\Shop\Repository $repoShops
      * @param Repository $repoOrders
      * @param TransactionRepository $repoTransactions
      */
-    public function __construct($LOG_PREFIX, Config $config, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, LoggerInterface $logger, \Shopware\Models\Shop\Repository $repoShops, Repository $repoOrders, TransactionRepository $repoTransactions)
+    public function __construct($LOG_PREFIX, Config $config, MollieGatewayInterface $gwMollie, MollieShipping $mollieShipping, MollieStatusValidator $statusValidator, LoggerInterface $logger, \Shopware\Models\Shop\Repository $repoShops, Repository $repoOrders, TransactionRepository $repoTransactions)
     {
         $this->LOG_PREFIX = $LOG_PREFIX;
 
         $this->config = $config;
         $this->gwMollie = $gwMollie;
+        $this->mollieShipping = $mollieShipping;
         $this->statusValidator = $statusValidator;
         $this->logger = $logger;
         $this->repoShops = $repoShops;
@@ -586,7 +593,7 @@ class ShippingCommandFacade
     private function shipOrder(Transaction $transaction, \Mollie\Api\Resources\Order $mollieOrder, Order $swOrder, Table $table, Shop $shop)
     {
         # finally ship our order
-        $mollieOrder->shipAll();
+        $this->mollieShipping->shipOrder($swOrder, $mollieOrder);
 
         # mark it as "shipped" so that it isn't
         # processed over and over again
