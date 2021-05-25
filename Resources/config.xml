@@ -466,13 +466,27 @@
             </options>
         </element>
 
+        <element type="combo" scope="shop">
+            <name>klarna_ship_on_status</name>
+            <label lang="de">Automatischer Versand Status</label>
+            <label lang="en">Automatic shipping status</label>
+            <label lang="nl">Automatische verzendstatus</label>
+            <description lang="de">Die Bestellung wird automatisch in Mollie als versendet markiert, wenn ein Übergang in diesen Status erfolgt.</description>
+            <description lang="en">The order is automatically marked as shipped in Mollie if a transition to this status is made.</description>
+            <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+            <options>
+                <position>16</position>
+            </options>
+        </element>
+
         <element type="button" required="false">
             <name>separator_mails</name>
             <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>16</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -503,7 +517,7 @@
                 </option>
             </store>
             <options>
-                <position>17</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -513,7 +527,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>18</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -524,7 +538,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>19</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -535,7 +549,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -544,20 +558,6 @@
             <label lang="de">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <options>
-                <position>21</position>
-            </options>
-        </element>
-
-        <element type="combo" scope="shop">
-            <name>klarna_ship_on_status</name>
-            <label lang="de">Automatischer Versand Status</label>
-            <label lang="en">Automatic shipping status</label>
-            <label lang="nl">Automatische verzendstatus</label>
-            <description lang="de">Die Bestellung wird automatisch in Mollie als versendet markiert, wenn ein Übergang in diesen Status erfolgt.</description>
-            <description lang="en">The order is automatically marked as shipped in Mollie if a transition to this status is made.</description>
-            <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
-            <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
                 <position>22</position>
             </options>
