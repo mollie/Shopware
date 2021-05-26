@@ -4,7 +4,9 @@ use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Mollie\MollieShipping;
+use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\Refund\RefundService;
 use Shopware\Models\Dispatch\Dispatch;
 use Shopware\Models\Order\Detail;
@@ -14,6 +16,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 {
     protected $model = Transaction::class;
     protected $alias = 'mollie_order';
+
+    const DASHBOARD_URL = 'https://www.mollie.com/dashboard';
 
     /** @var \MollieShopware\Components\Config $config */
     protected $config;
@@ -33,12 +37,121 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var RefundService */
     protected $refundService;
 
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var TransactionRepository
+     */
+    private $repoTransactions;
+
+    /**
+     * @var MollieGatewayFactory
+     */
+    private $gwMollieFactory;
+
+    /**
+     * @var MollieShopSwitcher
+     */
+    private $shopSwitcher;
+
+    /**
+     *
+     */
     public function preDispatch()
     {
+        $this->logger = $this->container->get('mollie_shopware.components.logger');
+
         $this->refundService = $this->container->get('mollie_shopware.services.refund_service');
+        $this->orderService = $this->container->get('mollie_shopware.order_service');
+        $this->gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
+
+        /** @var \Shopware\Components\Model\ModelManager $modelManager */
+        $this->modelManager = $this->container->get('models');
+
+        $this->repoTransactions = $this->modelManager->getRepository(Transaction::class);
+
+        $this->shopSwitcher = new MollieShopSwitcher($this->container);
+
         parent::preDispatch();
     }
 
+    /**
+     * @throws Exception
+     */
+    public function getMollieOrderDataAction()
+    {
+        try {
+
+            /** @var \Enlight_Controller_Request_Request $request */
+            $request = $this->Request();
+
+            $orderId = (int)$request->getParam('orderId', 0);
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $this->orderService->getOrderById($orderId);
+
+            if (!$order instanceof \Shopware\Models\Order\Order) {
+                throw new Exception('Order not found: ' . $orderId);
+            }
+
+            $transaction = $this->repoTransactions->getTransactionByOrder($orderId);
+
+            if (!$transaction instanceof Transaction) {
+                throw new Exception('Transaction not found for order: ' . $orderId);
+            }
+
+            $this->config = $this->shopSwitcher->getConfig($order->getShop()->getId());
+            $this->apiClient = $this->shopSwitcher->getMollieApi($order->getShop()->getId());
+
+            /** @var \MollieShopware\Gateways\MollieGatewayInterface $gwMollie */
+            $gwMollie = $this->gwMollieFactory->create($this->apiClient);
+
+
+            if ($transaction->isTypeOrder()) {
+
+                $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
+
+                $mollieId = $mollieOrder->id;
+                $mode = $mollieOrder->mode;
+                $description = $mollieOrder->orderNumber;
+                $paymentStatus = $mollieOrder->status;
+                $checkoutUrl = $mollieOrder->getCheckoutUrl();
+
+                $url = self::DASHBOARD_URL . '/' . $gwMollie->getOrganizationId() . '/orders/' . $mollieId;
+
+            } else {
+
+                $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
+
+                $mollieId = $molliePayment->id;
+                $mode = $molliePayment->mode;
+                $description = $molliePayment->description;
+                $paymentStatus = $molliePayment->status;
+                $checkoutUrl = $molliePayment->getCheckoutUrl();
+
+                $url = self::DASHBOARD_URL . '/' . $gwMollie->getOrganizationId() . '/payments/' . $mollieId;
+            }
+
+            $data = [
+                'mollieId' => (string)$mollieId,
+                'mode' => (string)$mode,
+                'description' => (string)$description,
+                'checkoutUrl' => (string)$checkoutUrl,
+                'paymentStatus' => (string)$paymentStatus,
+                'url' => (string)$url,
+            ];
+
+            $this->returnSuccess('', $data);
+
+        } catch (Exception $ex) {
+
+            $this->returnError($ex->getMessage());
+        }
+    }
 
     /**
      *
@@ -65,7 +178,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \MollieShopware\Components\Services\PaymentService $paymentService */
             $this->paymentService = $this->container->get('mollie_shopware.payment_service');
 
-            /** @var \MollieShopware\Gateways\Mollie\MollieGatewayFactory $gwMollie */
+            /** @var MollieGatewayFactory $gwMollie */
             $gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
 
 

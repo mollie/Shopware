@@ -5,6 +5,7 @@ namespace MollieShopware\Gateways\Mollie;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\Profile;
 use Mollie\Api\Resources\Shipment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
@@ -37,6 +38,49 @@ class MollieGateway implements MollieGatewayInterface
     public function switchClient(MollieApiClient $client)
     {
         $this->apiClient = $client;
+    }
+
+    /**
+     * @return string
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function getProfileId()
+    {
+        $profile = $this->apiClient->profiles->get('me');
+
+        if ($profile === null) {
+            return '';
+        }
+
+        return (string)$profile->id;
+    }
+
+    /**
+     * @return string
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function getOrganizationId()
+    {
+        $profile = $this->apiClient->profiles->get('me');
+
+        if ($profile === null) {
+            return '';
+        }
+
+        # the organization is in a full dashboard URL
+        # so we grab it, and extract that slug with the organization id
+        $orgId = (string)$profile->_links->dashboard->href;
+
+        $parts = explode('/', $orgId);
+
+        foreach ($parts as $part) {
+            if (strpos($part, 'org_') === 0) {
+                $orgId = $part;
+                break;
+            }
+        }
+
+        return (string)$orgId;
     }
 
     /**
