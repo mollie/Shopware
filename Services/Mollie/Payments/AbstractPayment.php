@@ -84,6 +84,11 @@ abstract class AbstractPayment implements PaymentInterface
      */
     private $lineItems;
 
+    /**
+     * @var int|null
+     */
+    private $expirationDays;
+
 
     /**
      * @param AddressConverter $addressBuilder
@@ -97,6 +102,8 @@ abstract class AbstractPayment implements PaymentInterface
         $this->paymentMethod = $paymentMethod;
 
         $this->formatter = new NumberFormatter();
+
+        $this->expirationDays = null;
     }
 
 
@@ -117,6 +124,16 @@ abstract class AbstractPayment implements PaymentInterface
         $this->webhookUrl = $payment->getWebhookUrl();
         $this->locale = $payment->getLocale();
     }
+
+    /**
+     * @param int $expirationDays
+     * @return void
+     */
+    public function setExpirationDays($expirationDays)
+    {
+        $this->expirationDays = $expirationDays;
+    }
+
 
     /**
      * @return mixed[]
@@ -162,6 +179,17 @@ abstract class AbstractPayment implements PaymentInterface
 
         foreach ($this->lineItems as $item) {
             $data['lines'][] = $this->lineItemBuilder->convertItem($item);
+        }
+
+
+        # if we have an expiration days value set
+        # then calculate the matching date and
+        # set it in our request
+        if ($this->expirationDays !== null) {
+
+            $expiresAt = (string)date('Y-m-d', (int)strtotime(' + ' . $this->expirationDays . ' day'));
+
+            $data['expiresAt'] = $expiresAt;
         }
 
         return $data;

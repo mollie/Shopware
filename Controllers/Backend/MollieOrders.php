@@ -8,12 +8,16 @@ use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\Refund\RefundService;
+use MollieShopware\Traits\Controllers\BackendControllerTrait;
 use Shopware\Models\Dispatch\Dispatch;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Status;
 
 class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Backend_Application
 {
+    use BackendControllerTrait;
+
+
     protected $model = Transaction::class;
     protected $alias = 'mollie_order';
 
@@ -440,49 +444,4 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         ]);
     }
 
-    /**
-     * Return success JSON
-     *
-     * @param $message
-     * @param $data
-     */
-    protected function returnSuccess($message, $data)
-    {
-        $this->returnJson([
-            'success' => true,
-            'message' => addslashes($message),
-            'data' => $data
-        ]);
-    }
-
-    /**
-     * Return success JSON
-     *
-     * @param $message
-     */
-    protected function returnError($message)
-    {
-        $this->returnJson([
-            'success' => false,
-            'message' => addslashes($message),
-        ]);
-    }
-
-    /**
-     * Return JSON
-     *
-     * @param $data
-     * @param int $httpCode
-     */
-    protected function returnJson($data, $httpCode = 200)
-    {
-        if ($httpCode !== 200) {
-            http_response_code(intval($httpCode));
-        }
-
-        header('Content-Type: application/json');
-        echo json_encode($data);
-
-        exit;
-    }
 }

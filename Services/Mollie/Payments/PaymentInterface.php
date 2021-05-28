@@ -14,6 +14,12 @@ interface PaymentInterface
     public function setPayment(Payment $payment);
 
     /**
+     * @param int $expirationDays
+     * @return void
+     */
+    public function setExpirationDays($expirationDays);
+
+    /**
      * @return mixed[]
      */
     public function buildBodyPaymentsAPI();

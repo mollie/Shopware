@@ -17,6 +17,8 @@ use MollieShopware\Components\Services\ShopService;
 use MollieShopware\Components\Snippets\SnippetFile;
 use MollieShopware\Components\Snippets\SnippetsCleaner;
 use MollieShopware\Models\OrderLines;
+use MollieShopware\Models\Payment\Configuration;
+use MollieShopware\Models\Payment\Repository;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
 use Psr\Log\LoggerInterface;
@@ -44,9 +46,13 @@ class MollieShopware extends Plugin
     {
         return [
             'Enlight_Controller_Front_StartDispatch' => 'requireDependencies',
-            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
             'Enlight_Controller_Front_RouteStartup' => ['fixLanguageShopPush', -10],
+
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Order' => 'onOrderPostDispatch',
+
+            'Enlight_Controller_Action_PostDispatch_Backend_Payment' => 'onPaymentPostDispatch',
+            'Enlight_Controller_Action_PostDispatchSecure_Backend_Payment' => 'onPaymentPostDispatch',
         ];
     }
 
@@ -134,14 +140,49 @@ class MollieShopware extends Plugin
         $view->addTemplateDir(__DIR__ . '/Resources/views');
 
         if ($request->getActionName() == 'load') {
-            $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
+
             $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
+
             $view->extendsTemplate('backend/mollie_extend_order/model/order_history.js');
+
+            $view->extendsTemplate('backend/mollie_extend_order/view/list/list.js');
             $view->extendsTemplate('backend/mollie_extend_order/view/detail/overview.js');
             $view->extendsTemplate('backend/mollie_extend_order/view/detail/order-history.js');
+
             $view->extendsTemplate('backend/mollie_extend_order_detail/view/detail/position.js');
+
+            # attention
+            # THIS IS REQUIRED HERE
+            # i have no clue why its not loaded in the payment post dispatch, it's only working here!
+            $view->extendsTemplate('backend/mollie_extend_payment/view/payment/form_panel.js');
         }
     }
+
+    /**
+     * Inject some backend ext.js extensions for the order module
+     *
+     * @param \Enlight_Event_EventArgs $args
+     */
+    public function onPaymentPostDispatch(\Enlight_Event_EventArgs $args)
+    {
+        /** @var \Enlight_Controller_Action $controller */
+        $controller = $args->getSubject();
+
+        /** @var \Enlight_View $view */
+        $view = $controller->View();
+
+        /** @var \Enlight_Controller_Request_Request $request */
+        $request = $controller->Request();
+
+        $view->addTemplateDir(__DIR__ . '/Resources/views');
+
+        if ($request->getActionName() == 'load') {
+
+            $view->extendsTemplate('backend/mollie_extend_payment/controller/payment.js');
+
+        }
+    }
+
 
     /**
      * @param InstallContext $context
@@ -223,6 +264,8 @@ class MollieShopware extends Plugin
 
     /**
      * @param ActivateContext $context
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function activate(ActivateContext $context)
     {
@@ -250,6 +293,9 @@ class MollieShopware extends Plugin
         // cleanup old transaction ordermail variables
         $this->cleanOrdermailVariables();
 
+        // clean old unused payment configs
+        $this->cleanLegacyPaymentSettings();
+
         parent::activate($context);
     }
 
@@ -276,6 +322,7 @@ class MollieShopware extends Plugin
                 Transaction::class,
                 TransactionItem::class,
                 OrderLines::class,
+                Configuration::class,
             ]);
         } catch (Exception $ex) {
             $this->getPluginLogger()->error(
@@ -297,6 +344,7 @@ class MollieShopware extends Plugin
             $schema->remove(Transaction::class);
             $schema->remove(TransactionItem::class);
             $schema->remove(OrderLines::class);
+            $schema->remove(Configuration::class);
         } catch (Exception $ex) {
             $this->getPluginLogger()->error(
                 'Error when removing database tables',
@@ -542,4 +590,16 @@ class MollieShopware extends Plugin
 
         $connection->executeQuery('UPDATE mol_sw_transactions SET ordermail_variables = NULL');
     }
+
+    /**
+     *
+     */
+    private function cleanLegacyPaymentSettings()
+    {
+        /** @var Repository $repoPaymentConfig */
+        $repoPaymentConfig = $this->container->get('models')->getRepository(Configuration::class);
+
+        $repoPaymentConfig->cleanLegacyData();
+    }
+
 }
