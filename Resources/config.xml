@@ -441,6 +441,9 @@
             <label lang="en">Reset stock on failed payment</label>
             <label lang="nl">Voorraad terugzetten bij mislukte betaling</label>
             <value>yes</value>
+            <description lang="de">Setzt die bestellten Mengen in abgebrochenen Bestellungen auf 0, um den Lagerbestand wieder zurückzusetzen.</description>
+            <description lang="en">Sets the position quantities in cancelled orders to 0, to reset the stock of the products.</description>
+            <description lang="nl">Zet de bestelde hoeveelheden in geannuleerde bestellingen op 0 om de voorraad opnieuw in te kunnen stellen.</description>
             <store>
                 <option>
                     <value>inherited</value>
