@@ -159,5 +159,9 @@
             <argument type="service" id="mollie_shopware.components.order.order_updater"/>
         </service>
 
+        <service id="mollie_shopware.components.translation" class="MollieShopware\Components\Translation\Translation">
+            <argument type="service" id="dbal_connection"/>
+        </service>
+
     </services>
 </container>

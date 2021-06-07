@@ -127,4 +127,19 @@ class ApplePayTest extends TestCase
         $this->assertEquals('token-123', $ordersAPI['payment']['applePayPaymentToken']);
     }
 
+    /**
+     * This test verifies that we can set a custom expiration date
+     * for our Orders API request.
+     */
+    public function testExpirationDate()
+    {
+        $dueInDays = 5;
+        $expectedDueDate = date('Y-m-d', strtotime(' + ' . $dueInDays . ' day'));
+
+        $this->payment->setExpirationDays($dueInDays);
+        $request = $this->payment->buildBodyOrdersAPI();
+
+        $this->assertEquals($expectedDueDate, $request['expiresAt']);
+    }
+
 }

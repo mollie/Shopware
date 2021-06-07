@@ -9,7 +9,6 @@ Ext.define('Shopware.apps.Mollie.Order.view.detail.Overview', {
     molSnippets: {
         captionMollieId: 'Mollie ID',
         btnOpenPayment: '{s namespace="backend/mollie/general" name="order_details_overview_btn_open_payment"}{/s}',
-        captionMode: '{s namespace="backend/mollie/general" name="order_details_overview_mode_caption"}{/s}',
         captionDescription: '{s namespace="backend/mollie/general" name="order_details_overview_description_caption"}{/s}',
         captionPaymentStatus: '{s namespace="backend/mollie/general" name="order_details_overview_paymentstatus_caption"}{/s}',
         captionCheckoutUrl: '{s namespace="backend/mollie/general" name="order_details_overview_checkouturl_caption"}{/s}',
@@ -62,10 +61,6 @@ Ext.define('Shopware.apps.Mollie.Order.view.detail.Overview', {
 
                     me.getFormField('mollie_id', field => {
                         field.setValue(result.data.mollieId);
-                    });
-
-                    me.getFormField('mollie_mode', field => {
-                        field.setValue(result.data.mode);
                     });
 
                     me.getFormField('mollie_description', field => {
@@ -163,26 +158,6 @@ Ext.define('Shopware.apps.Mollie.Order.view.detail.Overview', {
             ]
         };
 
-        const rowMode = {
-            xtype: 'fieldset',
-            flex: 12,
-            border: false,
-            margin: '0',
-            padding: '5 10 0 10',
-            bodyPadding: 0,
-            layout: 'hbox',
-            items: [
-                {
-                    xtype: 'textfield',
-                    flex: 12,
-                    name: 'mollie_mode',
-                    fieldLabel: me.molSnippets.captionMode,
-                    labelWidth: labelWidth,
-                    readOnly: true,
-                }
-            ]
-        };
-
         const rowPaymentStatus = {
             xtype: 'fieldset',
             flex: 12,
@@ -254,7 +229,6 @@ Ext.define('Shopware.apps.Mollie.Order.view.detail.Overview', {
             items: [
                 rowId,
                 rowDescription,
-                rowMode,
                 rowPaymentStatus,
                 rowCheckoutUrl
             ]

@@ -129,9 +129,26 @@ class BankTransferTest extends TestCase
     }
 
     /**
+     * This test verifies that we can set a custom expiration date
+     * for our Orders API request.
+     */
+    public function testExpirationDate()
+    {
+        $dueInDays = 5;
+        $expectedDueDate = date('Y-m-d', strtotime(' + ' . $dueInDays . ' day'));
+
+        $this->payment->setExpirationDays($dueInDays);
+        $request = $this->payment->buildBodyOrdersAPI();
+
+        $this->assertEquals($expectedDueDate, $request['expiresAt']);
+    }
+
+    /**
      * This test verifies that we can set a custom due date for our payment.
      * We set the due date in DAYS and it will automatically calculate
      * the date time for the request.
+     * We also verify that we override any previously set expiration date, because the dueDate uses
+     * the same field in the orders api.
      */
     public function testDueDate()
     {
@@ -139,6 +156,10 @@ class BankTransferTest extends TestCase
 
         $expectedDueDate = date('Y-m-d', strtotime(' + ' . $dueInDays . ' day'));
 
+        # add an expiration date which has to be overwritten
+        $this->payment->setExpirationDays($dueInDays + 2);
+
+        # add our real due date
         $this->payment->setDueDateDays($dueInDays);
 
         $paymentsAPI = $this->payment->buildBodyPaymentsAPI();

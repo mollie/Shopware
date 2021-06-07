@@ -190,14 +190,14 @@
         </element>
 
         <element type="select" scope="shop">
-            <name>orders_api_only_where_mandatory</name>
-            <label lang="de">Nur Transaktionen in Mollie erstellen</label>
-            <label lang="en">Only create transactions in Mollie</label>
-            <label lang="nl">Creëer alleen transacties in Mollie</label>
+            <name>create_order_before_payment</name>
+            <label lang="de">Shopware Bestellung vor Zahlung anlegen</label>
+            <label lang="en">Create Shopware order before payment</label>
+            <label lang="nl">Shopware Bestelling aanleggen voor de betaling</label>
             <value>yes</value>
-            <description lang="de">Mit JA werden nur einfache Transaktionen in Mollie erstellt. Mit NEIN werden zusätzlich zu Transaktionen Bestellungen angelegt. Für Klarna werden immer Bestellungen angelegt.</description>
-            <description lang="en">Use YES to create only simple transactions in Mollie. With NO you will also get orders in addition to these transactions. Klarna will always create orders.</description>
-            <description lang="nl">Met JA worden alleen eenvoudige transacties in Mollie gecreëerd. Met NEE worden naast transacties ook orders aangelegd. Klarna legt altijd orders aan.</description>
+            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
+            <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
+            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -224,14 +224,14 @@
         </element>
 
         <element type="select" scope="shop">
-            <name>create_order_before_payment</name>
-            <label lang="de">Bestellung vor Zahlungsabschluss anlegen</label>
-            <label lang="en">Create order before finishing the payment</label>
-            <label lang="nl">Bestelling aanleggen voordat de betaling voltooid is</label>
+            <name>orders_api_only_where_mandatory</name>
+            <label lang="de">Nur Transaktionen in Mollie erstellen</label>
+            <label lang="en">Only create transactions in Mollie</label>
+            <label lang="nl">Creëer alleen transacties in Mollie</label>
             <value>yes</value>
-            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
-            <description lang="en">By creating an order before finishing the payment, the order number (in stead of a temporary number) can be given to the payment.</description>
-            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
+            <description lang="de">Mit JA werden nur einfache Transaktionen in Mollie erstellt. Mit NEIN werden zusätzlich zu Transaktionen Bestellungen angelegt. Für Klarna werden immer Bestellungen angelegt.</description>
+            <description lang="en">Use YES to create only simple transactions in Mollie. With NO you will also get orders in addition to these transactions. Klarna will always create orders.</description>
+            <description lang="nl">Met JA worden alleen eenvoudige transacties in Mollie gecreëerd. Met NEE worden naast transacties ook orders aangelegd. Klarna legt altijd orders aan.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -336,9 +336,9 @@
 
         <element type="select" scope="shop">
             <name>orders_api_update_order_status</name>
-            <label lang="de">Bestellstatus von Mollie übernehmen</label>
-            <label lang="en">Take over order statuses from Mollie</label>
-            <label lang="nl">Order statussen vanuit Mollie overnemen</label>
+            <label lang="de">Bestellstatus automatisch aktualisieren</label>
+            <label lang="en">Update Order Status automatically</label>
+            <label lang="nl">Bestelstatus automatisch actualiseren</label>
             <value>no</value>
             <store>
                 <option>
@@ -489,7 +489,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>17</position>
+                <position>16</position>
             </options>
         </element>
 
@@ -520,7 +520,7 @@
                 </option>
             </store>
             <options>
-                <position>18</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -530,7 +530,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>19</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -541,7 +541,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>20</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -552,7 +552,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>21</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -562,9 +562,10 @@
             <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>22</position>
+                <position>21</position>
             </options>
         </element>
+
 
         <element type="combo" scope="shop">
             <name>klarna_shipped_status</name>

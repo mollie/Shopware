@@ -18,11 +18,16 @@ use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\UnixTimestampGenerator;
 use MollieShopware\Components\MollieApiFactory;
+use MollieShopware\Components\Translation\Translation;
 use MollieShopware\Exceptions\MollieOrderNotFound;
+use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Exceptions\MolliePaymentNotFound;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
+use MollieShopware\Models\Payment\Configuration;
+use MollieShopware\Models\Payment\ConfigurationKeys;
+use MollieShopware\Models\Payment\Repository;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\MollieShopware;
@@ -108,6 +113,16 @@ class PaymentService
      */
     private $customer;
 
+    /**
+     * @var Repository
+     */
+    private $repoPaymentConfig;
+
+    /**
+     * @var Translation
+     */
+    private $translations;
+
     private $orderLinesRepo;
 
 
@@ -129,6 +144,9 @@ class PaymentService
         $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
         $this->repoTransactions = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
         $this->orderRepo = Shopware()->Models()->getRepository(Order::class);
+        $this->repoPaymentConfig = Shopware()->Models()->getRepository(Configuration::class);
+
+        $this->translations = Shopware()->Container()->get('mollie_shopware.components.translation');
 
         $this->paymentFactory = new PaymentFactory();
     }
@@ -188,6 +206,7 @@ class PaymentService
         $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
         $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
         $this->customer = Shopware()->Container()->get('mollie_shopware.customer');
+        $shopID = Shopware()->Shop()->getId();
 
         $shopwareOrder = null;
 
@@ -227,8 +246,32 @@ class PaymentService
 
         $paymentMethodObject->setPayment($paymentData);
 
-        # some payment methods require additional specific data
-        # we just check those types and set our data if required
+
+        # ------------------------------------------------------------------------------------------------------
+        # PAYMENT SPECIFIC SETTINGS
+
+        try {
+
+            # load our payment specific configuration from the database
+            # and apply a configuration if existing
+            $paymentConfig = $this->repoPaymentConfig->getByPaymentName($paymentMethodName);
+
+            $paymentId = $paymentConfig->getPaymentMeanId();
+
+            # load our "expiration days" either from
+            # the translation of a shop, or the basic value
+            $translatedExpirationDays = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::EXPIRATION_DAYS, $paymentId, $shopID);
+            $expirationDays = (!empty($translatedExpirationDays)) ? $translatedExpirationDays : $paymentConfig->getExpirationDays();
+
+            if (!empty($expirationDays)) {
+                $paymentMethodObject->setExpirationDays((int)$expirationDays);
+            }
+
+        } catch (MolliePaymentConfigurationNotFound $exception) {
+            # this is OK, so there might not be a payment configuration.
+            # we must NOT show any logs or errors here!
+        }
+
 
         if ($paymentMethodObject instanceof ApplePay) {
 

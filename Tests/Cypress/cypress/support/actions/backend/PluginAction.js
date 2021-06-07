@@ -45,7 +45,7 @@ export default class PluginAction {
 
         cy.log('Create Order Before Payment');
         const valueCreateOrderBeforePayment = (createOrderBeforePayment) ? "Ja" : "Nein";
-        this._setConfigurationValue('Bestellung vor Zahlungsabschluss anlegen', valueCreateOrderBeforePayment);
+        this._setConfigurationValue('Shopware Bestellung vor Zahlung anlegen', valueCreateOrderBeforePayment);
 
         cy.log('Use Payments API');
         const valueUsePaymentsAPI = (usePaymentsAPI) ? "Ja" : "Nein";
