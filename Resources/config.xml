@@ -340,6 +340,9 @@
             <label lang="en">Update Order Status automatically</label>
             <label lang="nl">Bestelstatus automatisch actualiseren</label>
             <value>no</value>
+            <description lang="de">Aktualisiert zusätzlich zum Bezahlstatus, auch automatisch den Bestellstatus einer Bestellung.</description>
+            <description lang="en">Automatically updates the order status in addition to the payment status.</description>
+            <description lang="nl">Automatisch update van de orderstatus naast de betaalstatus.</description>
             <store>
                 <option>
                     <value>inherited</value>
