@@ -35,8 +35,13 @@ class MollieShipping
      */
     public function shipOrder(Order $order, \Mollie\Api\Resources\Order $mollieOrder)
     {
-        $shippingCarrier = (string)($order->getDispatch() instanceof Dispatch) ? $order->getDispatch()->getName() : '-';
-        $trackingUrl = (string)($order->getDispatch() instanceof Dispatch) ? $order->getDispatch()->getStatusLink() : '';
+        # unfortunately instanceOf is not enough
+        # an empty dispatch that does not exist, return TRUE, but has the ID 0
+        # so lets also ask for a valid ID > 0
+        $hasDispatch = ($order->getDispatch() instanceof Dispatch) && ($order->getDispatch()->getId() > 0);
+
+        $shippingCarrier = (string)($hasDispatch) ? $order->getDispatch()->getName() : '-';
+        $trackingUrl = (string)($hasDispatch) ? $order->getDispatch()->getStatusLink() : '';
         $trackingCode = (string)$order->getTrackingCode();
 
         # replace the tracking code variable in our tracking URL
