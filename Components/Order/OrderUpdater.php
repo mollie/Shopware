@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components\Order;
 
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
@@ -48,6 +49,12 @@ class OrderUpdater
     private $modelManager;
 
     /**
+     * @var EntityRepository
+     */
+    private $repoHistory;
+
+
+    /**
      * OrderUpdater constructor.
      * @param Config $config
      * @param $eventManager
@@ -61,6 +68,8 @@ class OrderUpdater
         $this->eventManager = $eventManager;
         $this->modelManager = $modelManager;
         $this->logger = $logger;
+
+        $this->repoHistory = $this->modelManager->getRepository(History::class);
     }
 
 
@@ -175,8 +184,24 @@ class OrderUpdater
      */
     private function updateOrderHistoryComment(Order $order)
     {
+        # we have to "live" reload the history entries.
+        # if payment AND order status would be written both, then
+        # we would need to reload the order...so lets just reload the history list
+        $entries = $this->repoHistory->findBy([
+            'orderId' => $order->getId()
+        ]);
+
         /** @var History|false $lastEntry */
-        $lastEntry = $order->getHistory()->last();
+        $lastEntry = null;
+
+        /** @var History $entry */
+        foreach ($entries as $entry) {
+            # search the one with the highest number
+            # that is our "latest" one
+            if ($lastEntry === null || $entry->getId() > $lastEntry->getId()) {
+                $lastEntry = $entry;
+            }
+        }
 
         if (!$lastEntry instanceof History) {
             return;
