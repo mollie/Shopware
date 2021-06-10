@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.3</version>
+    <version>1.8.4</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,31 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.8.4">
+        <changes lang="de">
+            - Neue zahlungsspezifische Konfigurationen. Diese können direkt bei den Zahlarten im Shopware Backend gefunden werden (neuer Mollie Bereich in Details).
+            - Neues Feature und Konfiguration für "Bestellverfalldatum (Tage)" innerhalb der zahlungspezifischen Konfiguration im Shopware Backend.
+            - Verbesserte Texte und Struktur in den Plugin Einstellung für einfacheres Verständnis einiger Einstellungen.
+            - Neue "Mollie Details" in der Ansicht von Bestellungen (Details) im Shopware Backend. Diese erlaubt die Live Einsicht von Mollie Daten der Zahlung (Status, ID, ...)
+            - Neue Möglichkeit bei der Bestellung im Backend (Mollie Details) auf den Payment-Link zuzugreifen für Zahlungserinnerungen oder anderes.
+            - Tracking Informationen (Code, Träger, URL) werden nun auch an Mollie übergeben, sofern verfügbar.
+            - Neues CLI Kommando um automatisch Bestellungen bei einem Zielstatus zu "verschicken". Dies funktioniert wie das bereits existierende Klarna Kommando, ist aber für alle Zahlarten verfügbar.
+            - Behebung eines Fehlers bei dem die "Status Historie" im Backend kein Mollie Icon für "Bestellstatus Updates" zeigte, sofern dieses optionale Feature aktiv war.
+            - Behebung, dass "offene" Zahlungen als "bezahlt" markiert wurden. Dies war nur in Kombination, wenn auch eine Bestellung in Mollie erstellt wurde.
+        </changes>
+        <changes lang="en">
+            - New payment specific configuration options. These can be found in the payment method in Shopware (new Mollie section available).
+            - Added a new feature and configuration for "Order Expiration (Days)" in the payment specific configurations in Shopware Backend.
+            - Improved wordings and structure in plugin configuration for a better understanding of some settings.
+            - Added new "Mollie Details" section in the order view in Shopware Backend to see live data of the payment from Mollie (status, id, ...)
+            - Added new option to retrieve/copy the payment link for friendly payment reminders in the order details window in Shopware Backend.
+            - Available tracking information (code, carrier, url) is now being passed on to Mollie when starting a shipment.
+            - New CLI command to automatically ship orders on a target status of all payment methods in addition to previous Klarna "only" command.
+            - Fix bug where the "order status update" transition did not get a Mollie Icon in the status history view when the feature is enabled to "automatically update order status".
+            - Fix bug where "open" payments accidentally got marked as "paid" when also using the configuration to create orders in Mollie.
+        </changes>
+    </changelog>
 
     <changelog version="1.8.3">
         <changes lang="de">
