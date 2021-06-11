@@ -1,0 +1,42 @@
+name: Build Release
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
+
+jobs:
+
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop -d dockware/play:latest
+          sleep 30
+          docker logs shop
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/MollieShopware
+
+      - name: Create Release
+        run: docker exec shop bash -c 'cd /var/www/html/MollieShopware && sudo make release -B'
+
+      - name: Download File
+        run: docker cp shop:/var/www/html/MollieShopware/.release/MollieShopware.zip $(pwd)/MollieShopware.zip
+
+      - name: Store File
+        uses: actions/upload-artifact@v2
+        with:
+          name: MollieShopware.zip
+          path: MollieShopware.zip
+          retention-days: 5

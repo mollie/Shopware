@@ -5,7 +5,6 @@
 .PHONY: help
 .DEFAULT_GOAL := help
 
-PLUGIN_VERSION=`cat MollieShopware/plugin.xml | grep -oPm1 "(?<=<version>)[^<]+"`
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -56,5 +55,6 @@ pr: ## Prepares everything for a Pull Request
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
-	@cd .. && rm -rf MollieShopware-v$(PLUGIN_VERSION).zip
-	@cd .. && zip -qq -r -0 MollieShopware-v$(PLUGIN_VERSION).zip MollieShopware/ -x '*.git*' '*.github' '*.reports*' '*/Tests*' '*/phpunit.xml' '*/phpstan.neon' '*/.phpmetrics.json' '*/.php_cs.php' '*/makefile' '*.DS_Store'
+	@mkdir -p ./.release
+	@cd ./.release && rm -rf MollieShopware.zip
+	@zip -qq -r -0 ./.release/MollieShopware.zip . -x '/.*' '/Tests*' '/phpstan.neon' '/makefile' '*.DS_Store'
