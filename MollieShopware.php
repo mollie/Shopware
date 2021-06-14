@@ -32,6 +32,9 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Routing\Context;
 
+
+require_once __DIR__ . '/vendor/autoload.php';
+
 class MollieShopware extends Plugin
 {
     const PLUGIN_VERSION = '1.8.4';
@@ -56,35 +59,12 @@ class MollieShopware extends Plugin
         ];
     }
 
+
     /**
      * Require composer libraries on a new request
      */
     public function requireDependencies()
     {
-        // Load composer libraries
-        if (file_exists($this->getPath() . '/Client/vendor/scoper-autoload.php')) {
-            require_once $this->getPath() . '/Client/vendor/scoper-autoload.php';
-        }
-
-        // Load guzzle functions
-        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php')) {
-            require_once $this->getPath() . '/Client/vendor/guzzlehttp/guzzle/src/functions_include.php';
-        }
-
-        // Load promises functions
-        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php')) {
-            require_once $this->getPath() . '/Client/vendor/guzzlehttp/promises/src/functions_include.php';
-        }
-
-        // Load psr7 functions
-        if (file_exists($this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php')) {
-            require_once $this->getPath() . '/Client/vendor/guzzlehttp/psr7/src/functions_include.php';
-        }
-
-        // Load client
-        if (file_exists($this->getPath() . '/Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php')) {
-            require_once $this->getPath() . '/Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php';
-        }
     }
 
     /**

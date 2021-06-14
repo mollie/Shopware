@@ -330,14 +330,14 @@ class PaymentMethodService
     {
         $applePayDirect = static function ($method) {
             $applePayDirect = clone $method;
-            $applePayDirect->id = PaymentMethod::APPLEPAY_DIRECT;
+            $applePayDirect->id = \MollieShopware\Components\Constants\PaymentMethod::APPLEPAY_DIRECT;
             $applePayDirect->description = 'Apple Pay Direct';
             return $applePayDirect;
         };
 
         /** @var Method $method */
         foreach ($methods as $method) {
-            if ($method->id === PaymentMethod::APPLEPAY) {
+            if ($method->id === \MollieShopware\Components\Constants\PaymentMethod::APPLEPAY_DIRECT) {
                 $methods[] = $applePayDirect($method);
                 break;
             }

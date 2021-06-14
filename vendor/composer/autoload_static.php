@@ -6,14 +6,33 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f
 {
-    public static $classMap = array (
-        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+    public static $prefixLengthsPsr4 = array (
+        'M' => 
+        array (
+            'Mollie\\Api\\' => 11,
+        ),
+        'C' => 
+        array (
+            'Composer\\CaBundle\\' => 18,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'Mollie\\Api\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mollie/mollie-api-php/src',
+        ),
+        'Composer\\CaBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
+        ),
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit60e94f964456bece9f8d510c34f1fa1f::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }

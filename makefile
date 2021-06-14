@@ -31,7 +31,7 @@ phpcheck: ## Starts the PHP syntax checks
 	@find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
 
 phpmin: ## Starts the PHP compatibility checks
-	@php vendor/bin/phpcs -p --ignore=*/Client/*,*/Resources/*,*/Tests*,*/vendor/* --standard=PHPCompatibility --extensions=php --runtime-set testVersion 5.6 .
+	@php vendor/bin/phpcs -p --ignore=*/Resources/*,*/Tests*,*/vendor/* --standard=PHPCompatibility --extensions=php --runtime-set testVersion 5.6 .
 
 csfix: ## Starts the PHP Coding Standard Analyser
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php --dry-run
