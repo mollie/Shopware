@@ -6,9 +6,9 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
-use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\StatusConverter\OrderStatusConverter;
 use MollieShopware\Components\StatusConverter\PaymentStatusConverter;
+use MollieShopware\Components\Validator\PaymentStatusMailValidator;
 use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderStatusNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
@@ -17,7 +17,6 @@ use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\History;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Status;
 use sOrder;
 
 class OrderUpdater
@@ -53,6 +52,11 @@ class OrderUpdater
      */
     private $repoHistory;
 
+    /**
+     * @var PaymentStatusMailValidator
+     */
+    private $paymentStatusMailValidator;
+
 
     /**
      * OrderUpdater constructor.
@@ -70,6 +74,8 @@ class OrderUpdater
         $this->logger = $logger;
 
         $this->repoHistory = $this->modelManager->getRepository(History::class);
+
+        $this->paymentStatusMailValidator = new PaymentStatusMailValidator($config);
     }
 
 
@@ -83,10 +89,12 @@ class OrderUpdater
      */
     public function updateShopwarePaymentStatus(Order $order, $status)
     {
+        $shouldSendPaymentMail = $this->paymentStatusMailValidator->shouldSendPaymentStatusMail($order, $status);
+
         $statusDidChange = $this->updatePaymentStatus(
             $order,
             $status,
-            $this->config->isPaymentStatusMailEnabled()
+            $shouldSendPaymentMail
         );
 
         if (!$statusDidChange) {

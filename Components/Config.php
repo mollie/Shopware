@@ -11,7 +11,7 @@ use Shopware\Models\Shop\Repository;
 use Shopware\Models\Shop\Shop;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
-class Config
+class Config implements ConfigInterface
 {
     const TRANSACTION_NUMBER_TYPE_MOLLIE = 'mollie';
     const TRANSACTION_NUMBER_TYPE_PAYMENT_METHOD = 'payment_method';
