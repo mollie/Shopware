@@ -12,8 +12,7 @@
             <argument>14</argument>
         </service>
 
-        <service id="mollie_shopware.components.logger" class="MollieShopware\Components\Logger\MollieLogger"
-                 public="true">
+        <service id="mollie_shopware.components.logger" class="MollieShopware\Components\Logger\MollieLogger" public="true">
             <factory service="mollie_shopware.components.logger.factory" method="createLogger"/>
         </service>
 

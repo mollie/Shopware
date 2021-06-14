@@ -5,8 +5,13 @@ namespace MollieShopware\Components\Logger\Processors;
 use MollieShopware\Components\Logger\Services\IPAnonymizer;
 use Monolog\Processor\WebProcessor;
 
-class AnonymousWebProcessor extends WebProcessor
+class AnonymousWebProcessor
 {
+
+    /**
+     * @var WebProcessor
+     */
+    private $webProcessor;
 
     /**
      * @var IPAnonymizer
@@ -15,14 +20,13 @@ class AnonymousWebProcessor extends WebProcessor
 
 
     /**
+     * AnonymousWebProcessor constructor.
+     * @param WebProcessor $webProcessor
      * @param IPAnonymizer $anonymizer
-     * @param array|null $serverData
-     * @param array|null $extraFields
      */
-    public function __construct(IPAnonymizer $anonymizer, array $serverData = null, array $extraFields = null)
+    public function __construct(WebProcessor $webProcessor, IPAnonymizer $anonymizer)
     {
-        parent::__construct($serverData, $extraFields);
-
+        $this->webProcessor = $webProcessor;
         $this->ipAnonymizer = $anonymizer;
     }
 
@@ -32,7 +36,7 @@ class AnonymousWebProcessor extends WebProcessor
      */
     public function __invoke(array $record)
     {
-        $record = parent::__invoke($record);
+        $record = $this->webProcessor->__invoke($record);
 
         if (array_key_exists('ip', $record['extra'])) {
 
@@ -45,4 +49,5 @@ class AnonymousWebProcessor extends WebProcessor
 
         return $record;
     }
+
 }

@@ -14,9 +14,8 @@
         "phpstan/phpstan": "^0.12",
         "friendsofphp/php-cs-fixer": "^2.18",
         "phpmetrics/phpmetrics": "^2.7",
-        "doctrine/collections": "1.6.4",
-        "monolog/monolog": "1.25.3",
-        "shopware/shopware": "~5.6.9",
+        "monolog/monolog": "2.1.1",
+        "shopware/shopware": "~5.7.0",
         "phpcompatibility/php-compatibility": "^9.3",
         "squizlabs/php_codesniffer": "^3.6"
     },

@@ -17,7 +17,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.2
+          php-version: 7.4
 
       - name: PHP Syntax Checks
         run: make phpcheck -B
@@ -33,7 +33,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.2
+          php-version: 7.4
 
       - name: Install Dependencies
         run: make dev -B
@@ -44,16 +44,9 @@ jobs:
   # ------------------------------------------------------------------------------------------------------------------------
 
   unit_tests:
-    name: Unit Tests | PHP ${{ matrix.php }}
+    name: Unit Tests
     needs: php_min
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Shopware Composer install only allows a few PHP versions due to this:
-        # mpdf/mpdf v7.1.9 requires php ^5.6 || ~7.0.0 || ~7.1.0 || ~7.2.0 || ~7.3.0
-        # also the PHPUnit versions are not compatible between 5.* and >= 7.*
-        # so lets only do a few >= 7.2 for now
-        php: [ '7.2', '7.3' ]
     steps:
       - name: Clone Code
         uses: actions/checkout@v2
@@ -61,7 +54,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: 7.4
 
       - name: Install Dependencies
         run: make dev -B
@@ -83,7 +76,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.2
+          php-version: 7.4
 
       - name: Install Dependencies
         run: make dev -B
@@ -103,7 +96,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.2
+          php-version: 7.4
 
       - name: Install Dependencies
         run: make dev -B
@@ -119,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        shopware: [ '5.6.10', '5.6.9', '5.6.4', '5.3.0' ]
+        shopware: [ '5.7.0', '5.6.10', '5.6.9', '5.3.0' ]
     steps:
 
       - name: Clone Code
