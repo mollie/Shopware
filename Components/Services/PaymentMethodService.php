@@ -13,6 +13,7 @@ use Mollie\Api\Resources\MethodCollection;
 use Mollie\Api\Types\PaymentMethod;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Installer\PaymentMethods\IconHtmlBuilder;
+use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\PaymentInstaller;
@@ -73,6 +74,33 @@ class PaymentMethodService
         $this->pluginName = $pluginName;
     }
 
+
+    /**
+     * Gets the official list of supported payment methods by this plugin.
+     *
+     * @return array
+     */
+    public static function getSupportedPaymentMethods()
+    {
+        return [
+            \MollieShopware\Components\Constants\PaymentMethod::APPLEPAY_DIRECT,
+            \MollieShopware\Components\Constants\PaymentMethod::APPLE_PAY,
+            \MollieShopware\Components\Constants\PaymentMethod::BANCONTACT,
+            \MollieShopware\Components\Constants\PaymentMethod::BANKTRANSFER,
+            \MollieShopware\Components\Constants\PaymentMethod::BELFIUS,
+            \MollieShopware\Components\Constants\PaymentMethod::CREDITCARD,
+            \MollieShopware\Components\Constants\PaymentMethod::EPS,
+            \MollieShopware\Components\Constants\PaymentMethod::GIROPAY,
+            \MollieShopware\Components\Constants\PaymentMethod::IDEAL,
+            \MollieShopware\Components\Constants\PaymentMethod::KBC,
+            \MollieShopware\Components\Constants\PaymentMethod::KLARNA_PAY_LATER,
+            \MollieShopware\Components\Constants\PaymentMethod::KLARNA_SLICE_IT,
+            \MollieShopware\Components\Constants\PaymentMethod::PAYPAL,
+            \MollieShopware\Components\Constants\PaymentMethod::P24,
+            \MollieShopware\Components\Constants\PaymentMethod::DIRECTDEBIT,
+            \MollieShopware\Components\Constants\PaymentMethod::SOFORT,
+        ];
+    }
 
     /**
      * This function completely installs everything and makes sure
@@ -234,9 +262,19 @@ class PaymentMethodService
 
         $iconBuilder = new IconHtmlBuilder();
 
+
+        $supportedPaymentMethods = self::getSupportedPaymentMethods();
+
         /** @var Method $method */
         foreach ($methods as $method) {
-            $paymentMethodName = 'mollie_' . strtolower($method->id);
+
+            # only add the payment methods to our list,
+            # that have been officially supported by this plugin
+            if (!in_array($method->id, $supportedPaymentMethods)) {
+                continue;
+            }
+
+            $paymentMethodName = MollieShopware::PAYMENT_PREFIX . strtolower($method->id);
 
             $newData = [
                 'action' => self::MOLLIE_ACTION_KEY,
