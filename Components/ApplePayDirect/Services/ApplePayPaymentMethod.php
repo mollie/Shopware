@@ -2,6 +2,8 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Services;
 
+use Doctrine\ORM\EntityNotFoundException;
+use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
 use MollieShopware\Components\Services\PaymentMethodService;
 use Shopware\Models\Payment\Payment;
@@ -13,6 +15,7 @@ class ApplePayPaymentMethod
      * @var PaymentMethodService $paymentMethodService
      */
     private $paymentMethodService;
+
 
     /**
      * ApplePayPaymentMethod constructor.
@@ -26,7 +29,7 @@ class ApplePayPaymentMethod
 
     /**
      * @return Payment
-     * @throws \Exception
+     * @throws EntityNotFoundException
      */
     public function getPaymentMethod()
     {
@@ -36,7 +39,7 @@ class ApplePayPaymentMethod
             return $applePayDirect;
         }
 
-        throw new \Exception('Apple Pay Direct Payment not found');
+        throw new EntityNotFoundException('Apple Pay Direct Payment not found');
     }
 
     /**
@@ -45,30 +48,56 @@ class ApplePayPaymentMethod
     public function isApplePayDirectEnabled()
     {
         try {
-            $this->getPaymentMethod();
 
-            return true;
+            $method = $this->getPaymentMethod();
+
+            return $method->getActive();
+
         } catch (\Exception $ex) {
             return false;
         }
     }
 
     /**
-     * @param string $defaultPaymentMethod
+     * @param $defaultPaymentMethod
      * @return bool
      */
     public function isApplePayPaymentMethod($defaultPaymentMethod)
     {
-        if (
-        !\in_array(
-            $defaultPaymentMethod,
-            [ShopwarePaymentMethod::APPLEPAY, ShopwarePaymentMethod::APPLEPAYDIRECT],
-            true
-        )
-        ) {
+        $applePayMethods = [
+            ShopwarePaymentMethod::APPLEPAY,
+            ShopwarePaymentMethod::APPLEPAYDIRECT
+        ];
+
+        if (!\in_array($defaultPaymentMethod, $applePayMethods, true)) {
             return false;
         }
 
         return true;
     }
+
+    /**
+     *
+     * Gets if the Apple Pay Direct method is blocked due
+     * to risk management settings in Shopware.
+     *
+     * @param \sAdmin $sAdmin
+     * @return bool
+     * @throws EntityNotFoundException
+     */
+    public function isRiskManagementBlocked(\sAdmin $sAdmin)
+    {
+        if (!$this->isApplePayDirectEnabled()) {
+            return false;
+        }
+
+        $method = $this->getPaymentMethod();
+
+        return $sAdmin->sManageRisks(
+            $method->getId(),
+            null,
+            $sAdmin->sGetUserData()
+        );
+    }
+
 }

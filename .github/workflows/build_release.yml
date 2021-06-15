@@ -13,9 +13,8 @@ on:
 
 jobs:
 
-
   release:
-    name: Release
+    name: Build Release
     runs-on: ubuntu-latest
     steps:
 
@@ -24,7 +23,7 @@ jobs:
 
       - name: Start Docker
         run: |
-          docker run --rm -p 80:80 --name shop -d dockware/play:latest
+          docker run --rm --name shop --env PHP_VERSION=7.4 -d dockware/dev:5.7.0
           sleep 30
           docker logs shop
 
@@ -32,14 +31,18 @@ jobs:
         run: docker cp $(pwd)/. shop:/var/www/html/MollieShopware
 
       - name: Create Release
-        run: docker exec shop bash -c 'cd /var/www/html/MollieShopware && sudo make release -B'
+        run: |
+          docker exec shop bash -c 'cd /var/www/html/MollieShopware && sudo make release -B'
+          docker exec shop bash -c 'cd /var/www/html/.release && sudo unzip MollieShopware.zip'
 
       - name: Download File
-        run: docker cp shop:/var/www/html/MollieShopware/.release/MollieShopware.zip $(pwd)/MollieShopware.zip
+        run: |
+          mkdir $(pwd)/release
+          docker cp shop:/var/www/html/.release/MollieShopware $(pwd)/release/MollieShopware
 
       - name: Store File
         uses: actions/upload-artifact@v2
         with:
-          name: MollieShopware.zip
-          path: MollieShopware.zip
+          name: MollieShopware
+          path: release
           retention-days: 5

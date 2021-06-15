@@ -55,6 +55,6 @@ pr: ## Prepares everything for a Pull Request
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
-	@mkdir -p ./.release
-	@cd ./.release && rm -rf MollieShopware.zip
-	@zip -qq -r -0 ./.release/MollieShopware.zip . -x '/.*' '/Tests*' '/phpstan.neon' '/makefile' '*.DS_Store'
+	cd .. && mkdir -p ./.release
+	cd .. && cd ./.release && rm -rf MollieShopware.zip
+	cd .. && zip -qq -r -0 ./.release/MollieShopware.zip MollieShopware/* -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpstan.neon' 'MollieShopware/makefile' '*.DS_Store'
