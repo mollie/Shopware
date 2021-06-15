@@ -274,7 +274,7 @@ class PaymentMethodService
         # always make sure our action is correctly set
         # otherwise the payments won't even start and a finish page is visible directly
         $method['action'] = self::MOLLIE_ACTION_KEY;
-        
+
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
     }
 
@@ -337,7 +337,9 @@ class PaymentMethodService
 
         /** @var Method $method */
         foreach ($methods as $method) {
-            if ($method->id === \MollieShopware\Components\Constants\PaymentMethod::APPLEPAY_DIRECT) {
+            # if the merchant is allowed to add apple pay
+            # then also create our custom apple pay direct method
+            if ($method->id === \MollieShopware\Components\Constants\PaymentMethod::APPLE_PAY) {
                 $methods[] = $applePayDirect($method);
                 break;
             }
