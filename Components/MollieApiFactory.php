@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components;
 
-require_once __DIR__ . '/../Client/vendor/autoload.php';
 
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
@@ -40,8 +39,6 @@ class MollieApiFactory
      */
     public function create($shopId = null)
     {
-        $this->requireDependencies();
-
         // set the configuration for the shop
         $this->config->setShop($shopId);
 
@@ -61,8 +58,6 @@ class MollieApiFactory
      */
     public function createLiveClient($shopId = null)
     {
-        $this->requireDependencies();
-
         // set the configuration for the shop
         $this->config->setShop($shopId);
 
@@ -78,8 +73,6 @@ class MollieApiFactory
      */
     public function createTestClient($shopId = null)
     {
-        $this->requireDependencies();
-
         // set the configuration for the shop
         $this->config->setShop($shopId);
 
@@ -133,34 +126,4 @@ class MollieApiFactory
         return $client;
     }
 
-    /**
-     *
-     */
-    private function requireDependencies()
-    {
-        // Load composer libraries
-        if (file_exists(__DIR__ . '/../Client/vendor/scoper-autoload.php')) {
-            require_once __DIR__ . '/../Client/vendor/scoper-autoload.php';
-        }
-
-        // Load guzzle functions
-        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/guzzle/src/functions_include.php')) {
-            require_once __DIR__ . '/../Client/vendor/guzzlehttp/guzzle/src/functions_include.php';
-        }
-
-        // Load promises functions
-        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/promises/src/functions_include.php')) {
-            require_once __DIR__ . '/../Client/vendor/guzzlehttp/promises/src/functions_include.php';
-        }
-
-        // Load psr7 functions
-        if (file_exists(__DIR__ . '/../Client/vendor/guzzlehttp/psr7/src/functions_include.php')) {
-            require_once __DIR__ . '/../Client/vendor/guzzlehttp/psr7/src/functions_include.php';
-        }
-
-        // Load client
-        if (file_exists(__DIR__ . '/../Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php')) {
-            require_once __DIR__ . '/../Client/vendor/mollie/mollie-api-php/src/MollieApiClient.php';
-        }
-    }
 }
