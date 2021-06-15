@@ -6,10 +6,10 @@
 
     <services>
 
-        <service id="mollie_shopware.gateways.mollie.factory" class="MollieShopware\Gateways\Mollie\MollieGatewayFactory">
+        <service id="mollie_shopware.gateways.mollie.factory" class="MollieShopware\Gateways\Mollie\MollieGatewayFactory" public="true">
         </service>
 
-        <service id="mollie_shopware.gateways.mollie" class="MollieShopware\Gateways\Mollie\MollieGateway">
+        <service id="mollie_shopware.gateways.mollie" class="MollieShopware\Gateways\Mollie\MollieGateway" public="true">
             <argument type="service" id="mollie_shopware.api"/>
         </service>
 

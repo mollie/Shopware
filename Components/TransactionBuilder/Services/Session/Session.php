@@ -11,7 +11,10 @@ class Session implements SessionInterface
      */
     public function getSessionId()
     {
-        return \Enlight_Components_Session::getId();
+        return Shopware()->Container()->get('sessionid');
+
+        # todo verify old versions
+        #return \Enlight_Components_Session::getId();
     }
 
 }

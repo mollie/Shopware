@@ -190,26 +190,6 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
     }
 
     /**
-     * Start a session with a given sessiond ID.
-     *
-     * Close the current session, set the ID to the given sessionId
-     * and start the session.
-     *
-     * @param $sessionId
-     * @throws \Exception
-     */
-    public function startSession($sessionId)
-    {
-        try {
-            \Enlight_Components_Session::writeClose();
-            \Enlight_Components_Session::setId($sessionId);
-            \Enlight_Components_Session::start();
-        } catch (\Exception $ex) {
-            //
-        }
-    }
-
-    /**
      * Check if order details are in the session
      *
      * @return boolean

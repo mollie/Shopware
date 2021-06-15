@@ -33,7 +33,7 @@
             <argument type="service" id="mollie_shopware.order_service"/>
         </service>
 
-        <service id="mollie_shopware.components.shipping" class="MollieShopware\Components\Shipping\Shipping">
+        <service id="mollie_shopware.components.shipping" class="MollieShopware\Components\Shipping\Shipping" public="true">
             <argument type="service" id="dbal_connection"/>
             <argument type="service" id="session"/>
             <argument type="service" id="mollie_shopware.components.shipping.provider.cart"/>
@@ -44,14 +44,14 @@
             <argument type="service" id="session"/>
         </service>
 
-        <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService">
+        <service id="mollie_shopware.payment_service" class="MollieShopware\Components\Services\PaymentService" public="true">
             <argument type="service" id="mollie_shopware.api_factory"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument>%shopware.custom%</argument>
         </service>
 
-        <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService">
+        <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="shopware.plugin_payment_installer"/>
@@ -60,7 +60,7 @@
             <argument>%mollie_shopware.plugin_name%</argument>
         </service>
 
-        <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService">
+        <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
@@ -71,17 +71,17 @@
             <argument type="service" id="service_container"/>
         </service>
 
-        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\iDEAL\iDEAL">
+        <service id="mollie_shopware.ideal_service" class="MollieShopware\Components\iDEAL\iDEAL" public="true">
             <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument type="service" id="models"/>
         </service>
 
-        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\Refund\RefundService">
+        <service id="mollie_shopware.services.refund_service" class="MollieShopware\Services\Refund\RefundService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="service_container"/>
         </service>
 
-        <service id="mollie_shopware.credit_card_service" class="MollieShopware\Components\Services\CreditCardService">
+        <service id="mollie_shopware.credit_card_service" class="MollieShopware\Components\Services\CreditCardService" public="true">
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="mollie_shopware.customer"/>
             <argument type="service" id="models"/>
@@ -100,21 +100,21 @@
             <argument type="service" id="shopware_attribute.crud_service"/>
         </service>
 
-        <service id="mollie_shopware.config" class="MollieShopware\Components\Config">
+        <service id="mollie_shopware.config" class="MollieShopware\Components\Config" public="true">
             <argument type="service" id="shopware.plugin.cached_config_reader"/>
             <argument type="service" id="mollie_shopware.shop_service"/>
         </service>
 
-        <service id="mollie_shopware.api_factory" class="MollieShopware\Components\MollieApiFactory">
+        <service id="mollie_shopware.api_factory" class="MollieShopware\Components\MollieApiFactory" public="true">
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
-        <service id="mollie_shopware.api" class="Mollie\Api\MollieApiClient">
+        <service id="mollie_shopware.api" class="Mollie\Api\MollieApiClient" public="true">
             <factory service="mollie_shopware.api_factory" method="create"/>
         </service>
 
-        <service id="mollie_shopware.customer" class="MollieShopware\Components\CurrentCustomer">
+        <service id="mollie_shopware.customer" class="MollieShopware\Components\CurrentCustomer" public="true">
             <argument type="service" id="session"/>
             <argument type="service" id="models"/>
         </service>
@@ -150,7 +150,7 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
-        <service id="mollie_shopware.components.order.cancellation" class="MollieShopware\Components\Order\OrderCancellation">
+        <service id="mollie_shopware.components.order.cancellation" class="MollieShopware\Components\Order\OrderCancellation" public="true">
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.order_service"/>
@@ -159,7 +159,7 @@
             <argument type="service" id="mollie_shopware.components.order.order_updater"/>
         </service>
 
-        <service id="mollie_shopware.components.translation" class="MollieShopware\Components\Translation\Translation">
+        <service id="mollie_shopware.components.translation" class="MollieShopware\Components\Translation\Translation" public="true">
             <argument type="service" id="dbal_connection"/>
         </service>
 

@@ -8,8 +8,10 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 use Monolog\Processor\IntrospectionProcessor;
 use Monolog\Processor\UidProcessor;
+use Monolog\Processor\WebProcessor;
+use Psr\Log\LoggerInterface;
 
-class MollieLogger extends Logger
+class MollieLogger implements LoggerInterface
 {
 
     /**
@@ -38,6 +40,11 @@ class MollieLogger extends Logger
      */
     private $sessionId;
 
+    /**
+     * @var Logger
+     */
+    private $logger;
+
 
     /**
      * @param $filename
@@ -51,23 +58,39 @@ class MollieLogger extends Logger
 
         $this->processorUid = new UidProcessor();
         $this->processorIntrospection = new IntrospectionProcessor();
-        $this->webProcessor = new AnonymousWebProcessor(new IPAnonymizer('*'));
 
+        $this->webProcessor = new AnonymousWebProcessor(
+            new WebProcessor(),
+            new IPAnonymizer('*')
+        );
+
+        # create a new file handler that creates a new file every day
+        # it also makes sure, to only keep logs for the provided number of days
         $fileHandler = new RotatingFileHandler($filename, $retentionDays, $logLevel);
 
-        parent::__construct(self::CHANNEL, [$fileHandler]);
+        # create our monolog instance that will be used to log messages
+        $this->logger = new Logger(self::CHANNEL, [$fileHandler]);
+    }
+
+    /**
+     * @param mixed $level
+     * @param string $message
+     * @param array $context
+     */
+    public function log($level, $message, array $context = [])
+    {
     }
 
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function debug($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::DEBUG);
 
-        return parent::debug(
+        $this->logger->debug(
             $this->modifyMessage($message),
             $this->extendInfoData($context, $record)
         );
@@ -76,13 +99,13 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function info($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::INFO);
 
-        return parent::info(
+        $this->logger->info(
             $this->modifyMessage($message),
             $this->extendInfoData($context, $record)
         );
@@ -91,13 +114,13 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function notice($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::NOTICE);
 
-        return parent::notice(
+        $this->logger->notice(
             $this->modifyMessage($message),
             $this->extendInfoData($context, $record)
         );
@@ -106,13 +129,13 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function warning($message, array $context = [])
     {
         $record = $this->buildProcessorRecord(Logger::WARNING);
 
-        return parent::warning(
+        $this->logger->warning(
             $this->modifyMessage($message),
             $this->extendInfoData($context, $record)
         );
@@ -121,7 +144,7 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function error($message, array $context = [])
     {
@@ -131,7 +154,7 @@ class MollieLogger extends Logger
         # below our actual call. so lets do it here
         $introspection = $this->processorIntrospection->__invoke($record)['extra'];
 
-        return parent::error(
+        $this->logger->error(
             $this->modifyMessage($message),
             $this->extendErrorData($context, $introspection, $record)
         );
@@ -140,7 +163,7 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function critical($message, array $context = [])
     {
@@ -150,7 +173,7 @@ class MollieLogger extends Logger
         # below our actual call. so lets do it here
         $introspection = $this->processorIntrospection->__invoke($record)['extra'];
 
-        return parent::critical(
+        $this->logger->critical(
             $this->modifyMessage($message),
             $this->extendErrorData($context, $introspection, $record)
         );
@@ -159,7 +182,7 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function alert($message, array $context = [])
     {
@@ -169,7 +192,7 @@ class MollieLogger extends Logger
         # below our actual call. so lets do it here
         $introspection = $this->processorIntrospection->__invoke($record)['extra'];
 
-        return parent::alert(
+        $this->logger->alert(
             $this->modifyMessage($message),
             $this->extendErrorData($context, $introspection, $record)
         );
@@ -178,7 +201,7 @@ class MollieLogger extends Logger
     /**
      * @param string $message
      * @param array $context
-     * @return bool
+     * @return void
      */
     public function emergency($message, array $context = [])
     {
@@ -188,7 +211,7 @@ class MollieLogger extends Logger
         # below our actual call. so lets do it here
         $introspection = $this->processorIntrospection->__invoke($record)['extra'];
 
-        return parent::emergency(
+        $this->logger->emergency(
             $this->modifyMessage($message),
             $this->extendErrorData($context, $introspection, $record)
         );
@@ -216,7 +239,6 @@ class MollieLogger extends Logger
 
         return $message . ' (Session: ' . $sessionPart . ')';
     }
-
 
     /**
      * @param array $context
@@ -255,4 +277,5 @@ class MollieLogger extends Logger
 
         return array_merge_recursive($context, $additional);
     }
+
 }
