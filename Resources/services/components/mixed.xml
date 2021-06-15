@@ -39,7 +39,7 @@
             <argument type="service" id="mollie_shopware.components.shipping.provider.cart"/>
         </service>
 
-        <service id="mollie_shopware.components.order_session" class="MollieShopware\Components\Order\OrderSession">
+        <service id="mollie_shopware.components.order_session" class="MollieShopware\Components\Order\OrderSession" public="true">
             <argument type="service" id="legacy_struct_converter"/>
             <argument type="service" id="session"/>
         </service>
@@ -120,7 +120,7 @@
         </service>
 
         <service id="mollie_shopware.components.basket_snapshot.basket_snapshot"
-                 class="MollieShopware\Components\BasketSnapshot\BasketSnapshot">
+                 class="MollieShopware\Components\BasketSnapshot\BasketSnapshot" public="true">
             <argument type="service" id="session"/>
         </service>
 
@@ -133,8 +133,7 @@
             <argument type="service" id="shopware_account.register_service"/>
         </service>
 
-        <service id="mollie_shopware.components.account.account"
-                 class="MollieShopware\Components\Account\Account">
+        <service id="mollie_shopware.components.account.account" class="MollieShopware\Components\Account\Account" public="true">
             <argument type="service" id="session"/>
             <argument type="service" id="passwordencoder"/>
             <argument type="service"

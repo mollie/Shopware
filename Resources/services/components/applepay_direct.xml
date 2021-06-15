@@ -23,7 +23,7 @@
         </service>
 
         <service id="mollie_shopware.components.apple_pay_direct.services.formatter"
-                 class="MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter">
+                 class="MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter" public="true">
             <argument type="service" id="snippets"/>
         </service>
 
