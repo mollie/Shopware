@@ -296,6 +296,15 @@ class OrderUpdater
                 $sendMail
             );
 
+        } catch (\Zend_Mail_Transport_Exception $ex) {
+            # never ever break if only an email cannot be sent
+            # lets just add a log here.
+            $this->logger->warning(
+                'Problem when sending payment status update email for order: ' . $order->getNumber(),
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
         } catch (\Zend_Mail_Protocol_Exception $ex) {
             # never ever break if only an email cannot be sent
             # lets just add a log here.
@@ -383,6 +392,15 @@ class OrderUpdater
                 $sendMail
             );
 
+        } catch (\Zend_Mail_Transport_Exception $ex) {
+            # never ever break if only an email cannot be sent
+            # lets just add a log here.
+            $this->logger->warning(
+                'Problem when sending order status update email for order: ' . $order->getNumber(),
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
         } catch (\Zend_Mail_Protocol_Exception $ex) {
             # never ever break if only an email cannot be sent
             # lets just add a log here.
