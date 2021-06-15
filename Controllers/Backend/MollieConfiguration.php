@@ -3,6 +3,7 @@
 use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Mollie\MollieApiTester;
 use MollieShopware\Components\MollieApiFactory;
+use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Shop\Shop;
@@ -12,6 +13,8 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
 {
 
     protected $model = Transaction::class;
+
+    const DASHBOARD_URL = 'https://www.mollie.com/dashboard';
 
     /**
      * @var LoggerInterface
@@ -28,6 +31,24 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
      */
     private $apiFactory;
 
+    /**
+     * @var MollieGatewayInterface
+     */
+    private $gwMollie;
+
+
+    /**
+     * Opens a deeplink to the Mollie dashboard API keys.
+     */
+    public function openDashboardKeysAction()
+    {
+        $this->loadServices();
+
+        $url = self::DASHBOARD_URL . '/' . $this->gwMollie->getOrganizationId() . '/developers/api-keys';
+
+        header('Location: ' . $url);
+        exit();
+    }
 
     /**
      * Iterates through all shops and tests their
@@ -123,6 +144,7 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
         $this->logger = $this->container->get('mollie_shopware.components.logger');
         $this->entityManager = $this->container->get('models');
         $this->apiFactory = $this->container->get('mollie_shopware.api_factory');
+        $this->gwMollie = $this->container->get('mollie_shopware.gateways.mollie');
     }
 
 }
