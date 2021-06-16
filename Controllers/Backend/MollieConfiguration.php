@@ -6,10 +6,11 @@ use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Shop\Shop;
 
 
-class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controllers_Backend_Application
+class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
 
     protected $model = Transaction::class;
@@ -35,6 +36,17 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
      * @var MollieGatewayInterface
      */
     private $gwMollie;
+
+
+    /**
+     * @return string[]|void
+     */
+    public function getWhitelistedCSRFActions()
+    {
+        return [
+            'openDashboardKeys'
+        ];
+    }
 
 
     /**
