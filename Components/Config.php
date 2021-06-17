@@ -332,15 +332,7 @@ class Config implements ConfigInterface
     {
         return (int)$this->get('klarna_ship_on_status', Status::ORDER_STATE_COMPLETELY_DELIVERED);
     }
-
-    /**
-     * @return int
-     */
-    public function getShippedStatus()
-    {
-        return (int)$this->get('klarna_shipped_status', -1);
-    }
-
+    
     /**
      * @return string
      */

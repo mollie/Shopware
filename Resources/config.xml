@@ -577,37 +577,12 @@
         </element>
 
         <element type="button" required="false">
-            <name>separator_klarna</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <options>
-                <position>23</position>
-            </options>
-        </element>
-
-
-        <element type="combo" scope="shop">
-            <name>klarna_shipped_status</name>
-            <label lang="de">Status für versendete Bestellungen</label>
-            <label lang="en">Status for shipped orders</label>
-            <label lang="nl">Status voor verzonden bestellingen</label>
-            <description lang="de">Bestellstatus für Bestellungen die als versendet markiert wurden.</description>
-            <description lang="en">Order status for shipped orders.</description>
-            <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
-            <store>Shopware.apps.Base.store.OrderStatus</store>
-            <options>
-                <position>24</position>
-            </options>
-        </element>
-
-        <element type="button" required="false">
             <name>separator_applepay</name>
             <label lang="de">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>25</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -648,7 +623,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>26</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -658,7 +633,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>27</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -668,7 +643,7 @@
             <label lang="en">Payment term (Days)</label>
             <label lang="nl">Betalingstermijn (Dagen)</label>
             <options>
-                <position>28</position>
+                <position>26</position>
             </options>
         </element>
 
