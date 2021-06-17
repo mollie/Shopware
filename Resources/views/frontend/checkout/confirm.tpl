@@ -7,13 +7,10 @@
                 <i class="icon--element icon--cross"></i>
             </div>
             <div class="alert--content">
-
                 {$sMollieStatusError}
-
             </div>
         </div>
     {/if}
-
     {$smarty.block.parent}
 {/block}
 
@@ -28,6 +25,5 @@
             </div>
         </div>
     {/if}
-
     {$smarty.block.parent}
 {/block}

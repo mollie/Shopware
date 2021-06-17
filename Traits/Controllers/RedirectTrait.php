@@ -11,6 +11,11 @@ trait RedirectTrait
      */
     private $ERROR_PAYMENT_FAILED = 'Payment failed';
 
+    /**
+     *
+     */
+    private $ERROR_PAYMENT_FAILED_RISKMANAGEMENT = "RiskManagement";
+
 
     /**
      * @param \Enlight_Controller_Action $controller
@@ -34,7 +39,17 @@ trait RedirectTrait
      */
     protected function redirectToShopwareCheckoutFailed(\Enlight_Controller_Action $controller)
     {
-        Shopware()->Session()->offsetSet('mollieError', $this->ERROR_PAYMENT_FAILED);
+        $this->redirectToShopwareCheckoutFailedWithError($controller, $this->ERROR_PAYMENT_FAILED);
+    }
+
+    /**
+     * @param \Enlight_Controller_Action $controller
+     * @param $errorSnippetKey
+     * @throws \Exception
+     */
+    protected function redirectToShopwareCheckoutFailedWithError(\Enlight_Controller_Action $controller, $errorSnippetKey)
+    {
+        Shopware()->Session()->offsetSet('mollieError', $errorSnippetKey);
 
         $url = Shopware()->Front()->Router()->assemble([
             'controller' => 'checkout',

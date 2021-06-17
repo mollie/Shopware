@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Services;
 
+use Doctrine\ORM\EntityNotFoundException;
 use Enlight_Controller_Request_Request;
 use Enlight_View;
 use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
@@ -62,11 +63,27 @@ class ApplePayButtonBuilder
      * @param Enlight_Controller_Request_Request $request
      * @param Enlight_View $view
      * @param Shop $shop
+     * @throws \Exception
      */
     public function addButtonStatus(Enlight_Controller_Request_Request $request, Enlight_View $view, Shop $shop)
     {
         /** @var string $controller */
         $controller = strtolower($request->getControllerName());
+
+
+        $isActive = $this->applePayPaymentMethod->isApplePayDirectEnabled();
+
+        if ($isActive) {
+            # now verify the risk management.
+            # the merchant might have some settings for risk management.
+            # if so, then block the buttons from being used
+            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->sAdmin);
+
+            if ($isRiskManagementBlocked) {
+                $isActive = false;
+            }
+        }
+
 
         # apple pay requires a country iso
         # we use the first one from our country list.
@@ -79,7 +96,7 @@ class ApplePayButtonBuilder
         $country = $isoParser->getISO($firstCountry);
 
         $button = new ApplePayButton(
-            $this->applePayPaymentMethod->isApplePayDirectEnabled(),
+            $isActive,
             $country,
             $shop->getCurrency()->getCurrency()
         );

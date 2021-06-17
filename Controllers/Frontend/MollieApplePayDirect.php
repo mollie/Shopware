@@ -14,12 +14,17 @@ use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Events\Events;
+use MollieShopware\Exceptions\RiskManagementBlockedException;
+use MollieShopware\Traits\Controllers\RedirectTrait;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\CSRFWhitelistAware;
 
 class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Controllers_Frontend_Checkout implements CSRFWhitelistAware
 {
+
+    use RedirectTrait;
+
 
     /**
      * @var \Psr\Log\LoggerInterface
@@ -476,6 +481,17 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
             $this->handlerApplePay->setUserData($userData);
 
+
+            # check for risk management
+            # do after registering and assigning the contact user data (it might be used in the risk rules)
+            # but BEFORE assigning our necessary payment token
+            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->admin);
+
+            if ($isRiskManagementBlocked) {
+                throw new RiskManagementBlockedException('Apple Pay Direct blocked due to Risk Management! Aborting payment action!');
+            }
+
+
             # save our payment token
             # that will be used when creating the
             # payment in the mollie controller action
@@ -493,15 +509,19 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 ]
             );
         } catch (\Exception $ex) {
-            $this->logger->error(
-                'Error starting Mollie Apple Pay Direct payment',
-                [
-                    'error' => $ex->getMessage()
-                ]
-            );
 
-            http_response_code(500);
-            die();
+            if ($ex instanceof RiskManagementBlockedException) {
+
+                $this->logger->notice('Apple Pay Direct checkout blocked due to Risk Management', ['error' => $ex->getMessage()]);
+
+                $this->redirectToShopwareCheckoutFailedWithError($this, $this->ERROR_PAYMENT_FAILED_RISKMANAGEMENT);
+
+            } else {
+
+                $this->logger->error('Error starting Mollie Apple Pay Direct payment', ['error' => $ex->getMessage()]);
+
+                $this->redirectToShopwareCheckoutFailed($this);
+            }
         }
     }
 
