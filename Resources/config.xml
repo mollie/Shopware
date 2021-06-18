@@ -422,13 +422,13 @@
 
         <element type="select" scope="shop">
             <name>reset_invoice_shipping</name>
-            <label lang="de">Stornierung von Gesamtbetrag und Versand</label>
-            <label lang="en">Cancellation of total amount and shipping</label>
-            <label lang="nl">Annulering van het totaalbedrag en verzending</label>
+            <label lang="de">Stornierung von Versandkosten</label>
+            <label lang="en">Cancellation of shipping amount</label>
+            <label lang="nl">Annulering van het verzendbedrag</label>
             <value>no</value>
-            <description lang="de">Der Gesamtbetrag sowie die Versandkosten werden beim Stornieren einer Bestellung geleert.</description>
-            <description lang="en">The invoice amount and shipping will be cleared for canceled orders.</description>
-            <description lang="nl">Het factuurbedrag en de verzendkosten worden verrekend voor geannuleerde bestellingen.</description>
+            <description lang="de">Versandkosten werden beim Stornieren einer Bestellung geleert.</description>
+            <description lang="en">The shipping amount will be cleared for canceled orders.</description>
+            <description lang="nl">Bij geannuleerde bestellingen worden de verzendkosten opnieuw ingesteld.</description>
             <store>
                 <option>
                     <value>inherited</value>
