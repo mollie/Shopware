@@ -507,17 +507,10 @@ class PaymentService
                 }
             }
 
-            try {
 
-                $mollieShipping = new MollieShipping($this->gwMollie);
+            $mollieShipping = new MollieShipping($this->gwMollie);
 
-                $result = $mollieShipping->shipOrder($shopwareOrder, $mollieOrder);
-
-            } catch (\Exception $ex) {
-                throw new \Exception('The order can\'t be shipped.');
-            }
-
-            return $result;
+            return $mollieShipping->shipOrder($shopwareOrder, $mollieOrder);
         }
 
         return false;
