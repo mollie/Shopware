@@ -40,13 +40,19 @@ class MollieShipping
         # so lets also ask for a valid ID > 0
         $hasDispatch = ($order->getDispatch() instanceof Dispatch) && ($order->getDispatch()->getId() > 0);
 
-        $shippingCarrier = (string)($hasDispatch) ? $order->getDispatch()->getName() : '-';
-        $trackingUrl = (string)($hasDispatch) ? $order->getDispatch()->getStatusLink() : '';
-        $trackingCode = (string)$order->getTrackingCode();
+        $shippingCarrier = (string)($hasDispatch) ? trim($order->getDispatch()->getName()) : '-';
+        $trackingUrl = (string)($hasDispatch) ? trim($order->getDispatch()->getStatusLink()) : '';
+        $trackingCode = (string)trim($order->getTrackingCode());
 
         # replace the tracking code variable in our tracking URL
         if (!empty($trackingUrl)) {
             $trackingUrl = str_replace(self::TRACKING_CODE_VARIABLE, $trackingCode, $trackingUrl);
+        }
+
+        # now validate if the tracking URL is a valid URL
+        # if not, just remove it
+        if (filter_var($trackingUrl, FILTER_VALIDATE_URL) === FALSE) {
+            $trackingUrl = '';
         }
 
         return $this->gwMollie->shipOrder(
