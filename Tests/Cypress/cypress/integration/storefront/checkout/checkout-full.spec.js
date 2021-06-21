@@ -92,6 +92,11 @@ configs.forEach(config => {
                         topMenu.clickOnClothing();
                         listing.clickOnFirstProduct();
                         pdp.addToCart(66);
+
+                        // wait 1 second
+                        // it stuck 1 time
+                        cy.wait(1000);
+
                         checkout.goToCheckoutInOffCanvas();
 
                         checkout.switchPaymentMethod(payment.name);
