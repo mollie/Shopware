@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.4</version>
+    <version>1.8.5</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,31 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.8.5">
+        <changes lang="de">
+            - Support für Shopware 5.7
+            - Das Plugin hat nun eine Liste von offiziell unterstützten und funktionierenden Zahlungsarten. Zahlungsarten, die unabsichtlich erstellt wurden (Gutscheine, ...) werden nun deaktiviert.
+            - Apple Pay Direct unterstützt nun die Shopware Risk Management Einstellungen.
+            - Neuer Button in der Plugin Konfiguration, um direkt zu den API Keys im Mollie Dashboard zu gelangen.
+            - Updates für die aktuellste Mollie API Anbindung.
+            - "Bezahlt" Zahlungstatus-Emails werden nun für Klarna "Pay Later" nicht mehr versendet. Dies würde eine "Du hast bezahlt" E-Mail an den Kunden verschicken. Allerdings wurde zu diesem Zeitpunkt noch nicht wirklich bezahlt - nur der Status zwischen Mollie und Klarna ist "abgeschlossen".
+            - Titel und Beschreibung der "Versandkosten zurücksetzen" Plugin Konfiguration wurde vereinfacht.
+            - Zusätzlicher Fall eines E-Mail Fehlers wurde ignoriert, sodass die Bestellung weiterhin erfolgreich bei E-Mail Fehlern durchläuft.
+            - Ungültige Tracking URLs werden nun beim Versand Richtung Mollie ignoriert.
+        </changes>
+        <changes lang="en">
+            - Add Support for Shopware 5.7
+            - Add official list of supported and working payment methods. Payment methods that have been added accidentally like "Vouchers", will now be disabled.
+            - Apple Pay Direct does now support the Risk Management settings of Shopware.
+            - Add deep link to the Mollie Dashboard "API Key page" in the plugin configuration window.
+            - Update to latest Mollie API version.
+            - "Paid" payment status mails for Klarna "Pay Later" will now be skipped. This would trigger a "you have paid" email for customers - but they have not really paid anything at that time. It's only marked as completed between Mollie and Klarna.
+            - Improve wording for the "Reset Shipping" configuration to make it more clear.
+            - Ignore additional email error case and continue with the checkout in that case.
+            - Ignore invalid tracking URLs when shipping orders.
+        </changes>
+    </changelog>
 
     <changelog version="1.8.4">
         <changes lang="de">
