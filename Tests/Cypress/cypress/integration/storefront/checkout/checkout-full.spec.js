@@ -89,7 +89,8 @@ configs.forEach(config => {
 
                         login.doLogin(user_email, user_pwd);
 
-                        topMenu.clickOnClothing();
+                        topMenu.clickOnFirstCategory();
+
                         listing.clickOnFirstProduct();
                         pdp.addToCart(66);
 
@@ -148,7 +149,7 @@ configs.forEach(config => {
 
                     login.doLogin(user_email, user_pwd);
 
-                    topMenu.clickOnClothing();
+                    topMenu.clickOnFirstCategory();
                     listing.clickOnFirstProduct();
                     pdp.addToCart(1);
                     checkout.goToCheckoutInOffCanvas();

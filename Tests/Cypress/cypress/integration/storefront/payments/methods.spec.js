@@ -57,7 +57,7 @@ describe('Payment Methods', () => {
 
                 login.doLogin(user_email, user_pwd);
 
-                topMenu.clickOnClothing();
+                topMenu.clickOnFirstCategory();
 
                 listing.clickOnFirstProduct();
 

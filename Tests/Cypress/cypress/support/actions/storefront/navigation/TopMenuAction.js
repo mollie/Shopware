@@ -1,17 +1,19 @@
 import NavigationRepository from 'Repositories/storefront/navigation/NavigationRepository';
 
-class TopMenuAction {
+
+
+export default class TopMenuAction {
 
     /**
      *
      */
-    clickOnClothing() {
+    clickOnFirstCategory() {
 
         const repo = new NavigationRepository();
 
-        repo.getClothingMenuItem().click();
+        repo.getFirstCategoryItem().click();
     }
 
 }
 
-export default TopMenuAction;
+
