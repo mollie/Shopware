@@ -38,13 +38,15 @@ class ShippingCommand extends ShopwareCommand
 
 
     /**
+     * ShippingCommand constructor.
      * @param Config $config
      * @param ModelManager $modelManager
+     * @param \Enlight_Template_Manager $smarty
      * @param MollieGatewayInterface $gwMollie
      * @param LoggerInterface $logger
      * @param null $name
      */
-    public function __construct(Config $config, ModelManager $modelManager, MollieGatewayInterface $gwMollie, LoggerInterface $logger, $name = null)
+    public function __construct(Config $config, ModelManager $modelManager, \Enlight_Template_Manager $smarty, MollieGatewayInterface $gwMollie, LoggerInterface $logger, $name = null)
     {
         parent::__construct($name);
 
@@ -58,7 +60,7 @@ class ShippingCommand extends ShopwareCommand
             self::LOG_PREFIX,
             $config,
             $gwMollie,
-            new MollieShipping($gwMollie),
+            new MollieShipping($gwMollie, $smarty),
             new MollieStatusValidator(),
             $logger,
             $repoShops,

@@ -185,6 +185,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var MollieGatewayFactory $gwMollie */
             $gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
 
+            /** @var Enlight_Template_Manager $smarty */
+            $smarty = $this->container->get('template');
+
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->orderService->getOrderById(
@@ -235,7 +238,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError($errorMessage);
             }
 
-            $mollieShipping = new MollieShipping($gwMollie);
+            $mollieShipping = new MollieShipping($gwMollie, $smarty);
 
             $result = $mollieShipping->shipOrder($order, $mollieOrder);
 

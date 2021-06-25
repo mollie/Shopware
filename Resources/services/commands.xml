@@ -10,6 +10,7 @@
             <tag name="console.command" command="mollie:ship:klarna"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
+            <argument type="service" id="template"/>
             <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
@@ -18,6 +19,7 @@
             <tag name="console.command" command="mollie:ship:orders"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="models"/>
+            <argument type="service" id="template"/>
             <argument type="service" id="mollie_shopware.gateways.mollie"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
