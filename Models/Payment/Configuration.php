@@ -3,6 +3,7 @@
 namespace MollieShopware\Models\Payment;
 
 use Doctrine\ORM\Mapping as ORM;
+use MollieShopware\Components\Constants\PaymentMethodType;
 use Shopware\Models\Payment\Payment;
 
 /**
@@ -41,6 +42,13 @@ class Configuration
      * @ORM\Column(name="expiration_days", type="string", nullable=true)
      */
     private $expirationDays;
+
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(name="method_type", type="integer", nullable=true)
+     */
+    private $methodType;
 
 
     /**
@@ -109,6 +117,40 @@ class Configuration
     public function setExpirationDays($expirationDays)
     {
         $this->expirationDays = $expirationDays;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMethodType()
+    {
+        if ($this->methodType === null) {
+            return PaymentMethodType::UNDEFINED;
+        }
+
+        $availableTypes = [
+            PaymentMethodType::GLOBAL_SETTING,
+            PaymentMethodType::PAYMENTS_API,
+            PaymentMethodType::ORDERS_API,
+        ];
+
+        $value = (int)$this->methodType;
+
+        # if we dont know the INT value
+        # then at least always return the payments API
+        if (!in_array($value, $availableTypes)) {
+            return PaymentMethodType::PAYMENTS_API;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int $methodType
+     */
+    public function setMethodType($methodType)
+    {
+        $this->methodType = $methodType;
     }
 
 }

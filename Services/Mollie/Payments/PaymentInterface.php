@@ -14,6 +14,17 @@ interface PaymentInterface
     public function setPayment(Payment $payment);
 
     /**
+     * @param bool $enabled
+     * @return void
+     */
+    public function setOrdersApiEnabled($enabled);
+
+    /**
+     * @return bool
+     */
+    public function isOrdersApiEnabled();
+
+    /**
      * @param int $expirationDays
      * @return void
      */

@@ -53,12 +53,18 @@
 
         <service id="mollie_shopware.payment_method_service" class="MollieShopware\Components\Services\PaymentMethodService" public="true">
             <argument type="service" id="models"/>
+        </service>
+
+        <service id="mollie_shopware.payments.installer" class="MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller" public="true">
+            <argument type="service" id="models"/>
+            <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="mollie_shopware.api"/>
             <argument type="service" id="shopware.plugin_payment_installer"/>
             <argument type="service" id="template"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
             <argument>%mollie_shopware.plugin_name%</argument>
         </service>
+
 
         <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService" public="true">
             <argument type="service" id="models"/>

@@ -10,6 +10,7 @@ use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayDomainFileDownloader;
 use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Schema;
 use MollieShopware\Components\Services\PaymentMethodService;
@@ -220,9 +221,9 @@ class MollieShopware extends Plugin
      */
     public function uninstall(UninstallContext $context)
     {
-        /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService($context);
-        $paymentMethodService->uninstallPaymentMethods();
+        /** @var PaymentMethodsInstaller $paymentInstaller */
+        $paymentInstaller = $this->getPaymentMethodInstaller($context);
+        $paymentInstaller->uninstallPaymentMethods();
 
         // remove extra attributes
         $this->removeAttributes();
@@ -235,9 +236,9 @@ class MollieShopware extends Plugin
      */
     public function deactivate(DeactivateContext $context)
     {
-        /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService($context);
-        $paymentMethodService->uninstallPaymentMethods();
+        /** @var PaymentMethodsInstaller $paymentInstaller */
+        $paymentInstaller = $this->getPaymentMethodInstaller($context);
+        $paymentInstaller->uninstallPaymentMethods();
 
         parent::deactivate($context);
     }
@@ -255,12 +256,12 @@ class MollieShopware extends Plugin
         // update db tables
         $this->updateDbTables();
 
-        /** @var PaymentMethodService $paymentMethodService */
-        $paymentMethodService = $this->getPaymentMethodService($context);
+        /** @var PaymentMethodsInstaller $paymentsInstaller */
+        $paymentsInstaller = $this->getPaymentMethodInstaller($context);
 
         # if we install the plugin from scratch, then we
         # want to activate all payment methods
-        $paymentMethodService->installPaymentMethods(true);
+        $paymentsInstaller->installPaymentMethods(true);
 
 
         // download apple pay merchant domain verification file of mollie
@@ -492,9 +493,9 @@ class MollieShopware extends Plugin
     /**
      * Returns an instance of the payment method service.
      *
-     * @return PaymentMethodService
+     * @return PaymentMethodsInstaller
      */
-    protected function getPaymentMethodService($context)
+    protected function getPaymentMethodInstaller($context)
     {
         /** @var ModelManager $modelManager */
         $modelManager = $this->container->get('models');
@@ -505,21 +506,23 @@ class MollieShopware extends Plugin
         /** @var Plugin\PaymentInstaller $paymentInstaller */
         $paymentInstaller = $this->container->get('shopware.plugin_payment_installer');
 
+
         /** @var PaymentMethodService $paymentMethodService */
         $paymentMethodService = null;
 
         /** @var Enlight_Template_Manager $templateManager */
         $templateManager = $this->container->get('template');
 
-        // Create an instance of the payment method service
-        if (
-            $modelManager !== null
-            && $mollieApiClient !== null
-            && $paymentInstaller !== null
-            && $templateManager !== null
-        ) {
-            $paymentMethodService = new PaymentMethodService(
+        if ($modelManager !== null && $mollieApiClient !== null && $paymentInstaller !== null && $templateManager !== null) {
+
+            $config = new Config(
+                $this->container->get('shopware.plugin.cached_config_reader'),
+                new ShopService(Shopware()->Models())
+            );
+
+            $paymentMethodService = new PaymentMethodsInstaller(
                 $modelManager,
+                $config,
                 $mollieApiClient,
                 $paymentInstaller,
                 $templateManager,
