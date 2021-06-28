@@ -30,7 +30,16 @@ class MollieShippingTest extends TestCase
     public function setUp(): void
     {
         $this->fakeGateway = new FakeMollieGateway();
-        $this->shipping = new MollieShipping($this->fakeGateway);
+
+        # set custom directories to avoid
+        # phpstan finding new cache and compile files
+        $pluginsDir = __DIR__ . '/../../../../../..';
+
+        $smarty = new \Smarty();
+        $smarty->setCompileDir($pluginsDir);
+        $smarty->setCacheDir($pluginsDir);
+
+        $this->shipping = new MollieShipping($this->fakeGateway, $smarty);
     }
 
 
@@ -57,14 +66,35 @@ class MollieShippingTest extends TestCase
     }
 
     /**
+     * This test verifies that we send the carrier if existing, even though
+     * our tracking code is not available.
+     */
+    public function testShipCarrierWithoutTracking()
+    {
+        $shopwareOrder = new Order();
+        $shopwareOrder->setTrackingCode('');
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'https://tracking.test'));
+
+        $mollieOrder = $this->getMollieOrder();
+
+        $this->shipping->shipOrder($shopwareOrder, $mollieOrder);
+
+        $this->assertSame($mollieOrder, $this->fakeGateway->getShippedOrder());
+
+        $this->assertEquals('MyCarrier', $this->fakeGateway->getShippedCarrier());
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
+    /**
      * This test verifies that we send all required tracking information
      * to Mollie when provided
      */
     public function testShipWithTracking()
     {
         $shopwareOrder = new Order();
-        $shopwareOrder->setTrackingCode('ABC');
         $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'https://tracking.test'));
+        $shopwareOrder->setTrackingCode('ABC');
 
         $mollieOrder = $this->getMollieOrder();
 
@@ -79,14 +109,48 @@ class MollieShippingTest extends TestCase
     }
 
     /**
-     * This test verifies that invalid URLs are ignored and
-     * not passed on to Mollie.
+     * @return \string[][]
      */
-    public function testSkipInvalidTrackingURL()
+    public function getAvailableTrackingVariables()
+    {
+        return [
+            'sOrder.trackingcode' => ['{$sOrder.trackingcode}'],
+            'offerPosition.trackingcode' => ['{$offerPosition.trackingcode}'],
+        ];
+    }
+
+    /**
+     * This test verifies that the available smarty variables in our tracking
+     * URL are correctly replaced with the real tracking code.
+     *
+     * @dataProvider getAvailableTrackingVariables
+     * @param string $variable
+     */
+    public function testAvailableTrackingVariables($variable)
     {
         $shopwareOrder = new Order();
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'http://track.mollie.local?code=' . $variable));
         $shopwareOrder->setTrackingCode('ABC');
-        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'tracking.test'));
+
+        $mollieOrder = $this->getMollieOrder();
+
+
+        $this->shipping->shipOrder($shopwareOrder, $mollieOrder);
+
+        $this->assertEquals('ABC', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('http://track.mollie.local?code=ABC', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
+    /**
+     * This test verifies that we do have a valid url with a valid
+     * smarty variable syntax. but the variable is not known.
+     * In this case, the url should be empty.
+     */
+    public function testUnknownTrackingVariables()
+    {
+        $shopwareOrder = new Order();
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'http://track.mollie.local?code={$unknownVariable}'));
+        $shopwareOrder->setTrackingCode('ABC');
 
         $mollieOrder = $this->getMollieOrder();
 
@@ -96,6 +160,41 @@ class MollieShippingTest extends TestCase
         $this->assertEquals('ABC', $this->fakeGateway->getShippedTrackingNumber());
         $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
     }
+
+    /**
+     * @return \string[][]
+     */
+    public function getInvalidTrackingUrls()
+    {
+        return [
+            'invalid-url' => ['no-http-url'],
+            'unknown-smarty-variable' => ['https://nolp.dhl.de/nextt-online-public/de/search?piececode={abc.trackingcode}'],
+            'invalid-characters' => ['https://nolp.dhl.de/nextt-online-public/de/search?piececode={}'],
+        ];
+    }
+
+    /**
+     * This test verifies that invalid URLs
+     * are ignored and not passed on to Mollie.
+     *
+     * @dataProvider getInvalidTrackingUrls
+     * @param $invalidTrackingUrl
+     */
+    public function testSkipInvalidTrackingURL($invalidTrackingUrl)
+    {
+        $shopwareOrder = new Order();
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', $invalidTrackingUrl));
+        $shopwareOrder->setTrackingCode('ABC');
+
+        $mollieOrder = $this->getMollieOrder();
+
+
+        $this->shipping->shipOrder($shopwareOrder, $mollieOrder);
+
+        $this->assertEquals('ABC', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
 
     /**
      * This test verifies that we successfully ship our order

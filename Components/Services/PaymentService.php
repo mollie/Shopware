@@ -123,6 +123,11 @@ class PaymentService
      */
     private $translations;
 
+    /**
+     * @var \Enlight_Template_Manager
+     */
+    private $smarty;
+
     private $orderLinesRepo;
 
 
@@ -147,6 +152,8 @@ class PaymentService
         $this->repoPaymentConfig = Shopware()->Models()->getRepository(Configuration::class);
 
         $this->translations = Shopware()->Container()->get('mollie_shopware.components.translation');
+
+        $this->smarty = Shopware()->Container()->get('template');
 
         $this->paymentFactory = new PaymentFactory();
     }
@@ -508,7 +515,7 @@ class PaymentService
             }
 
 
-            $mollieShipping = new MollieShipping($this->gwMollie);
+            $mollieShipping = new MollieShipping($this->gwMollie, $this->smarty);
 
             return $mollieShipping->shipOrder($shopwareOrder, $mollieOrder);
         }
