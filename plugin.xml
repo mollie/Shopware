@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.5</version>
+    <version>1.8.6</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -40,6 +40,18 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+
+    <changelog version="1.8.6">
+        <changes lang="de">
+            - Verbesserung der Tracking URL beim Versand. Es werden nun mehr Variablen, wie z.B. offerPosition.trackingcode unterstützt. Dabei werden ungültige URLs nicht mehr an Mollie verschickt.
+            - Verbesserung der technischen URL für die Apple Pay Display Einschränkungen in der Plugin Konfiguration. Dadurch werden nun auch Cluster Setups mit mehreren Shop Instanzen unterstützt.
+        </changes>
+        <changes lang="en">
+            - Improve Shipment Tracking URL to support more variables, just as offerPosition.trackingcode. Invalid URLs will not be sent to Mollie.
+            - Improve technical URL call to Apple Pay Display restrictions in the plugin configuration to support cluster setups with multiple shop instances.
+        </changes>
+    </changelog>
 
 
     <changelog version="1.8.5">
