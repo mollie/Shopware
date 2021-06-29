@@ -65,7 +65,7 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
-        <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService">
+        <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
             <argument type="service" id="service_container"/>
