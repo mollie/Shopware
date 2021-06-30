@@ -62,6 +62,25 @@ class RestoreSessionFacade
 
             $this->logger->notice('Missing Session! Restoring Session for Transaction: ' . $transaction->getId());
 
+            $this->logger->debug('Restoring to SessionID ' . $transaction->getSessionId() . ' again');
+
+            $select = Shopware()->Db()->select();
+            $select->from('s_core_sessions');
+            $select->where('id = :id');
+            $select->bind([
+                    'id' => $transaction->getSessionId(),
+                ]
+            );
+
+            $data = Shopware()->Db()->fetchAll($select);
+
+            if (count($data) > 0) {
+                $sessionRow = $data[0];
+                $this->logger->debug('Existing Session Row ' . $sessionRow['id'] . ', Modified: ' . $sessionRow['modified'] . ', Expiry: ' . $sessionRow['expiry']);
+            } else {
+                $this->logger->debug('No Existing Session Row for ID: ' . $transaction->getSessionId());
+            }
+
             $this->sessionManager->restoreFromToken($transaction, $requestPaymentToken);
         }
 
@@ -84,11 +103,19 @@ class RestoreSessionFacade
         $sessionPaymentId = (string)$variables['sUserData']['additional']['user']['paymentID'];
         $userLoggedIn = (string)$variables['sUserLoggedIn'];
 
+        $loginID = Shopware()->Session()->get('sUserId');
+
         if (empty($sessionPaymentId)) {
+
+            $this->logger->debug('No session due to missing paymentID, sUserId: ' . $loginID);
+
             return false;
         }
 
         if (empty($userLoggedIn)) {
+
+            $this->logger->debug('No session due to missing sUserLoggedIn, sUserId: ' . $loginID);
+
             return false;
         }
 
