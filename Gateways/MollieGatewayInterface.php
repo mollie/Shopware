@@ -53,4 +53,15 @@ interface MollieGatewayInterface
      */
     public function shipOrder(Order $mollieOrder, $carrier, $trackingNumber, $trackingUrl);
 
+    /**
+     * @param Order $mollieOrder
+     * @param string $lineId
+     * @param int $quantity
+     * @param string $carrier
+     * @param string $trackingNumber
+     * @param string $trackingUrl
+     * @return Shipment
+     */
+    public function shipOrderPartially(Order $mollieOrder, $lineId, $quantity, $carrier, $trackingNumber, $trackingUrl);
+
 }

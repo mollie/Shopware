@@ -1,8 +1,9 @@
 parameters:
     level: 8
     paths:
-        - ./Exceptions
+        - ./Command/OrdersShippingCommand.php
         - ./Components/iDEAL
+        - ./Exceptions
         - ./Services
     excludes_analyse:
         - Resources/*

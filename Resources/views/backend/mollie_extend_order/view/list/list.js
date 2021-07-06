@@ -43,8 +43,8 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
             header: me.molSnippets.colHeaderMollieActions,
             width: 80,
             items: [
-                me.createRefundOrderColumn(),
-                me.createShipOrderColumn()
+                me.createShipOrderColumn(),
+                me.createRefundOrderColumn()
             ]
         });
     },
@@ -53,7 +53,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         var me = this;
 
         return {
-            iconCls: 'sprite-money-coin',
+            iconCls: 'sprite-money--minus',
             action: 'editOrder',
             tooltip: me.molSnippets.tooltipRefundOrder,
             /**
@@ -88,7 +88,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
         var me = this;
 
         return {
-            iconCls: 'sprite-truck-box-label',
+            iconCls: 'sprite-truck--arrow',
             action: 'shipOrder',
             tooltip: me.molSnippets.tooltipShipOrder,
             /**
@@ -171,7 +171,7 @@ Ext.define('Shopware.apps.Mollie.view.list.List', {
 
         if (!style) {
 
-            css = '.mollie-hide { display: none !important; }';
+            css = '.mollie-hide { opacity:0.3 !important; pointer-events: none; }';
 
             head = document.head || document.getElementsByTagName('head')[0];
 

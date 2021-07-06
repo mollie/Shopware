@@ -2,8 +2,10 @@
 
 namespace MollieShopware\Components\Mollie;
 
+use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use Shopware\Models\Dispatch\Dispatch;
+use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
 
 class MollieShipping
@@ -32,19 +34,101 @@ class MollieShipping
     }
 
     /**
+     * @param Order $shopwareOrder
+     * @param \Mollie\Api\Resources\Order $mollieOrder
+     * @param $detailId
+     * @param $quantity
+     * @return \Mollie\Api\Resources\Shipment
+     * @throws OrderNotFoundException
+     */
+    public function shipOrderPartially(Order $shopwareOrder, \Mollie\Api\Resources\Order $mollieOrder, $detailId, $quantity)
+    {
+        $foundItem = null;
+
+        /** @var Detail $item */
+        foreach ($shopwareOrder->getDetails() as $item) {
+            if ($item->getId() === $detailId) {
+                $foundItem = $item;
+                break;
+            }
+        }
+
+        if (!$foundItem instanceof Detail) {
+            throw new OrderNotFoundException('Order Line Item with ID ' . $detailId . ' has not been found!');
+        }
+
+
+        $mollieLineItemId = $foundItem->getAttribute()->getMollieOrderLineId();
+
+        $shippingCarrier = $this->getCarrier($shopwareOrder);
+        $trackingCode = $this->getTrackingCode($shopwareOrder);
+        $trackingUrl = $this->getTrackingUrl($shopwareOrder, $trackingCode);
+
+        return $this->gwMollie->shipOrderPartially(
+            $mollieOrder,
+            $mollieLineItemId,
+            $quantity,
+            $shippingCarrier,
+            $trackingCode,
+            $trackingUrl
+        );
+    }
+
+    /**
      * @param Order $order
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @return \Mollie\Api\Resources\Shipment
      */
     public function shipOrder(Order $order, \Mollie\Api\Resources\Order $mollieOrder)
     {
+        $shippingCarrier = $this->getCarrier($order);
+        $trackingCode = $this->getTrackingCode($order);
+        $trackingUrl = $this->getTrackingUrl($order, $trackingCode);
+
+        return $this->gwMollie->shipOrder(
+            $mollieOrder,
+            $shippingCarrier,
+            $trackingCode,
+            $trackingUrl
+        );
+    }
+
+
+    /**
+     * @param Order $shopwareOrder
+     * @return string
+     */
+    private function getCarrier(Order $shopwareOrder)
+    {
         # unfortunately instanceOf is not enough
         # an empty dispatch that does not exist, return TRUE, but has the ID 0
         # so lets also ask for a valid ID > 0
-        $hasDispatch = ($order->getDispatch() instanceof Dispatch) && ($order->getDispatch()->getId() > 0);
+        $hasDispatch = ($shopwareOrder->getDispatch() instanceof Dispatch) && ($shopwareOrder->getDispatch()->getId() > 0);
 
-        $shippingCarrier = (string)($hasDispatch) ? trim($order->getDispatch()->getName()) : '-';
-        $trackingCode = (string)trim($order->getTrackingCode());
+        return (string)($hasDispatch) ? trim($shopwareOrder->getDispatch()->getName()) : '-';
+    }
+
+    /**
+     * @param Order $shopwareOrder
+     * @return string
+     */
+    private function getTrackingCode(Order $shopwareOrder)
+    {
+        return (string)trim($shopwareOrder->getTrackingCode());
+    }
+
+    /**
+     * @param Order $shopwareOrder
+     * @param $trackingCode
+     * @return array|string|string[]
+     */
+    private function getTrackingUrl(Order $shopwareOrder, $trackingCode)
+    {
+        # unfortunately instanceOf is not enough
+        # an empty dispatch that does not exist, return TRUE, but has the ID 0
+        # so lets also ask for a valid ID > 0
+        $hasDispatch = ($shopwareOrder->getDispatch() instanceof Dispatch) && ($shopwareOrder->getDispatch()->getId() > 0);
+
         $trackingUrl = '';
 
         # replace the tracking code variable in our tracking URL
@@ -52,7 +136,7 @@ class MollieShipping
 
             # if we have a tracking code,
             # then grab our smarty tracking url template
-            $smartyTrackingUrl = (string)($hasDispatch) ? trim($order->getDispatch()->getStatusLink()) : '';
+            $smartyTrackingUrl = (string)($hasDispatch) ? trim($shopwareOrder->getDispatch()->getStatusLink()) : '';
 
             # fill our smarty url template with
             # real values, so we get a final URL
@@ -65,13 +149,9 @@ class MollieShipping
             $trackingUrl = '';
         }
 
-        return $this->gwMollie->shipOrder(
-            $mollieOrder,
-            $shippingCarrier,
-            $trackingCode,
-            $trackingUrl
-        );
+        return $trackingUrl;
     }
+
 
     /**
      * @param $smartyTrackingUrl

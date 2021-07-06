@@ -3,9 +3,26 @@
 namespace MollieShopware\Gateways\Mollie;
 
 use Mollie\Api\MollieApiClient;
+use MollieShopware\Components\MollieApiFactory;
+use Psr\Container\ContainerInterface;
 
 class MollieGatewayFactory
 {
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+
+    /**
+     * @param $container
+     */
+    public function __construct($container)
+    {
+        $this->container = $container;
+    }
+
 
     /**
      * @param MollieApiClient $client
@@ -15,4 +32,20 @@ class MollieGatewayFactory
     {
         return new MollieGateway($client);
     }
+
+    /**
+     * @param $shopId
+     * @return MollieGateway
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function createForShop($shopId)
+    {
+        /** @var MollieApiFactory $apiFactory */
+        $apiFactory = $this->container->get('mollie_shopware.api_factory');
+
+        $apiClient = $apiFactory->create($shopId);
+
+        return $this->create($apiClient);
+    }
+
 }

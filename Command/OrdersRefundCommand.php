@@ -5,7 +5,6 @@ namespace MollieShopware\Command;
 use InvalidArgumentException;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Services\Refund\RefundInterface;
-use MollieShopware\Services\Refund\RefundService;
 use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -54,7 +53,7 @@ class OrdersRefundCommand extends ShopwareCommand
         $this
             ->setName('mollie:orders:refund')
             ->setDescription('Perform full or partial refunds for a given order.')
-            ->addArgument('orderNumber', InputArgument::REQUIRED, 'The ordernumber of the order, that should be refunded.')
+            ->addArgument('orderNumber', InputArgument::REQUIRED, 'The order number of the order, that should be refunded.')
             ->addArgument('customAmount', null, 'Optional amount for partial refunds. Leave it empty for full refunds.', null);
     }
 

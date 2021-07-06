@@ -4,61 +4,138 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
     override: 'Shopware.apps.Order.view.detail.Position',
 
     molSnippets: {
+        titleError: '{s namespace="backend/mollie/general" name="title_error"}{/s}',
+        // -------------------------------------------------------------------------
         colHeaderMollieActions: '{s namespace="backend/mollie/general" name="order_details_column_actions_title"}{/s}',
         colHeaderRefunds: '{s namespace="backend/mollie/general" name="order_details_column_refunds_title"}{/s}',
+        // -------------------------------------------------------------------------
         tooltipRefundItem: '{s namespace="backend/mollie/general" name="order_details_tooltip_refund"}{/s}',
         refundQuantityTitle: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_title"}{/s}',
         refundQuantityMessage: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_message"}{/s}',
         refundQuantityErrorInvalid: '{s namespace="backend/mollie/general" name="order_details_confirm_refund_quantity_error_invalid"}{/s}',
         messagePartialRefundProcessing: '{s namespace="backend/mollie/general" name="order_details_info_partialrefund_processing"}{/s}',
         messagePartialRefundCreated: '{s namespace="backend/mollie/general" name="order_details_info_partialrefund_created"}{/s}',
-        titleError: 'Error',
+        // -------------------------------------------------------------------------
+        tooltipShipItem: '{s namespace="backend/mollie/general" name="order_details_shipping_tooltip"}{/s}',
+        shippingConfirmTitle: '{s namespace="backend/mollie/general" name="order_details_shipping_confirm_title"}{/s}',
+        shippingConfirmMessage: '{s namespace="backend/mollie/general" name="order_details_shipping_confirm_message"}{/s}',
+        shippingInvalidQuantityError: '{s namespace="backend/mollie/general" name="order_details_shipping_error_invalid_quantity"}{/s}',
+        shippingCreatedMessage: '{s namespace="backend/mollie/general" name="order_details_shipping_success_message"}{/s}',
     },
 
     getColumns: function (view) {
         let me = this;
+
         var store = view.getStore();
         var record = (!!store.getAt(0)) ? store.getAt(0) : store.getAt(1);
         var columns = me.callParent(arguments);
-        const refundable = (me.isMollieOrder(record));
-        if (!!refundable) {
-            columns.push(me.createRefundColumn());
+
+        const isMollieOrder = me.isMollieOrder(record);
+        console.log(isMollieOrder);
+
+        if (!!isMollieOrder) {
+
+            columns.push(me.createMollieColumn());
+
             columns.push({
                 xtype: 'gridcolumn',
                 header: me.molSnippets.colHeaderRefunds,
+                sortable: false,
+                dataIndex: 'name',
                 renderer: function (value, metaData, record) {
-                    if (
-                        !!record
-                        && !!record.raw
-                        && !!record.raw.attribute
-                    ) {
+                    if (!!record && !!record.raw && !!record.raw.attribute) {
                         return (!!record.raw.attribute.mollieReturn) ? record.raw.attribute.mollieReturn : ' ';
                     } else {
                         return ' ';
                     }
-                },
-                sortable: false,
-                dataIndex: 'name'
+                }
             });
         }
+
         return columns;
     },
-    createRefundColumn: function () {
-        var me = this;
+
+
+    createMollieColumn: function() {
         return Ext.create('Ext.grid.column.Action', {
-            header: me.molSnippets.colHeaderMollieActions,
-            width: 80,
+            header: 'Mollie',
+            width: 60,
             items: [
-                me.createRefundOrderColumn(),
+                this.getShippingButton(),
+                this.getRefundButton()
             ]
         });
     },
 
-    createRefundOrderColumn: function () {
+    getShippingButton: function () {
+        let me = this;
+
+        return {
+            iconCls: 'sprite-truck--arrow',
+            action: '',
+            tooltip: this.molSnippets.tooltipShipItem,
+            getClass: function (value, metadata, record) {
+                return '';
+            },
+            handler: function (view, rowIndex, colIndex, item) {
+                var store = view.getStore();
+                var record = store.getAt(rowIndex);
+
+                const data = record.data;
+                const quantity = data.quantity;
+
+                const messageBox = Ext.MessageBox;
+
+                messageBox.prompt(me.molSnippets.shippingConfirmTitle, me.molSnippets.shippingConfirmMessage, function (choice, amount) {
+
+                    if (choice === 'ok') {
+
+                        const chosenQuantity = parseInt(amount);
+
+                        if (chosenQuantity <= 0 || chosenQuantity > quantity) {
+                            me.showGrowl(me.molSnippets.titleError, me.molSnippets.shippingInvalidQuantityError);
+                            return false;
+                        }
+
+                        Ext.Ajax.request({
+                            url: '{url controller=MollieOrders action="partialShipping"}',
+                            params: {
+                                'itemId' : data.id,
+                                'articleNumber' : data.articleNumber,
+                                'orderId' : data.orderId,
+                                'quantity' : chosenQuantity,
+                            },
+                            success: function (res) {
+                                try {
+
+                                    var result = JSON.parse(res.responseText);
+
+                                    if (!result.success) {
+                                        throw new Error(result.message);
+                                    }
+
+                                    me.showGrowl(me.snippets.successTitle, me.molSnippets.shippingCreatedMessage);
+
+                                } catch (e) {
+                                    me.showGrowl(me.molSnippets.titleError,   e.message);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // prefill our message box with data
+                // so that our quantity is already filled
+                me.prefillMessageBox(messageBox, quantity);
+            },
+        };
+    },
+
+    getRefundButton: function () {
         var me = this;
 
         return {
-            iconCls: 'sprite-money-coin',
+            iconCls: 'sprite-money--minus',
             action: 'editOrder',
             tooltip: me.molSnippets.tooltipRefundItem,
             /**
@@ -110,10 +187,8 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             },
 
             getClass: function (value, metadata, record) {
-                if (
-                    // order line is refundable through mollie
-                    me.isRefundableOrder(record)
-                ) {
+                // order line is refundable through mollie
+                if (me.isRefundableOrder(record)) {
                     return '';
                 }
 
@@ -206,7 +281,7 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
 
         if (!style) {
 
-            css = '.mollie-hide { display: none !important; }';
+            css = '.mollie-hide { opacity:0.3 !important; pointer-events: none; }';
             css = '';
             head = document.head || document.getElementsByTagName('head')[0];
 
@@ -224,95 +299,29 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         }
     },
 
-    isRefundable: function (record) {
-        if (
-            typeof this.record.data !== "undefined"
-            && typeof this.record.data.cleared !== "undefined"
-            && (
-                this.record.data.cleared === 9
-                || this.record.data.cleared === 10
-                || this.record.data.cleared === 11
-                || this.record.data.cleared === 12
-                || this.record.data.cleared === 20
-            )
-            && typeof record.data !== "undefined"
-            && typeof record.data.quantity !== "undefined"
-            && typeof record.raw !== "undefined"
-            && typeof record.raw.attribute !== "undefined"
-            && typeof record.raw.attribute.mollieReturn !== "undefined"
-            && typeof record.raw.attribute.mollieTransactionId !== "undefined"
-            && record.raw.attribute.mollieTransactionId !== null
-            && record.raw.attribute.mollieTransactionId.toString() !== ''
-            && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
-        ) {
-            return true;
+    /**
+     * Gets if the provided line item id is a full Mollie Order
+     * and no simple transaction.
+     */
+    isMollieOrder: function (lineItem) {
+        if (!lineItem.raw) {
+            return false;
         }
 
-        return false;
-    },
-
-    isRefundablePayment: function (record) {
-        if (
-            typeof this.record.data !== "undefined"
-            && typeof this.record.data.cleared !== "undefined"
-            && (
-                this.record.data.cleared === 9
-                || this.record.data.cleared === 10
-                || this.record.data.cleared === 11
-                || this.record.data.cleared === 12
-                || this.record.data.cleared === 20
-            )
-            && typeof record.data !== "undefined"
-            && typeof record.data.quantity !== "undefined"
-            && typeof record.raw !== "undefined"
-            && typeof record.raw.attribute !== "undefined"
-            && typeof record.raw.attribute.mollieReturn !== "undefined"
-            && typeof record.raw.attribute.mollieTransactionId !== "undefined"
-            && record.raw.attribute.mollieTransactionId !== null
-            && record.raw.attribute.mollieTransactionId.toString() !== ''
-            && record.raw.attribute.mollieTransactionId.toString().substr(0, 3) === 'tr_'
-            && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
-        ) {
-            return true;
+        if (!lineItem.raw.attribute) {
+            return false;
         }
 
-        return false;
-    },
-
-    isMollieOrder: function (record) {
-        if (
-            !!record
-            && !!this.record
-            && typeof this.record.data !== "undefined"
-            && (
-                this.record.data.cleared === 9
-                || this.record.data.cleared === 10
-                || this.record.data.cleared === 11
-                || this.record.data.cleared === 12
-                || this.record.data.cleared === 20
-            )
-            && !!record.data
-            && typeof record.data.quantity !== "undefined"
-            && typeof record.raw !== "undefined"
-            && !!record.raw
-            && !!record.raw.attribute
-            && typeof record.raw.attribute.mollieReturn !== "undefined"
-            && typeof record.raw.attribute.mollieTransactionId !== "undefined"
-            && record.raw.attribute.mollieTransactionId !== null
-            && record.raw.attribute.mollieTransactionId.toString() !== ''
-            && record.raw.attribute.mollieTransactionId.toString().substr(0, 4) === 'ord_'
-        ) {
-            return record;
+        if (!lineItem.raw.attribute.mollieTransactionId) {
+            return false;
         }
-        return false;
+
+        return lineItem.raw.attribute.mollieTransactionId.toString().substr(0, 4) === 'ord_';
     },
 
     isRefundableOrder: function (record) {
         let me = this;
-        if (
-            me.isMollieOrder(record) !== false
-            && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity
-        ) {
+        if (me.isMollieOrder(record) !== false && parseInt(!!record.raw.attribute.mollieReturn ? record.raw.attribute.mollieReturn : 0) < record.data.quantity) {
             return true;
         }
         return false;
@@ -327,6 +336,26 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
             var current = store.currentPage;
             store.loadPage(current, { callback: me.up('window').close() });
         }
+    },
+
+    prefillMessageBox(messageBox, value) {
+        const inputDiv = messageBox.textField.bodyEl.dom;
+        const input = inputDiv.querySelector("input");
+
+        input.type = 'number';
+        input.min = 1;
+        input.max = value;
+        input.value = value;
+        input.step = 1;
+    },
+
+    showGrowl(title, text) {
+        Shopware.Notification.createGrowlMessage(
+            title,
+            text,
+            ''
+        );
     }
+
 });
 //{/block}

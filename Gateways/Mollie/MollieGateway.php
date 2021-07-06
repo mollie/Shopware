@@ -163,4 +163,35 @@ class MollieGateway implements MollieGatewayInterface
         return $mollieOrder->shipAll($options);
     }
 
+    /**
+     * @param Order $mollieOrder
+     * @param $lineId
+     * @param $quantity
+     * @param $carrier
+     * @param $trackingNumber
+     * @param $trackingUrl
+     * @return mixed|Shipment
+     */
+    public function shipOrderPartially(Order $mollieOrder, $lineId, $quantity, $carrier, $trackingNumber, $trackingUrl)
+    {
+        $data = [
+            'lines' => [
+                [
+                    'id' => $lineId,
+                    'quantity' => $quantity,
+                ]
+            ]
+        ];
+
+        if (!empty($trackingNumber)) {
+            $data['tracking'] = [
+                'carrier' => $carrier,
+                'code' => $trackingNumber,
+                'url' => $trackingUrl,
+            ];
+        }
+
+        return $mollieOrder->createShipment($data);
+    }
+
 }
