@@ -57,6 +57,8 @@ class PaymentStatusConverterTest extends TestCase
             'mollie_paid' => [PaymentStatus::MOLLIE_PAYMENT_PAID, Status::PAYMENT_STATE_COMPLETELY_PAID],
             'mollie_completed' => [PaymentStatus::MOLLIE_PAYMENT_COMPLETED, Status::PAYMENT_STATE_COMPLETELY_PAID],
             # ------------------------------------------------------------------------------------------------------
+            'mollie_shipping' => [PaymentStatus::MOLLIE_PAYMENT_SHIPPING, null],
+            # ------------------------------------------------------------------------------------------------------
             'mollie_canceled' => [PaymentStatus::MOLLIE_PAYMENT_CANCELED, Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED],
             'mollie_failed' => [PaymentStatus::MOLLIE_PAYMENT_FAILED, Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED],
             'mollie_expired' => [PaymentStatus::MOLLIE_PAYMENT_EXPIRED, Status::PAYMENT_STATE_THE_PROCESS_HAS_BEEN_CANCELLED],

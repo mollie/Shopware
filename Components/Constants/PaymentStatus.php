@@ -16,6 +16,12 @@ class PaymentStatus
     const MOLLIE_PAYMENT_FAILED = 'failed';
 
     /**
+     * this is no real payment status, but still
+     * an existing status of mollie
+     */
+    const MOLLIE_PAYMENT_SHIPPING = 'shipping';
+
+    /**
      * attention!
      * mollie has no status for refunds. its always "paid", but
      * the payment itself has additional refund keys and values.

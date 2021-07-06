@@ -356,7 +356,7 @@ class Config implements ConfigInterface
      */
     public function getShippedStatus()
     {
-        return (int)$this->get('klarna_shipped_status', -1);
+        return $this->get('klarna_shipped_status', null);
     }
 
     /**
