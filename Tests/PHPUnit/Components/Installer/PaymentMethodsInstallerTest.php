@@ -1,14 +1,26 @@
 <?php
 
-namespace MollieShopware\Tests\Services;
+namespace MollieShopware\Tests\Components\Installer;
 
 use MollieShopware\Components\Constants\PaymentMethod;
-use MollieShopware\Components\Services\PaymentMethodService;
+use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use PHPUnit\Framework\TestCase;
 
 
-class PaymentMethodServiceTest extends TestCase
+class PaymentMethodsInstallerTest extends TestCase
 {
+
+    /**
+     * This test verifies that our important value for the
+     * payment action is not touched without recognizing it.
+     * It's important to tell Shopware to start a certain action.
+     * That action is always the same for Mollie payments and
+     * must always exist.
+     */
+    public function testMollieActionKey()
+    {
+        $this->assertEquals('frontend/Mollie', PaymentMethodsInstaller::MOLLIE_ACTION_KEY);
+    }
 
     /**
      * This test verifies that we have a valid list of supported payment methods.
@@ -37,7 +49,7 @@ class PaymentMethodServiceTest extends TestCase
             PaymentMethod::SOFORT,
         ];
 
-        $this->assertEquals($expected, PaymentMethodService::getSupportedPaymentMethods());
+        $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());
     }
 
 }

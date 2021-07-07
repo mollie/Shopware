@@ -21,6 +21,14 @@ export default class TopMenuRepository {
      *
      * @returns {*}
      */
+    getPaymentMethods() {
+        return cy.contains('Zahlungsarten');
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
     getCachesPerformance() {
         return cy.contains('Caches / Performance');
     }

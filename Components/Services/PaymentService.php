@@ -10,6 +10,7 @@ use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
+use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\iDEAL\iDEALInterface;
@@ -198,7 +199,7 @@ class PaymentService
      * @param $paymentMethodName
      * @param Transaction $transaction
      * @param $paymentToken
-     * @return string
+     * @return string|null
      * @throws ApiException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -228,10 +229,6 @@ class PaymentService
         # convert our mollie_xyz to "xyz" only
         $cleanPaymentMethod = str_replace(MollieShopware::PAYMENT_PREFIX, '', $paymentMethodName);
 
-        # figure out if we are using the orders API or the payments API
-        $useOrdersAPI = $this->shouldUseOrdersAPI($cleanPaymentMethod);
-
-
         # ------------------------------------------------------------------------------------------------------
 
         /** @var PaymentInterface|null $paymentMethodObject */
@@ -242,7 +239,7 @@ class PaymentService
         }
 
         # ------------------------------------------------------------------------------------------------------
-        # BUILD OUR ORDER DATA
+        # BUILD OUR PAYMENT DATA
 
         $paymentBuilder = new MolliePaymentBuilder(
             new TransactionUUID(new UnixTimestampGenerator()),
@@ -251,84 +248,23 @@ class PaymentService
 
         $paymentData = $paymentBuilder->buildPayment($transaction, $paymentToken);
 
+        # set basic payment data
         $paymentMethodObject->setPayment($paymentData);
 
-
-        # ------------------------------------------------------------------------------------------------------
-        # PAYMENT SPECIFIC SETTINGS
-
-        try {
-
-            # load our payment specific configuration from the database
-            # and apply a configuration if existing
-            $paymentConfig = $this->repoPaymentConfig->getByPaymentName($paymentMethodName);
-
-            $paymentId = $paymentConfig->getPaymentMeanId();
-
-            # load our "expiration days" either from
-            # the translation of a shop, or the basic value
-            $translatedExpirationDays = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::EXPIRATION_DAYS, $paymentId, $shopID);
-            $expirationDays = (!empty($translatedExpirationDays)) ? $translatedExpirationDays : $paymentConfig->getExpirationDays();
-
-            if (!empty($expirationDays)) {
-                $paymentMethodObject->setExpirationDays((int)$expirationDays);
-            }
-
-        } catch (MolliePaymentConfigurationNotFound $exception) {
-            # this is OK, so there might not be a payment configuration.
-            # we must NOT show any logs or errors here!
-        }
-
-
-        if ($paymentMethodObject instanceof ApplePay) {
-
-            $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();
-
-            if (!empty($aaToken)) {
-                /** @var ApplePay $paymentMethodObject */
-                $paymentMethodObject->setPaymentToken($aaToken);
-            }
-        }
-
-        if ($paymentMethodObject instanceof IDeal) {
-            # test if we have a current customer (we should have one)
-            # if so, get his selected iDeal issuer.
-            # if an issuer has been set, then also use it for our payment,
-            # otherwise just continue without a prefilled issuer.
-            $currentCustomer = $this->customer->getCurrent();
-
-            if ($currentCustomer instanceof Customer) {
-                $issuer = $this->idealService->getCustomerIssuer($currentCustomer);
-                if (!empty($issuer)) {
-                    /** @var IDeal $paymentMethodObject */
-                    $paymentMethodObject->setIssuer($issuer);
-                }
-            }
-        }
-
-        if ($paymentMethodObject instanceof CreditCard) {
-
-            $ccToken = $this->creditCardService->getCardToken();
-
-            if (!empty($ccToken)) {
-                /** @var CreditCard $paymentMethodObject */
-                $paymentMethodObject->setPaymentToken($ccToken);
-            }
-        }
-
-        if ($paymentMethodObject instanceof BankTransfer) {
-
-            $dueDateDays = $this->config->getBankTransferDueDateDays();
-
-            if (!empty($dueDateDays)) {
-                /** @var BankTransfer $paymentMethodObject */
-                $paymentMethodObject->setDueDateDays($dueDateDays);
-            }
-        }
+        # configure payment specific settings
+        $paymentMethodObject = $this->configurePaymentSettings(
+            $paymentMethodObject,
+            $paymentMethodName,
+            $cleanPaymentMethod,
+            $shopID
+        );
 
         # ------------------------------------------------------------------------------------------------------
 
-        if ($useOrdersAPI) {
+        $mollieOrder = null;
+        $molliePayment = null;
+
+        if ($paymentMethodObject->isOrdersApiEnabled()) {
 
             $requestBody = $paymentMethodObject->buildBodyOrdersAPI();
 
@@ -398,13 +334,13 @@ class PaymentService
         # so we check for their payment methods and return our special checkout URL
         # to tell our calling function that we should redirect to the return url immediately.
         if (empty($checkoutUrl)) {
-            if ($useOrdersAPI) {
+            if ($mollieOrder !== null && $paymentMethodObject->isOrdersApiEnabled()) {
                 if ($mollieOrder->method === PaymentMethod::CREDITCARD &&
                     $mollieOrder->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
                 }
             } else {
-                if ($molliePayment->method === PaymentMethod::CREDITCARD &&
+                if ($molliePayment !== null && $molliePayment->method === PaymentMethod::CREDITCARD &&
                     $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
                 }
@@ -412,27 +348,6 @@ class PaymentService
         }
 
         return $checkoutUrl;
-    }
-
-    /**
-     * @param $paymentMethod
-     * @return bool
-     */
-    private function shouldUseOrdersAPI($paymentMethod)
-    {
-        if (!$this->config->useOrdersApiOnlyWhereMandatory()) {
-            return true;
-        }
-
-        if ($paymentMethod === PaymentMethod::KLARNA_PAY_LATER) {
-            return true;
-        }
-
-        if ($paymentMethod === PaymentMethod::KLARNA_SLICE_IT) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -639,6 +554,113 @@ class PaymentService
         $transaction->setIsShipped(true);
         $entityManager->persist($transaction);
         $entityManager->flush();
+    }
+
+
+    /**
+     * @param PaymentInterface $paymentMethodObject
+     * @param $paymentMethodName
+     * @param $cleanPaymentMethod
+     * @param $shopID
+     * @return PaymentInterface|ApplePay|BankTransfer|CreditCard|IDeal
+     * @throws ApiException
+     */
+    private function configurePaymentSettings(PaymentInterface $paymentMethodObject, $paymentMethodName, $cleanPaymentMethod, $shopID)
+    {
+        $methodType = PaymentMethodType::GLOBAL_SETTING;
+        $expirationDays = '';
+
+        # we start by loading our payment specific configuration
+        # from the database.
+        # if somehow a specific config object is not yet existing in the database
+        # then we always continue with the basic settings to at least have a working checkout.
+        try {
+
+            $paymentConfig = $this->repoPaymentConfig->getByPaymentName($paymentMethodName);
+            $paymentId = $paymentConfig->getPaymentMeanId();
+
+            $translatedMethods = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::METHODS_API, $paymentId, $shopID);
+            $methodType = (!empty($translatedMethods)) ? (int)$translatedMethods : (int)$paymentConfig->getMethodType();
+
+            $translatedExpirationDays = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::EXPIRATION_DAYS, $paymentId, $shopID);
+            $expirationDays = (!empty($translatedExpirationDays)) ? $translatedExpirationDays : $paymentConfig->getExpirationDays();
+
+        } catch (MolliePaymentConfigurationNotFound $ex) {
+            # if we do not have a payment method config
+            # then repeat as usual
+        }
+
+
+        # 1. CONFIGURE API METHOD
+        # if we should use our global setting,
+        # then use the one from out plugin configuration
+        if ($methodType === PaymentMethodType::GLOBAL_SETTING) {
+            $methodType = $this->config->getPaymentMethodsType();
+        }
+
+        # make sure to validate it one more time, because some
+        # payment methods have strict guides on what to use
+        $worksWithPaymentsApi = PaymentMethodType::isPaymentsApiAllowed($cleanPaymentMethod);
+
+        # if payments is not allowed, or orders api is used, then switch to Orders API
+        $useOrdersAPI = ($methodType === PaymentMethodType::ORDERS_API || !$worksWithPaymentsApi);
+        $paymentMethodObject->setOrdersApiEnabled($useOrdersAPI);
+
+
+        # 2. CONFIGURE OPTIONAL EXPIRATION DAYS
+        if (!empty($expirationDays)) {
+            $paymentMethodObject->setExpirationDays((int)$expirationDays);
+        }
+
+
+        # 3. CONFIGURE INDIVIDUAL PAYMENT SPECIFIC DATA
+        if ($paymentMethodObject instanceof ApplePay) {
+
+            $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();
+
+            if (!empty($aaToken)) {
+                /** @var ApplePay $paymentMethodObject */
+                $paymentMethodObject->setPaymentToken($aaToken);
+            }
+        }
+
+        if ($paymentMethodObject instanceof IDeal) {
+            # test if we have a current customer (we should have one)
+            # if so, get his selected iDeal issuer.
+            # if an issuer has been set, then also use it for our payment,
+            # otherwise just continue without a prefilled issuer.
+            $currentCustomer = $this->customer->getCurrent();
+
+            if ($currentCustomer instanceof Customer) {
+                $issuer = $this->idealService->getCustomerIssuer($currentCustomer);
+                if (!empty($issuer)) {
+                    /** @var IDeal $paymentMethodObject */
+                    $paymentMethodObject->setIssuer($issuer);
+                }
+            }
+        }
+
+        if ($paymentMethodObject instanceof CreditCard) {
+
+            $ccToken = $this->creditCardService->getCardToken();
+
+            if (!empty($ccToken)) {
+                /** @var CreditCard $paymentMethodObject */
+                $paymentMethodObject->setPaymentToken($ccToken);
+            }
+        }
+
+        if ($paymentMethodObject instanceof BankTransfer) {
+
+            $dueDateDays = $this->config->getBankTransferDueDateDays();
+
+            if (!empty($dueDateDays)) {
+                /** @var BankTransfer $paymentMethodObject */
+                $paymentMethodObject->setDueDateDays($dueDateDays);
+            }
+        }
+
+        return $paymentMethodObject;
     }
 
 }

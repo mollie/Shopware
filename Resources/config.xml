@@ -241,14 +241,14 @@
         </element>
 
         <element type="select" scope="shop">
-            <name>orders_api_only_where_mandatory</name>
-            <label lang="de">Nur Transaktionen in Mollie erstellen</label>
-            <label lang="en">Only create transactions in Mollie</label>
-            <label lang="nl">Creëer alleen transacties in Mollie</label>
-            <value>yes</value>
-            <description lang="de">Mit JA werden nur einfache Transaktionen in Mollie erstellt. Mit NEIN werden zusätzlich zu Transaktionen Bestellungen angelegt. Für Klarna werden immer Bestellungen angelegt.</description>
-            <description lang="en">Use YES to create only simple transactions in Mollie. With NO you will also get orders in addition to these transactions. Klarna will always create orders.</description>
-            <description lang="nl">Met JA worden alleen eenvoudige transacties in Mollie gecreëerd. Met NEE worden naast transacties ook orders aangelegd. Klarna legt altijd orders aan.</description>
+            <name>payment_method</name>
+            <label lang="de">Zahlungs Methode</label>
+            <label lang="en">Zahlungs Methode</label>
+            <label lang="nl">Zahlungs Methode</label>
+            <value>payments_api</value>
+            <description lang="de">Konfiguration ob nur Transaktionen oder auch Bestellungen in Mollie angelegt werden. Für Klarna werden immer Bestellungen angelegt.</description>
+            <description lang="en">Configuration if only transactions are also orders are being created in Mollie. Klarna will always create orders.</description>
+            <description lang="nl">Configuratie als alleen transacties ook orders worden aangemaakt in Mollie. Klarna legt altijd orders aan.</description>
             <store>
                 <option>
                     <value>inherited</value>
@@ -257,20 +257,20 @@
                     <label lang="nl">Geërfd</label>
                 </option>
                 <option>
-                    <value>yes</value>
-                    <label lang="de">Ja</label>
-                    <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <value>payments_api</value>
+                    <label lang="de">Payments API (Transaktionen)</label>
+                    <label lang="en">Payments API (Transactions)</label>
+                    <label lang="nl">Payments API (transacties)</label>
                 </option>
                 <option>
-                    <value>no</value>
-                    <label lang="de">Nein</label>
-                    <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <value>orders_api</value>
+                    <label lang="de">Orders API (Transaktionen + Bestellungen)</label>
+                    <label lang="en">Orders API (Transactions + Orders)</label>
+                    <label lang="nl">Orders API (transacties + bestellingen)</label>
                 </option>
             </store>
             <options>
-                <position>10</position>
+                <position>11</position>
             </options>
         </element>
 
@@ -313,7 +313,7 @@
                 </option>
             </store>
             <options>
-                <position>11</position>
+                <position>12</position>
             </options>
         </element>
 
@@ -347,7 +347,7 @@
                 </option>
             </store>
             <options>
-                <position>12</position>
+                <position>13</position>
             </options>
         </element>
 
@@ -381,7 +381,7 @@
                 </option>
             </store>
             <options>
-                <position>13</position>
+                <position>14</position>
             </options>
         </element>
 
@@ -415,7 +415,7 @@
                 </option>
             </store>
             <options>
-                <position>14</position>
+                <position>15</position>
             </options>
         </element>
 
@@ -450,7 +450,7 @@
                 </option>
             </store>
             <options>
-                <position>15</position>
+                <position>16</position>
             </options>
         </element>
 
@@ -485,7 +485,7 @@
                 </option>
             </store>
             <options>
-                <position>16</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -499,7 +499,7 @@
             <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>17</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -509,7 +509,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>18</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -540,7 +540,7 @@
                 </option>
             </store>
             <options>
-                <position>19</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -550,7 +550,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -561,7 +561,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -572,7 +572,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -582,7 +582,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>23</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -597,7 +597,7 @@
             <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>24</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -607,7 +607,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>25</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -648,7 +648,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>26</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -658,7 +658,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>27</position>
+                <position>28</position>
             </options>
         </element>
 
@@ -668,7 +668,7 @@
             <label lang="en">Payment term (Days)</label>
             <label lang="nl">Betalingstermijn (Dagen)</label>
             <options>
-                <position>28</position>
+                <position>29</position>
             </options>
         </element>
 

@@ -10,7 +10,6 @@ class Repository extends ModelRepository
 
     /**
      * @param Configuration $configuration
-     * @return mixed
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -18,13 +17,11 @@ class Repository extends ModelRepository
     {
         $this->getEntityManager()->persist($configuration);
         $this->getEntityManager()->flush($configuration);
-
-        return $configuration;
     }
 
     /**
      * @param $paymentMeanId
-     * @return Configuration|object|null
+     * @return Configuration
      */
     public function getByPaymentId($paymentMeanId)
     {

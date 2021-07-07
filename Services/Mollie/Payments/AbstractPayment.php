@@ -15,6 +15,11 @@ abstract class AbstractPayment implements PaymentInterface
 {
 
     /**
+     * @var bool
+     */
+    private $userOrdersAPI;
+
+    /**
      * @var NumberFormatter
      */
     private $formatter;
@@ -103,6 +108,7 @@ abstract class AbstractPayment implements PaymentInterface
 
         $this->formatter = new NumberFormatter();
 
+        $this->userOrdersAPI = false;
         $this->expirationDays = null;
     }
 
@@ -123,6 +129,23 @@ abstract class AbstractPayment implements PaymentInterface
         $this->redirectUrl = $payment->getRedirectUrl();
         $this->webhookUrl = $payment->getWebhookUrl();
         $this->locale = $payment->getLocale();
+    }
+
+    /**
+     * @param bool $enabled
+     * @return void
+     */
+    public function setOrdersApiEnabled($enabled)
+    {
+        $this->userOrdersAPI = $enabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOrdersApiEnabled()
+    {
+        return $this->userOrdersAPI;
     }
 
     /**

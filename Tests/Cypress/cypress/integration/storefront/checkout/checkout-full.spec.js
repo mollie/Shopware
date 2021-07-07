@@ -1,5 +1,7 @@
 import Devices from "Services/Devices";
 import Session from "Actions/utils/Session"
+import PluginConfig from "Actions/backend/models/PluginConfig";
+import PaymentConfig from "Actions/backend/models/PaymentConfig";
 // ------------------------------------------------------
 import PluginAction from "Actions/backend/PluginAction";
 import TopMenuAction from 'Actions/storefront/navigation/TopMenuAction';
@@ -33,10 +35,14 @@ const device = devices.getFirstDevice();
 
 
 const configs = [
-    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true,},
-    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true,},
-    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false,},
-    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false,},
+    {name: "Global Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: true,},
+    {name: "Global Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true, useGlobalConfig: true,},
+    // ------------------------------------------------------------------------------------------------------------------------------
+    {name: "Global Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: true,},
+    {name: "Global Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false, useGlobalConfig: true,},
+    // ------------------------------------------------------------------------------------------------------------------------------
+    {name: "Payment Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: false,},
+    {name: "Payment Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: false,},
 ];
 
 const payments = [
@@ -57,15 +63,20 @@ const payments = [
 
 configs.forEach(config => {
 
-    context("Checkout " + config.name, () => {
+    context("Config: " + config.name, () => {
 
         before(function () {
             devices.setDevice(device);
 
-            plugin.configure(
-                config.createOrderBeforePayment,
-                config.paymentsAPI
-            );
+            const pluginConfig = new PluginConfig();
+            pluginConfig.setOrderBeforePayment(config.createOrderBeforePayment);
+            pluginConfig.setPaymentsAPI(config.paymentsAPI);
+
+            const paymentConfig = new PaymentConfig();
+            paymentConfig.setMethodsGlobal(config.useGlobalConfig);
+            paymentConfig.setMethodsPaymentsAPI(config.paymentsAPI);
+
+            plugin.configure(pluginConfig, paymentConfig);
 
             register.doRegister(user_email, user_pwd);
         })

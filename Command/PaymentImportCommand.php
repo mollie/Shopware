@@ -2,7 +2,7 @@
 
 namespace MollieShopware\Command;
 
-use MollieShopware\Components\Services\PaymentMethodService;
+use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,7 +13,7 @@ class PaymentImportCommand extends ShopwareCommand
 {
 
     /**
-     * @var PaymentMethodService
+     * @var PaymentMethodsInstaller
      */
     private $paymentMethodService;
 
@@ -24,10 +24,10 @@ class PaymentImportCommand extends ShopwareCommand
 
 
     /**
-     * @param PaymentMethodService $paymentMethodService
+     * @param PaymentMethodsInstaller $paymentMethodService
      * @param LoggerInterface $logger
      */
-    public function __construct(PaymentMethodService $paymentMethodService, LoggerInterface $logger)
+    public function __construct(PaymentMethodsInstaller $paymentMethodService, LoggerInterface $logger)
     {
         $this->paymentMethodService = $paymentMethodService;
         $this->logger = $logger;

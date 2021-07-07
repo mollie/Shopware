@@ -1,6 +1,7 @@
 <?php
 
-use MollieShopware\Components\Services\PaymentMethodService;
+use MollieShopware\Components\Constants\PaymentMethodType;
+use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Payment\Repository;
 use MollieShopware\Traits\Controllers\BackendControllerTrait;
@@ -39,8 +40,8 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
         try {
 
-            /** @var PaymentMethodService $paymentMethodService */
-            $paymentMethodService = $this->container->get('mollie_shopware.payment_method_service');
+            /** @var PaymentMethodsInstaller $paymentMethodService */
+            $paymentMethodService = $this->container->get('mollie_shopware.payments.installer');
 
             $importCount = $paymentMethodService->installPaymentMethods(false);
 
@@ -76,21 +77,38 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
             $paymentId = (int)$request->getParam('paymentId', 0);
 
-            $paymentConfig = $this->repoConfiguration->getByPaymentId($paymentId);
+            /** @var array $payments */
+            $payments = $this->getMolliePaymentMethods($paymentId);
+
+            if (count($payments) <= 0) {
+                # we dont have a valid mollie payment
+                # just return, that this is no mollie payment
+                $this->returnSuccess('', [
+                    'isMollie' => false,
+                ]);
+                return;
+            }
 
 
-            # if we do not have a config yet
-            # make sure to create one in the database
-            if (!$paymentConfig instanceof Configuration) {
+            /** @var Payment $payment */
+            $payment = $payments[0];
 
-                $paymentConfig = new Configuration();
-                $paymentConfig->setPaymentMeanId($paymentId);
 
-                $this->repoConfiguration->save($paymentConfig);
+            $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
+
+            $paymentMethodType = (int)$paymentConfig->getMethodType();
+            $worksWithPaymentsApi = PaymentMethodType::isPaymentsApiAllowed($payment->getName());
+
+            # if its not working with payments API
+            # always switch to orders api
+            if ($paymentMethodType === PaymentMethodType::PAYMENTS_API && !$worksWithPaymentsApi) {
+                $paymentMethodType = PaymentMethodType::ORDERS_API;
             }
 
             $data = [
+                'isMollie' => true,
                 'expirationDays' => (string)$paymentConfig->getExpirationDays(),
+                'method' => $paymentMethodType,
             ];
 
             $this->returnSuccess('', $data);
@@ -114,21 +132,28 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $request = $this->Request();
 
             $paymentId = (int)$request->getParam('paymentId', 0);
-            $expirationDays = (string)$request->getParam('expirationDays', '');
 
+            /** @var array $payments */
+            $payments = $this->getMolliePaymentMethods($paymentId);
 
-            $paymentConfig = $this->repoConfiguration->getByPaymentId($paymentId);
-
-            # if we dont have a config yet
-            # then create a new object and configure it
-            if (!$paymentConfig instanceof Configuration) {
-
-                $paymentConfig = new Configuration();
-                $paymentConfig->setPaymentMeanId($paymentId);
+            if (count($payments) <= 0) {
+                # if we have not found a mollie payment for this id
+                # then don't do anything
+                $this->returnSuccess('', []);
+                return;
             }
+
+            /** @var Payment $payment */
+            $payment = $payments[0];
+
+            $expirationDays = (string)$request->getParam('expirationDays', '');
+            $methodType = (int)$request->getParam('methodType', PaymentMethodType::GLOBAL_SETTING);
+
+            $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
 
             # update with our new settings
             $paymentConfig->setExpirationDays($expirationDays);
+            $paymentConfig->setMethodType($methodType);
 
             # save the data
             $this->repoConfiguration->save($paymentConfig);
@@ -149,6 +174,25 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
         $this->logger = $this->container->get('mollie_shopware.components.logger');
 
         $this->repoConfiguration = $this->container->get('models')->getRepository(Configuration::class);
+    }
+
+    /**
+     * @param $paymentId
+     * @return int|mixed|string
+     */
+    private function getMolliePaymentMethods($paymentId)
+    {
+        /** @var \Doctrine\ORM\QueryBuilder $qb */
+        $qb = $this->container->get('models')->createQueryBuilder();
+
+        $qb->select('p')
+            ->from(Payment::class, 'p')
+            ->where($qb->expr()->eq('p.id', ':id'))
+            ->andWhere($qb->expr()->like('p.name', ':namePattern'))
+            ->setParameter(':namePattern', 'mollie_%')
+            ->setParameter(':id', $paymentId);
+
+        return $qb->getQuery()->getResult();
     }
 
 }

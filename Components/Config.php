@@ -3,6 +3,7 @@
 namespace MollieShopware\Components;
 
 use Exception;
+use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Services\ShopService;
 use Shopware\Components\Logger;
 use Shopware\Components\Plugin\ConfigReader;
@@ -264,11 +265,28 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @return bool
+     * @return int type PaymentMethodType
      */
-    public function useOrdersApiOnlyWhereMandatory()
+    public function getPaymentMethodsType()
     {
-        return ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+        $oldConfigUsePaymentsAPI = ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+
+        $newConfig = $this->get('payment_method', null);
+
+
+        if ($newConfig === null) {
+            if ($oldConfigUsePaymentsAPI) {
+                return PaymentMethodType::PAYMENTS_API;
+            } else {
+                return PaymentMethodType::ORDERS_API;
+            }
+        }
+
+        if ($newConfig === 'orders_api') {
+            return PaymentMethodType::ORDERS_API;
+        }
+
+        return PaymentMethodType::PAYMENTS_API;
     }
 
     /**
