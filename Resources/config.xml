@@ -313,7 +313,7 @@
                 </option>
             </store>
             <options>
-                <position>12</position>
+                <position>11</position>
             </options>
         </element>
 
@@ -385,6 +385,20 @@
             </options>
         </element>
 
+        <element type="combo" scope="shop">
+            <name>klarna_shipped_status</name>
+            <label lang="de">Bestellstatus für versendete Bestellungen</label>
+            <label lang="en">Order Status for shipped orders.</label>
+            <label lang="nl">Bestelstatus voor verzonden bestellingen</label>
+            <description lang="de">Bestellstatus für Bestellungen die durch Teillieferung als versendet markiert wurden.</description>
+            <description lang="en">Order status for orders that have been marked as shipped by partial delivery.</description>
+            <description lang="nl">Bestelstatus voor orders gemarkeerd als verzonden door gedeeltelijke levering.</description>
+            <store>Shopware.apps.Base.store.OrderStatus</store>
+            <options>
+                <position>15</position>
+            </options>
+        </element>
+
         <element type="select" scope="shop">
             <name>auto_cancel_failed_orders</name>
             <label lang="de">Fehlgeschlagene Bestellungen stornieren</label>
@@ -415,7 +429,7 @@
                 </option>
             </store>
             <options>
-                <position>15</position>
+                <position>16</position>
             </options>
         </element>
 
@@ -450,7 +464,7 @@
                 </option>
             </store>
             <options>
-                <position>16</position>
+                <position>17</position>
             </options>
         </element>
 
@@ -485,7 +499,7 @@
                 </option>
             </store>
             <options>
-                <position>17</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -499,9 +513,10 @@
             <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>18</position>
+                <position>19</position>
             </options>
         </element>
+
 
         <element type="button" required="false">
             <name>separator_mails</name>
@@ -509,7 +524,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>19</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -540,7 +555,7 @@
                 </option>
             </store>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -550,7 +565,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -561,7 +576,7 @@
             <label lang="nl">Component activeren</label>
             <value>true</value>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -572,32 +587,7 @@
             <label lang="nl">Voeg styling toe aan componenten</label>
             <value>true</value>
             <options>
-                <position>23</position>
-            </options>
-        </element>
-
-        <element type="button" required="false">
-            <name>separator_klarna</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <label lang="en">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Klarna ---------------------------------------------------------------------------------------</label>
-            <options>
                 <position>24</position>
-            </options>
-        </element>
-
-
-        <element type="combo" scope="shop">
-            <name>klarna_shipped_status</name>
-            <label lang="de">Status für versendete Bestellungen</label>
-            <label lang="en">Status for shipped orders</label>
-            <label lang="nl">Status voor verzonden bestellingen</label>
-            <description lang="de">Bestellstatus für Bestellungen die als versendet markiert wurden.</description>
-            <description lang="en">Order status for shipped orders.</description>
-            <description lang="nl">Bestelstatus voor bestellingen die zijn gemarkeerd als verzonden</description>
-            <store>Shopware.apps.Base.store.OrderStatus</store>
-            <options>
-                <position>25</position>
             </options>
         </element>
 
@@ -607,7 +597,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>26</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -648,7 +638,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>27</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -658,7 +648,7 @@
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>28</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -668,7 +658,7 @@
             <label lang="en">Payment term (Days)</label>
             <label lang="nl">Betalingstermijn (Dagen)</label>
             <options>
-                <position>29</position>
+                <position>28</position>
             </options>
         </element>
 

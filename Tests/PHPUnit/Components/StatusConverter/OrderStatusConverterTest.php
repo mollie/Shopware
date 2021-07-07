@@ -12,6 +12,12 @@ class OrderStatusConverterTest extends TestCase
 {
 
     /**
+     *
+     */
+    public const CUSTOM_STATUS_SHIPPING = 99;
+
+
+    /**
      * This test verifies that our Mollie Payment status is
      * correctly converted into the matching Shopware Order Status
      * Here are overviews about the status changes in Mollie:
@@ -26,7 +32,7 @@ class OrderStatusConverterTest extends TestCase
      */
     public function testStatusMapping($status, $expectedStatus)
     {
-        $mapper = new OrderStatusConverter();
+        $mapper = new OrderStatusConverter(self::CUSTOM_STATUS_SHIPPING);
 
         $result = $mapper->getShopwareOrderStatus($status);
 
@@ -50,6 +56,8 @@ class OrderStatusConverterTest extends TestCase
             # ------------------------------------------------------------------------------------------------------
             'mollie_paid' => [PaymentStatus::MOLLIE_PAYMENT_PAID, Status::ORDER_STATE_COMPLETED],
             'mollie_completed' => [PaymentStatus::MOLLIE_PAYMENT_COMPLETED, Status::ORDER_STATE_COMPLETED],
+            # ------------------------------------------------------------------------------------------------------
+            'mollie_shipping' => [PaymentStatus::MOLLIE_PAYMENT_SHIPPING, self::CUSTOM_STATUS_SHIPPING],
             # ------------------------------------------------------------------------------------------------------
             'mollie_canceled' => [PaymentStatus::MOLLIE_PAYMENT_CANCELED, Status::ORDER_STATE_CANCELLED_REJECTED],
             'mollie_failed' => [PaymentStatus::MOLLIE_PAYMENT_FAILED, Status::ORDER_STATE_CANCELLED_REJECTED],

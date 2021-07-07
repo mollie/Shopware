@@ -68,6 +68,11 @@ class PaymentStatusConverter
                 $targetState = Status::PAYMENT_STATE_RE_CREDITING;
                 break;
 
+            case PaymentStatus::MOLLIE_PAYMENT_SHIPPING:
+                # do nothing
+                # this status should not affect the payment status
+                break;
+
             default:
                 throw new PaymentStatusNotFoundException('Unable to convert Mollie Payment Status: ' . $molliePaymentStatus . ' to Shopware Payment Status!');
         }

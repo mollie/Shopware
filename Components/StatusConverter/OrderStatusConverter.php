@@ -11,6 +11,21 @@ use Shopware\Models\Order\Status;
 class OrderStatusConverter
 {
 
+    /**
+     * @var int
+     */
+    private $shippingStatus;
+
+
+    /**
+     * OrderStatusConverter constructor.
+     * @param $shippingStatus
+     */
+    public function __construct($shippingStatus)
+    {
+        $this->shippingStatus = $shippingStatus;
+    }
+
 
     /**
      * @param string $molliePaymentStatus
@@ -30,6 +45,10 @@ class OrderStatusConverter
             case PaymentStatus::MOLLIE_PAYMENT_PAID:
             case PaymentStatus::MOLLIE_PAYMENT_COMPLETED:
                 $targetState = Status::ORDER_STATE_COMPLETED;
+                break;
+
+            case PaymentStatus::MOLLIE_PAYMENT_SHIPPING:
+                $targetState = $this->shippingStatus;
                 break;
 
             case PaymentStatus::MOLLIE_PAYMENT_CANCELED:

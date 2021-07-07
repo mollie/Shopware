@@ -94,6 +94,12 @@ class MollieStatusConverter
         }
 
 
+        # if partial shipping is used, then the
+        # order might have this status.
+        if ($order->isShipping()) {
+            $targetStatus = PaymentStatus::MOLLIE_PAYMENT_SHIPPING;
+        }
+
         # i dont know if that can happen in both ways?
         # but it was definitely necessary to add it
         if ($this->refundStatus->isOrderFullyRefunded($order)) {

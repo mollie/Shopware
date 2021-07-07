@@ -329,7 +329,7 @@ class OrderUpdater
      */
     private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
-        $converter = new OrderStatusConverter();
+        $converter = new OrderStatusConverter($this->config->getShippedStatus());
 
         $newStatusData = $converter->getShopwareOrderStatus($mollieStatus);
 

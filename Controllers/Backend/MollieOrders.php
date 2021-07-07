@@ -255,14 +255,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
                 $transaction->setIsShipped(true);
 
-                if ((int)$this->config->getShippedStatus() > 0) {
-                    Shopware()->Modules()->Order()->setOrderStatus(
-                        $order->getId(),
-                        $this->config->getShippedStatus(),
-                        $this->config->isPaymentStatusMailEnabled()
-                    );
-                }
-
                 $this->modelManager->flush($transaction);
 
                 $this->returnSuccess('Order status set to shipped at Mollie', true);
