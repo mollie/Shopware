@@ -4,6 +4,7 @@ use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Mollie\MollieShipping;
+use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
@@ -41,6 +42,10 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var RefundService */
     protected $refundService;
 
+    /**
+     * @var Smarty
+     */
+    private $smarty;
 
     /**
      * @var \Psr\Log\LoggerInterface
@@ -185,9 +190,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var MollieGatewayFactory $gwMollie */
             $gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
 
-            /** @var Enlight_Template_Manager $smarty */
             $smarty = $this->container->get('template');
-
 
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->orderService->getOrderById(
@@ -402,6 +405,78 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         }
     }
 
+
+    /**
+     *
+     */
+    public function partialShippingAction()
+    {
+        $this->loadServices();
+
+        try {
+
+            /** @var \Enlight_Controller_Request_Request $request */
+            $request = $this->Request();
+
+            $itemId = (int)$request->getParam('itemId', 0);
+            $articleNumber = (string)$request->getParam('articleNumber', '');
+            $orderId = (int)$request->getParam('orderId', 0);
+            $quantity = (int)$request->getParam('quantity', 0);
+
+
+            /** @var \Shopware\Models\Order\Order $order */
+            $order = $this->orderService->getOrderById($orderId);
+
+            if (!$order instanceof \Shopware\Models\Order\Order) {
+                throw new OrderNotFoundException('Order with ID ' . $orderId . ' has not been found!');
+            }
+
+            $this->logger->info('Starting partial shipping in Backend for Order: ' . $order->getNumber() . ' and Item: ' . $articleNumber);
+
+            # get the correct mollie gateway for the shop of our order
+            $gwMollie = $this->gwMollieFactory->createForShop($order->getShop()->getId());
+
+            # retrieve our mollie order
+            $mollieId = $this->orderService->getMollieOrderId($order);
+            $mollieOrder = $gwMollie->getOrder($mollieId);
+
+
+            # create our shipping component
+            # and start the partial shipment
+            $shipping = new MollieShipping($gwMollie, $this->smarty);
+
+            $shipment = $shipping->shipOrderPartially(
+                $order,
+                $mollieOrder,
+                $itemId,
+                $quantity
+            );
+
+
+            $this->logger->info(
+                'Partial Shipment successful in Backend for Order: ' . $order->getNumber(),
+                [
+                    'shipment' => $shipment->id
+                ]
+            );
+
+            $data = [
+            ];
+
+            $this->returnSuccess('', $data);
+
+        } catch (Exception $ex) {
+
+            $message = $ex->getMessage();
+
+            if (strpos($ex->getMessage(), 'The quantity is higher than the maximum quantity') !== false) {
+                $message = 'The provided quantity cannot be processed. It might already be shipped in Mollie!';
+            }
+
+            $this->returnError($message);
+        }
+    }
+
     public function shippableAction()
     {
         $shippable = false;
@@ -437,6 +512,20 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $this->returnJson([
             'shippable' => $shippable,
         ]);
+    }
+
+
+    /**
+     *
+     */
+    private function loadServices()
+    {
+        $this->logger = $this->container->get('mollie_shopware.components.logger');
+
+        $this->modelManager = $this->container->get('models');
+        $this->config = $this->container->get('mollie_shopware.config');
+        $this->orderService = $this->container->get('mollie_shopware.order_service');
+        $this->smarty = $this->container->get('template');
     }
 
 }

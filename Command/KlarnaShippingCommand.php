@@ -75,7 +75,7 @@ class KlarnaShippingCommand extends ShopwareCommand
     {
         $this
             ->setName('mollie:ship:klarna')
-            ->setDescription('Ship completed Klarna orders');
+            ->setDescription('Ship completed orders (Klarna Pay Later and Slice It)');
     }
 
     /**

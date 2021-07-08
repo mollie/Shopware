@@ -7,7 +7,9 @@ use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Tests\Utils\Fakes\Gateway\FakeMollieGateway;
 use PHPUnit\Framework\TestCase;
 use Shopware\Models\Dispatch\Dispatch;
+use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
+use stdClass;
 
 
 class MollieShippingTest extends TestCase
@@ -109,6 +111,41 @@ class MollieShippingTest extends TestCase
     }
 
     /**
+     * This test verifies that our tracking also works
+     * for partial shipments. Our cart has 1 line item.
+     * We try to ship 2 pieces of it, and make sure everything is sent
+     * correctly to the Mollie gateway.
+     */
+    public function testShipPartiallyWithTracking()
+    {
+        $shopwareOrder = new Order();
+        $shopwareOrder->setTrackingCode('ABC');
+
+        $detail = $this->getDetail(1, 'olid_123');
+        $detail->setQuantity(5);
+        $shopwareOrder->setDetails([$detail]);
+
+        $mollieOrder = $this->getMollieOrder();
+
+
+        $this->shipping->shipOrderPartially(
+            $shopwareOrder,
+            $mollieOrder,
+            1,
+            2
+        );
+
+        $this->assertSame($mollieOrder, $this->fakeGateway->getShippedOrder());
+        $this->assertSame('olid_123', $this->fakeGateway->getShippedLineItemId());
+        $this->assertSame(2, $this->fakeGateway->getShippedLineItemQuantity());
+
+        $this->assertEquals('ABC', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('-', $this->fakeGateway->getShippedCarrier());
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
+
+    /**
      * @return \string[][]
      */
     public function getAvailableTrackingVariables()
@@ -195,7 +232,6 @@ class MollieShippingTest extends TestCase
         $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
     }
 
-
     /**
      * This test verifies that we successfully ship our order
      * with a tracking information but without an existing dispatch object.
@@ -238,7 +274,7 @@ class MollieShippingTest extends TestCase
     {
         # we have to create a MOCK because theres no way
         # to set the ID for this type of entity!
-        /** @var \PHPUnit_Framework_MockObject_MockObject|Dispatch $repoTasks */
+        /** @var \PHPUnit_Framework_MockObject_MockObject|Dispatch $dispatch */
         $dispatch = $this->getMockBuilder(Dispatch::class)->disableOriginalConstructor()->getMock();
 
         $dispatch->method('getId')->willReturn($id);
@@ -246,6 +282,29 @@ class MollieShippingTest extends TestCase
         $dispatch->method('getStatusLink')->willReturn($trackingUrl);
 
         return $dispatch;
+    }
+
+    /**
+     * @param $id
+     * @param $mollieLineItemId
+     * @return Detail
+     */
+    private function getDetail($id, $mollieLineItemId)
+    {
+        /** @var \PHPUnit_Framework_MockObject_MockObject $att */
+        $att = $this->getMockBuilder(stdClass::class)->disableOriginalConstructor()
+            ->addMethods([
+                'getMollieOrderLineId'
+            ])
+            ->getMock();
+        $att->method('getMollieOrderLineId')->willReturn($mollieLineItemId);
+
+        /** @var \PHPUnit_Framework_MockObject_MockObject|Detail $detail */
+        $detail = $this->getMockBuilder(Detail::class)->disableOriginalConstructor()->getMock();
+        $detail->method('getId')->willReturn($id);
+        $detail->method('getAttribute')->willReturn($att);
+
+        return $detail;
     }
 
 }

@@ -31,6 +31,14 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
+        <service id="mollie_shopware.command.orders_shipping_command" class="MollieShopware\Command\OrdersShippingCommand" public="true">
+            <tag name="console.command" command="mollie:orders:ship"/>
+            <argument type="service" id="mollie_shopware.order_service"/>
+            <argument type="service" id="mollie_shopware.gateways.mollie.factory"/>
+            <argument type="service" id="template"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
         <service id="mollie_shopware.command.payment_import_command" class="MollieShopware\Command\PaymentImportCommand" public="true">
             <tag name="console.command" command="mollie:payments:import"/>
             <argument type="service" id="mollie_shopware.payments.installer"/>

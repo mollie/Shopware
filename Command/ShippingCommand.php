@@ -76,7 +76,7 @@ class ShippingCommand extends ShopwareCommand
     {
         $this
             ->setName('mollie:ship:orders')
-            ->setDescription('Ship completed orders');
+            ->setDescription('Ship completed orders (All Payment Methods)');
     }
 
     /**
