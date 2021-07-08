@@ -19,12 +19,17 @@ Ext.define('Shopware.apps.Mollie.controller.Payment', {
 
             me.getFormField(generalForm, 'mollie_methods_api', field => {
                 const methodType = field.getValue();
-                me.updateMollieData(record.data.id, expirationDays, methodType);
+
+                me.getFormField(generalForm, 'mollie_order_creation', field => {
+                    const orderCreation = field.getValue();
+                    me.updateMollieData(record.data.id, expirationDays, methodType, orderCreation);
+                });
+
             });
         });
     },
 
-    updateMollieData(paymentId, expirationDays, methodType) {
+    updateMollieData(paymentId, expirationDays, methodType, orderCreation) {
         Ext.Ajax.request({
             url: '{url controller=MolliePayments action="saveMollieConfig"}',
             method: 'POST',
@@ -32,6 +37,7 @@ Ext.define('Shopware.apps.Mollie.controller.Payment', {
                 paymentId: paymentId,
                 expirationDays: expirationDays,
                 methodType: methodType,
+                orderCreation: orderCreation
             },
             success: function (res) {
                 try {

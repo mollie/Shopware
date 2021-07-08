@@ -9,6 +9,7 @@ use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\PaymentStatus;
@@ -68,6 +69,11 @@ class PaymentService
      * @var Config
      */
     protected $config;
+
+    /**
+     * @var Config\PaymentConfigResolver
+     */
+    private $paymentConfig;
 
     /**
      * @var array
@@ -133,17 +139,20 @@ class PaymentService
 
 
     /**
+     * PaymentService constructor.
      * @param MollieApiFactory $apiFactory
      * @param Config $config
+     * @param Config\PaymentConfigResolver $paymentConfig
      * @param MollieGatewayInterface $gwMollie
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
+        $this->paymentConfig = $paymentConfig;
         $this->gwMollie = $gwMollie;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
@@ -254,7 +263,6 @@ class PaymentService
         # configure payment specific settings
         $paymentMethodObject = $this->configurePaymentSettings(
             $paymentMethodObject,
-            $paymentMethodName,
             $cleanPaymentMethod,
             $shopID
         );
@@ -559,61 +567,31 @@ class PaymentService
 
     /**
      * @param PaymentInterface $paymentMethodObject
-     * @param $paymentMethodName
-     * @param $cleanPaymentMethod
-     * @param $shopID
+     * @param string $cleanPaymentMethod
+     * @param int $shopID
      * @return PaymentInterface|ApplePay|BankTransfer|CreditCard|IDeal
      * @throws ApiException
      */
-    private function configurePaymentSettings(PaymentInterface $paymentMethodObject, $paymentMethodName, $cleanPaymentMethod, $shopID)
+    private function configurePaymentSettings(PaymentInterface $paymentMethodObject, $cleanPaymentMethod, $shopID)
     {
-        $methodType = PaymentMethodType::GLOBAL_SETTING;
-        $expirationDays = '';
-
-        # we start by loading our payment specific configuration
-        # from the database.
-        # if somehow a specific config object is not yet existing in the database
-        # then we always continue with the basic settings to at least have a working checkout.
-        try {
-
-            $paymentConfig = $this->repoPaymentConfig->getByPaymentName($paymentMethodName);
-            $paymentId = $paymentConfig->getPaymentMeanId();
-
-            $translatedMethods = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::METHODS_API, $paymentId, $shopID);
-            $methodType = (!empty($translatedMethods)) ? (int)$translatedMethods : (int)$paymentConfig->getMethodType();
-
-            $translatedExpirationDays = $this->translations->getPaymentConfigTranslation(ConfigurationKeys::EXPIRATION_DAYS, $paymentId, $shopID);
-            $expirationDays = (!empty($translatedExpirationDays)) ? $translatedExpirationDays : $paymentConfig->getExpirationDays();
-
-        } catch (MolliePaymentConfigurationNotFound $ex) {
-            # if we do not have a payment method config
-            # then repeat as usual
-        }
-
-
-        # 1. CONFIGURE API METHOD
-        # if we should use our global setting,
-        # then use the one from out plugin configuration
-        if ($methodType === PaymentMethodType::GLOBAL_SETTING) {
-            $methodType = $this->config->getPaymentMethodsType();
-        }
-
+        # CONFIGURE API METHOD
+        $methodType = $this->paymentConfig->getFinalMethodType($cleanPaymentMethod, $shopID);
         # make sure to validate it one more time, because some
         # payment methods have strict guides on what to use
         $worksWithPaymentsApi = PaymentMethodType::isPaymentsApiAllowed($cleanPaymentMethod);
-
         # if payments is not allowed, or orders api is used, then switch to Orders API
         $useOrdersAPI = ($methodType === PaymentMethodType::ORDERS_API || !$worksWithPaymentsApi);
         $paymentMethodObject->setOrdersApiEnabled($useOrdersAPI);
 
 
-        # 2. CONFIGURE OPTIONAL EXPIRATION DAYS
+        # CONFIGURE OPTIONAL EXPIRATION DAYS
+        $expirationDays = $this->paymentConfig->getFinalOrderExpiration($cleanPaymentMethod, $shopID);
         if (!empty($expirationDays)) {
             $paymentMethodObject->setExpirationDays((int)$expirationDays);
         }
 
 
-        # 3. CONFIGURE INDIVIDUAL PAYMENT SPECIFIC DATA
+        # CONFIGURE INDIVIDUAL PAYMENT SPECIFIC DATA
         if ($paymentMethodObject instanceof ApplePay) {
 
             $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();

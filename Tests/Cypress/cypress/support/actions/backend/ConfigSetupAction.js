@@ -2,40 +2,26 @@ import LoginRepository from 'Repositories/backend/LoginRepository';
 import TopMenuRepository from "Repositories/backend/TopMenuRepository";
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
-import Session from "Actions/utils/Session";
+
 
 const repoLogin = new LoginRepository();
 const repoTopMenu = new TopMenuRepository();
-const session = new Session();
 
 
-export default class PluginAction {
-
-    payments = [
-        'PayPal',
-        'Pay later',
-        'Slice it',
-        'iDEAL',
-        'SOFORT',
-        'eps',
-        'Giropay',
-        'Bancontact',
-        'Przelewy24',
-        'KBC',
-        'Belfius',
-        'Bank transfer',
-    ];
+export default class ConfigSetupAction {
 
 
     /**
      *
      * @param {PluginConfig} pluginConfig
      * @param {PaymentConfig} paymentsConfig
+     * @param {string[]} payments
      */
-    configure(pluginConfig, paymentsConfig) {
+    configure(pluginConfig, paymentsConfig, payments) {
 
         this.pluginConfig = pluginConfig;
         this.paymentsConfig = paymentsConfig;
+        this.payments = payments;
 
         // we have to re-login after every type of setting
         // because the selectors with the "x" close buttons change sometimes.
@@ -111,19 +97,35 @@ export default class PluginAction {
         this.payments.forEach(payment => {
 
             cy.contains(payment).click({force: true});
+            cy.wait(500);
 
-            // click on methods dropdown
+            // ---------------------------------------------------------------
+            // METHOD TYPE
             cy.get('#mollie_combo_method-inputEl').click({force: true});
+            var itemSelector = '[data-action="mollie_methods_api"] > div > ul';
 
-            // now select either the global configuration
-            // or a specific payment methods
             if (this.paymentsConfig.isMethodsGlobalSetting()) {
-                cy.contains('Globale Einstellung').click({force: true});
+                cy.get(itemSelector + ' > :nth-child(1)').click({force: true});
             } else if (this.paymentsConfig.isMethodsPaymentsApiEnabled()) {
-                cy.get('ul > :nth-child(2)').click({force: true});
+                cy.get(itemSelector + ' > :nth-child(2)').click({force: true});
             } else {
-                cy.get('ul > :nth-child(3)').click({force: true});
+                cy.get(itemSelector + ' > :nth-child(3)').click({force: true});
             }
+
+            // ---------------------------------------------------------------
+            // ORDER CREATION
+            cy.get('#mollie_combo_order_creation-inputEl').click({force: true});
+            itemSelector = '[data-action="mollie_order_creation"] > div > ul';
+
+            if (this.paymentsConfig.isOrderCreationGlobalSetting()) {
+                cy.get(itemSelector + ' > :nth-child(1)').click({force: true});
+            } else if (this.paymentsConfig.isOrderCreationBefore()) {
+                cy.get(itemSelector + ' > :nth-child(2)').click({force: true});
+            } else {
+                cy.get(itemSelector + ' > :nth-child(3)').click({force: true});
+            }
+
+            // ---------------------------------------------------------------
 
             cy.wait(500);
             cy.contains('Speichern').click({force: true});

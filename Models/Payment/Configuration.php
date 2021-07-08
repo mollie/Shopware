@@ -3,7 +3,9 @@
 namespace MollieShopware\Models\Payment;
 
 use Doctrine\ORM\Mapping as ORM;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
+use Shopware\Models\Order\Order;
 use Shopware\Models\Payment\Payment;
 
 /**
@@ -49,6 +51,13 @@ class Configuration
      * @ORM\Column(name="method_type", type="integer", nullable=true)
      */
     private $methodType;
+
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(name="order_creation", type="integer", nullable=true)
+     */
+    private $orderCreation;
 
 
     /**
@@ -137,9 +146,9 @@ class Configuration
         $value = (int)$this->methodType;
 
         # if we dont know the INT value
-        # then at least always return the payments API
+        # then return GLOBAL as fallback
         if (!in_array($value, $availableTypes)) {
-            return PaymentMethodType::PAYMENTS_API;
+            return PaymentMethodType::GLOBAL_SETTING;
         }
 
         return $value;
@@ -151,6 +160,40 @@ class Configuration
     public function setMethodType($methodType)
     {
         $this->methodType = $methodType;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrderCreation()
+    {
+        if ($this->orderCreation === null) {
+            return OrderCreationType::UNDEFINED;
+        }
+
+        $availableTypes = [
+            OrderCreationType::GLOBAL_SETTING,
+            OrderCreationType::BEFORE_PAYMENT,
+            OrderCreationType::AFTER_PAYMENT,
+        ];
+
+        $value = (int)$this->orderCreation;
+
+        # if we dont know the INT value
+        # then return GLOBAL as default
+        if (!in_array($value, $availableTypes)) {
+            return OrderCreationType::GLOBAL_SETTING;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int $orderCreation
+     */
+    public function setOrderCreation($orderCreation)
+    {
+        $this->orderCreation = $orderCreation;
     }
 
 }

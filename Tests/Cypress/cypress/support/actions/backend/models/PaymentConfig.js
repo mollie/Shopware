@@ -4,8 +4,10 @@ export default class PluginConfig {
      *
      */
     constructor() {
-        this.userMethodsGlobal = true;
+        this.useMethodsGlobal = true;
         this.useMethodsPaymentsAPI = true;
+        this.useOrderCreationGlobal = true;
+        this.useOrderCreationBefore = true;
     }
 
     /**
@@ -13,7 +15,7 @@ export default class PluginConfig {
      * @returns {boolean}
      */
     isMethodsGlobalSetting() {
-        return this.userMethodsGlobal;
+        return this.useMethodsGlobal;
     }
 
     /**
@@ -21,7 +23,7 @@ export default class PluginConfig {
      * @param {boolean} enabled
      */
     setMethodsGlobal(enabled) {
-        this.userMethodsGlobal = enabled;
+        this.useMethodsGlobal = enabled;
     }
 
     /**
@@ -37,7 +39,41 @@ export default class PluginConfig {
      * @param {boolean} enabled
      */
     setMethodsPaymentsAPI(enabled) {
+        this.useMethodsGlobal = false;
         this.useMethodsPaymentsAPI = enabled;
+    }
+
+    /**
+     *
+     * @param enabled
+     */
+    setOrderCreationGlobal(enabled) {
+        this.useOrderCreationGlobal = enabled;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isOrderCreationGlobalSetting() {
+        return this.useOrderCreationGlobal;
+    }
+
+    /**
+     *
+     * @param enabled
+     */
+    setOrderCreationBefore(enabled) {
+        this.useOrderCreationGlobal = false;
+        this.useOrderCreationBefore = enabled;
+    }
+
+    /**
+     *
+     * @returns {boolean}
+     */
+    isOrderCreationBefore() {
+        return this.useOrderCreationBefore;
     }
 
 }
