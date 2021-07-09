@@ -25,10 +25,11 @@ class Translation
     }
 
     /**
-     * @param string $configKey
-     * @param int $paymentId
-     * @param int $shopId
+     * @param $configKey
+     * @param $paymentId
+     * @param $shopId
      * @return string
+     * @throws \Doctrine\DBAL\Exception
      */
     public function getPaymentConfigTranslation($configKey, $paymentId, $shopId)
     {
@@ -44,6 +45,10 @@ class Translation
         $row = $qb->execute()->fetch();
 
         $data = unserialize($row['objectdata']);
+
+        if (!is_array($data)) {
+            return '';
+        }
 
         if (!array_key_exists($paymentId, $data)) {
             return '';
