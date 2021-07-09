@@ -35,10 +35,20 @@ export default class PluginAction {
         this.pluginConfig = pluginConfig;
         this.paymentsConfig = paymentsConfig;
 
-        this._openBackend();
+        // we have to re-login after every type of setting
+        // because the selectors with the "x" close buttons change sometimes.
+        // its way more reliable if we just reload a clean backend and open
+        // the new configuration that we need.
+
+        this._loginToBackend();
 
         this.__configurePayments();
+
+        this._loginToBackend();
+
         this._configurePlugin();
+
+        this._loginToBackend();
 
         this.__clearCaches();
     }
@@ -46,7 +56,7 @@ export default class PluginAction {
     /**
      *
      */
-    _openBackend() {
+    _loginToBackend() {
         cy.visit('/backend');
 
         // login in backend
@@ -93,11 +103,6 @@ export default class PluginAction {
             .within(() => {
                 return cy.get('.x-tool-close').click({force: true});
             })
-
-        // also close our plugin manager
-        cy.wait(500);
-        cy.get('#tool-1568-toolEl').click({force: true});
-        cy.wait(500);
     }
 
     /**
@@ -114,7 +119,7 @@ export default class PluginAction {
             cy.contains(payment).click({force: true});
 
             // click on methods dropdown
-            cy.get('#ext-gen1605').click();
+            cy.get('#mollie_combo_method-inputEl').click({force: true});
 
             // now select either the global configuration
             // or a specific payment methods
@@ -128,11 +133,6 @@ export default class PluginAction {
 
             cy.contains('Speichern').click({force: true});
         })
-
-        // click on close button
-        cy.wait(500);
-        cy.get('#tool-1405-toolEl').click({force: true});
-        cy.wait(500);
     }
 
     /**

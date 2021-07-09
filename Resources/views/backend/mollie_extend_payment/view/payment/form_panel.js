@@ -60,6 +60,7 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                     items: [
                         {
                             xtype: 'combobox',
+                            id: 'mollie_combo_method',
                             name: 'mollie_methods_api',
                             flex: 12,
                             fieldLabel: me.molSnippets.methodCaption,
