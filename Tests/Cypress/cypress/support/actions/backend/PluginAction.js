@@ -2,9 +2,11 @@ import LoginRepository from 'Repositories/backend/LoginRepository';
 import TopMenuRepository from "Repositories/backend/TopMenuRepository";
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
+import Session from "Actions/utils/Session";
 
 const repoLogin = new LoginRepository();
 const repoTopMenu = new TopMenuRepository();
+const session = new Session();
 
 
 export default class PluginAction {
@@ -44,10 +46,12 @@ export default class PluginAction {
 
         this.__configurePayments();
 
+        session.resetBrowserSession();
         this._loginToBackend();
 
         this._configurePlugin();
 
+        session.resetBrowserSession();
         this._loginToBackend();
 
         this.__clearCaches();
