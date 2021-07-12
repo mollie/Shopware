@@ -145,6 +145,7 @@ configs.forEach(config => {
 
                         // we should now get back to the shop
                         // with a successful order message
+                        cy.url().should('include', '/checkout/finish');
                         cy.contains('Vielen Dank für Ihre Bestellung');
                     })
 
