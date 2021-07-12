@@ -30,7 +30,9 @@ export default class PaymentsAction {
      *
      */
     submitPage() {
-        repoPayments.getSubmitButton().click();
+        // do a force submit, because the cookie popup might
+        // be on top of it
+        repoPayments.getSubmitButton().click({force: true});
     }
 
 }

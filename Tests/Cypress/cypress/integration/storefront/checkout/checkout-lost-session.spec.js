@@ -45,6 +45,11 @@ configs.forEach(config => {
     context("Config: " + config.name, () => {
 
         before(() => {
+
+            // this is required to have the mollie
+            // sandbox form working correctly
+            molliePayment.initSandboxCookie();
+
             devices.setDevice(device);
 
             const pluginConfig = new PluginConfig();

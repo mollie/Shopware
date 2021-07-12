@@ -66,6 +66,11 @@ configs.forEach(config => {
     context("Config: " + config.name, () => {
 
         before(function () {
+
+            // this is required to have the mollie
+            // sandbox form working correctly
+            molliePayment.initSandboxCookie();
+
             devices.setDevice(device);
 
             const pluginConfig = new PluginConfig();
@@ -119,6 +124,7 @@ configs.forEach(config => {
                         // and that our payment method is also visible somewhere in that url
                         cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
                         cy.url().should('include', payment.key);
+
 
                         if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 

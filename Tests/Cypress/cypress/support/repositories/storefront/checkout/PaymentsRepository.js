@@ -1,4 +1,5 @@
-class PaymentsRepository {
+
+export default class PaymentsRepository {
 
     /**
      *
@@ -9,5 +10,3 @@ class PaymentsRepository {
     }
 
 }
-
-export default PaymentsRepository;
