@@ -92,29 +92,53 @@ class FakeMollieGateway implements MollieGatewayInterface
         return $this->shippedLineItemQuantity;
     }
 
-
-    public function switchClient(MollieApiClient $client)
+    /**
+     * @param MollieApiClient $client
+     */
+    public function switchClient(MollieApiClient $client): void
     {
     }
 
-    public function getOrganizationId()
+    /**
+     * @return string
+     */
+    public function getOrganizationId(): string
     {
+        return 'org_test';
     }
 
-    public function getProfileId()
+    /**
+     * @return string
+     */
+    public function getProfileId(): string
     {
+        return 'prof_test';
     }
 
-    public function getOrder($orderId)
+    /**
+     * @param $orderId
+     * @return Order
+     */
+    public function getOrder($orderId): Order
     {
+        return new Order(null);
     }
 
-    public function getPayment($paymentId)
+    /**
+     * @param $paymentId
+     * @return Payment
+     */
+    public function getPayment($paymentId): Payment
     {
+        return new Payment(null);
     }
 
-    public function getIdealIssuers()
+    /**
+     * @return array
+     */
+    public function getIdealIssuers(): array
     {
+        return [];
     }
 
     /**

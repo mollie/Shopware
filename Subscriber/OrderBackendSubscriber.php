@@ -76,7 +76,6 @@ class OrderBackendSubscriber implements SubscriberInterface
      * them in the database to use them when the order is fully processed.
      *
      * @param Enlight_Event_EventArgs $args
-     * @return bool
      * @throws Exception
      */
     public function onSendMail(Enlight_Event_EventArgs $args)
