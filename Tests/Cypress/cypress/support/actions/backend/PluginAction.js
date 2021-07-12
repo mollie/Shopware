@@ -135,7 +135,7 @@ export default class PluginAction {
                 cy.get('ul > :nth-child(3)').click({force: true});
             }
 
-            cy.wait(100);
+            cy.wait(1000);
 
             cy.contains('Speichern').click({force: true});
         })
