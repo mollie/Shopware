@@ -28,7 +28,7 @@ class PaymentMethodsInstaller
     /**
      *
      */
-    const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../Resources/views/frontend/plugins/payment';
+    const PAYMENT_METHOD_TEMPLATE_DIR = __DIR__ . '/../../../Resources/views/frontend/plugins/payment';
 
     /**
      *
@@ -378,6 +378,12 @@ class PaymentMethodsInstaller
         # always make sure our action is correctly set
         # otherwise the payments won't even start and a finish page is visible directly
         $method['action'] = self::MOLLIE_ACTION_KEY;
+
+        $file = self::PAYMENT_METHOD_TEMPLATE_DIR . '/' . $method . '.tpl';
+
+        if (file_exists($file)) {
+            $method['template'] = $method . '.tpl';
+        }
 
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
     }
