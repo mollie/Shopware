@@ -35,14 +35,11 @@ const device = devices.getFirstDevice();
 
 
 const configs = [
-    {name: "Global Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: true,},
-    {name: "Global Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true, useGlobalConfig: true,},
+    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: true,},
+    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true, useGlobalConfig: true,},
     // ------------------------------------------------------------------------------------------------------------------------------
-    {name: "Global Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: true,},
-    {name: "Global Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false, useGlobalConfig: true,},
-    // ------------------------------------------------------------------------------------------------------------------------------
-    {name: "Payment Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: false,},
-    {name: "Payment Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: false,},
+    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: true,},
+    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false, useGlobalConfig: true,},
 ];
 
 const payments = [
