@@ -64,10 +64,6 @@ configs.forEach(config => {
 
         before(function () {
 
-            // this is required to have the mollie
-            // sandbox form working correctly
-            molliePayment.initSandboxCookie();
-
             devices.setDevice(device);
 
             const pluginConfig = new PluginConfig();
@@ -84,7 +80,7 @@ configs.forEach(config => {
         })
 
         beforeEach(() => {
-            session.resetBrowserSession();
+            session.resetSession();
         });
 
         describe('Successful Checkout', () => {
@@ -122,6 +118,7 @@ configs.forEach(config => {
                         cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
                         cy.url().should('include', payment.key);
 
+                        molliePayment.initSandboxCookie();
 
                         if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 
@@ -171,6 +168,8 @@ configs.forEach(config => {
 
                     checkout.switchPaymentMethod('PayPal');
                     checkout.placeOrderOnConfirm();
+
+                    molliePayment.initSandboxCookie();
 
                     molliePayment.selectFailed();
 

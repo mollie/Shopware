@@ -3,8 +3,7 @@ class PaymentScreenAction {
 
     /**
      * This function is very important.
-     * Call it in the "before" or within your test, that uses
-     * the Mollie sandbox page.
+     * Call it on the Mollie sandbox page.
      * It will prepare the required cookies for the sandbox page,
      * and also modify its sameSite property to be recognized using
      * cross-domain cypress tests.
@@ -23,6 +22,8 @@ class PaymentScreenAction {
                 httpOnly: true
             }
         );
+
+        cy.reload();
     }
 
 

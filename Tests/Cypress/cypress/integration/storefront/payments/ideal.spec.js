@@ -36,7 +36,7 @@ describe('iDEAL Issuers', () => {
     })
 
     beforeEach(() => {
-        session.resetBrowserSession();
+        session.resetSession();
     });
 
 

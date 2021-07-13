@@ -46,13 +46,11 @@ export default class PluginAction {
 
         this.__configurePayments();
 
-        session.resetBrowserSession();
-        this._loginToBackend();
+        cy.reload();
 
         this._configurePlugin();
 
-        session.resetBrowserSession();
-        this._loginToBackend();
+        cy.reload();
 
         this.__clearCaches();
     }
@@ -96,17 +94,8 @@ export default class PluginAction {
         const valueUsePaymentsAPI = (this.pluginConfig.isPaymentsApiEnabled()) ? "Payments API (Transaktionen)" : "Orders API (Transaktionen + Bestellungen)";
         this._setConfigurationValue('Zahlungs Methode', valueUsePaymentsAPI);
 
-
         cy.get(".save-button").click({force: true});
         cy.log('Plugin successfully configured');
-
-        // this is important to avoid side effects
-        // with same elements like x-tab-inner for upcoming actions
-        // in our ExtJS backend.
-        cy.get('.detail-window')
-            .within(() => {
-                return cy.get('.x-tool-close').click({force: true});
-            })
     }
 
     /**
@@ -118,6 +107,7 @@ export default class PluginAction {
         repoTopMenu.getSettings().click({force: true});
         repoTopMenu.getPaymentMethods().click({force: true});
         cy.wait(500);
+
         this.payments.forEach(payment => {
 
             cy.contains(payment).click({force: true});
@@ -135,8 +125,7 @@ export default class PluginAction {
                 cy.get('ul > :nth-child(3)').click({force: true});
             }
 
-            cy.wait(1000);
-
+            cy.wait(500);
             cy.contains('Speichern').click({force: true});
         })
     }

@@ -46,10 +46,6 @@ configs.forEach(config => {
 
         before(() => {
 
-            // this is required to have the mollie
-            // sandbox form working correctly
-            molliePayment.initSandboxCookie();
-
             devices.setDevice(device);
 
             const pluginConfig = new PluginConfig();
@@ -63,12 +59,11 @@ configs.forEach(config => {
             plugin.configure(pluginConfig, paymentConfig);
 
             register.doRegister(user_email, user_pwd);
-
         });
 
         beforeEach(() => {
             devices.setDevice(device);
-            session.resetBrowserSession();
+            session.resetSession();
         });
 
         it('Pay with PayPal', () => {
@@ -86,7 +81,9 @@ configs.forEach(config => {
             checkout.placeOrderOnConfirm();
 
             // now remove our session
-            session.resetSessionData();
+            session.resetSession();
+
+            molliePayment.initSandboxCookie();
 
             // mark as paid in mollie
             // and navigate back
@@ -112,7 +109,9 @@ configs.forEach(config => {
             checkout.placeOrderOnConfirm();
 
             // now remove our session
-            session.resetSessionData();
+            session.resetSession();
+
+            molliePayment.initSandboxCookie();
 
             // mark as failed in mollie
             // and navigate back
