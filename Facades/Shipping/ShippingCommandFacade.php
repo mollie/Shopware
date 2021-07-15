@@ -1,6 +1,6 @@
 <?php
 
-namespace MollieShopware\Facades\ShippingCommand;
+namespace MollieShopware\Facades\Shipping;
 
 
 use Doctrine\ORM\EntityNotFoundException;

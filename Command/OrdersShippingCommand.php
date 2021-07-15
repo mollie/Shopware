@@ -3,14 +3,11 @@
 namespace MollieShopware\Command;
 
 use InvalidArgumentException;
-use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Components\Services\OrderService;
-use MollieShopware\Exceptions\OrderNotFoundException;
+use MollieShopware\Facades\Shipping\ShipOrderFacade;
 use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
-use Shopware\Models\Order\Detail;
-use Shopware\Models\Order\Order;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,19 +17,9 @@ class OrdersShippingCommand extends ShopwareCommand
 {
 
     /**
-     * @var OrderService
+     * @var ShipOrderFacade
      */
-    private $orderService;
-
-    /**
-     * @var MollieGatewayFactory
-     */
-    private $mollieGatewayFactory;
-
-    /**
-     * @var \Smarty
-     */
-    private $template;
+    private $shipOrderFacade;
 
     /**
      * @var LoggerInterface
@@ -49,10 +36,13 @@ class OrdersShippingCommand extends ShopwareCommand
      */
     public function __construct(OrderService $orderService, MollieGatewayFactory $gatewayFactory, \Smarty $template, LoggerInterface $logger)
     {
-        $this->orderService = $orderService;
-        $this->mollieGatewayFactory = $gatewayFactory;
-        $this->template = $template;
         $this->logger = $logger;
+
+        $this->shipOrderFacade = new ShipOrderFacade(
+            $orderService,
+            $gatewayFactory,
+            $template
+        );
 
         parent::__construct();
     }
@@ -89,9 +79,6 @@ class OrdersShippingCommand extends ShopwareCommand
         /** @var null|int $shipQuantity */
         $shipQuantity = $input->getArgument('quantity');
 
-        $isPartial = ($articleNumber !== null);
-
-
         if ($orderNumber === null) {
             throw new InvalidArgumentException('Missing Argument for Order Number!');
         }
@@ -99,58 +86,19 @@ class OrdersShippingCommand extends ShopwareCommand
 
         try {
 
+            $isPartial = ($articleNumber !== null);
+
             if ($isPartial) {
                 $this->logger->info('Starting partial shipment on CLI for Order: ' . $orderNumber . ', Article: ' . $articleNumber);
             } else {
                 $this->logger->info('Starting full shipment on CLI for Order: ' . $orderNumber);
             }
 
-
-            $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
-
-            if (!$order instanceof Order) {
-                throw new OrderNotFoundException('Order with number: ' . $orderNumber . ' has not been found in Shopware!');
-            }
-
-
-            $mollieId = $this->orderService->getMollieOrderId($order);
-
-
-            # create our mollie gateway
-            # with the configuration from the shop of our order
-            $mollieGateway = $this->mollieGatewayFactory->createForShop($order->getShop()->getId());
-
-            # now retrieve the mollie order object
-            # from our gateway
-            $mollieOrder = $mollieGateway->getOrder($mollieId);
-
-
-            $shipping = new MollieShipping($mollieGateway, $this->template);
-
-            # now either perform a full shipment
-            # or only a partial shipment for our order and its articles
-            if (!$isPartial) {
-
-                $shipping->shipOrder($order, $mollieOrder);
-
-            } else {
-
-                $detail = $this->searchArticleItem($order, $articleNumber);
-
-                # if we did not provide a quantity
-                # then we use the full quantity that has been ordered
-                if ($shipQuantity === null) {
-                    $shipQuantity = $detail->getQuantity();
-                }
-
-                $shipping->shipOrderPartially(
-                    $order,
-                    $mollieOrder,
-                    $detail->getId(),
-                    $shipQuantity
-                );
-            }
-
+            $this->shipOrderFacade->shipOrder(
+                $orderNumber,
+                $articleNumber,
+                $shipQuantity
+            );
 
             if ($isPartial) {
                 $this->logger->info('Partial Shipping Success on CLI for Order: ' . $orderNumber . ', Article: ' . $articleNumber);
@@ -171,25 +119,6 @@ class OrdersShippingCommand extends ShopwareCommand
 
             $io->error($e->getMessage());
         }
-    }
-
-    /**
-     * @param Order $order
-     * @param string $articleNumber
-     * @return Detail
-     * @throws \Exception
-     */
-    private function searchArticleItem(Order $order, $articleNumber)
-    {
-        /** @var Detail $detail */
-        foreach ($order->getDetails() as $detail) {
-
-            if ($detail->getArticleNumber() === $articleNumber) {
-                return $detail;
-            }
-        }
-
-        throw new \Exception('Item with article number: ' . $articleNumber . ' not found in this order!');
     }
 
 }
