@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
-use MollieShopware\Facades\ShippingCommand\ShippingCommandFacade;
+use MollieShopware\Facades\Shipping\ShippingCommandFacade;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use Psr\Log\LoggerInterface;

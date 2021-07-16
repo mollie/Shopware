@@ -6,7 +6,7 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
-use MollieShopware\Facades\ShippingCommand\ShippingCommandFacade;
+use MollieShopware\Facades\Shipping\ShippingCommandFacade;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
