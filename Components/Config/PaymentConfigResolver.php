@@ -1,0 +1,196 @@
+<?php
+
+namespace MollieShopware\Components\Config;
+
+use MollieShopware\Components\Constants\OrderCreationType;
+use MollieShopware\Components\Constants\PaymentMethodType;
+use MollieShopware\Components\Translation\Translation;
+use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
+use MollieShopware\Models\Payment\Configuration;
+use MollieShopware\Models\Payment\ConfigurationKeys;
+use MollieShopware\Models\Payment\Repository;
+use MollieShopware\MollieShopware;
+use Shopware\Components\Model\ModelManager;
+
+class PaymentConfigResolver
+{
+
+    /**
+     * @var ConfigFactory
+     */
+    protected $configFactory;
+
+    /**
+     * @var Repository
+     */
+    private $repoPaymentConfig;
+
+    /**
+     * @var Translation
+     */
+    private $translations;
+
+
+    /**
+     * PaymentConfigResolver constructor.
+     * @param ConfigFactory $configFactory
+     * @param ModelManager $models
+     * @param Translation $translations
+     */
+    public function __construct(ConfigFactory $configFactory, ModelManager $models, Translation $translations)
+    {
+        $this->configFactory = $configFactory;
+        $this->translations = $translations;
+
+        /** @var Repository $repoPayments */
+        $repoPayments = $models->getRepository(Configuration::class);
+        $this->repoPaymentConfig = $repoPayments;
+    }
+
+
+    /**
+     * Gets the final method type for the provided
+     * payment method in the provided shop.
+     * This is either the one from the payment configuration,
+     * or the global plugin setting if that has been configured.
+     *
+     * @param string $paymentMethod
+     * @param int $shopId
+     * @return int
+     * @throws MolliePaymentConfigurationNotFound
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getFinalMethodType($paymentMethod, $shopId)
+    {
+        $fullPaymentMethod = $this->getPaymentFullName($paymentMethod);
+        $cleanPaymentMethod = str_replace(MollieShopware::PAYMENT_PREFIX, '', $paymentMethod);
+
+
+        # fetch the configuration for this payment method
+        $pluginConfig = $this->configFactory->getForShop($shopId);
+        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+
+        # get any translated values
+        # for our provided shop
+        $translatedValue = $this->translations->getPaymentConfigTranslation(
+            ConfigurationKeys::METHODS_API,
+            $paymentConfig->getPaymentMeanId(),
+            $shopId
+        );
+
+        # use either the snippet or the
+        # value from the config directly
+        $methodType = (!empty($translatedValue)) ? (int)$translatedValue : (int)$paymentConfig->getMethodType();
+
+
+        # if we should use our global setting,
+        # then use the one from out plugin configuration
+        if ($methodType === PaymentMethodType::GLOBAL_SETTING) {
+            $methodType = $pluginConfig->getPaymentMethodsType();
+        }
+
+        # make sure to validate it one more time, because some
+        # payment methods have strict guides on what to use
+        $worksWithPaymentsApi = PaymentMethodType::isPaymentsApiAllowed($cleanPaymentMethod);
+
+        # if payments is not allowed, or orders api is used, then switch to Orders API
+        $useOrdersAPI = ($methodType === PaymentMethodType::ORDERS_API || !$worksWithPaymentsApi);
+
+
+        if ($useOrdersAPI) {
+            return PaymentMethodType::ORDERS_API;
+        }
+
+        return PaymentMethodType::PAYMENTS_API;
+    }
+
+    /**
+     * Gets the final order creation option for the provided
+     * payment method in the provided shop.
+     * This is either the one from the payment configuration,
+     * or the global plugin setting if that has been configured.
+     *
+     * @param string $paymentMethod
+     * @param int $shopId
+     * @return int
+     * @throws MolliePaymentConfigurationNotFound
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getFinalOrderCreation($paymentMethod, $shopId)
+    {
+        $fullPaymentMethod = $this->getPaymentFullName($paymentMethod);
+
+        # fetch the configuration for this payment method
+        $pluginConfig = $this->configFactory->getForShop($shopId);
+        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+
+        # get any translated values
+        # for our provided shop
+        $translatedValue = $this->translations->getPaymentConfigTranslation(
+            ConfigurationKeys::ORDER_CREATION,
+            $paymentConfig->getPaymentMeanId(),
+            $shopId
+        );
+
+        # use either the snippet or the
+        # value from the config directly
+        $orderCreation = (!empty($translatedValue)) ? (int)$translatedValue : (int)$paymentConfig->getOrderCreation();
+
+        # if we should use our global setting,
+        # then use the one from out plugin configuration
+        if ($orderCreation === OrderCreationType::GLOBAL_SETTING) {
+            $orderCreation = ($pluginConfig->createOrderBeforePayment()) ? OrderCreationType::BEFORE_PAYMENT : OrderCreationType::AFTER_PAYMENT;
+        }
+
+        return $orderCreation;
+    }
+
+    /**
+     * Gets the final order creation option for the provided
+     * payment method in the provided shop.
+     * This is either the one from the payment configuration,
+     * or the global plugin setting if that has been configured.
+     *
+     * @param string $paymentMethod
+     * @param int $shopId
+     * @return string
+     * @throws MolliePaymentConfigurationNotFound
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getFinalOrderExpiration($paymentMethod, $shopId)
+    {
+        $fullPaymentMethod = $this->getPaymentFullName($paymentMethod);
+
+        # fetch the configuration for this payment method
+        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+
+        # get any translated values
+        # for our provided shop
+        $translatedValue = $this->translations->getPaymentConfigTranslation(
+            ConfigurationKeys::EXPIRATION_DAYS,
+            $paymentConfig->getPaymentMeanId(),
+            $shopId
+        );
+
+        # use either the snippet or the
+        # value from the config directly
+        $expirationDays = (!empty($translatedValue)) ? $translatedValue : $paymentConfig->getExpirationDays();
+
+        return (string)$expirationDays;
+    }
+
+
+    /**
+     * @param string $paymentName
+     * @return string
+     */
+    private function getPaymentFullName($paymentName)
+    {
+        if (strpos($paymentName, MollieShopware::PAYMENT_PREFIX) === 0) {
+            return $paymentName;
+        }
+
+        return MollieShopware::PAYMENT_PREFIX . $paymentName;
+    }
+
+}

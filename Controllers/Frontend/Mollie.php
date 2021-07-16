@@ -147,7 +147,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->getBasketUserId(),
                 $this->getPaymentShortName(),
                 $signature,
-                $currency
+                $currency,
+                Shopware()->Shop()->getId()
             );
 
             # some payment methods do not require a redirect to mollie.
@@ -570,6 +571,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $paymentStatusResolver = Shopware()->Container()->get('mollie_shopware.components.transaction.payment_status_resolver');
 
+            $paymentConfigResolver = Shopware()->Container()->get('mollie_shopware.components.config.payments');
 
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
@@ -628,7 +630,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $creditCardService,
                 $repoTransactions,
                 $sessionManager,
-                $transactionBuilder
+                $transactionBuilder,
+                $paymentConfigResolver
             );
 
             $this->checkoutReturn = new FinishCheckoutFacade(
@@ -643,7 +646,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $swOrderBuilder,
                 $statusConverter,
                 $orderUpdater,
-                $confirmationMail
+                $confirmationMail,
+                $paymentConfigResolver
             );
 
             $this->notifications = new MollieShopware\Facades\Notifications\Notifications(
@@ -654,7 +658,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $orderUpdater,
                 $this->orderCancellation,
                 $sessionManager,
-                $paymentStatusResolver
+                $paymentStatusResolver,
+                $paymentConfigResolver
             );
 
             $this->restoreSessionFacade = new RestoreSessionFacade(

@@ -6,6 +6,7 @@ use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
 use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Basket\BasketInterface;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\Helpers\LocaleFinder;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
@@ -117,6 +118,11 @@ class CheckoutSessionFacade
      */
     private $transactionBuilder;
 
+    /**
+     * @var Config\PaymentConfigResolver
+     */
+    private $paymentConfig;
+
 
     /**
      * CheckoutSessionFacade constructor.
@@ -137,8 +143,9 @@ class CheckoutSessionFacade
      * @param TransactionRepository $repoTransactions
      * @param SessionManager $sessionManager
      * @param TransactionBuilder $transactionBuilder
+     * @param Config\PaymentConfigResolver $paymentConfig
      */
-    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager, TransactionBuilder $transactionBuilder)
+    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager, TransactionBuilder $transactionBuilder, Config\PaymentConfigResolver $paymentConfig)
     {
         $this->config = $config;
         $this->paymentService = $paymentService;
@@ -157,6 +164,7 @@ class CheckoutSessionFacade
         $this->repoTransactions = $repoTransactions;
         $this->sessionManager = $sessionManager;
         $this->transactionBuilder = $transactionBuilder;
+        $this->paymentConfig = $paymentConfig;
     }
 
 
@@ -174,13 +182,15 @@ class CheckoutSessionFacade
      * @param $paymentShortName
      * @param $basketSignature
      * @param $currencyShortName
+     * @param $shopId
      * @return CheckoutSession
+     * @throws \Doctrine\DBAL\Exception
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Enlight_Exception
+     * @throws \MollieShopware\Exceptions\MolliePaymentConfigurationNotFound
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName)
+    public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName, $shopId)
     {
         # immediately reset our previous order
         # just to make sure we don't have a previous one accidentally
@@ -229,8 +239,11 @@ class CheckoutSessionFacade
         # thus we create a payment token, that can be used for this in the returnAction
         $paymentToken = $this->sessionManager->generateSessionToken($transaction);
 
+        # now check, if we should create the order
+        # before or after the payment
+        $orderCreation = $this->paymentConfig->getFinalOrderCreation($paymentShortName, $shopId);
 
-        if ($this->config->createOrderBeforePayment()) {
+        if ($orderCreation === OrderCreationType::BEFORE_PAYMENT) {
 
             # create the order in our system.
             # attention, this is the point where the basket is officially "empty"

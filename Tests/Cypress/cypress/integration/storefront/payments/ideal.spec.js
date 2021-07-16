@@ -3,11 +3,9 @@ import Session from "Actions/utils/Session"
 // ------------------------------------------------------
 import LoginAction from 'Actions/storefront/account/LoginAction';
 import RegisterAction from 'Actions/storefront/account/RegisterAction';
-import TopMenuAction from "Actions/storefront/navigation/TopMenuAction";
-import ListingAction from "Actions/storefront/products/ListingAction";
-import PDPAction from "Actions/storefront/products/PDPAction";
 import CheckoutAction from "Actions/storefront/checkout/CheckoutAction";
 import PaymentsAction from "Actions/storefront/checkout/PaymentsAction";
+import DummyBasketScenario from "Scenarios/DummyBasketScenario";
 
 
 const devices = new Devices();
@@ -15,40 +13,22 @@ const session = new Session();
 
 const register = new RegisterAction();
 const login = new LoginAction();
-const topMenu = new TopMenuAction();
-const listing = new ListingAction();
-const pdp = new PDPAction();
 const checkout = new CheckoutAction();
 const payments = new PaymentsAction();
 
-
-const user_email = "dev@localhost.de";
-const user_pwd = "MollieMollie111";
-
-const device = devices.getFirstDevice();
+const scenarioDummyBasket = new DummyBasketScenario(1);
 
 
 describe('iDEAL Issuers', () => {
 
-    before(function () {
-        devices.setDevice(device);
-        register.doRegister(user_email, user_pwd);
-    })
-
     beforeEach(() => {
+        devices.setDevice(devices.getFirstDevice());
         session.resetSession();
     });
 
-
     it('Issuer List on payment selection page', () => {
 
-        cy.visit('/');
-        login.doLogin(user_email, user_pwd);
-
-        topMenu.clickOnFirstCategory();
-        listing.clickOnFirstProduct();
-        pdp.addToCart(1);
-        checkout.goToCheckoutInOffCanvas();
+        scenarioDummyBasket.execute();
 
         checkout.openPaymentSelectionOnConfirm();
 
@@ -59,11 +39,11 @@ describe('iDEAL Issuers', () => {
         payments.selectIDealIssuer('bunq');
     })
 
-
     it('Ajax Route working for signed in users', () => {
 
-        cy.visit('/');
-        login.doLogin(user_email, user_pwd);
+        register.doRegister("dev@localhost.de", "MollieMollie111");
+
+        login.doLogin("dev@localhost.de", "MollieMollie111");
 
         // we start the request
         // and make sure that we have a 200 status code
@@ -77,7 +57,6 @@ describe('iDEAL Issuers', () => {
 
         })
     })
-
 
     it('Ajax Route blocked for anonymous users', () => {
 

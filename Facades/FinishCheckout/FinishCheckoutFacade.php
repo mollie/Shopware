@@ -5,6 +5,7 @@ namespace MollieShopware\Facades\FinishCheckout;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\Resources\Payment;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
 use MollieShopware\Components\Order\OrderUpdater;
@@ -90,6 +91,12 @@ class FinishCheckoutFacade
     private $confirmationMail;
 
     /**
+     * @var Config\PaymentConfigResolver
+     */
+    private $paymentConfig;
+
+
+    /**
      * FinishCheckoutFacade constructor.
      * @param Config $config
      * @param OrderService $orderService
@@ -103,8 +110,9 @@ class FinishCheckoutFacade
      * @param MollieStatusConverter $statusConverter
      * @param OrderUpdater $orderUpdater
      * @param ConfirmationMail $confirmationMail
+     * @param Config\PaymentConfigResolver $paymentConfig
      */
-    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail)
+    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail, Config\PaymentConfigResolver $paymentConfig)
     {
         $this->config = $config;
         $this->orderService = $orderService;
@@ -118,6 +126,7 @@ class FinishCheckoutFacade
         $this->statusConverter = $statusConverter;
         $this->orderUpdater = $orderUpdater;
         $this->confirmationMail = $confirmationMail;
+        $this->paymentConfig = $paymentConfig;
     }
 
 
@@ -187,7 +196,12 @@ class FinishCheckoutFacade
         # our payment was successful!
         # now we need to check if our order needs to be created after the payment (plugin configuration).
         # if so, verify if our session needs to be restored, and then just create the Shopware order.
-        if (!$this->config->createOrderBeforePayment()) {
+        $orderCreation = $this->paymentConfig->getFinalOrderCreation(
+            $transaction->getPaymentMethod(),
+            $transaction->getShopId()
+        );
+
+        if ($orderCreation === OrderCreationType::AFTER_PAYMENT) {
             # create an order in shopware
             $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
                 $transactionNumber,
@@ -222,7 +236,7 @@ class FinishCheckoutFacade
         # if we have created our order before the payment
         # then we have to update the transaction ID here so that
         # it will be our final transaction number
-        if ($this->config->createOrderBeforePayment()) {
+        if ($orderCreation === OrderCreationType::BEFORE_PAYMENT) {
             $this->swOrderUpdater->updateTransactionId($swOrder, $finalTransactionNumber);
         }
 
@@ -285,7 +299,7 @@ class FinishCheckoutFacade
         # if we have created the order before this
         # then send the order confirmation mail NOW,
         # if the mollie payment is valid
-        if ($this->config->createOrderBeforePayment() && PaymentStatus::isApprovedStatus($mollieStatus)) {
+        if ($orderCreation === OrderCreationType::BEFORE_PAYMENT && PaymentStatus::isApprovedStatus($mollieStatus)) {
             try {
 
                 $this->confirmationMail->sendConfirmationEmail($transaction);

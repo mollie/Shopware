@@ -3,43 +3,31 @@ import Session from "Actions/utils/Session"
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
 // ------------------------------------------------------
-import PluginAction from "Actions/backend/PluginAction";
-import TopMenuAction from 'Actions/storefront/navigation/TopMenuAction';
-import LoginAction from 'Actions/storefront/account/LoginAction';
-import RegisterAction from 'Actions/storefront/account/RegisterAction';
-import ListingAction from 'Actions/storefront/products/ListingAction';
-import PDPAction from 'Actions/storefront/products/PDPAction';
+import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
 import CheckoutAction from 'Actions/storefront/checkout/CheckoutAction';
 import PaymentScreenAction from 'Actions/mollie/PaymentScreenAction';
 import IssuerScreenAction from 'Actions/mollie/IssuerScreenAction';
+import DummyBasketScenario from "Scenarios/DummyBasketScenario";
 
 
 const devices = new Devices();
 const session = new Session();
 
-const plugin = new PluginAction();
-const topMenu = new TopMenuAction();
-const register = new RegisterAction();
-const login = new LoginAction();
-const listing = new ListingAction();
-const pdp = new PDPAction();
+const plugin = new ConfigSetupAction();
 const checkout = new CheckoutAction();
 const molliePayment = new PaymentScreenAction();
 const mollieIssuer = new IssuerScreenAction();
 
-
-const user_email = "dev@localhost.de";
-const user_pwd = "MollieMollie111";
+const scenarioDummyBasket = new DummyBasketScenario(66);
 
 const device = devices.getFirstDevice();
 
-
 const configs = [
-    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true, useGlobalConfig: true,},
-    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true, useGlobalConfig: true,},
+    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true},
+    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true},
     // ------------------------------------------------------------------------------------------------------------------------------
-    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false, useGlobalConfig: true,},
-    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false, useGlobalConfig: true,},
+    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false},
+    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false},
 ];
 
 const payments = [
@@ -60,7 +48,7 @@ const payments = [
 
 configs.forEach(config => {
 
-    context("Config: " + config.name, () => {
+    context("Global Config: " + config.name, () => {
 
         before(function () {
 
@@ -71,117 +59,86 @@ configs.forEach(config => {
             pluginConfig.setPaymentsAPI(config.paymentsAPI);
 
             const paymentConfig = new PaymentConfig();
-            paymentConfig.setMethodsGlobal(config.useGlobalConfig);
-            paymentConfig.setMethodsPaymentsAPI(config.paymentsAPI);
+            paymentConfig.setMethodsGlobal(true);
+            paymentConfig.setOrderCreationGlobal(true);
 
-            plugin.configure(pluginConfig, paymentConfig);
+            const configurationPayments = payments.map(payment => {
+                return payment.name;
+            });
 
-            register.doRegister(user_email, user_pwd);
+            plugin.configure(pluginConfig, paymentConfig, configurationPayments);
         })
 
         beforeEach(() => {
+            devices.setDevice(device);
             session.resetSession();
         });
 
         describe('Successful Checkout', () => {
-            context(devices.getDescription(device), () => {
 
-                payments.forEach(payment => {
+            payments.forEach(payment => {
 
-                    beforeEach(() => {
-                        devices.setDevice(device);
-                    });
+                it('Pay with ' + payment.name, () => {
 
-                    it('Pay with ' + payment.name, () => {
+                    scenarioDummyBasket.execute();
 
-                        cy.visit('/');
+                    checkout.switchPaymentMethod(payment.name);
 
-                        login.doLogin(user_email, user_pwd);
+                    checkout.placeOrderOnConfirm();
 
-                        topMenu.clickOnFirstCategory();
+                    // verify that we are on the mollie payment screen
+                    // and that our payment method is also visible somewhere in that url
+                    cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
+                    cy.url().should('include', payment.key);
 
-                        listing.clickOnFirstProduct();
-                        pdp.addToCart(66);
+                    molliePayment.initSandboxCookie();
 
-                        // wait 1 second
-                        // it stuck 1 time
-                        cy.wait(1000);
+                    if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 
-                        checkout.goToCheckoutInOffCanvas();
+                        molliePayment.selectAuthorized();
 
-                        checkout.switchPaymentMethod(payment.name);
+                    } else {
 
-                        checkout.placeOrderOnConfirm();
-
-                        // verify that we are on the mollie payment screen
-                        // and that our payment method is also visible somewhere in that url
-                        cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
-                        cy.url().should('include', payment.key);
-
-                        molliePayment.initSandboxCookie();
-
-                        if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
-
-                            molliePayment.selectAuthorized();
-
-                        } else {
-
-                            if (payment.key === 'ideal') {
-                                mollieIssuer.selectIDEAL();
-                            }
-
-                            if (payment.key === 'kbc') {
-                                mollieIssuer.selectKBC();
-                            }
-
-                            molliePayment.selectPaid();
+                        if (payment.key === 'ideal') {
+                            mollieIssuer.selectIDEAL();
                         }
 
-                        // we should now get back to the shop
-                        // with a successful order message
-                        cy.url().should('include', '/checkout/finish');
-                        cy.contains('Vielen Dank für Ihre Bestellung');
-                    })
+                        if (payment.key === 'kbc') {
+                            mollieIssuer.selectKBC();
+                        }
 
+                        molliePayment.selectPaid();
+                    }
+
+                    // we should now get back to the shop
+                    // with a successful order message
+                    cy.url().should('include', '/checkout/finish');
+                    cy.contains('Vielen Dank für Ihre Bestellung');
                 })
 
             })
         })
 
         describe('Failed Checkout', () => {
-            context(devices.getDescription(device), () => {
 
-                beforeEach(() => {
-                    devices.setDevice(device);
-                });
+            it('Pay with PayPal', () => {
 
-                it('Pay with PayPal', () => {
+                scenarioDummyBasket.execute();
 
-                    cy.visit('/');
+                checkout.switchPaymentMethod('PayPal');
+                checkout.placeOrderOnConfirm();
 
-                    login.doLogin(user_email, user_pwd);
+                molliePayment.initSandboxCookie();
 
-                    topMenu.clickOnFirstCategory();
-                    listing.clickOnFirstProduct();
-                    pdp.addToCart(1);
-                    checkout.goToCheckoutInOffCanvas();
+                molliePayment.selectFailed();
 
-                    checkout.switchPaymentMethod('PayPal');
-                    checkout.placeOrderOnConfirm();
+                // verify that we are back in the shop
+                // and that our order payment has failed
+                cy.url().should('include', '/checkout/confirm');
+                cy.contains('Ihre Zahlung ist fehlgeschlagen');
 
-                    molliePayment.initSandboxCookie();
-
-                    molliePayment.selectFailed();
-
-                    // verify that we are back in the shop
-                    // and that our order payment has failed
-                    cy.url().should('include', '/checkout/confirm');
-                    cy.contains('Ihre Zahlung ist fehlgeschlagen');
-
-                    // also verify that we still have products in our cart
-                    cy.get('.row--product').should('be.visible');
-                })
-
+                // also verify that we still have products in our cart
+                cy.get('.row--product').should('be.visible');
             })
         })
 

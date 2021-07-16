@@ -3,6 +3,7 @@
 namespace MollieShopware\Facades\Notifications;
 
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\OrderUpdater;
@@ -60,6 +61,11 @@ class Notifications
      */
     private $paymentStatusResolver;
 
+    /**
+     * @var Config\PaymentConfigResolver
+     */
+    private $paymentConfig;
+
 
     /**
      * Notifications constructor.
@@ -71,8 +77,9 @@ class Notifications
      * @param OrderCancellation $orderCancellation
      * @param SessionManager $sessionManager
      * @param PaymentStatusResolver $paymentStatusResolver
+     * @param Config\PaymentConfigResolver $paymentConfig
      */
-    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver)
+    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig)
     {
         $this->logger = $logger;
         $this->config = $config;
@@ -82,6 +89,7 @@ class Notifications
         $this->orderCancellation = $orderCancellation;
         $this->sessionManager = $sessionManager;
         $this->paymentStatusResolver = $paymentStatusResolver;
+        $this->paymentConfig = $paymentConfig;
     }
 
 
@@ -165,11 +173,13 @@ class Notifications
         # otherwise we would have a race condition, because our order already exists when we
         # would come back without a session in the frontend. this webhooks is faster
         # and so it wouldn't be possible to restore it.
-        if ($this->config->createOrderBeforePayment() === false) {
+        $orderCreation = $this->paymentConfig->getFinalOrderCreation($transaction->getPaymentMethod(), $transaction->getShopId());
+
+        if ($orderCreation === OrderCreationType::AFTER_PAYMENT) {
             $this->sessionManager->deleteSessionToken($transaction);
         }
 
-        
+
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
 

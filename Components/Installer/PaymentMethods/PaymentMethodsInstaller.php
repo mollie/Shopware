@@ -10,6 +10,7 @@ use Mollie\Api\Resources\BaseCollection;
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
@@ -238,10 +239,13 @@ class PaymentMethodsInstaller
                 $paymentConfig->setPaymentMeanId($method->getId());
             }
 
-            # if not set yet, then use our global
-            # default config from our earlier settings
-            if ($paymentConfig->getMethodType() ===  PaymentMethodType::UNDEFINED) {
+            # if not set yet, then use our global plugin configuration
+            if ($paymentConfig->getMethodType() === PaymentMethodType::UNDEFINED) {
                 $paymentConfig->setMethodType(PaymentMethodType::GLOBAL_SETTING);
+            }
+
+            if ($paymentConfig->getOrderCreation() === OrderCreationType::UNDEFINED) {
+                $paymentConfig->setOrderCreation(OrderCreationType::GLOBAL_SETTING);
             }
 
             $this->repoConfiguration->save($paymentConfig);

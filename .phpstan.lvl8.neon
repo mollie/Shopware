@@ -3,6 +3,7 @@ parameters:
     paths:
         - ./Command/OrdersShippingCommand.php
         - ./Components/iDEAL
+        - ./Components/Config
         - ./Exceptions
         - ./Services
     excludes_analyse:

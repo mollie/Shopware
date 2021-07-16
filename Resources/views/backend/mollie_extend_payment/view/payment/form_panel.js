@@ -11,8 +11,16 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
         methodValueGlobal: '{s namespace="backend/mollie/general" name="payment_details_method_value_global"}{/s}',
         methodValuePaymentAPI: '{s namespace="backend/mollie/general" name="payment_details_method_value_paymentapi"}{/s}',
         methodValueOrdersAPI: '{s namespace="backend/mollie/general" name="payment_details_method_value_ordersapi"}{/s}',
+        // ------------------------------------------------------------------------------------------------------
         captionExpirationDays: '{s namespace="backend/mollie/general" name="payment_details_order_expires_caption"}{/s}',
         descriptionExpirationDays: '{s namespace="backend/mollie/general" name="payment_details_order_expires_description"}{/s}',
+        // ------------------------------------------------------------------------------------------------------
+        orderCreationCaption: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_caption"}{/s}',
+        orderCreationDescription: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_description"}{/s}',
+        orderCreationValueGlobal: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_value_global"}{/s}',
+        orderCreationValueBefore: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_value_before"}{/s}',
+        orderCreationValueAfter: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_value_after"}{/s}',
+        // ------------------------------------------------------------------------------------------------------
         btnUserGuide: '{s namespace="backend/mollie/general" name="payment_details_btn_userguide"}{/s}',
     },
 
@@ -33,7 +41,7 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
     createMollieContainer: function () {
         var me = this;
 
-        const labelWidth = 200;
+        const labelWidth = 133;
 
         // padding: top right bot left
 
@@ -62,8 +70,9 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                             xtype: 'combobox',
                             id: 'mollie_combo_method',
                             name: 'mollie_methods_api',
-                            flex: 12,
+                            flex: 10,
                             fieldLabel: me.molSnippets.methodCaption,
+                            labelWidth: labelWidth,
                             supportText: me.molSnippets.methodDescription,
                             translatable: true,
                             multiSelect: false,
@@ -97,10 +106,39 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                     layout: 'hbox',
                     items: [
                         {
+                            xtype: 'combobox',
+                            name: 'mollie_order_creation',
+                            id: 'mollie_combo_order_creation',
+                            flex: 12,
+                            fieldLabel: me.molSnippets.orderCreationCaption,
+                            labelWidth: labelWidth,
+                            supportText: me.molSnippets.orderCreationDescription,
+                            translatable: true,
+                            multiSelect: false,
+                            editable: false,
+                            allowBlank: false,
+                            store: [
+                                [1, me.molSnippets.orderCreationValueGlobal],
+                                [2, me.molSnippets.orderCreationValueBefore],
+                                [3, me.molSnippets.orderCreationValueAfter]
+                            ],
+                        }
+                    ]
+                },
+                {
+                    xtype: 'fieldset',
+                    flex: 12,
+                    border: false,
+                    margin: '0',
+                    bodyPadding: 0,
+                    layout: 'hbox',
+                    items: [
+                        {
                             xtype: 'textfield',
                             name: 'mollie_expiration_days',
                             flex: 12,
                             fieldLabel: me.molSnippets.captionExpirationDays,
+                            labelWidth: labelWidth,
                             supportText: me.molSnippets.descriptionExpirationDays,
                             translatable: true
                         }
@@ -168,6 +206,10 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
 
                     me.getFormField('mollie_methods_api', field => {
                         field.setValue(result.data.method);
+                    });
+
+                    me.getFormField('mollie_order_creation', field => {
+                        field.setValue(result.data.orderCreation);
                     });
 
                 } catch (e) {

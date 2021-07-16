@@ -1,5 +1,6 @@
 <?php
 
+use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Models\Payment\Configuration;
@@ -109,6 +110,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
                 'isMollie' => true,
                 'expirationDays' => (string)$paymentConfig->getExpirationDays(),
                 'method' => $paymentMethodType,
+                'orderCreation' => (int)$paymentConfig->getOrderCreation(),
             ];
 
             $this->returnSuccess('', $data);
@@ -148,12 +150,15 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
             $expirationDays = (string)$request->getParam('expirationDays', '');
             $methodType = (int)$request->getParam('methodType', PaymentMethodType::GLOBAL_SETTING);
+            $orderCreationType = (int)$request->getParam('orderCreation', OrderCreationType::GLOBAL_SETTING);
+
 
             $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
 
             # update with our new settings
             $paymentConfig->setExpirationDays($expirationDays);
             $paymentConfig->setMethodType($methodType);
+            $paymentConfig->setOrderCreation($orderCreationType);
 
             # save the data
             $this->repoConfiguration->save($paymentConfig);
