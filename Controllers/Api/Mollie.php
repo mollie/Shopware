@@ -1,5 +1,6 @@
 <?php
 
+use MollieShopware\Facades\Refund\RefundOrderFacade;
 use MollieShopware\Facades\Shipping\ShipOrderFacade;
 use Psr\Log\LoggerInterface;
 
@@ -13,6 +14,11 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
     private $shipOrderFacade;
 
     /**
+     * @var RefundOrderFacade
+     */
+    private $refundOrderFacade;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -23,10 +29,17 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
      */
     public function init()
     {
+        $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
+
         $this->shipOrderFacade = new ShipOrderFacade(
-            Shopware()->Container()->get('mollie_shopware.order_service'),
+            $orderService,
             Shopware()->Container()->get('mollie_shopware.gateways.mollie.factory'),
             Shopware()->Container()->get('template')
+        );
+
+        $this->refundOrderFacade = new RefundOrderFacade(
+            Shopware()->Container()->get('mollie_shopware.services.refund_service'),
+            $orderService
         );
 
         $this->logger = Shopware()->Container()->get('mollie_shopware.components.logger');
@@ -55,6 +68,10 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
 
             case '/ship/item':
                 $this->shipItemAction();
+                break;
+
+            case '/refund/order':
+                $this->refundOrderAction();
                 break;
 
             default:
@@ -141,6 +158,50 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
 
             $this->logger->error(
                 'Error when processing partial shipment for Order ' . $orderNumber . ' on API',
+                [
+                    'error' => $e->getMessage(),
+                ]
+            );
+
+            $this->View()->assign([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     *
+     */
+    public function refundOrderAction()
+    {
+        try {
+
+            /** @var null|string $orderNumber */
+            $orderNumber = $this->Request()->getParam('number', null);
+
+            /** @var null|float $customAmount */
+            $customAmount = (float)$this->Request()->getParam('amount', 0);
+
+
+            if ($orderNumber === null) {
+                throw new InvalidArgumentException('Missing Argument for Order Number!');
+            }
+
+            $this->logger->info('Starting refund on API for Order: ' . $orderNumber);
+
+            $this->refundOrderFacade->refundOrder($orderNumber, $customAmount);
+
+            $this->logger->info('Refund Success on API for Order: ' . $orderNumber);
+
+            $this->View()->assign([
+                'success' => true
+            ]);
+
+        } catch (\Exception $e) {
+
+            $this->logger->error(
+                'Error when processing the refund for Order ' . $orderNumber . ' on API',
                 [
                     'error' => $e->getMessage(),
                 ]
