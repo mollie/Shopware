@@ -109,6 +109,8 @@ configs.forEach(config => {
                         cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
                         cy.url().should('include', payment.key);
 
+                        molliePayment.initSandboxCookie();
+
                         if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 
                             molliePayment.selectAuthorized();
@@ -156,6 +158,8 @@ configs.forEach(config => {
 
                     checkout.switchPaymentMethod('PayPal');
                     checkout.placeOrderOnConfirm();
+
+                    molliePayment.initSandboxCookie();
 
                     molliePayment.selectFailed();
 

@@ -102,6 +102,8 @@ configs.forEach(config => {
             // now remove our session
             session.resetSessionData();
 
+            molliePayment.initSandboxCookie();
+
             // mark as failed in mollie
             // and navigate back
             molliePayment.selectFailed();

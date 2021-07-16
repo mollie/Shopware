@@ -37,7 +37,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 class MollieShopware extends Plugin
 {
-    const PLUGIN_VERSION = '1.8.6';
+    const PLUGIN_VERSION = '1.8.7';
 
     const PAYMENT_PREFIX = 'mollie_';
 
