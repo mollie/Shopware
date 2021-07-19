@@ -58,7 +58,7 @@ class RestoreSessionFacade
         }
 
         # try to restore our session if our current session is empty
-        if (!$this->isOrderSessionExisting()) {
+        if (!$this->isUserSessionExisting()) {
 
             $this->logger->notice('Missing Session! Restoring Session for Transaction: ' . $transaction->getId());
 
@@ -77,22 +77,13 @@ class RestoreSessionFacade
      *
      * @return bool
      */
-    public function isOrderSessionExisting()
+    public function isUserSessionExisting()
     {
-        $variables = Shopware()->Session()->sOrderVariables;
-
-        $sessionPaymentId = (string)$variables['sUserData']['additional']['user']['paymentID'];
-        $userLoggedIn = (string)$variables['sUserLoggedIn'];
-
-        if (empty($sessionPaymentId)) {
-            return false;
+        if (Shopware()->Session()->get('sUserId')) {
+            return true;
         }
 
-        if (empty($userLoggedIn)) {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
 }

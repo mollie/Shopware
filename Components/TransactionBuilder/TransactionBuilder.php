@@ -5,11 +5,12 @@ namespace MollieShopware\Components\TransactionBuilder;
 
 use MollieShopware\Components\Basket\BasketInterface;
 use MollieShopware\Components\Helpers\LocaleFinder;
+use MollieShopware\Components\SessionManager\SessionManager;
+use MollieShopware\Components\SessionManager\SessionManagerInterface;
 use MollieShopware\Components\Shipping\ShippingInterface;
 use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
-use MollieShopware\Components\TransactionBuilder\Services\Session\SessionInterface;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepositoryInterface;
 use Shopware\Models\Customer\Customer;
@@ -19,7 +20,7 @@ class TransactionBuilder
 {
 
     /**
-     * @var SessionInterface
+     * @var SessionManagerInterface
      */
     private $session;
 
@@ -45,13 +46,13 @@ class TransactionBuilder
 
 
     /**
-     * @param SessionInterface $session
+     * @param SessionManagerInterface $session
      * @param TransactionRepositoryInterface $repoTransactions
      * @param BasketInterface $basket
      * @param ShippingInterface $shipping
      * @param $roundAfterTax
      */
-    public function __construct(SessionInterface $session, TransactionRepositoryInterface $repoTransactions, BasketInterface $basket, ShippingInterface $shipping, $roundAfterTax)
+    public function __construct(SessionManagerInterface $session, TransactionRepositoryInterface $repoTransactions, BasketInterface $basket, ShippingInterface $shipping, $roundAfterTax)
     {
         $this->session = $session;
         $this->repoTransactions = $repoTransactions;

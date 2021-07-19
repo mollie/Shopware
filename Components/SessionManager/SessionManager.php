@@ -2,13 +2,26 @@
 
 namespace MollieShopware\Components\SessionManager;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\SessionManager\Exceptions\InvalidSessionTokenException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
+use Shopware\Recovery\Common\DependencyInjection\ContainerInterface;
 
-class SessionManager
+class SessionManager implements SessionManagerInterface
 {
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
 
     /**
      * @var CookieRepositoryInterface
@@ -27,19 +40,65 @@ class SessionManager
 
 
     /**
-     * SessionSnapshotManager constructor.
+     * SessionManager constructor.
+     * @param $container
      * @param EntityManager $entityManager
+     * @param Connection $connection
      * @param CookieRepositoryInterface $cookieRepository
      * @param TokenGeneratorInterface $tokenGenerator
      */
-    public function __construct(EntityManager $entityManager, CookieRepositoryInterface $cookieRepository, TokenGeneratorInterface $tokenGenerator)
+    public function __construct($container, EntityManager $entityManager, Connection $connection, CookieRepositoryInterface $cookieRepository, TokenGeneratorInterface $tokenGenerator)
     {
+        $this->container = $container;
         $this->repoCookies = $cookieRepository;
+        $this->connection = $connection;
         $this->tokenGenerator = $tokenGenerator;
 
         $this->repoTransactions = $entityManager->getRepository(Transaction::class);
     }
 
+
+    /**
+     * @return string
+     */
+    public function getSessionId()
+    {
+        return $this->container->get('sessionid');
+    }
+
+    /**
+     * @param $days
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function extendSessionLifespan($days)
+    {
+        $session = $this->container->get('session');
+
+        # write session data and commit database transaction to avoid locks
+        # @see Shopware\Components\Session\PdoSessionHandler::close()
+        if (method_exists($session, 'save')) {
+            $session->save();
+        }
+
+        session_write_close();
+
+
+        $sessionId = $this->getSessionId();
+        $lifetimeSeconds = $days * 24 * 60 * 60;
+
+        ini_set('session.gc_maxlifetime', $lifetimeSeconds);
+
+        /** @var QueryBuilder $qb */
+        $qb = $this->connection->createQueryBuilder();
+
+        $qb->update('s_core_sessions')
+            ->set('expiry', ':expiry')
+            ->where($qb->expr()->eq('id', ':id'))
+            ->setParameter(':expiry', time() + $lifetimeSeconds)
+            ->setParameter(':id', $sessionId);
+
+        $qb->execute();
+    }
 
     /**
      * @param Transaction $transaction

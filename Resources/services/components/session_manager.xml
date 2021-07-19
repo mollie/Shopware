@@ -19,7 +19,9 @@
         <service id="mollie_shopware.components.session_manager"
                  class="MollieShopware\Components\SessionManager\SessionManager"
                  public="true">
+            <argument type="service" id="service_container"/>
             <argument type="service" id="models"/>
+            <argument type="service" id="dbal_connection"/>
             <argument type="service" id="mollie_shopware.components.session_manager.cookie_repository"/>
             <argument type="service" id="mollie_shopware.components.session_manager.token_generator"/>
         </service>

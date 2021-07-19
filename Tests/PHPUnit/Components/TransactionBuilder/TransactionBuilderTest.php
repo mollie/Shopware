@@ -5,7 +5,7 @@ namespace MollieShopware\Tests\Components\TransactionBuilder;
 
 use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
 use MollieShopware\Tests\Utils\Fakes\Basket\FakeBasket;
-use MollieShopware\Tests\Utils\Fakes\Session\FakeSession;
+use MollieShopware\Tests\Utils\Fakes\Session\FakeSessionManager;
 use MollieShopware\Tests\Utils\Fakes\Shipping\FakeShipping;
 use MollieShopware\Tests\Utils\Fakes\Transaction\FakeTransactionRepository;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
@@ -34,7 +34,7 @@ class TransactionBuilderTest extends TestCase
         $this->itemsFixture = new BasketLineItemFixture();
 
         $this->sampleBuilder = new TransactionBuilder(
-            new FakeSession('session-123'),
+            new FakeSessionManager('session-123'),
             new FakeTransactionRepository(),
             new FakeBasket([
                 $this->itemsFixture->buildProductItemGross(19.99, 1, 19),
@@ -84,7 +84,7 @@ class TransactionBuilderTest extends TestCase
     public function testTransactionNetShop($shopwareTotalAmount, $roundAfterTax, $product1, $product2, $product3)
     {
         $builder = new TransactionBuilder(
-            new FakeSession('session-123'),
+            new FakeSessionManager('session-123'),
             new FakeTransactionRepository(),
             new FakeBasket([
                 $this->itemsFixture->buildProductItemNet($product1[0], $product1[1], 19),
@@ -155,7 +155,7 @@ class TransactionBuilderTest extends TestCase
     public function testTransactionGrossShop($shopwareTotalAmount, $roundAfterTax, $product1, $product2, $product3)
     {
         $builder = new TransactionBuilder(
-            new FakeSession('session-123'),
+            new FakeSessionManager('session-123'),
             new FakeTransactionRepository(),
             new FakeBasket([
                 $this->itemsFixture->buildProductItemGross($product1[0], $product1[1], 19),
