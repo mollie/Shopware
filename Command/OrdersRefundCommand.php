@@ -4,6 +4,7 @@ namespace MollieShopware\Command;
 
 use InvalidArgumentException;
 use MollieShopware\Components\Services\OrderService;
+use MollieShopware\Facades\Refund\RefundOrderFacade;
 use MollieShopware\Services\Refund\RefundInterface;
 use Psr\Log\LoggerInterface;
 use Shopware\Commands\ShopwareCommand;
@@ -16,14 +17,9 @@ class OrdersRefundCommand extends ShopwareCommand
 {
 
     /**
-     * @var RefundInterface
+     * @var RefundOrderFacade
      */
-    private $refundService;
-
-    /**
-     * @var OrderService
-     */
-    private $orderService;
+    private $refundFacade;
 
     /**
      * @var LoggerInterface
@@ -38,9 +34,12 @@ class OrdersRefundCommand extends ShopwareCommand
      */
     public function __construct(RefundInterface $refundService, OrderService $orderService, LoggerInterface $logger)
     {
-        $this->refundService = $refundService;
-        $this->orderService = $orderService;
         $this->logger = $logger;
+
+        $this->refundFacade = new RefundOrderFacade(
+            $refundService,
+            $orderService
+        );
 
         parent::__construct();
     }
@@ -69,28 +68,24 @@ class OrdersRefundCommand extends ShopwareCommand
         $io->title('MOLLIE Order Refund');
         $io->text('Searching for order and refunding the given amount.');
 
-        $orderNumber = $input->getArgument('orderNumber');
-        $customAmount = $input->getArgument('customAmount');
+        $orderNumber = (string)$input->getArgument('orderNumber');
+        $customAmount = (float)$input->getArgument('customAmount');
 
-        $this->validateInputArguments($orderNumber, $customAmount);
 
-        $this->logger->info('Starting Refund on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
+        if (empty($orderNumber)) {
+            throw new InvalidArgumentException('No orderNumber provided as argument!');
+        }
 
         try {
-            $transaction = $this->orderService->getOrderTransactionByNumber($orderNumber);
 
-            $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
+            $this->logger->info('Starting Refund on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
-            if (empty($customAmount)) {
-                $this->refundService->refundFullOrder($order, $transaction);
-            } else {
-                $this->refundService->refundPartialOrderAmount($order, $transaction, $customAmount);
-            }
-
+            $this->refundFacade->refundOrder($orderNumber, $customAmount);
 
             $this->logger->info('Refund Success on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
             $io->success('Order ' . $orderNumber . ' was successfully refunded.');
+
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error when processing Refund for Order ' . $orderNumber . ' on CLI',
@@ -103,25 +98,5 @@ class OrdersRefundCommand extends ShopwareCommand
         }
     }
 
-    /**
-     * @param string|array $orderNumber
-     * @param string|array|null $refundAmount
-     *
-     * @throws InvalidArgumentException
-     */
-    private function validateInputArguments($orderNumber, $refundAmount)
-    {
-        if (\is_array($orderNumber) ||
-            (
-                $refundAmount !== null &&
-                \is_array($refundAmount) &&
-                !\is_numeric($refundAmount)
-            )
-        ) {
-            throw new InvalidArgumentException(
-                'There was an error during the input of information. Please only submit one orderNumber per execution and set refund amounts to be split with a dot.',
-                1
-            );
-        }
-    }
+
 }
