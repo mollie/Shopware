@@ -30,9 +30,9 @@ class CheckoutSessionFacade
 {
 
     /**
-     * @var Config
+     *
      */
-    private $config;
+    const SESSION_EXPIRE_DAYS = 1;
 
     /**
      * @var PaymentService
@@ -58,16 +58,6 @@ class CheckoutSessionFacade
      * @var ModelManager
      */
     private $modelManager;
-
-    /**
-     * @var BasketInterface
-     */
-    private $basket;
-
-    /**
-     * @var ShippingInterface
-     */
-    private $shipping;
 
     /**
      * @var LocaleFinder
@@ -127,14 +117,11 @@ class CheckoutSessionFacade
 
     /**
      * CheckoutSessionFacade constructor.
-     * @param Config $config
      * @param PaymentService $paymentService
      * @param OrderService $orderService
      * @param LoggerInterface $logger
      * @param Shopware_Controllers_Frontend_Payment $controller
      * @param ModelManager $modelManager
-     * @param Basket $basket
-     * @param Shipping $shipping
      * @param LocaleFinder $localeFinder
      * @param $sBasket
      * @param ShopwareOrderBuilder $swOrderBuilder
@@ -146,16 +133,13 @@ class CheckoutSessionFacade
      * @param TransactionBuilder $transactionBuilder
      * @param Config\PaymentConfigResolver $paymentConfig
      */
-    public function __construct(Config $config, PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, Basket $basket, Shipping $shipping, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager, TransactionBuilder $transactionBuilder, Config\PaymentConfigResolver $paymentConfig)
+    public function __construct(PaymentService $paymentService, OrderService $orderService, LoggerInterface $logger, Shopware_Controllers_Frontend_Payment $controller, ModelManager $modelManager, LocaleFinder $localeFinder, $sBasket, ShopwareOrderBuilder $swOrderBuilder, TokenAnonymizer $anonymizer, ApplePayDirectHandler $applePay, CreditCardService $creditCard, TransactionRepository $repoTransactions, SessionManager $sessionManager, TransactionBuilder $transactionBuilder, Config\PaymentConfigResolver $paymentConfig)
     {
-        $this->config = $config;
         $this->paymentService = $paymentService;
         $this->orderService = $orderService;
         $this->logger = $logger;
         $this->controller = $controller;
         $this->modelManager = $modelManager;
-        $this->basket = $basket;
-        $this->shipping = $shipping;
         $this->localeFinder = $localeFinder;
         $this->sBasket = $sBasket;
         $this->swOrderBuilder = $swOrderBuilder;
@@ -199,11 +183,19 @@ class CheckoutSessionFacade
         # just to make sure we don't have a previous one accidentally
         $this->restorableOrder = null;
 
+
         $basketData = $this->sBasket->sGetBasketData();
 
         if (!$this->sBasket->sCountBasket()) {
             throw new \Exception('No items in basket');
         }
+
+
+        # we have to extend the lifetime of our session handler
+        # this is required to allow shopware restore user from our restoring cookie.
+        # this is plain shopware, and only works with an existing session,
+        $this->sessionManager->extendSessionLifespan(self::SESSION_EXPIRE_DAYS);
+
 
         # we want to log anonymized tokens
         # to see if they are used correctly.
