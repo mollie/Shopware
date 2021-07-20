@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Services;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Payment;
@@ -39,6 +40,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
+use Shopware\Models\Customer\Address;
 use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
 
@@ -126,6 +128,11 @@ class PaymentService
     private $repoPaymentConfig;
 
     /**
+     * @var EntityRepository
+     */
+    private $repoAddress;
+
+    /**
      * @var Translation
      */
     private $translations;
@@ -160,6 +167,7 @@ class PaymentService
         $this->repoTransactions = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
         $this->orderRepo = Shopware()->Models()->getRepository(Order::class);
         $this->repoPaymentConfig = Shopware()->Models()->getRepository(Configuration::class);
+        $this->repoAddress = Shopware()->Models()->getRepository(Address::class);
 
         $this->translations = Shopware()->Container()->get('mollie_shopware.components.translation');
 
@@ -208,12 +216,14 @@ class PaymentService
      * @param $paymentMethodName
      * @param Transaction $transaction
      * @param $paymentToken
+     * @param $billingAddressID
+     * @param $shippingAddressID
      * @return string|null
      * @throws ApiException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function startMollieSession($paymentMethodName, Transaction $transaction, $paymentToken)
+    public function startMollieSession($paymentMethodName, Transaction $transaction, $paymentToken, $billingAddressID, $shippingAddressID)
     {
         # ATTENTION
         # we have to do this here now,
@@ -252,10 +262,16 @@ class PaymentService
 
         $paymentBuilder = new MolliePaymentBuilder(
             new TransactionUUID(new UnixTimestampGenerator()),
+            $this->repoAddress,
             $this->customEnvironmentVariables
         );
 
-        $paymentData = $paymentBuilder->buildPayment($transaction, $paymentToken);
+        $paymentData = $paymentBuilder->buildPayment(
+            $transaction,
+            $paymentToken,
+            $billingAddressID,
+            $shippingAddressID
+        );
 
         # set basic payment data
         $paymentMethodObject->setPayment($paymentData);

@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Mollie\Builder;
 
 
+use Doctrine\ORM\EntityRepository;
 use MollieShopware\Components\Mollie\Builder\Payment\DescriptionBuilder;
 use MollieShopware\Components\Mollie\Builder\Payment\OrderNumberBuilder;
 use MollieShopware\Components\Mollie\Builder\Payment\PaymentAddressBuilder;
@@ -20,6 +21,11 @@ class MolliePaymentBuilder
      * @var TransactionUUID
      */
     private $uuid;
+
+    /**
+     * @var EntityRepository
+     */
+    private $repoAddress;
 
     /**
      * @var DescriptionBuilder
@@ -48,12 +54,15 @@ class MolliePaymentBuilder
 
 
     /**
+     * MolliePaymentBuilder constructor.
      * @param TransactionUUID $uuid
+     * @param $repoAddress
      * @param array $customEnvVariables
      */
-    public function __construct(TransactionUUID $uuid, array $customEnvVariables)
+    public function __construct(TransactionUUID $uuid, $repoAddress, array $customEnvVariables)
     {
         $this->uuid = $uuid;
+        $this->repoAddress = $repoAddress;
 
         $this->builderDescription = new DescriptionBuilder();
         $this->builderOrderNumber = new OrderNumberBuilder();
@@ -67,9 +76,11 @@ class MolliePaymentBuilder
     /**
      * @param Transaction $transaction
      * @param $paymentToken
+     * @param $billingAddressID
+     * @param $shippingAddressID
      * @return Payment
      */
-    public function buildPayment(Transaction $transaction, $paymentToken)
+    public function buildPayment(Transaction $transaction, $paymentToken, $billingAddressID, $shippingAddressID)
     {
         $uniqueID = $this->uuid->generate(
             $transaction->getId(),
@@ -80,13 +91,14 @@ class MolliePaymentBuilder
         $description = $this->builderDescription->buildDescription($transaction, $uniqueID);
         $orderNumber = $this->builderOrderNumber->buildOrderNumber($transaction, $uniqueID);
 
+
         $billingAddress = $this->builderAddress->getPaymentAddress(
-            $transaction->getCustomer()->getDefaultBillingAddress(),
+            $this->repoAddress->find($billingAddressID),
             $transaction->getCustomer()
         );
 
         $shippingAddress = $this->builderAddress->getPaymentAddress(
-            $transaction->getCustomer()->getDefaultShippingAddress(),
+            $this->repoAddress->find($shippingAddressID),
             $transaction->getCustomer()
         );
 

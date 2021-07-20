@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 class SofortTest extends TestCase
 {
     use PaymentTestTrait;
-    
+
     /**
      * @var Sofort
      */
@@ -22,7 +22,13 @@ class SofortTest extends TestCase
     /**
      * @var PaymentAddress
      */
-    private $address;
+    private $addressInvoice;
+
+    /**
+     * @var PaymentAddress
+     */
+    private $addressShipping;
+
 
     /**
      * @var PaymentLineItem
@@ -36,7 +42,8 @@ class SofortTest extends TestCase
     {
         $this->payment = new Sofort();
 
-        $this->address = $this->getAddressFixture();
+        $this->addressInvoice = $this->getAddressFixture1();
+        $this->addressShipping = $this->getAddressFixture2();
         $this->lineItem = $this->getLineItemFixture();
 
         $this->payment->setPayment(
@@ -44,8 +51,8 @@ class SofortTest extends TestCase
                 'UUID-123',
                 'Payment UUID-123',
                 '20004',
-                $this->address,
-                $this->address,
+                $this->addressInvoice,
+                $this->addressShipping,
                 49.98,
                 [$this->lineItem],
                 'USD',
@@ -99,8 +106,8 @@ class SofortTest extends TestCase
             'payment' => [
                 'webhookUrl' => 'https://local/notify',
             ],
-            'billingAddress' => $this->getExpectedAddressStructure($this->address),
-            'shippingAddress' => $this->getExpectedAddressStructure($this->address),
+            'billingAddress' => $this->getExpectedAddressStructure($this->addressInvoice),
+            'shippingAddress' => $this->getExpectedAddressStructure($this->addressShipping),
             'lines' => [
                 $this->getExpectedLineItemStructure($this->lineItem),
             ],

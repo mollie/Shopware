@@ -21,6 +21,7 @@ use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use Psr\Log\LoggerInterface;
+use sBasket;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
 use Shopware_Controllers_Frontend_Payment;
@@ -79,7 +80,7 @@ class CheckoutSessionFacade
     private $restorableOrder;
 
     /**
-     * @var $sBasket
+     * @var sBasket
      */
     private $sBasket;
 
@@ -183,6 +184,8 @@ class CheckoutSessionFacade
      * @param $basketSignature
      * @param $currencyShortName
      * @param $shopId
+     * @param $billingAddressID
+     * @param $shippingAddressID
      * @return CheckoutSession
      * @throws \Doctrine\DBAL\Exception
      * @throws \Doctrine\ORM\ORMException
@@ -190,7 +193,7 @@ class CheckoutSessionFacade
      * @throws \MollieShopware\Exceptions\MolliePaymentConfigurationNotFound
      * @throws \Mollie\Api\Exceptions\ApiException
      */
-    public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName, $shopId)
+    public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName, $shopId, $billingAddressID, $shippingAddressID)
     {
         # immediately reset our previous order
         # just to make sure we don't have a previous one accidentally
@@ -232,7 +235,6 @@ class CheckoutSessionFacade
                 ]
             ]
         );
-
 
         # to avoid problems on lost sessions, we have to ensure
         # that we can restore a session.
@@ -279,7 +281,9 @@ class CheckoutSessionFacade
         $checkoutUrl = $this->paymentService->startMollieSession(
             $paymentShortName,
             $transaction,
-            $paymentToken
+            $paymentToken,
+            $billingAddressID,
+            $shippingAddressID
         );
 
         # some payment methods are approved and
