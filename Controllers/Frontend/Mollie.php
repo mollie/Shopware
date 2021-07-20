@@ -141,6 +141,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $currency = method_exists($this, 'getCurrencyShortName') ? $this->getCurrencyShortName() : 'EUR';
 
+            # we need to extract the IDs here, because we need to
+            # send the correct billing and shipping data to Mollie.
+            # there is no order entity existing at this step, so we
+            # need to get that data from here.
+            $billingAddressID = (int)$this->getUser()['billingaddress']['id'];
+            $shippingAddressID = (int)$this->getUser()['shippingaddress']['id'];
+
+
             # create a new checkout session
             # by preparing transactions, orders and more
             $session = $this->checkout->startCheckoutSession(
@@ -148,7 +156,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->getPaymentShortName(),
                 $signature,
                 $currency,
-                Shopware()->Shop()->getId()
+                Shopware()->Shop()->getId(),
+                $billingAddressID,
+                $shippingAddressID
             );
 
             # some payment methods do not require a redirect to mollie.

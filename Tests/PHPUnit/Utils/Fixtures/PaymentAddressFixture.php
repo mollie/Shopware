@@ -9,6 +9,22 @@ class PaymentAddressFixture
 {
 
     /**
+     * @var string
+     */
+    private $city;
+
+
+    /**
+     * PaymentAddressFixture constructor.
+     * @param string $city
+     */
+    public function __construct($city)
+    {
+        $this->city = $city;
+    }
+
+
+    /**
      * @return PaymentAddress
      */
     public function buildAddress()
@@ -21,11 +37,9 @@ class PaymentAddressFixture
             'Mollie Street',
             'Addon',
             '1000',
-            'Munich',
+            $this->city,
             'DE'
         );
     }
-
-
 
 }

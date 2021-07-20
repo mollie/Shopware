@@ -15,9 +15,17 @@ trait PaymentTestTrait
     /***
      * @return PaymentAddress
      */
-    protected function getAddressFixture()
+    protected function getAddressFixture1()
     {
-        return (new PaymentAddressFixture())->buildAddress();
+        return (new PaymentAddressFixture('Munich'))->buildAddress();
+    }
+
+    /***
+     * @return PaymentAddress
+     */
+    protected function getAddressFixture2()
+    {
+        return (new PaymentAddressFixture('Amsterdam'))->buildAddress();
     }
 
     /**
