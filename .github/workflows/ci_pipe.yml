@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@947009a71769c25ab5292f073f5343624b7c879d
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
 
@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@947009a71769c25ab5292f073f5343624b7c879d
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
 
@@ -55,7 +55,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@947009a71769c25ab5292f073f5343624b7c879d
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
 
@@ -77,7 +77,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@947009a71769c25ab5292f073f5343624b7c879d
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
 
@@ -97,7 +97,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@947009a71769c25ab5292f073f5343624b7c879d
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 7.4
 
