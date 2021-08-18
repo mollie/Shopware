@@ -242,12 +242,12 @@
 
         <element type="select" scope="shop">
             <name>payment_method</name>
-            <label lang="de">Zahlungs Methode</label>
-            <label lang="en">Zahlungs Methode</label>
-            <label lang="nl">Zahlungs Methode</label>
+            <label lang="de">API Methode</label>
+            <label lang="en">API Method</label>
+            <label lang="nl">API Method</label>
             <value>payments_api</value>
             <description lang="de">Konfiguration ob nur Transaktionen oder auch Bestellungen in Mollie angelegt werden. Für Klarna werden immer Bestellungen angelegt.</description>
-            <description lang="en">Configuration if only transactions are also orders are being created in Mollie. Klarna will always create orders.</description>
+            <description lang="en">Configuration if only transactions or also orders are being created in Mollie. Klarna will always create orders.</description>
             <description lang="nl">Configuratie als alleen transacties ook orders worden aangemaakt in Mollie. Klarna legt altijd orders aan.</description>
             <store>
                 <option>

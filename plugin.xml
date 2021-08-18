@@ -48,6 +48,7 @@
             - Neuer Shopware API Support um eine Rückerstattung zu starten.
             - Neue Zahlungskonfiguration für "Bestell Erstellung". Damit ist es möglich, den Zeitpunkt, an dem eine Shopware Bestellung erstellt wird, zusätzlich zu den Plugin Einstellungen individuell pro Zahlart zu konfigurieren.
             - Neue Zahlungskonfiguration für "Methods API". Damit ist es möglich, zusätzlich zu den Plugin Einstellungen, individuell pro Zahlart zu konfigurieren, ob Bestellungen oder nur Transaktionen in Mollie erstellt werden sollen.
+            - Ablöse der Plugin Konfiguration "Nur Transaktionen erstellen" durch die neue Konfiguration "Zahlungs Methode".
             - Verbesserung und Fehlerbehebung des Features "Status für verschickte Bestellungen".
             - Optimierte Icons für Versand/Rückerstattung im Shopware Backend. Zusätzlich ist die Anzeige nun klarer und konsistenter, indem Aktionen nur mehr ausgegraut, aber nicht mehr versteckt werden.
             - Problembehebung, bei der abweichende Lieferadressen nicht korrekt an Mollie Bestellungen übergeben wurden.
@@ -58,6 +59,7 @@
             - Add new Shopware API support to start refunds.
             - Add payment configuration for "create order". You can now configure a payment method to have its own before/after setting in addition to the global settings.
             - Add payment configuration for "methods api". You can now configure a payment method to create orders or transactions in addition to the global settings.
+            - Replacement of the plugin configuration "create only transactions" with the new configuration "Payment method".
             - Improve and fix configuration for feature "Order Status for shipped orders".
             - Improve icons for shipping/refund in Shopware backend. In addition to this, the display is now clearer and more consistent, as actions are only grayed out, but no longer hidden.
             - Fix problem where a different shipping address was not correctly transferred to a Mollie order.
