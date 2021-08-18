@@ -14,6 +14,7 @@ use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Payment\Repository;
 use MollieShopware\MollieShopware;
@@ -227,18 +228,29 @@ class PaymentMethodsInstaller
         # -------------------------------------------------------------------------------------------------------
         # now make sure that our payment specific settings are existing
         # we either have to create if its not existing or update it
+        $this->updatePaymentConfigs();
+
+        return count($availableMolliePayments);
+    }
+
+    /**
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function updatePaymentConfigs()
+    {
         $installedMethods = $this->getInstalledMolliePayments();
 
         /** @var Payment $method */
         foreach ($installedMethods as $method) {
 
-            $paymentConfig = $this->repoConfiguration->getByPaymentId($method->getId());
-
-            if (!$paymentConfig instanceof Configuration) {
+            try {
+                $paymentConfig = $this->repoConfiguration->getByPaymentId($method->getId());
+            } catch (MolliePaymentConfigurationNotFound $ex) {
                 $paymentConfig = new Configuration();
                 $paymentConfig->setPaymentMeanId($method->getId());
             }
-
+            
             # if not set yet, then use our global plugin configuration
             if ($paymentConfig->getMethodType() === PaymentMethodType::UNDEFINED) {
                 $paymentConfig->setMethodType(PaymentMethodType::GLOBAL_SETTING);
@@ -250,8 +262,6 @@ class PaymentMethodsInstaller
 
             $this->repoConfiguration->save($paymentConfig);
         }
-
-        return count($availableMolliePayments);
     }
 
     /**
@@ -383,7 +393,7 @@ class PaymentMethodsInstaller
         # otherwise the payments won't even start and a finish page is visible directly
         $method['action'] = self::MOLLIE_ACTION_KEY;
 
-        
+
         $this->paymentInstaller->createOrUpdate($this->pluginName, $method);
     }
 

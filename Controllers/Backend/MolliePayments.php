@@ -3,6 +3,7 @@
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
+use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Payment\Repository;
 use MollieShopware\Traits\Controllers\BackendControllerTrait;
@@ -28,6 +29,9 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
      * @var Repository
      */
     private $repoConfiguration;
+
+    /** @var PaymentMethodsInstaller */
+    private $paymentInstaller;
 
 
     /**
@@ -95,7 +99,20 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $payment = $payments[0];
 
 
-            $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
+            try {
+
+                $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
+
+            } catch (MolliePaymentConfigurationNotFound $ex) {
+
+                # if we do not have a config here
+                # then make sure to update our payment configs and repair it.
+                # afterwards fetch our config again
+                $this->paymentInstaller->updatePaymentConfigs();
+
+                $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
+            }
+
 
             $paymentMethodType = (int)$paymentConfig->getMethodType();
             $worksWithPaymentsApi = PaymentMethodType::isPaymentsApiAllowed($payment->getName());
@@ -179,6 +196,8 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
         $this->logger = $this->container->get('mollie_shopware.components.logger');
 
         $this->repoConfiguration = $this->container->get('models')->getRepository(Configuration::class);
+
+        $this->paymentInstaller = $this->container->get('mollie_shopware.payments.installer');
     }
 
     /**

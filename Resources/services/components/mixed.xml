@@ -120,6 +120,7 @@
             <argument type="service" id="mollie_shopware.components.config.factory"/>
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.translation"/>
+            <argument type="service" id="mollie_shopware.payments.installer"/>
         </service>
 
         <service id="mollie_shopware.api_factory" class="MollieShopware\Components\MollieApiFactory" public="true">
