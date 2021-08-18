@@ -2,11 +2,12 @@ import LoginRepository from 'Repositories/backend/LoginRepository';
 import TopMenuRepository from "Repositories/backend/TopMenuRepository";
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
+import PaymentMethodsRepository from "Repositories/backend/PaymentMethodsRepository";
 
 
 const repoLogin = new LoginRepository();
 const repoTopMenu = new TopMenuRepository();
-
+const repoPaymentMethods = new PaymentMethodsRepository();
 
 export default class ConfigSetupAction {
 
@@ -101,28 +102,26 @@ export default class ConfigSetupAction {
 
             // ---------------------------------------------------------------
             // METHOD TYPE
-            cy.get('#mollie_combo_method-inputEl').click({force: true});
-            var itemSelector = '[data-action="mollie_methods_api"] > div > ul';
+            repoPaymentMethods.getDropdownExpandButton('mollie_methods_api').click({force: true});
 
             if (this.paymentsConfig.isMethodsGlobalSetting()) {
-                cy.get(itemSelector + ' > :nth-child(1)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_methods_api', 1).click({force: true});
             } else if (this.paymentsConfig.isMethodsPaymentsApiEnabled()) {
-                cy.get(itemSelector + ' > :nth-child(2)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_methods_api', 2).click({force: true});
             } else {
-                cy.get(itemSelector + ' > :nth-child(3)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_methods_api', 3).click({force: true});
             }
 
             // ---------------------------------------------------------------
             // ORDER CREATION
-            cy.get('#mollie_combo_order_creation-inputEl').click({force: true});
-            itemSelector = '[data-action="mollie_order_creation"] > div > ul';
+            repoPaymentMethods.getDropdownExpandButton('mollie_order_creation').click({force: true});
 
             if (this.paymentsConfig.isOrderCreationGlobalSetting()) {
-                cy.get(itemSelector + ' > :nth-child(1)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_order_creation', 1).click({force: true});
             } else if (this.paymentsConfig.isOrderCreationBefore()) {
-                cy.get(itemSelector + ' > :nth-child(2)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_order_creation', 2).click({force: true});
             } else {
-                cy.get(itemSelector + ' > :nth-child(3)').click({force: true});
+                repoPaymentMethods.getDropdownItem('mollie_order_creation', 3).click({force: true});
             }
 
             // ---------------------------------------------------------------
