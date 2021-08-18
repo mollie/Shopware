@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Config;
 
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
+use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Components\Translation\Translation;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
@@ -30,17 +31,23 @@ class PaymentConfigResolver
      */
     private $translations;
 
+    /**
+     * @var PaymentMethodsInstaller
+     */
+    private $paymentInstaller;
+
 
     /**
-     * PaymentConfigResolver constructor.
      * @param ConfigFactory $configFactory
      * @param ModelManager $models
      * @param Translation $translations
+     * @param PaymentMethodsInstaller $paymentInstaller
      */
-    public function __construct(ConfigFactory $configFactory, ModelManager $models, Translation $translations)
+    public function __construct(ConfigFactory $configFactory, ModelManager $models, Translation $translations, PaymentMethodsInstaller $paymentInstaller)
     {
         $this->configFactory = $configFactory;
         $this->translations = $translations;
+        $this->paymentInstaller = $paymentInstaller;
 
         /** @var Repository $repoPayments */
         $repoPayments = $models->getRepository(Configuration::class);
@@ -68,7 +75,7 @@ class PaymentConfigResolver
 
         # fetch the configuration for this payment method
         $pluginConfig = $this->configFactory->getForShop($shopId);
-        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+        $paymentConfig = $this->getPaymentConfig($fullPaymentMethod);
 
         # get any translated values
         # for our provided shop
@@ -122,7 +129,7 @@ class PaymentConfigResolver
 
         # fetch the configuration for this payment method
         $pluginConfig = $this->configFactory->getForShop($shopId);
-        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+        $paymentConfig = $this->getPaymentConfig($fullPaymentMethod);
 
         # get any translated values
         # for our provided shop
@@ -162,7 +169,7 @@ class PaymentConfigResolver
         $fullPaymentMethod = $this->getPaymentFullName($paymentMethod);
 
         # fetch the configuration for this payment method
-        $paymentConfig = $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+        $paymentConfig = $this->getPaymentConfig($fullPaymentMethod);
 
         # get any translated values
         # for our provided shop
@@ -191,6 +198,24 @@ class PaymentConfigResolver
         }
 
         return MollieShopware::PAYMENT_PREFIX . $paymentName;
+    }
+
+    /**
+     * @param string $fullPaymentMethod
+     * @return Configuration
+     * @throws MolliePaymentConfigurationNotFound
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function getPaymentConfig($fullPaymentMethod)
+    {
+        try {
+            return $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
+        } catch (MolliePaymentConfigurationNotFound $exception) {
+            $this->paymentInstaller->updatePaymentConfigs();
+        }
+
+        return $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
     }
 
 }

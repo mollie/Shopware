@@ -22,12 +22,19 @@ class Repository extends ModelRepository
     /**
      * @param $paymentMeanId
      * @return Configuration
+     * @throws MolliePaymentConfigurationNotFound
      */
     public function getByPaymentId($paymentMeanId)
     {
-        return $this->findOneBy([
+        $config = $this->findOneBy([
             'paymentMeanId' => $paymentMeanId
         ]);
+
+        if (!$config instanceof Configuration) {
+            throw new MolliePaymentConfigurationNotFound('No payment configuration found for ID: ' . $paymentMeanId);
+        }
+
+        return $config;
     }
 
     /**
