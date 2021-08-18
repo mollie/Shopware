@@ -79,7 +79,7 @@ export default class ConfigSetupAction {
         this._setConfigurationValue('Shopware Bestellung vor Zahlung anlegen', valueCreateOrderBeforePayment);
 
         const valueUsePaymentsAPI = (this.pluginConfig.isPaymentsApiEnabled()) ? "Payments API (Transaktionen)" : "Orders API (Transaktionen + Bestellungen)";
-        this._setConfigurationValue('Zahlungs Methode', valueUsePaymentsAPI);
+        this._setConfigurationValue('API Methode', valueUsePaymentsAPI);
 
         cy.get(".save-button").click({force: true});
         cy.log('Plugin successfully configured');
