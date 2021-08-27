@@ -205,8 +205,9 @@ class MollieShippingTest extends TestCase
     {
         return [
             'invalid-url' => ['no-http-url'],
-            'unknown-smarty-variable' => ['https://nolp.dhl.de/nextt-online-public/de/search?piececode={abc.trackingcode}'],
-            'invalid-characters' => ['https://nolp.dhl.de/nextt-online-public/de/search?piececode={}'],
+            'unknown-smarty-variable' => ['https://nolp.dhl.de/de/search?piececode={abc.trackingcode}'],
+            'invalid-characters' => ['https://nolp.dhl.de/de/search?piececode={}'],
+            'invalid-hashtags' => ['https://nolp.dhl.de/de/search?piececode=#test#'],
         ];
     }
 
