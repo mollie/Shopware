@@ -142,6 +142,15 @@ class FakeMollieGateway implements MollieGatewayInterface
     }
 
     /**
+     * @param $mollieId
+     * @param $orderNumber
+     * @return mixed|void
+     */
+    public function updateOrderNumber($mollieId, $orderNumber)
+    {
+    }
+
+    /**
      * @param Order $mollieOrder
      * @param string $carrier
      * @param string $trackingNumber

@@ -249,8 +249,7 @@ class FinishCheckoutFacade
 
             # if we have a separate order entry in Mollie
             # make sure we update its number with the one from Shopware
-            $mollieOrder->orderNumber = (string)$orderNumber;
-            $mollieOrder->update();
+            $this->gwMollie->updateOrderNumber($mollieOrder->id, (string)$orderNumber);
         }
 
         # -------------------------------------------------------------------------------------------------------------
