@@ -45,6 +45,13 @@ interface MollieGatewayInterface
     public function getIdealIssuers();
 
     /**
+     * @param $mollieId
+     * @param $orderNumber
+     * @return mixed
+     */
+    public function updateOrderNumber($mollieId, $orderNumber);
+
+    /**
      * @param Order $mollieOrder
      * @param string $carrier
      * @param string $trackingNumber

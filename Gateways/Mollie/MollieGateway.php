@@ -140,6 +140,22 @@ class MollieGateway implements MollieGatewayInterface
     }
 
     /**
+     * @param $mollieId
+     * @param $orderNumber
+     * @return void
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function updateOrderNumber($mollieId, $orderNumber)
+    {
+        $this->apiClient->orders->update(
+            $mollieId,
+            [
+                'orderNumber' => $orderNumber,
+            ]
+        );
+    }
+
+    /**
      * @param Order $mollieOrder
      * @param string $carrier
      * @param string $trackingNumber
