@@ -4,8 +4,10 @@ namespace MollieShopware\Components;
 
 
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\HttpAdapter\CurlMollieHttpAdapter;
 use Mollie\Api\MollieApiClient;
 use MollieShopware\MollieShopware;
+use MollieShopware\Services\Mollie\Client\MollieHttpClient;
 use Psr\Log\LoggerInterface;
 
 class MollieApiFactory
@@ -89,7 +91,13 @@ class MollieApiFactory
      */
     private function buildApiClient($apiKey)
     {
-        $client = new MollieApiClient();
+        # in some rare peaks, the Mollie API might take a bit more time.
+        # so we set it a higher connect timeout, and also a high enough response timeout
+        $connectTimeout = 5;
+        $responseTimeout = 10;
+        $httpClient = new MollieHttpClient($connectTimeout, $responseTimeout);
+
+        $client = new MollieApiClient($httpClient);
 
         $shopwareVersion = Shopware()->Config()->get('Version');
 
