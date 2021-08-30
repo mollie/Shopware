@@ -216,10 +216,7 @@ class FinishCheckoutFacade
             $this->repoTransactions->save($transaction);
         }
 
-        # -------------------------------------------------------------------------------------------------------------
 
-        # now load the order number from the transaction
-        # and also load our shopware order
         $orderNumber = $transaction->getOrderNumber();
         $swOrder = $this->orderService->getShopwareOrderByNumber($orderNumber);
 
@@ -228,91 +225,113 @@ class FinishCheckoutFacade
             throw new OrderNotFoundException('Order with number: ' . $orderNumber . ' not found!');
         }
 
-        # make sure our transaction is correctly linked to the order
-        $transaction->setOrderId($swOrder->getId());
-        $this->repoTransactions->save($transaction);
-
-
-        # if we have created our order before the payment
-        # then we have to update the transaction ID here so that
-        # it will be our final transaction number
-        if ($orderCreation === OrderCreationType::BEFORE_PAYMENT) {
-            $this->swOrderUpdater->updateTransactionId($swOrder, $finalTransactionNumber);
-        }
-
-
-        # now we need to update the transaction identifier in the Shopware order.
-        # this will be a number from Mollie depending on some settings.
-        # we either extract that data from the Mollie Order or Mollie Payment
-        if ($transaction->isTypeOrder()) {
-            $this->swOrderUpdater->updateReferencesFromMollieOrder($swOrder, $mollieOrder, $transaction);
-
-            # if we have a separate order entry in Mollie
-            # make sure we update its number with the one from Shopware
-            $this->gwMollie->updateOrderNumber($mollieOrder->id, (string)$orderNumber);
-        }
-
         # -------------------------------------------------------------------------------------------------------------
-        # UPDATE the actual payment and order status in Shopware
-        # by using the status from the Mollie API object.
-        # please note, the payment/order is loaded again from Mollie! we would actually have it
-        # but I'm not quite sure if its better to reload it again from the server due to some changes above.
-        if ($transaction->isTypeOrder()) {
-            $mollieOrder = $this->paymentService->getMollieOrder($swOrder, $transaction);
-            $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
-        } else {
-            $molliePayment = $this->paymentService->getMolliePayment($swOrder, $transaction);
-            $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
-        }
+        # -------------------------------------------------------------------------------------------------------------
+        # SAFETY CHECKPOINT
+        # if we have errors from here on, then we MUST NOT throw additional exceptions.
+        # these would lead to a cancelled order, but we do not want the customer to see that something was cancelled
+        # if the overall payment did succeed and the order was successfully created
+        # -------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------
+
+        try {
+
+            # make sure our transaction is correctly linked to the order
+            $transaction->setOrderId($swOrder->getId());
+            $this->repoTransactions->save($transaction);
 
 
-        # update the payment status of our shopware order
-        $this->orderUpdater->updateShopwarePaymentStatus(
-            $swOrder,
-            $mollieStatus
-        );
-
-
-        # update the order status of our shopware order
-        # if configured to do this
-        if ($this->config->updateOrderStatus()) {
-            try {
-                $this->orderUpdater->updateShopwareOrderStatus(
-                    $swOrder,
-                    $mollieStatus
-                );
-            } catch (OrderStatusNotFoundException $ex) {
-                # if we have a problem here, we will still continue
-                # with sending order confirmations.
-                # but at least we will log that the status wasn't updated
-                $this->logger->warning(
-                    'The status of order: ' . $swOrder->getNumber() . ' has not been updated to: ' . $mollieStatus,
-                    [
-                        'error' => $ex->getMessage()
-                    ]
-                );
+            # if we have created our order before the payment
+            # then we have to update the transaction ID here so that
+            # it will be our final transaction number
+            if ($orderCreation === OrderCreationType::BEFORE_PAYMENT) {
+                $this->swOrderUpdater->updateTransactionId($swOrder, $finalTransactionNumber);
             }
-        }
 
 
-        # if we have created the order before this
-        # then send the order confirmation mail NOW,
-        # if the mollie payment is valid
-        if ($orderCreation === OrderCreationType::BEFORE_PAYMENT && PaymentStatus::isApprovedStatus($mollieStatus)) {
-            try {
+            # now we need to update the transaction identifier in the Shopware order.
+            # this will be a number from Mollie depending on some settings.
+            # we either extract that data from the Mollie Order or Mollie Payment
+            if ($transaction->isTypeOrder()) {
+                $this->swOrderUpdater->updateReferencesFromMollieOrder($swOrder, $mollieOrder, $transaction);
 
-                $this->confirmationMail->sendConfirmationEmail($transaction);
-
-            } catch (\Exception $ex) {
-                # never ever break if only an email cannot be sent
-                # lets just add a log here.
-                $this->logger->warning(
-                    'Problem when sending confirmation email for order: ' . $swOrder->getNumber(),
-                    [
-                        'error' => $ex->getMessage()
-                    ]
-                );
+                # if we have a separate order entry in Mollie
+                # make sure we update its number with the one from Shopware
+                $this->gwMollie->updateOrderNumber($mollieOrder->id, (string)$orderNumber);
             }
+
+            # -------------------------------------------------------------------------------------------------------------
+            # UPDATE the actual payment and order status in Shopware
+            # by using the status from the Mollie API object.
+            # please note, the payment/order is loaded again from Mollie! we would actually have it,
+            # but I'm not quite sure if its better to reload it again from the server due to some changes above.
+            if ($transaction->isTypeOrder()) {
+                $mollieOrder = $this->paymentService->getMollieOrder($swOrder, $transaction);
+                $mollieStatus = $this->statusConverter->getMollieOrderStatus($mollieOrder);
+            } else {
+                $molliePayment = $this->paymentService->getMolliePayment($swOrder, $transaction);
+                $mollieStatus = $this->statusConverter->getMolliePaymentStatus($molliePayment);
+            }
+
+
+            # update the payment status of our shopware order
+            $this->orderUpdater->updateShopwarePaymentStatus(
+                $swOrder,
+                $mollieStatus
+            );
+
+
+            # update the order status of our shopware order
+            # if configured to do this
+            if ($this->config->updateOrderStatus()) {
+                try {
+                    $this->orderUpdater->updateShopwareOrderStatus(
+                        $swOrder,
+                        $mollieStatus
+                    );
+                } catch (OrderStatusNotFoundException $ex) {
+                    # if we have a problem here, we will still continue
+                    # with sending order confirmations.
+                    # but at least we will log that the status wasn't updated
+                    $this->logger->warning(
+                        'The status of order: ' . $swOrder->getNumber() . ' has not been updated to: ' . $mollieStatus,
+                        [
+                            'error' => $ex->getMessage()
+                        ]
+                    );
+                }
+            }
+
+
+            # if we have created the order before this
+            # then send the order confirmation mail NOW,
+            # if the mollie payment is valid
+            if ($orderCreation === OrderCreationType::BEFORE_PAYMENT && PaymentStatus::isApprovedStatus($mollieStatus)) {
+                try {
+
+                    $this->confirmationMail->sendConfirmationEmail($transaction);
+
+                } catch (\Exception $ex) {
+                    # never ever break if only an email cannot be sent
+                    # lets just add a log here.
+                    $this->logger->warning(
+                        'Problem when sending confirmation email for order: ' . $swOrder->getNumber(),
+                        [
+                            'error' => $ex->getMessage()
+                        ]
+                    );
+                }
+            }
+
+        } catch (\Exception $ex) {
+
+            $this->logger->warning(
+                'Attention, something went wrong during payment of order: ' . $swOrder->getNumber(),
+                [
+                    'info' => 'The checkout continued as normal for the user, but some data could not be updated in Shopware or Mollie!',
+                    'error' => $ex->getMessage()
+                ]
+            );
         }
 
         return new CheckoutFinish(
