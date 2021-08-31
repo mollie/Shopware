@@ -3,18 +3,32 @@ import Devices from "Services/Devices";
 import {ApplePaySessionMockFactory} from "Services/ApplePay/applepay.stub";
 import TopMenuAction from "Actions/storefront/navigation/TopMenuAction";
 import ListingAction from "Actions/storefront/products/ListingAction";
+import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
+import PluginConfig from "Actions/backend/models/PluginConfig";
+import PaymentConfig from "Actions/backend/models/PaymentConfig";
+import PDPAction from "Actions/storefront/products/PDPAction";
+import PDPRepository from "Repositories/storefront/products/PDPRepository";
+import OffCanvasRepository from "Repositories/storefront/checkout/OffCanvasRepository";
+import CheckoutAction from "Actions/storefront/checkout/CheckoutAction";
+import DummyUserScenario from "Scenarios/DummyUserScenario";
+import BasketRepository from "Repositories/storefront/checkout/BasketRepository";
 
 const devices = new Devices();
-const mockFactory = new ApplePaySessionMockFactory();
+const applePayFactory = new ApplePaySessionMockFactory();
 
+const repoPDP = new PDPRepository();
+const repoOffCanvas = new OffCanvasRepository();
+const repoBasket = new BasketRepository();
 
+const plugin = new ConfigSetupAction();
 const topMenuAction = new TopMenuAction();
 const listingAction = new ListingAction();
+const pdpAction = new PDPAction();
+const checkoutAction = new CheckoutAction();
+
+const scenarioDummyUser = new DummyUserScenario();
 
 const device = devices.getFirstDevice();
-
-const applePayAvailableMock = mockFactory.buildMock(true);
-const applePayNotAvailableMock = mockFactory.buildMock(false);
 
 
 describe('Apple Pay Direct - Functional', () => {
@@ -26,34 +40,105 @@ describe('Apple Pay Direct - Functional', () => {
 
 describe('Apple Pay Direct - UI Tests', () => {
 
+    before(function () {
+
+        devices.setDevice(device);
+
+        const pluginConfig = new PluginConfig();
+        const paymentConfig = new PaymentConfig();
+        const configurationPayments = ['Apple Pay Direct'];
+
+        plugin.configure(pluginConfig, paymentConfig, configurationPayments);
+    })
+
     beforeEach(function () {
         devices.setDevice(device);
     })
 
-    it('Apple Pay Direct visible if available in browser', () => {
+    describe('PDP', () => {
 
-        Cypress.on('window:before:load', (win) => {
-            win.ApplePaySession = applePayAvailableMock;
+        it('Apple Pay Direct available (PDP)', () => {
+
+            applePayFactory.registerApplePay(true);
+
+            cy.visit('/');
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
+
+            repoPDP.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
         })
 
-        cy.visit('/');
-        topMenuAction.clickOnFirstCategory();
-        listingAction.clickOnFirstProduct();
+        it('Apple Pay Direct not available (PDP)', () => {
 
-        cy.get('.apple-pay--container').should('not.have.css', 'display', 'none');
-    })
+            applePayFactory.registerApplePay(false);
 
-    it('Apple Pay Direct hidden if not available in browser', () => {
+            cy.visit('/');
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
 
-        Cypress.on('window:before:load', (win) => {
-            win.ApplePaySession = applePayNotAvailableMock;
+            repoPDP.getApplePayDirectContainer().should('have.css', 'display', 'none');
+        })
+    });
+
+    describe('Off Canvas Cart', () => {
+
+        it('Apple Pay Direct available (Off-Canvas)', () => {
+
+            applePayFactory.registerApplePay(true);
+
+            cy.visit('/');
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
+            pdpAction.addToCart(1);
+
+            repoOffCanvas.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
         })
 
-        cy.visit('/');
-        topMenuAction.clickOnFirstCategory();
-        listingAction.clickOnFirstProduct();
+        it('Apple Pay Direct not available (Off-Canvas)', () => {
 
-        cy.get('.apple-pay--container').should('have.css', 'display', 'none');
-    })
+            applePayFactory.registerApplePay(false);
+
+            cy.visit('/');
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
+            pdpAction.addToCart(1);
+
+            repoOffCanvas.getApplePayDirectContainer().should('have.css', 'display', 'none');
+        })
+    });
+
+    describe('Cart', () => {
+
+        it('Apple Pay Direct available (Cart)', () => {
+
+            applePayFactory.registerApplePay(true);
+
+            scenarioDummyUser.execute();
+
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
+            pdpAction.addToCart(1);
+            checkoutAction.goToBasketInOffCanvas();
+
+            repoBasket.getApplePayDirectContainerTop().should('not.have.css', 'display', 'none');
+            repoBasket.getApplePayDirectContainerBottom().should('not.have.css', 'display', 'none');
+        })
+
+        it('Apple Pay Direct not available (Cart)', () => {
+
+            applePayFactory.registerApplePay(false);
+
+            scenarioDummyUser.execute();
+
+            topMenuAction.clickOnFirstCategory();
+            listingAction.clickOnFirstProduct();
+            pdpAction.addToCart(1);
+            checkoutAction.goToBasketInOffCanvas();
+
+            repoBasket.getApplePayDirectContainerTop().should('have.css', 'display', 'none');
+            repoBasket.getApplePayDirectContainerBottom().should('have.css', 'display', 'none');
+        })
+
+    });
 
 })

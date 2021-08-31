@@ -10,6 +10,14 @@ const repoConfirm = new ConfirmRepository();
 
 class CheckoutAction {
 
+
+    /**
+     *
+     */
+    goToBasketInOffCanvas() {
+        repoOffCanvas.getBasketButton().click();
+    }
+
     /**
      *
      */

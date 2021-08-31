@@ -58,12 +58,25 @@ class ApplePaySessionMock {
 class ApplePaySessionMockFactory {
 
     /**
-     *
+     * This function registered a mock directly
+     * within the Cypress WIN of the browser.
+     * @param available
+     */
+    registerApplePay(available) {
+        const mock = this.buildMock(available);
+
+        Cypress.on('window:before:load', (win) => {
+            win.ApplePaySession = mock;
+        })
+    }
+
+    /**
+     * This function just builds a basic mock object
+     * that can be used in any way
      * @param available
      * @returns {ApplePaySessionMock}
      */
     buildMock(available) {
-
         const mock = new ApplePaySessionMock();
 
         mock.canMakePayments = () => available;

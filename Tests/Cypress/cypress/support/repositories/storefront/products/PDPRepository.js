@@ -1,4 +1,4 @@
-class PDPRepository {
+export default class PDPRepository {
 
     /**
      *
@@ -12,11 +12,16 @@ class PDPRepository {
      *
      * @returns {*}
      */
-    getQuantity()
-    {
+    getQuantity() {
         return cy.get('#sQuantity');
     }
 
-}
+    /**
+     *
+     * @returns {*}
+     */
+    getApplePayDirectContainer() {
+        return cy.get('.apple-pay--container--detail');
+    }
 
-export default PDPRepository;
+}

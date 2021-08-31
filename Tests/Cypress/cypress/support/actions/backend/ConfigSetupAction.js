@@ -100,6 +100,18 @@ export default class ConfigSetupAction {
             cy.contains(payment).click({force: true});
             cy.wait(500);
 
+
+            // ---------------------------------------------------------------
+            // ACTIVATE METHOD
+            // we dont know if its active, and we cannot just toggle it :)
+            // so we grab the isChecked status from an indicator element (table).
+            // if that one is not checked, we simply click on the extJS element.
+            repoPaymentMethods.getActiveIndicatorElement().then(($indicator) => {
+                if (!$indicator.hasClass('x-form-cb-checked')) {
+                    repoPaymentMethods.getActiveCheckbox().click();
+                }
+            })
+
             // ---------------------------------------------------------------
             // METHOD TYPE
             repoPaymentMethods.getDropdownExpandButton('mollie_methods_api').click({force: true});

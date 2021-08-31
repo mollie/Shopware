@@ -1,5 +1,22 @@
 export default class PaymentMethodsRepository {
 
+
+    /**
+     *
+     * @returns {*}
+     */
+    getActiveCheckbox() {
+        return cy.get('#checkboxfield-1323-inputEl');
+    }
+
+    /**
+     *
+     * @returns {*}
+     */
+    getActiveIndicatorElement() {
+        return cy.get('#checkboxfield-1323');
+    }
+
     /**
      *
      * @returns {*}
