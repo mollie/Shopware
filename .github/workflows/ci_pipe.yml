@@ -181,7 +181,9 @@ jobs:
         run: cd Tests/Cypress && make install -B
 
       - name: Start Cypress
-        run: cd Tests/Cypress && make run url=http://local.mollie.shop
+        run: cd Tests/Cypress && make run shopware=$SW_VERSION url=http://local.mollie.shop
+        env:
+          SW_VERSION: ${{ matrix.shopware }}
 
       - name: Download Logs
         if: ${{ always() }}

@@ -106,11 +106,13 @@ export default class ConfigSetupAction {
             // we dont know if its active, and we cannot just toggle it :)
             // so we grab the isChecked status from an indicator element (table).
             // if that one is not checked, we simply click on the extJS element.
-            repoPaymentMethods.getActiveIndicatorElement().then(($indicator) => {
+            repoPaymentMethods.getActiveRow().then(($indicator) => {
                 if (!$indicator.hasClass('x-form-cb-checked')) {
+                    cy.log('Activating ' + payment);
                     repoPaymentMethods.getActiveCheckbox().click();
                 }
             })
+            
 
             // ---------------------------------------------------------------
             // METHOD TYPE

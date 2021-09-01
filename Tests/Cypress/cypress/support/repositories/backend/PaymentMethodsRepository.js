@@ -1,10 +1,19 @@
+import Shopware from "Services/Shopware";
+
+const shopware = new Shopware();
+
 export default class PaymentMethodsRepository {
 
     /**
      *
      * @returns {*}
      */
-    getActiveIndicatorElement() {
+    getActiveRow() {
+
+        if (shopware.isVersionGreaterEqual("5.6.9")) {
+            return cy.get('.x-anchor-form-item').eq(9);
+        }
+
         return cy.get('.x-anchor-form-item').eq(10);
     }
 
@@ -13,7 +22,8 @@ export default class PaymentMethodsRepository {
      * @returns {*}
      */
     getActiveCheckbox() {
-        return cy.get('.x-anchor-form-item').eq(10).find(".x-form-checkbox");
+        // our checkbox is within our active row
+        return this.getActiveRow().find(".x-form-checkbox");
     }
 
     /**

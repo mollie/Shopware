@@ -20,13 +20,21 @@ ifndef url
 	$(warning Please provide the URL argument to Start Cypress!)
 	@exit 1
 endif
-	CYPRESS_BASE_URL=$(url) ./node_modules/.bin/cypress open --env conf=dev
+ifndef shopware
+	CYPRESS_BASE_URL=$(url) CYPRESS_SHOPWARE=5.7 ./node_modules/.bin/cypress open --env conf=dev
+else
+	CYPRESS_BASE_URL=$(url) CYPRESS_SHOPWARE=$(shopware) ./node_modules/.bin/cypress open --env conf=dev
+endif
 
 # ---------------------------------------------------------------------------------------------
 
-run: ## Runs all E2E tests
+run: ## Runs all E2E tests for Shopware
 ifndef url
 	$(warning Please provide the URL argument to Start Cypress!)
 	@exit 1
 endif
-	CYPRESS_BASE_URL=$(url) ./node_modules/.bin/cypress run --env conf=dev --headless
+ifndef shopware
+	$(warning Please provide the Shopware Version as argument to Start Cypress!)
+	@exit 1
+endif
+	CYPRESS_BASE_URL=$(url) CYPRESS_SHOPWARE=$(shopware) ./node_modules/.bin/cypress run --env conf=dev --headless
