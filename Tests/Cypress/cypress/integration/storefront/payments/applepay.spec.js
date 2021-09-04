@@ -9,7 +9,7 @@ import AccountAction from "Actions/storefront/account/AccountAction";
 
 const devices = new Devices();
 const session = new Session();
-const mockFactory = new ApplePaySessionMockFactory();
+const applePayFactory = new ApplePaySessionMockFactory();
 
 
 const checkoutAction = new CheckoutAction();
@@ -20,9 +20,6 @@ const scenarioUser = new DummyUserScenario();
 
 
 const device = devices.getFirstDevice();
-
-const applePayAvailableMock = mockFactory.buildMock(true);
-const applePayNotAvailableMock = mockFactory.buildMock(false);
 
 
 context("Apple Pay", () => {
@@ -38,11 +35,9 @@ context("Apple Pay", () => {
 
     context("Account", () => {
 
-        it('Apple Pay hidden if not available in browser', () => {
+        it('Apple Pay hidden if not available in browser (Account)', () => {
 
-            Cypress.on('window:before:load', (win) => {
-                win.ApplePaySession = applePayNotAvailableMock;
-            })
+            applePayFactory.registerApplePay(false);
 
             scenarioUser.execute();
             accountAction.openPaymentMethods();
@@ -53,11 +48,9 @@ context("Apple Pay", () => {
         // Apple Pay is no persistent selection of a payment method, because it depends on the browser.
         // This means a pre-selection doesnt make any sense,
         // and that's the reason why it should also be removed if it would be available.
-        it('Apple Pay hidden if available in browser', () => {
+        it('Apple Pay hidden if available in browser (Account)', () => {
 
-            Cypress.on('window:before:load', (win) => {
-                win.ApplePaySession = applePayNotAvailableMock;
-            })
+            applePayFactory.registerApplePay(false);
 
             scenarioUser.execute();
             accountAction.openPaymentMethods();
@@ -69,11 +62,9 @@ context("Apple Pay", () => {
 
     context("Checkout", () => {
 
-        it('Apple Pay hidden if not available in browser', () => {
+        it('Apple Pay hidden if not available in browser (Checkout)', () => {
 
-            Cypress.on('window:before:load', (win) => {
-                win.ApplePaySession = applePayNotAvailableMock;
-            })
+            applePayFactory.registerApplePay(false);
 
             scenarioDummyBasket.execute();
             checkoutAction.openPaymentSelectionOnConfirm();
@@ -81,11 +72,9 @@ context("Apple Pay", () => {
             cy.contains('Apple Pay').should('not.be.visible');
         })
 
-        it('Apple Pay visible if available in browser', () => {
+        it('Apple Pay visible if available in browser (Checkout)', () => {
 
-            Cypress.on('window:before:load', (win) => {
-                win.ApplePaySession = applePayAvailableMock;
-            })
+            applePayFactory.registerApplePay(true);
 
             scenarioDummyBasket.execute();
             checkoutAction.openPaymentSelectionOnConfirm();
