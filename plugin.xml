@@ -6,7 +6,7 @@
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
 
-    <version>1.8.8</version>
+    <version>1.8.9</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -41,6 +41,25 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.8.9">
+        <changes lang="de">
+            - Aktualisierung des Mollie PHP Client Frameworks auf die aktuellste Version
+            - Es wird (dank neuem Client) bei Rückkehr in den Shop nur mehr die Bestellnummer Richtung Mollie aktualisiert. Dadurch sollte kein (seltener) Fehler mehr von Klarna bzgl. Aktualisierung der Adresse kommen.
+            - Tracking-URLs mit "#" werden nun beim Versand ignoriert, da diese von Mollie nicht erlaubt sind.
+            - Erhöhung des API Timeouts für bessere Stabilität bei höher frequentierten Shops.
+            - Neuer Sicherheits-Checkpoint bei Rückkehr in den Shop nach der Bezahlung. Sobald eine Shopware Bestellung für eine gültige Bezahlung erstellt wurde, brechen kommende Fehler die Bestellung nicht mehr ab. Dies kann zu Problemen mit Daten führen, die Bestellung für den Kunden existiert zumindest.
+            - Problembehebung, bei der Bestellungen mit korrupten Daten im Backend nicht geöffnet werden konnten.
+        </changes>
+        <changes lang="en">
+            - Update Mollie PHP Client Framework to latest version
+            - Only update the order number (with new PHP Client) after a checkout to avoid the random issues with Klarna and failed address updates.
+            - Skip Tracking URLs that contain a "#". This is not allowed by Mollie.
+            - Increase API timeout to be more stable with higher traffic and loads
+            - Add new safety checkpoint when returning to the shop after a payment. If an error occurs after creating an order in Shopware for a valid payment, the Shopware order won't get cancelled anymore. This might lead to problems with data, but the customer order is at least valid and existing.
+            - Fix problem where the Shopware order in the backend couldn't be opened if the data was corrupt.
+        </changes>
+    </changelog>
 
     <changelog version="1.8.8">
         <changes lang="de">
