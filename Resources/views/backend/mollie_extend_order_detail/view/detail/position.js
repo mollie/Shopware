@@ -31,7 +31,6 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
         var columns = me.callParent(arguments);
 
         const isMollieOrder = me.isMollieOrder(record);
-        console.log(isMollieOrder);
 
         if (!!isMollieOrder) {
 
@@ -304,6 +303,11 @@ Ext.define('Shopware.apps.Mollie.view.detail.Position', {
      * and no simple transaction.
      */
     isMollieOrder: function (lineItem) {
+
+        if (lineItem === undefined || lineItem === null) {
+            return false;
+        }
+
         if (!lineItem.raw) {
             return false;
         }
