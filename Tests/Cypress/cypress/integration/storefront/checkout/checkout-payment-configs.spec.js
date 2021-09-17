@@ -16,7 +16,7 @@ const plugin = new ConfigSetupAction();
 const checkout = new CheckoutAction();
 const molliePayment = new PaymentScreenAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(1);
+const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 
 const device = devices.getFirstDevice();

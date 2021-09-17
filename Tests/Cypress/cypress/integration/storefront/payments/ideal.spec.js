@@ -16,7 +16,7 @@ const login = new LoginAction();
 const checkout = new CheckoutAction();
 const payments = new PaymentsAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(1);
+const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 
 describe('iDEAL Issuers', () => {
@@ -41,7 +41,7 @@ describe('iDEAL Issuers', () => {
 
     it('Ajax Route working for signed in users', () => {
 
-        register.doRegister("dev@localhost.de", "MollieMollie111");
+        register.doRegister("dev@localhost.de", "MollieMollie111", 'Mollie', 'Mollie');
 
         login.doLogin("dev@localhost.de", "MollieMollie111");
 

@@ -18,7 +18,7 @@ const checkout = new CheckoutAction();
 const molliePayment = new PaymentScreenAction();
 const mollieIssuer = new IssuerScreenAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(66);
+const scenarioDummyBasket = new DummyBasketScenario(66, 'Max', 'Mustermann');
 
 const device = devices.getFirstDevice();
 
@@ -131,6 +131,9 @@ configs.forEach(config => {
                     // with a successful order message
                     cy.url().should('include', '/checkout/finish');
                     cy.contains('Vielen Dank für Ihre Bestellung');
+
+                    // also verify that our address is correctly visible
+                    cy.get('.billing--panel').contains('Max Mustermann');
                 })
 
             })

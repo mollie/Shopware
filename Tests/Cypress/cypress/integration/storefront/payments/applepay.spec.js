@@ -15,7 +15,7 @@ const applePayFactory = new ApplePaySessionMockFactory();
 const checkoutAction = new CheckoutAction();
 const accountAction = new AccountAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(66);
+const scenarioDummyBasket = new DummyBasketScenario(66, 'Max', 'Mustermann');
 const scenarioUser = new DummyUserScenario();
 
 

@@ -10,7 +10,7 @@ const session = new Session();
 
 const checkout = new CheckoutAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(1);
+const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 const device = devices.getFirstDevice();
 

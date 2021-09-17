@@ -1,13 +1,15 @@
 import RegisterRepository from 'Repositories/storefront/account/RegisterRepository';
 
-class RegisterAction {
+export default class RegisterAction {
 
     /**
      *
      * @param email
      * @param password
+     * @param firstname
+     * @param lastname
      */
-    doRegister(email, password) {
+    doRegister(email, password, firstname, lastname) {
 
         cy.visit('/account');
 
@@ -16,8 +18,8 @@ class RegisterAction {
         repo.getAccountType().select('Privatkunde');
         repo.getSalutation().select('Herr');
 
-        repo.getFirstname().clear().type('Mollie');
-        repo.getLastname().clear().type('Mollie');
+        repo.getFirstname().clear().type(firstname);
+        repo.getLastname().clear().type(lastname);
 
         repo.getEmail().clear().type(email);
         repo.getPassword().clear().type(password);
@@ -31,5 +33,3 @@ class RegisterAction {
         repo.getRegisterButton().click();
     }
 }
-
-export default RegisterAction;

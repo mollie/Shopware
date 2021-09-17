@@ -13,7 +13,7 @@ const session = new Session();
 const checkout = new CheckoutAction();
 const molliePayment = new PaymentScreenAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(1);
+const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 
 const device = devices.getFirstDevice();
@@ -46,6 +46,9 @@ context("Lost Sessions", () => {
         // our session should be restored
         // and we should still have a successful checkout
         cy.contains('Vielen Dank für Ihre Bestellung');
+
+        // also verify that our address is correctly visible
+        cy.get('.billing--panel').contains('Max Mustermann');
     })
 
     it('Error with ' + paymentMethod, () => {

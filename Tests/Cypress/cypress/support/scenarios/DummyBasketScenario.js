@@ -22,9 +22,13 @@ export default class DummyBasketScenario {
     /**
      *
      * @param quantity
+     * @param firstname
+     * @param lastname
      */
-    constructor(quantity) {
+    constructor(quantity, firstname, lastname) {
         this.quantity = quantity;
+        this.firstname = firstname;
+        this.lastname = lastname;
     }
 
     /**
@@ -37,7 +41,7 @@ export default class DummyBasketScenario {
 
         cy.visit('/');
 
-        register.doRegister(user_email, user_pwd);
+        register.doRegister(user_email, user_pwd, this.firstname, this.lastname);
 
         session.resetSession();
 

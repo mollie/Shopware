@@ -20,7 +20,7 @@ export default class DummyUserScenario {
 
         cy.visit('/');
 
-        register.doRegister(user_email, user_pwd);
+        register.doRegister(user_email, user_pwd, 'Mollie', 'Mollie');
 
         session.resetSession();
 
