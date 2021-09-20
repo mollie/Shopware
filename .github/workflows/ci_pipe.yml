@@ -111,7 +111,6 @@ jobs:
 
   integration_tests:
     name: Integration Tests | Shopware ${{ matrix.shopware }}
-    needs: phpcsfixer
     runs-on: ubuntu-latest
     strategy:
       matrix:
