@@ -127,6 +127,12 @@ make csfix
 
 ## Starts the PHPStan Analyzer
 make stan
+
+## Starts the Jest Unit Tests
+make jest
+
+## Starts the ESLint Analyzer
+make eslint
 ```
 
 
@@ -150,9 +156,9 @@ This command will create a new report HTML file that you can just open and use!
 
 Testing is a must-have for us!
 
-We have provided 2 tools for you.
+We have provided 3 tools for you.
 
-There's a setup for `PHPUnit Tests` as well as a very easy `Cypress E2E Test Suite` that you can just run locally.
+There's a setup for `PHPUnit Tests`, `Jest Tests`, as well as a very easy `Cypress E2E Test Suite` that you can just run locally.
 
 
 
@@ -164,6 +170,16 @@ It is configured to include Code Coverage reports, so there will be a new report
 
 ```bash
 make test
+```
+
+### Jest
+
+Please use this command to run your Jest tests.
+
+It is configured to test everything in thest Tests/Jest folder for you.
+
+```bash
+make jest
 ```
 
 

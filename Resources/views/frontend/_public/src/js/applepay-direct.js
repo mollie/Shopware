@@ -1,5 +1,5 @@
 function initApplePay() {
-    "use strict";
+    'use strict';
 
     var applePayApiVersion = 3;
     var applePayDivSelector = '.apple-pay--container';
@@ -24,7 +24,7 @@ function initApplePay() {
             // to avoid any wrong margins if no apple pay is displayed
             if (divsApplePay) {
                 for (var i = 0; i < divsApplePay.length; i++) {
-                    divsApplePay[i].style.display = "none";
+                    divsApplePay[i].style.display = 'none';
                 }
             }
             return;
@@ -34,7 +34,7 @@ function initApplePay() {
         // just in case it wasn't visible before
         if (divsApplePay) {
             divsApplePay.forEach(function (div) {
-                div.style.display = "inline-block";
+                div.style.display = 'inline-block';
             });
         }
 
@@ -45,7 +45,7 @@ function initApplePay() {
             button.style.display = 'inline-block';
 
             // remove previous handlers (just in case)
-            button.removeEventListener("click", onButtonClick);
+            button.removeEventListener('click', onButtonClick);
             // add click event handlers
             button.addEventListener('click', onButtonClick);
         });
@@ -62,7 +62,7 @@ function initApplePay() {
             button.dataset.label,
             button.dataset.amount,
             button.dataset.country,
-            button.dataset.currency
+            button.dataset.currency,
         );
 
         // if button is in item mode
@@ -88,7 +88,7 @@ function initApplePay() {
                     number: button.dataset.productnumber,
                     quantity: qty,
                 }
-            ).done(function (data) {
+            ).done(function () {
                 }
             );
         }
@@ -109,19 +109,21 @@ function initApplePay() {
 
                     if (data.success) {
                         session.completeShippingContactSelection(
+                            // eslint-disable-next-line no-undef
                             ApplePaySession.STATUS_SUCCESS,
                             data.shippingmethods,
                             data.cart.total,
-                            data.cart.items
+                            data.cart.items,
                         );
                     } else {
                         session.completeShippingContactSelection(
+                            // eslint-disable-next-line no-undef
                             ApplePaySession.STATUS_FAILURE,
                             [],
                             {
-                                label: "",
+                                label: '',
                                 amount: 0,
-                                pending: true
+                                pending: true,
                             },
                             []
                         );
@@ -138,24 +140,26 @@ function initApplePay() {
             $.post(
                 button.dataset.setshippingurl,
                 {
-                    identifier: e.shippingMethod.identifier
+                    identifier: e.shippingMethod.identifier,
                 }
             ).done(function (data) {
                     data = JSON.parse(data);
 
                     if (data.success) {
                         session.completeShippingMethodSelection(
+                            // eslint-disable-next-line no-undef
                             ApplePaySession.STATUS_SUCCESS,
                             data.cart.total,
-                            data.cart.items
+                            data.cart.items,
                         );
                     } else {
                         session.completeShippingMethodSelection(
+                            // eslint-disable-next-line no-undef
                             ApplePaySession.STATUS_FAILURE,
                             {
-                                label: "",
+                                label: '',
                                 amount: 0,
-                                pending: true
+                                pending: true,
                             },
                             []
                         );
@@ -185,13 +189,13 @@ function initApplePay() {
             $.post(
                 button.dataset.validationurl,
                 {
-                    validationUrl: e.validationURL
+                    validationUrl: e.validationURL,
                 }
             ).done(function (validationData) {
                     validationData = JSON.parse(validationData);
                     session.completeMerchantValidation(validationData);
                 }
-            ).fail(function (xhr, status, error) {
+            ).fail(function () {
                 session.abort();
             });
         };
@@ -206,6 +210,7 @@ function initApplePay() {
 
             // complete the session and notify the
             // devices and the system that everything worked
+            // eslint-disable-next-line no-undef
             session.completePayment(ApplePaySession.STATUS_SUCCESS);
 
             // now finish our payment by filling a form
@@ -229,24 +234,25 @@ function initApplePay() {
             countryCode: country,
             currencyCode: currency,
             requiredShippingContactFields: [
-                "name",
-                "email",
-                "postalAddress"
+                'name',
+                'email',
+                'postalAddress',
             ],
             supportedNetworks: [
                 'amex',
                 'maestro',
                 'masterCard',
                 'visa',
-                'vPay'
+                'vPay',
             ],
             merchantCapabilities: ['supports3DS', 'supportsEMV', 'supportsCredit', 'supportsDebit'],
             total: {
                 label: label,
-                amount: 0
-            }
+                amount: 0,
+            },
         };
 
+        // eslint-disable-next-line no-undef
         return new ApplePaySession(applePayApiVersion, request);
     }
 
@@ -257,19 +263,18 @@ function initApplePay() {
      * @param payment
      */
     function finishPayment(checkoutURL, paymentToken, payment) {
-        var me = this,
-            $form,
-            createField = function (name, val) {
-                return $('<input>', {
-                    type: 'hidden',
-                    name: name,
-                    value: val
-                });
-            };
 
-        $form = $('<form>', {
+        var createField = function (name, val) {
+            return $('<input>', {
+                type: 'hidden',
+                name: name,
+                value: val,
+            });
+        };
+
+        var $form = $('<form>', {
             action: checkoutURL,
-            method: 'POST'
+            method: 'POST',
         });
 
 

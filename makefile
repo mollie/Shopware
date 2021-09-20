@@ -12,14 +12,20 @@ help:
 # ------------------------------------------------------------------------------------------------------------
 
 install: ## Installs all production dependencies
+	@make clean -B
 	@composer install --no-dev
+	@npm install --production
 
 dev: ## Installs all dev dependencies
+	@make clean -B
 	@composer install
+	@npm install
 
 clean: ## Cleans all dependencies
 	@rm -rf vendor
+	@rm -rf node_modules
 	@rm -rf composer.lock
+	@rm -rf package-lock.json
 	@rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
@@ -43,6 +49,12 @@ stan: ## Starts the PHPStan Analyser
 metrics: ## Starts the PHPMetrics Analyser
 	@php vendor/bin/phpmetrics --config=.phpmetrics.json
 
+jest: ## Starts all Jest tests
+	./node_modules/.bin/jest --config=.jest.config.js
+
+eslint: ## Starts ESLint
+	./node_modules/eslint/bin/eslint.js --config ./.eslintrc.json ./Resources/views/frontend
+
 # ------------------------------------------------------------------------------------------------------------
 
 pr: ## Prepares everything for a Pull Request
@@ -51,10 +63,12 @@ pr: ## Prepares everything for a Pull Request
 	@make phpmin -B
 	@make test -B
 	@make stan -B
+	@make jest -B
+	@make eslint -B
 
 # ------------------------------------------------------------------------------------------------------------
 
 release: ## Creates a new ZIP package
 	cd .. && mkdir -p ./.release
 	cd .. && cd ./.release && rm -rf MollieShopware.zip
-	cd .. && zip -qq -r -0 ./.release/MollieShopware.zip MollieShopware/* -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpstan.neon' 'MollieShopware/makefile' '*.DS_Store'
+	cd .. && zip -qq -r -0 ./.release/MollieShopware.zip MollieShopware/* -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpstan.neon' 'MollieShopware/makefile' '*.DS_Store' '*node_modules'

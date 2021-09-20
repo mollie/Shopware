@@ -11,9 +11,11 @@ var cardToken = document.querySelector('#cardToken');
 
 if (cardToken !== undefined) {
     // Initialize Mollie Components instance
+    // eslint-disable-next-line no-undef
     const mollie = Mollie('[mollie_profile_id]', {
         locale: '[mollie_locale]',
-        testmode: [mollie_testmode]
+        // eslint-disable-next-line no-undef
+        testmode: [mollie_testmode],
     });
 
     // Default properties
@@ -25,7 +27,7 @@ if (cardToken !== undefined) {
                 padding: '10px 10px',
                 '::placeholder': {
                     color: 'rgba(68, 68, 68, 0.2)',
-                }
+                },
             },
             valid: {
                 color: '#090',
@@ -33,28 +35,28 @@ if (cardToken !== undefined) {
             invalid: {
                 backgroundColor: '#fff1f3',
             },
-        }
+        },
     };
 
     const cardHolder = {
-        name: "cardHolder",
-        id: "#cardHolder",
-        errors: "cardHolderError"
+        name: 'cardHolder',
+        id: '#cardHolder',
+        errors: 'cardHolderError',
     };
     const cardNumber = {
-        name: "cardNumber",
-        id: "#cardNumber",
-        errors: "cardNumberError"
+        name: 'cardNumber',
+        id: '#cardNumber',
+        errors: 'cardNumberError',
     };
     const expiryDate = {
-        name: "expiryDate",
-        id: "#expiryDate",
-        errors: "expiryDateError"
+        name: 'expiryDate',
+        id: '#expiryDate',
+        errors: 'expiryDateError',
     };
     const verificationCode = {
-        name: "verificationCode",
-        id: "#verificationCode",
-        errors: "verificationCodeError"
+        name: 'verificationCode',
+        id: '#verificationCode',
+        errors: 'verificationCodeError',
     };
 
     const inputs = [cardHolder, cardNumber, expiryDate, verificationCode];
@@ -62,11 +64,11 @@ if (cardToken !== undefined) {
     // Event helpers
     const setFocus = (componentName, isFocused) => {
         const element = document.querySelector(componentName);
-        element.classList.toggle("is-focused", isFocused);
+        element.classList.toggle('is-focused', isFocused);
     };
 
     const disableForm = () => {
-        let submitButtons = document.querySelectorAll('button[type="submit"]');
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
         if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = true;
@@ -75,7 +77,7 @@ if (cardToken !== undefined) {
     };
 
     const enableForm = () => {
-        let submitButtons = document.querySelectorAll('button[type="submit"]');
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
         if (submitButtons.length > 0) {
             submitButtons.forEach(function(el) {
                 el.disabled = false;

@@ -1,5 +1,5 @@
 (function ($) {
-    "use strict";
+    'use strict';
 
     $(document).ready(function() {
         hideApplePayIfNotAllowed();
@@ -23,6 +23,7 @@
         var disabledItem = document.createAttribute('disabled');
         disabledItem.value = 'disabled';
 
+        // eslint-disable-next-line no-undef
         if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
             // Apple Pay is not available
             if (typeof applePayInput !== 'undefined' && applePayInput.length) {
