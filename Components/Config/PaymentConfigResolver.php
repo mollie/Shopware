@@ -89,6 +89,11 @@ class PaymentConfigResolver
         # value from the config directly
         $methodType = (!empty($translatedValue)) ? (int)$translatedValue : (int)$paymentConfig->getMethodType();
 
+        # if we have no real value
+        # then make sure to use the global setting
+        if ($methodType !== PaymentMethodType::ORDERS_API && $methodType !== PaymentMethodType::PAYMENTS_API) {
+            $methodType = PaymentMethodType::GLOBAL_SETTING;
+        }
 
         # if we should use our global setting,
         # then use the one from out plugin configuration
@@ -143,6 +148,12 @@ class PaymentConfigResolver
         # value from the config directly
         $orderCreation = (!empty($translatedValue)) ? (int)$translatedValue : (int)$paymentConfig->getOrderCreation();
 
+        # if we somehow have a weird value that is neither one of our options,
+        # then make sure we use the global setting
+        if ($orderCreation !== OrderCreationType::BEFORE_PAYMENT && $orderCreation !== OrderCreationType::AFTER_PAYMENT) {
+            $orderCreation = OrderCreationType::GLOBAL_SETTING;
+        }
+        
         # if we should use our global setting,
         # then use the one from out plugin configuration
         if ($orderCreation === OrderCreationType::GLOBAL_SETTING) {
