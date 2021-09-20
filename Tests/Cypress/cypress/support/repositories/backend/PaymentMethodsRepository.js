@@ -10,7 +10,10 @@ export default class PaymentMethodsRepository {
      */
     getActiveRow() {
 
-        if (shopware.isVersionGreaterEqual("5.6.9")) {
+        // starting with some Shopware versions there are more
+        // options existing in the backend, and thus the index
+        // of our "active" row changes.
+        if (shopware.isVersionGreaterEqual("5.6.6")) {
             return cy.get('.x-anchor-form-item').eq(9);
         }
 
