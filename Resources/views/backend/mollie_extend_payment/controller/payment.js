@@ -42,7 +42,6 @@ Ext.define('Shopware.apps.Mollie.controller.Payment', {
             success: function (res) {
                 try {
                     var result = JSON.parse(res.responseText);
-                    console.log(result);
                 } catch (e) {
                     console.log(e);
                 }

@@ -171,7 +171,7 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
     loadRecord(record) {
         var me = this;
 
-        var result = me.callParent(arguments);
+        var result = me.form.loadRecord(record);
 
         this.loadMollieData(record.data.id);
 
