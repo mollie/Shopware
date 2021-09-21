@@ -1,0 +1,9 @@
+{
+    "name": "mollie-cypress-tests",
+    "version": "1.0.0",
+    "description": "Cypress Testing Project for Mollie Shopware",
+    "dependencies": {},
+    "devDependencies": {
+    },
+    "scripts": {}
+}
