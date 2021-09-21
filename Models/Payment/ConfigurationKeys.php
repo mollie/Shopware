@@ -13,4 +13,6 @@ interface ConfigurationKeys
 
     const EXPIRATION_DAYS = 'mollie_expiration_days';
 
+    const BANKTRANSFER_FLOW = 'mollie_banktransfer_flow';
+
 }

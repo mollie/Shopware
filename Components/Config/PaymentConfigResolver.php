@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components\Config;
 
+use MollieShopware\Components\Constants\BankTransferFlow;
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
@@ -153,7 +154,7 @@ class PaymentConfigResolver
         if ($orderCreation !== OrderCreationType::BEFORE_PAYMENT && $orderCreation !== OrderCreationType::AFTER_PAYMENT) {
             $orderCreation = OrderCreationType::GLOBAL_SETTING;
         }
-        
+
         # if we should use our global setting,
         # then use the one from out plugin configuration
         if ($orderCreation === OrderCreationType::GLOBAL_SETTING) {
@@ -197,6 +198,40 @@ class PaymentConfigResolver
         return (string)$expirationDays;
     }
 
+    /**
+     * @param string $paymentMethod
+     * @param int $shopId
+     * @return bool
+     * @throws MolliePaymentConfigurationNotFound
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function getFinalIsEasyBankTransfer($paymentMethod, $shopId)
+    {
+        $fullPaymentMethod = $this->getPaymentFullName($paymentMethod);
+
+        # fetch the configuration for this payment method
+        $paymentConfig = $this->getPaymentConfig($fullPaymentMethod);
+
+        # get any translated values for our provided shop
+        $translatedValue = $this->translations->getPaymentConfigTranslation(
+            ConfigurationKeys::BANKTRANSFER_FLOW,
+            $paymentConfig->getPaymentMeanId(),
+            $shopId
+        );
+
+        $flowType = (int)$paymentConfig->getBankTransferFlow();
+
+        if (!empty($translatedValue)) {
+            $flowType = (int)$translatedValue;
+        }
+
+        if ($flowType === BankTransferFlow::EASY) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * @param string $paymentName

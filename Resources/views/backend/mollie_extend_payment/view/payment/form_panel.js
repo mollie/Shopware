@@ -21,6 +21,10 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
         orderCreationValueBefore: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_value_before"}{/s}',
         orderCreationValueAfter: '{s namespace="backend/mollie/general" name="payment_details_ordercreation_value_after"}{/s}',
         // ------------------------------------------------------------------------------------------------------
+        captionBankTransferFlow: '{s namespace="backend/mollie/general" name="payment_details_bankflow_caption"}{/s}',
+        valueBankTransferFlowMollie: '{s namespace="backend/mollie/general" name="payment_details_bankflow_value_mollie"}{/s}',
+        valueBankTransferFlowNoMollie: '{s namespace="backend/mollie/general" name="payment_details_bankflow_value_no_mollie"}{/s}',
+        // ------------------------------------------------------------------------------------------------------
         btnUserGuide: '{s namespace="backend/mollie/general" name="payment_details_btn_userguide"}{/s}',
     },
 
@@ -146,6 +150,43 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                     xtype: 'fieldset',
                     flex: 12,
                     border: false,
+                    margin: '0',
+                    bodyPadding: 0,
+                    layout: 'hbox',
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            name: 'mollie_banktransfer_flow',
+                            flex: 10,
+                            fieldLabel: me.molSnippets.captionBankTransferFlow,
+                            labelWidth: labelWidth,
+                            supportText: '',
+                            translatable: true,
+                            multiSelect: false,
+                            editable: false,
+                            allowBlank: false,
+                            store: [
+                                [1, me.molSnippets.valueBankTransferFlowMollie],
+                                [2, me.molSnippets.valueBankTransferFlowNoMollie],
+                            ],
+                        },
+                        {
+                            xtype: 'button',
+                            flex: 2,
+                            text: me.molSnippets.methodReadMore,
+                            cls: 'small primary',
+                            margin: '2 0 0 10',
+                            scope: this,
+                            handler: function () {
+                                window.open('https://github.com/mollie/Shopware/wiki/SEPA-Bank-Transfer', '_blank').focus();
+                            }
+                        }
+                    ]
+                },
+                {
+                    xtype: 'fieldset',
+                    flex: 12,
+                    border: false,
                     margin: '0 0 0 0',
                     bodyPadding: 0,
                     layout: 'hbox',
@@ -179,7 +220,9 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
     },
 
     loadMollieData(paymentId) {
-        var me = this;
+        const me = this;
+
+        const paymentName = me.getPaymentName();
 
         Ext.Ajax.request({
             url: '{url controller=MolliePayments action="getMollieConfig"}',
@@ -194,6 +237,7 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                     if (!result.success) {
                         throw new Error(result.message);
                     }
+
 
                     // disable forms for non-mollie payments
                     me.setMollieFieldsEnabled(result.data.isMollie);
@@ -210,6 +254,15 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
                         field.setValue(result.data.orderCreation);
                     });
 
+                    me.getFormField('mollie_banktransfer_flow', field => {
+
+                        // only enable this for the bank transfer payment
+                        const isBankTransfer = (paymentName === 'mollie_banktransfer');
+                        field.setDisabled(!isBankTransfer);
+
+                        field.setValue(result.data.bankTransferFlow);
+                    });
+
                 } catch (e) {
                     console.log(e);
                 }
@@ -217,6 +270,21 @@ Ext.define('Shopware.apps.Mollie.Payment.view.payment.FormPanel', {
         });
     },
 
+    getPaymentName() {
+        var me = this;
+
+        const allFields = me.getForm().getFields();
+
+        var paymentName = '';
+
+        Ext.each(allFields.items, function (field) {
+            if (field.name === 'name') {
+                paymentName = field.rawValue;
+            }
+        });
+
+        return paymentName;
+    },
 
     setMollieFieldsEnabled(enabled) {
         var me = this;

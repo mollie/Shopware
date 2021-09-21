@@ -94,6 +94,11 @@ abstract class AbstractPayment implements PaymentInterface
      */
     private $expirationDays;
 
+    /**
+     * @var bool
+     */
+    private $ignoreCheckoutURL;
+
 
     /**
      * @param AddressConverter $addressBuilder
@@ -110,6 +115,7 @@ abstract class AbstractPayment implements PaymentInterface
 
         $this->userOrdersAPI = false;
         $this->expirationDays = null;
+        $this->ignoreCheckoutURL = false;
     }
 
 
@@ -157,6 +163,22 @@ abstract class AbstractPayment implements PaymentInterface
         $this->expirationDays = $expirationDays;
     }
 
+    /**
+     * @param bool $ignore
+     * @return void
+     */
+    public function setIgnoreCheckoutURL($ignore)
+    {
+        $this->ignoreCheckoutURL = $ignore;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCheckoutUrlIgnored()
+    {
+        return $this->ignoreCheckoutURL;
+    }
 
     /**
      * @return mixed[]

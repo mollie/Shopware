@@ -13,8 +13,6 @@ use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\Services\PaymentService;
-use MollieShopware\Models\Transaction;
-use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
@@ -38,7 +36,6 @@ class OrderBackendSubscriber implements SubscriberInterface
         return [
             'Enlight_Controller_Action_PostDispatch_Backend_Order' => 'onOrderPostDispatch',
             'Shopware_Controllers_Api_Orders::putAction::after' => 'onOrderApiPut',
-            'Shopware_Modules_Order_SendMail_Send' => 'onSendMail',
             'Shopware\Models\Order\Order::postUpdate' => 'onUpdate'
         ];
     }
@@ -69,61 +66,6 @@ class OrderBackendSubscriber implements SubscriberInterface
         }
 
         $this->shipOrderToMollie($orderId);
-    }
-
-    /**
-     * Catch mail variables when the confirmation email is triggered and store
-     * them in the database to use them when the order is fully processed.
-     *
-     * @param Enlight_Event_EventArgs $args
-     * @throws Exception
-     */
-    public function onSendMail(Enlight_Event_EventArgs $args)
-    {
-        $variables = $args->get('variables');
-        $orderNumber = (isset($variables['ordernumber']) ? $variables['ordernumber'] : null);
-        $order = null;
-        $mollieOrder = null;
-
-        if (!empty($orderNumber)) {
-            /** @var OrderService $orderService */
-            $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
-
-            /** @var Order $order */
-            $order = $orderService->getShopwareOrderByNumber($orderNumber);
-        }
-
-        if (!empty($order)) {
-            if (strstr($order->getTransactionId(), 'mollie_') &&
-                $order->getPaymentStatus()->getId() == Status::PAYMENT_STATE_OPEN) {
-
-                /** @var TransactionRepository $transactionRepo */
-                $transactionRepo = Shopware()->Models()->getRepository(
-                    Transaction::class
-                );
-
-                /** @var Transaction $transaction */
-                $transaction = $transactionRepo->findOneBy([
-                    'transactionId' => $order->getTransactionId()
-                ]);
-
-                if (!empty($transaction) && empty($transaction->getOrdermailVariables())) {
-                    try {
-                        $transaction->setOrdermailVariables(json_encode($variables));
-                        $transactionRepo->save($transaction);
-                    } catch (Exception $e) {
-                        $this->logger->error(
-                            'Error in onSendMail event',
-                            [
-                                'error' => $e->getMessage(),
-                            ]
-                        );
-                    }
-
-                    return false;
-                }
-            }
-        }
     }
 
     /**
