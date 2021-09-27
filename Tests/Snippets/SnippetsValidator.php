@@ -46,6 +46,16 @@ class SnippetsValidator
 
             foreach ($entries as $key => $value) {
 
+                if (empty($value)) {
+                    $errors[] = new ValidationError(
+                        $language,
+                        $key,
+                        $value,
+                        "No translation existing for this key!"
+                    );
+                    continue;
+                }
+
                 if ($this->isBackendValidator) {
 
                     if ($this->endsWith($value, '"')) {
