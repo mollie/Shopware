@@ -55,6 +55,10 @@ jest: ## Starts all Jest tests
 eslint: ## Starts ESLint
 	./node_modules/eslint/bin/eslint.js --config ./.eslintrc.json ./Resources/views/frontend
 
+snippetcheck: ## Validates the Snippets (requires Shopware)
+	cd ./Tests/Snippets && php validate.php
+	cd ../../.. && php bin/console sw:snippets:validate custom/plugins/MollieShopware
+
 # ------------------------------------------------------------------------------------------------------------
 
 pr: ## Prepares everything for a Pull Request
@@ -65,6 +69,7 @@ pr: ## Prepares everything for a Pull Request
 	@make stan -B
 	@make jest -B
 	@make eslint -B
+	@make snippets -B
 
 # ------------------------------------------------------------------------------------------------------------
 

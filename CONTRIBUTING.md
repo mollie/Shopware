@@ -133,6 +133,9 @@ make jest
 
 ## Starts the ESLint Analyzer
 make eslint
+
+## Validates the Snippets files (requires Shopware)
+make snippetcheck
 ```
 
 

@@ -4,9 +4,12 @@
 
         <element type="button">
             <name>btn_wiki</name>
-            <label lang="de">>> Benutzeranleitung öffnen</label>
             <label lang="en">>> Open Documentation</label>
-            <label lang="nl">>> Handleiding openen</label>
+            <label lang="de">>> Benutzeranleitung öffnen</label>
+            <label lang="nl-NL">>> Handleiding openen</label>
+            <label lang="es-ES">>> Abrir documentación</label>
+            <label lang="fr-FR">>> Ouvrir la documentation</label>
+            <label lang="it-IT">>> Apri documentazione</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -21,9 +24,12 @@
 
         <element type="button">
             <name>btn_retrieve_keys</name>
-            <label lang="de">>> API Keys abrufen</label>
             <label lang="en">>> Retrieve API Keys</label>
-            <label lang="nl">>> API Keys opvragen</label>
+            <label lang="de">>> API Keys abrufen</label>
+            <label lang="nl-NL">>> API Keys opvragen</label>
+            <label lang="es-ES">>> Recuperar claves de API</label>
+            <label lang="fr-FR">>> Récupérer les clés API</label>
+            <label lang="it-IT">>> Recupera le chiavi API</label>
             <options>
                 <handler>
                     <![CDATA[
@@ -40,7 +46,10 @@
             <name>btnTestAPI</name>
             <label lang="en">>> Test API Keys (before: save + clear cache)</label>
             <label lang="de">>> Teste API Keys (zuvor: Speichern + Cache löschen)</label>
-            <label lang="nl">>> Test API Keys (voor : opslaan + cache wissen)</label>
+            <label lang="nl-NL">>> Test API Keys (voor : opslaan + cache wissen)</label>
+            <label lang="es-ES">>> Probar claves API (antes: guardar + borrar caché)</label>
+            <label lang="fr-FR">>> Tester les clés API (avant : enregistrer + vider le cache)</label>
+            <label lang="it-IT">>> Test API Keys (prima: salva + cancella cache)</label>
             <options>
                 <position>2</position>
                 <handler>
@@ -67,9 +76,12 @@
 
         <element required="false" type="password" scope="shop">
             <name>api-key</name>
-            <label lang="de">Live API-key</label>
             <label lang="en">Live API-key</label>
-            <label lang="nl">Live API-key</label>
+            <label lang="de">Live API-key</label>
+            <label lang="nl-NL">Live API-key</label>
+            <label lang="es-ES">Live API-key</label>
+            <label lang="fr-FR">Clé API en direct</label>
+            <label lang="it-IT">Chiave API live</label>
             <options>
                 <position>3</position>
             </options>
@@ -77,9 +89,12 @@
 
         <element required="false" type="text" scope="shop">
             <name>test-api-key</name>
-            <label lang="de">Test API-key</label>
             <label lang="en">Test API-key</label>
-            <label lang="nl">Test API-key</label>
+            <label lang="de">Test API-key</label>
+            <label lang="nl-NL">Test API-key</label>
+            <label lang="es-ES">Prueba API-key</label>
+            <label lang="fr-FR">Tester la clé API</label>
+            <label lang="it-IT">Chiave API di prova</label>
             <options>
                 <position>4</position>
             </options>
@@ -87,31 +102,46 @@
 
         <element required="true" type="select" scope="shop">
             <name>test_mode_active</name>
-            <label lang="de">Testmodus</label>
             <label lang="en">Test mode</label>
-            <label lang="nl">Testmodus</label>
+            <label lang="de">Testmodus</label>
+            <label lang="nl-NL">Testmodus</label>
+            <label lang="es-ES">Modo de prueba</label>
+            <label lang="fr-FR">Mode d'essai</label>
+            <label lang="it-IT">Modalità di prova</label>
             <value>no</value>
-            <description lang="de">Zahlungen werden über das Testystem durchgeführt.</description>
             <description lang="en">Payments are done using the testing system.</description>
-            <description lang="nl">Betalingen worden gedaan met behulp van het testsysteem.</description>
+            <description lang="de">Zahlungen werden über das Testystem durchgeführt.</description>
+            <description lang="nl-NL">Betalingen worden gedaan met behulp van het testsysteem.</description>
+            <description lang="es-ES">Los pagos se realizan mediante el sistema de prueba.</description>
+            <description lang="fr-FR">Les paiements sont effectués à l'aide du système de test.</description>
+            <description lang="it-IT">I pagamenti vengono effettuati utilizzando il sistema di test.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -121,13 +151,19 @@
 
         <element required="true" type="select">
             <name>log_level</name>
-            <label lang="de">Protokollstufe</label>
             <label lang="en">Log Level</label>
-            <label lang="nl">Log niveau</label>
+            <label lang="de">Protokollstufe</label>
+            <label lang="nl-NL">Log niveau</label>
+            <label lang="es-ES">Nivel de registro</label>
+            <label lang="fr-FR">Niveau de journal</label>
+            <label lang="it-IT">Livello di registro</label>
             <value>2, INFO</value>
-            <description lang="de">Konfiguration, ab welcher Stufe Informationen und Fehler protokolliert werden sollen.</description>
             <description lang="en">Configuration from which level information and errors should be logged</description>
-            <description lang="nl">Configuratie vanaf welk niveau informatie en errors gelogd moeten worden</description>
+            <description lang="de">Konfiguration, ab welcher Stufe Informationen und Fehler protokolliert werden sollen.</description>
+            <description lang="nl-NL">Configuratie vanaf welk niveau informatie en errors gelogd moeten worden</description>
+            <description lang="es-ES">Configuración desde la que se debe registrar la información de nivel y los errores</description>
+            <description lang="fr-FR">Configuration à partir de laquelle les informations et les erreurs de niveau doivent être enregistrées</description>
+            <description lang="it-IT">Configurazione da quale livello devono essere registrate le informazioni e gli errori</description>
             <store>
                 <option>
                     <value>100</value>
@@ -171,7 +207,10 @@
             <name>btnPaymentUpdate</name>
             <label lang="en">>> Update Payment Methods</label>
             <label lang="de">>> Zahlungsmethoden aktualisieren</label>
-            <label lang="nl">>> Betaalmethoden actualiseren</label>
+            <label lang="nl-NL">>> Betaalmethoden actualiseren</label>
+            <label lang="es-ES">>> Actualizar métodos de pago</label>
+            <label lang="fr-FR">>> Mettre à jour les modes de paiement</label>
+            <label lang="it-IT">>> Aggiorna metodi di pagamento</label>
             <options>
                 <position>7</position>
                 <handler>
@@ -198,9 +237,12 @@
 
         <element type="button" required="false">
             <name>separator_orders</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Bestellungen ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Orders ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Bestellingen ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- Bestellungen ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- Bestellingen ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- Pedidos ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- Ordres ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- Ordini ---------------------------------------------------------------------------------------</label>
             <options>
                 <position>8</position>
             </options>
@@ -208,31 +250,46 @@
 
         <element type="select" scope="shop">
             <name>create_order_before_payment</name>
-            <label lang="de">Shopware Bestellung vor Zahlung anlegen</label>
             <label lang="en">Create Shopware order before payment</label>
-            <label lang="nl">Shopware Bestelling aanleggen voor de betaling</label>
+            <label lang="de">Shopware Bestellung vor Zahlung anlegen</label>
+            <label lang="nl-NL">Shopware Bestelling aanleggen voor de betaling</label>
+            <label lang="es-ES">Crear pedido de Shopware antes del pago</label>
+            <label lang="fr-FR">Créer une commande Shopware avant le paiement</label>
+            <label lang="it-IT">Crea l'ordine Shopware prima del pagamento</label>
             <value>yes</value>
-            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Shopware Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
             <description lang="en">By creating an order before finishing the payment, the Shopware order number (instead of a temporary number) can be given to the payment.</description>
-            <description lang="nl">Door de order te maken voor het afronden van de betaling, kan het Shopware order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
+            <description lang="de">Durch das Anlegen einer Bestellung vor Abschluss der Zahlung kann der Zahlung die Shopware Bestellnummer (anstelle einer temporären Nummer) zugewiesen werden.</description>
+            <description lang="nl-NL">Door de order te maken voor het afronden van de betaling, kan het Shopware order nummer (in plaats van een tijdelijk nummer) worden meegegeven aan de betaling.</description>
+            <description lang="es-ES">Al crear un pedido antes de finalizar el pago, se puede proporcionar al pago el número de pedido de Shopware (en lugar de un número temporal).</description>
+            <description lang="fr-FR">En créant une commande avant de terminer le paiement, le numéro de commande Shopware (au lieu d'un numéro temporaire) peut être attribué au paiement.</description>
+            <description lang="it-IT">Creando un ordine prima di completare il pagamento, è possibile attribuire al pagamento il numero d'ordine Shopware (invece di un numero temporaneo).</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -242,31 +299,46 @@
 
         <element type="select" scope="shop">
             <name>payment_method</name>
-            <label lang="de">API Methode</label>
             <label lang="en">API Method</label>
-            <label lang="nl">API Method</label>
+            <label lang="de">API Methode</label>
+            <label lang="nl-NL">API Method</label>
+            <label lang="es-ES">Método API</label>
+            <label lang="fr-FR">Méthode API</label>
+            <label lang="it-IT">Metodo API</label>
             <value>payments_api</value>
-            <description lang="de">Konfiguration ob nur Transaktionen oder auch Bestellungen in Mollie angelegt werden. Für Klarna werden immer Bestellungen angelegt.</description>
             <description lang="en">Configuration if only transactions or also orders are being created in Mollie. Klarna will always create orders.</description>
-            <description lang="nl">Configuratie als alleen transacties ook orders worden aangemaakt in Mollie. Klarna legt altijd orders aan.</description>
+            <description lang="de">Konfiguration ob nur Transaktionen oder auch Bestellungen in Mollie angelegt werden. Für Klarna werden immer Bestellungen angelegt.</description>
+            <description lang="nl-NL">Configuratie als alleen transacties ook orders worden aangemaakt in Mollie. Klarna legt altijd orders aan.</description>
+            <description lang="es-ES">Configuración si solo se crean transacciones o también pedidos en Mollie. Klarna siempre creará pedidos.</description>
+            <description lang="fr-FR">Configuration si seules des transactions ou également des commandes sont créées dans Mollie. Klarna créera toujours des commandes.</description>
+            <description lang="it-IT">Configurazione se in Mollie vengono create solo transazioni o anche ordini. Klarna creerà sempre ordini.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>payments_api</value>
-                    <label lang="de">Payments API (Transaktionen)</label>
                     <label lang="en">Payments API (Transactions)</label>
-                    <label lang="nl">Payments API (transacties)</label>
+                    <label lang="de">Payments API (Transaktionen)</label>
+                    <label lang="nl-NL">Payments API (transacties)</label>
+                    <label lang="es-ES">API de pagos (transacciones)</label>
+                    <label lang="fr-FR">API de paiement (transactions)</label>
+                    <label lang="it-IT">API dei pagamenti (transazioni)</label>
                 </option>
                 <option>
                     <value>orders_api</value>
-                    <label lang="de">Orders API (Transaktionen + Bestellungen)</label>
                     <label lang="en">Orders API (Transactions + Orders)</label>
-                    <label lang="nl">Orders API (transacties + bestellingen)</label>
+                    <label lang="de">Orders API (Transaktionen + Bestellungen)</label>
+                    <label lang="nl-NL">Orders API (transacties + bestellingen)</label>
+                    <label lang="es-ES">API de pedidos (transacciones + pedidos)</label>
+                    <label lang="fr-FR">API de commandes (Transactions + Commandes)</label>
+                    <label lang="it-IT">API Ordini (Transazioni + Ordini)</label>
                 </option>
             </store>
             <options>
@@ -276,40 +348,58 @@
 
         <element type="select" scope="shop">
             <name>payment_authorized_status</name>
-            <label lang="de">Zahlungsstatus für autorisierte Bezahlungen</label>
             <label lang="en">Status for authorized payments</label>
-            <label lang="nl">Status voor geautoriseerde betalingen</label>
+            <label lang="de">Zahlungsstatus für autorisierte Bezahlungen</label>
+            <label lang="nl-NL">Status voor geautoriseerde betalingen</label>
+            <label lang="es-ES">Estado de los pagos autorizados</label>
+            <label lang="fr-FR">Statut des paiements autorisés</label>
+            <label lang="it-IT">Stato per i pagamenti autorizzati</label>
             <value>ordered</value>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>ordered</value>
-                    <label lang="de">Die Zahlung wurde angewiesen (not available in Shopware 5.3)</label>
                     <label lang="en">The payment has been ordered (nicht verfügbar in Shopware 5.3)</label>
-                    <label lang="nl">De betaling is geautoriseerd (niet beschikbaar in Shopware 5.3)</label>
+                    <label lang="de">Die Zahlung wurde angewiesen (not available in Shopware 5.3)</label>
+                    <label lang="nl-NL">De betaling is geautoriseerd (niet beschikbaar in Shopware 5.3)</label>
+                    <label lang="es-ES">El pago ha sido ordenado (nicht verfügbar en Shopware 5.3)</label>
+                    <label lang="fr-FR">Le paiement a été commandé (nicht verfügbar dans Shopware 5.3)</label>
+                    <label lang="it-IT">Il pagamento è stato ordinato (nicht verfügbar in Shopware 5.3)</label>
                 </option>
                 <option>
                     <value>preliminarily_accepted</value>
-                    <label lang="de">Der Kredit wurde vorläufig akzeptiert</label>
                     <label lang="en">The credit has been preliminarily accepted</label>
-                    <label lang="nl">Het krediet werd voorlopig geaccepteerd</label>
+                    <label lang="de">Der Kredit wurde vorläufig akzeptiert</label>
+                    <label lang="nl-NL">Het krediet werd voorlopig geaccepteerd</label>
+                    <label lang="es-ES">El crédito ha sido aceptado preliminarmente</label>
+                    <label lang="fr-FR">Le crédit a été préalablement accepté</label>
+                    <label lang="it-IT">Il credito è stato preliminarmente accettato</label>
                 </option>
                 <option>
                     <value>accepted</value>
-                    <label lang="de">Der Kredit wurde genehmigt</label>
                     <label lang="en">The credit has been accepted</label>
-                    <label lang="nl">Het krediet werd goedgekeurd</label>
+                    <label lang="de">Der Kredit wurde genehmigt</label>
+                    <label lang="nl-NL">Het krediet werd goedgekeurd</label>
+                    <label lang="es-ES">El crédito ha sido aceptado</label>
+                    <label lang="fr-FR">Le crédit a été accepté</label>
+                    <label lang="it-IT">Il credito è stato accettato</label>
                 </option>
                 <option>
                     <value>completely_paid</value>
-                    <label lang="de">Vollständig bezahlt</label>
                     <label lang="en">Completely paid</label>
-                    <label lang="nl">Volledig betaald</label>
+                    <label lang="de">Vollständig bezahlt</label>
+                    <label lang="nl-NL">Volledig betaald</label>
+                    <label lang="es-ES">Completamente pagado</label>
+                    <label lang="fr-FR">Entièrement payé</label>
+                    <label lang="it-IT">Completamente pagato</label>
                 </option>
             </store>
             <options>
@@ -319,31 +409,46 @@
 
         <element type="select" scope="shop">
             <name>transaction_number_type</name>
-            <label lang="de">Transaktionsnummer für Bestellungen</label>
             <label lang="en">Transaction number for orders</label>
-            <label lang="nl">Transactienummer voor orders</label>
+            <label lang="de">Transaktionsnummer für Bestellungen</label>
+            <label lang="nl-NL">Transactienummer voor orders</label>
+            <label lang="es-ES">Número de transacción para pedidos</label>
+            <label lang="fr-FR">Numéro de transaction pour les commandes</label>
+            <label lang="it-IT">Numero di transazione per gli ordini</label>
             <value>mollie</value>
-            <description lang="de">Wähle die Transaktionsnummer, die in Shopware als Referenz angezeigt werden soll. Dies ist entweder die Nummer der Mollie Transaktion, oder eine Referenznummer der Zahlart, sofern verfügbar.</description>
             <description lang="en">Choose the transaction number that is visible as reference in Shopware. This is either the number of the Mollie transaction, or a reference number of the payment method, if available.</description>
-            <description lang="nl">Selecteer het transactienummer dat in Shopware als referentie moet worden weergegeven. Dit is of het nummer van de Mollie transactie, of een referentienummer van de betalingsmethode, indien beschikbaar.</description>
+            <description lang="de">Wähle die Transaktionsnummer, die in Shopware als Referenz angezeigt werden soll. Dies ist entweder die Nummer der Mollie Transaktion, oder eine Referenznummer der Zahlart, sofern verfügbar.</description>
+            <description lang="nl-NL">Selecteer het transactienummer dat in Shopware als referentie moet worden weergegeven. Dit is of het nummer van de Mollie transactie, of een referentienummer van de betalingsmethode, indien beschikbaar.</description>
+            <description lang="es-ES">Elija el número de transacción que está visible como referencia en Shopware. Este es el número de la transacción de Mollie o un número de referencia del método de pago, si está disponible.</description>
+            <description lang="fr-FR">Choisissez le numéro de transaction qui est visible comme référence dans Shopware. Il s'agit soit du numéro de la transaction Mollie, soit d'un numéro de référence du moyen de paiement, si disponible.</description>
+            <description lang="it-IT">Scegli il numero di transazione che è visibile come riferimento in Shopware. Questo è il numero della transazione Mollie o un numero di riferimento del metodo di pagamento, se disponibile.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>mollie</value>
-                    <label lang="de">Mollie</label>
                     <label lang="en">Mollie</label>
-                    <label lang="nl">Mollie</label>
+                    <label lang="de">Mollie</label>
+                    <label lang="nl-NL">Mollie</label>
+                    <label lang="es-ES">Mollie</label>
+                    <label lang="fr-FR">Mollie</label>
+                    <label lang="it-IT">Mollie</label>
                 </option>
                 <option>
                     <value>payment_method</value>
-                    <label lang="de">Zahlungsart</label>
                     <label lang="en">Payment Method</label>
-                    <label lang="nl">Betaalmethode</label>
+                    <label lang="de">Zahlungsart</label>
+                    <label lang="nl-NL">Betaalmethode</label>
+                    <label lang="es-ES">Método de pago</label>
+                    <label lang="fr-FR">Mode de paiement</label>
+                    <label lang="it-IT">Metodo di pagamento</label>
                 </option>
             </store>
             <options>
@@ -353,31 +458,46 @@
 
         <element type="select" scope="shop">
             <name>orders_api_update_order_status</name>
-            <label lang="de">Bestellstatus automatisch aktualisieren</label>
             <label lang="en">Update Order Status automatically</label>
-            <label lang="nl">Bestelstatus automatisch actualiseren</label>
+            <label lang="de">Bestellstatus automatisch aktualisieren</label>
+            <label lang="nl-NL">Bestelstatus automatisch actualiseren</label>
+            <label lang="es-ES">Actualizar el estado del pedido automáticamente</label>
+            <label lang="fr-FR">Mettre à jour le statut de la commande automatiquement</label>
+            <label lang="it-IT">Aggiorna automaticamente lo stato dell'ordine</label>
             <value>no</value>
-            <description lang="de">Aktualisiert zusätzlich zum Bezahlstatus, auch automatisch den Bestellstatus einer Bestellung.</description>
             <description lang="en">Automatically updates the order status in addition to the payment status.</description>
-            <description lang="nl">Automatisch update van de orderstatus naast de betaalstatus.</description>
+            <description lang="de">Aktualisiert zusätzlich zum Bezahlstatus, auch automatisch den Bestellstatus einer Bestellung.</description>
+            <description lang="nl-NL">Automatisch update van de orderstatus naast de betaalstatus.</description>
+            <description lang="es-ES">Actualiza automáticamente el estado del pedido además del estado del pago.</description>
+            <description lang="fr-FR">Met automatiquement à jour le statut de la commande en plus du statut du paiement.</description>
+            <description lang="it-IT">Aggiorna automaticamente lo stato dell'ordine oltre allo stato del pagamento.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -387,12 +507,18 @@
 
         <element type="combo" scope="shop">
             <name>klarna_shipped_status</name>
-            <label lang="de">Bestellstatus für versendete Bestellungen</label>
             <label lang="en">Order Status for shipped orders.</label>
-            <label lang="nl">Bestelstatus voor verzonden bestellingen</label>
-            <description lang="de">Bestellstatus für Bestellungen die durch Teillieferung als versendet markiert wurden.</description>
+            <label lang="de">Bestellstatus für versendete Bestellungen</label>
+            <label lang="nl-NL">Bestelstatus voor verzonden bestellingen</label>
+            <label lang="es-ES">Estado del pedido para pedidos enviados.</label>
+            <label lang="fr-FR">Statut de la commande pour les commandes expédiées.</label>
+            <label lang="it-IT">Stato dell'ordine per gli ordini spediti.</label>
             <description lang="en">Order status for orders that have been marked as shipped by partial delivery.</description>
-            <description lang="nl">Bestelstatus voor orders gemarkeerd als verzonden door gedeeltelijke levering.</description>
+            <description lang="de">Bestellstatus für Bestellungen die durch Teillieferung als versendet markiert wurden.</description>
+            <description lang="nl-NL">Bestelstatus voor orders gemarkeerd als verzonden door gedeeltelijke levering.</description>
+            <description lang="es-ES">Estado del pedido para los pedidos que se han marcado como enviados mediante entrega parcial.</description>
+            <description lang="fr-FR">Statut de la commande pour les commandes marquées comme expédiées par livraison partielle.</description>
+            <description lang="it-IT">Stato dell'ordine per gli ordini contrassegnati come spediti con consegna parziale.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
                 <position>15</position>
@@ -401,31 +527,46 @@
 
         <element type="select" scope="shop">
             <name>auto_cancel_failed_orders</name>
-            <label lang="de">Fehlgeschlagene Bestellungen stornieren</label>
             <label lang="en">Cancel failed orders</label>
-            <label lang="nl">Mislukte bestellingen annuleren</label>
+            <label lang="de">Fehlgeschlagene Bestellungen stornieren</label>
+            <label lang="nl-NL">Mislukte bestellingen annuleren</label>
+            <label lang="es-ES">Cancelar pedidos fallidos</label>
+            <label lang="fr-FR">Annuler les commandes échouées</label>
+            <label lang="it-IT">Annulla gli ordini non riusciti</label>
             <value>yes</value>
-            <description lang="de">Wenn eine Bestellung wiederhergestellt wird, wird die alte (fehlgeschlagene) Bestellung automatisch storniert.</description>
             <description lang="en">Automatically cancel the old (failed) order when an order is restored.</description>
-            <description lang="nl">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
+            <description lang="de">Wenn eine Bestellung wiederhergestellt wird, wird die alte (fehlgeschlagene) Bestellung automatisch storniert.</description>
+            <description lang="nl-NL">Wanneer een bestelling wordt hersteld, automatisch de oude (mislukte) bestelling annuleren.</description>
+            <description lang="es-ES">Cancela automáticamente el pedido anterior (fallido) cuando se restablece un pedido.</description>
+            <description lang="fr-FR">Annulez automatiquement l'ancienne commande (en échec) lorsqu'une commande est restaurée.</description>
+            <description lang="it-IT">Annulla automaticamente il vecchio ordine (fallito) quando un ordine viene ripristinato.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -436,31 +577,46 @@
 
         <element type="select" scope="shop">
             <name>reset_invoice_shipping</name>
-            <label lang="de">Stornierung aller Beträge</label>
             <label lang="en">Cancellation of all amounts</label>
-            <label lang="nl">Annulering van alle bedragen</label>
+            <label lang="de">Stornierung aller Beträge</label>
+            <label lang="nl-NL">Annulering van alle bedragen</label>
+            <label lang="es-ES">Cancelación de todos los importes</label>
+            <label lang="fr-FR">Annulation de tous les montants</label>
+            <label lang="it-IT">Annullamento di tutti gli importi</label>
             <value>no</value>
-            <description lang="de">Gesamtbetrag, sowie Versandkosten werden beim Stornieren einer Bestellung zurückgesetzt.</description>
             <description lang="en">The total amount and shipping costs are reset when an order is canceled.</description>
-            <description lang="nl">Het totaalbedrag en de verzendkosten worden gereset wanneer een bestelling wordt geannuleerd.</description>
+            <description lang="de">Gesamtbetrag, sowie Versandkosten werden beim Stornieren einer Bestellung zurückgesetzt.</description>
+            <description lang="nl-NL">Het totaalbedrag en de verzendkosten worden gereset wanneer een bestelling wordt geannuleerd.</description>
+            <description lang="es-ES">El monto total y los costos de envío se restablecen cuando se cancela un pedido.</description>
+            <description lang="fr-FR">Le montant total et les frais d'expédition sont réinitialisés lorsqu'une commande est annulée.</description>
+            <description lang="it-IT">L'importo totale e le spese di spedizione vengono azzerati quando un ordine viene annullato.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -471,31 +627,46 @@
 
         <element type="select" scope="shop">
             <name>auto_reset_stock</name>
-            <label lang="de">Lagerbestand bei Fehler zurücksetzen</label>
             <label lang="en">Reset stock on failed payment</label>
-            <label lang="nl">Voorraad terugzetten bij mislukte betaling</label>
+            <label lang="de">Lagerbestand bei Fehler zurücksetzen</label>
+            <label lang="nl-NL">Voorraad terugzetten bij mislukte betaling</label>
+            <label lang="es-ES">Restablecer stock en caso de pago fallido</label>
+            <label lang="fr-FR">Réinitialiser le stock en cas d'échec de paiement</label>
+            <label lang="it-IT">Ripristina lo stock in caso di pagamento non riuscito</label>
             <value>yes</value>
-            <description lang="de">Setzt die bestellten Mengen in abgebrochenen Bestellungen auf 0, um den Lagerbestand wieder zurückzusetzen. Dies setzt auch den Gesamtbetrag entsprechend zurück.</description>
             <description lang="en">Sets the position quantities in cancelled orders to 0, to reset the stock of the products. This also resets the total amount accordingly.</description>
-            <description lang="nl">Zet de bestelde hoeveelheden in geannuleerde bestellingen op 0 om de voorraad opnieuw in te kunnen stellen. Hiermee wordt ook het totale bedrag overeenkomstig gereset.</description>
+            <description lang="de">Setzt die bestellten Mengen in abgebrochenen Bestellungen auf 0, um den Lagerbestand wieder zurückzusetzen. Dies setzt auch den Gesamtbetrag entsprechend zurück.</description>
+            <description lang="es-ES">Establece las cantidades de posición en pedidos cancelados a 0, para restablecer el stock de los productos. Esto también restablece la cantidad total en consecuencia.</description>
+            <description lang="nl-NL">Zet de bestelde hoeveelheden in geannuleerde bestellingen op 0 om de voorraad opnieuw in te kunnen stellen. Hiermee wordt ook het totale bedrag overeenkomstig gereset.</description>
+            <description lang="fr-FR">Définit les quantités de position dans les commandes annulées à 0, pour réinitialiser le stock des produits. Cela réinitialise également le montant total en conséquence.</description>
+            <description lang="it-IT">Imposta le quantità di posizione negli ordini annullati a 0, per azzerare lo stock dei prodotti. Questo azzera anche l'importo totale di conseguenza.</description>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -505,12 +676,18 @@
 
         <element type="combo" scope="shop">
             <name>klarna_ship_on_status</name>
-            <label lang="de">Automatischer Versand Status</label>
             <label lang="en">Automatic shipping status</label>
-            <label lang="nl">Automatische verzendstatus</label>
-            <description lang="de">Die Bestellung wird automatisch in Mollie als versendet markiert, wenn ein Übergang in diesen Status erfolgt.</description>
+            <label lang="de">Automatischer Versand Status</label>
+            <label lang="nl-NL">Automatische verzendstatus</label>
+            <label lang="es-ES">Estado de envío automático</label>
+            <label lang="fr-FR">Statut d'expédition automatique</label>
+            <label lang="it-IT">Stato della spedizione automatica</label>
             <description lang="en">The order is automatically marked as shipped in Mollie if a transition to this status is made.</description>
-            <description lang="nl">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
+            <description lang="de">Die Bestellung wird automatisch in Mollie als versendet markiert, wenn ein Übergang in diesen Status erfolgt.</description>
+            <description lang="nl-NL">De bestelling wordt automatisch gemarkeerd als verzonden in Mollie als er een overgang naar deze status wordt gemaakt.</description>
+            <description lang="es-ES">El pedido se marca automáticamente como enviado en Mollie si se realiza una transición a este estado.</description>
+            <description lang="fr-FR">La commande est automatiquement marquée comme expédiée dans Mollie si une transition vers ce statut est effectuée.</description>
+            <description lang="it-IT">L'ordine viene automaticamente contrassegnato come spedito in Mollie se viene effettuata una transizione a questo stato.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
                 <position>19</position>
@@ -520,9 +697,12 @@
 
         <element type="button" required="false">
             <name>separator_mails</name>
-            <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
                 <position>20</position>
             </options>
@@ -530,28 +710,40 @@
 
         <element type="select" scope="shop">
             <name>send_status_mail</name>
-            <label lang="de">Statusmail für Zahlungen senden</label>
             <label lang="en">Send payment status mail</label>
-            <label lang="nl">Stuur betaalstatus e-mail</label>
+            <label lang="de">Statusmail für Zahlungen senden</label>
+            <label lang="nl-NL">Stuur betaalstatus e-mail</label>
+            <label lang="es-ES">Enviar correo de estado de pago</label>
+            <label lang="fr-FR">Envoyer un e-mail de statut de paiement</label>
+            <label lang="it-IT">Invia un messaggio di stato del pagamento</label>
             <value>yes</value>
             <store>
                 <option>
                     <value>inherited</value>
-                    <label lang="de">Vererbt</label>
                     <label lang="en">Inherited</label>
-                    <label lang="nl">Geërfd</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
                 </option>
                 <option>
                     <value>yes</value>
-                    <label lang="de">Ja</label>
                     <label lang="en">Yes</label>
-                    <label lang="nl">Ja</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
                 </option>
                 <option>
                     <value>no</value>
-                    <label lang="de">Nein</label>
                     <label lang="en">No</label>
-                    <label lang="nl">Nee</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
                 </option>
             </store>
             <options>
@@ -561,9 +753,12 @@
 
         <element type="button" required="false">
             <name>separator_credit_card</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Kreditkarte ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Credit Card ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- Kreditkarte ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- Creditcard ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- tarjeta de crédito ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- Carte de crédit ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- Carta di credito ---------------------------------------------------------------------------------------</label>
             <options>
                 <position>22</position>
             </options>
@@ -571,9 +766,12 @@
 
         <element type="boolean">
             <name>enable_credit_card_component</name>
-            <label lang="de">Komponenten aktivieren</label>
             <label lang="en">Enable components</label>
-            <label lang="nl">Component activeren</label>
+            <label lang="de">Komponenten aktivieren</label>
+            <label lang="nl-NL">Component activeren</label>
+            <label lang="es-ES">Habilitar componentes</label>
+            <label lang="fr-FR">Activer les composants</label>
+            <label lang="it-IT">Abilita componenti</label>
             <value>true</value>
             <options>
                 <position>23</position>
@@ -582,9 +780,12 @@
 
         <element type="boolean">
             <name>enable_credit_card_component_styling</name>
-            <label lang="de">Styling für Komponenten aktivieren</label>
             <label lang="en">Enable styling for components</label>
-            <label lang="nl">Voeg styling toe aan componenten</label>
+            <label lang="de">Styling für Komponenten aktivieren</label>
+            <label lang="nl-NL">Voeg styling toe aan componenten</label>
+            <label lang="es-ES">Habilitar el estilo de los componentes</label>
+            <label lang="fr-FR">Activer le style pour les composants</label>
+            <label lang="it-IT">Abilita lo stile per i componenti</label>
             <value>true</value>
             <options>
                 <position>24</position>
@@ -593,9 +794,12 @@
 
         <element type="button" required="false">
             <name>separator_applepay</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
                 <position>25</position>
             </options>
@@ -603,12 +807,18 @@
 
         <element type="select" scope="shop">
             <name>mollie_applepaydirect_restrictions</name>
-            <label lang="de">Anzeige Einschränkungen</label>
             <label lang="en">Display Restrictions</label>
-            <label lang="nl">Beperkingen weergeven</label>
-            <description lang="en">Restrict Apple Pay Direct from being displayed on these pages.</description>
+            <label lang="de">Anzeige Einschränkungen</label>
+            <label lang="nl-NL">Beperkingen weergeven</label>
+            <label lang="es-ES">Restricciones de visualización</label>
+            <label lang="fr-FR">Restrictions d'affichage</label>
+            <label lang="it-IT">Restrizioni di visualizzazione</label>
             <description lang="de">Verhindere die Anzeige von Apple Pay Direct auf den hier gewählten Seiten</description>
-            <description lang="nl">Voorkom dat Apple Pay Direct wordt weergegeven op deze pagina's.</description>
+            <description lang="en">Restrict Apple Pay Direct from being displayed on these pages.</description>
+            <description lang="nl-NL">Voorkom dat Apple Pay Direct wordt weergegeven op deze pagina's.</description>
+            <description lang="es-ES">Restrinja Apple Pay Direct para que no se muestre en estas páginas.</description>
+            <description lang="fr-FR">Empêcher l'affichage d'Apple Pay Direct sur ces pages.</description>
+            <description lang="it-IT">Limita la visualizzazione di Apple Pay Direct su queste pagine.</description>
             <store><![CDATA[Ext.define('Mollie.ApplePayDirect.RestrictionsForm', {
     extend: 'Ext.data.Store',
     fields: [
@@ -644,9 +854,12 @@
 
         <element type="button" required="false">
             <name>separator_banktransfer</name>
-            <label lang="de">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
             <label lang="en">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
-            <label lang="nl">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- Transferencia bancaria ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- Bank Transfer ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- Bancaire ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- Trasferimento bancario ---------------------------------------------------------------------------------------</label>
             <options>
                 <position>27</position>
             </options>
@@ -654,9 +867,12 @@
 
         <element type="number" scope="shop">
             <name>banktransfer_duedate_days</name>
-            <label lang="de">Zahlungsziel (Tage)</label>
             <label lang="en">Payment term (Days)</label>
-            <label lang="nl">Betalingstermijn (Dagen)</label>
+            <label lang="de">Zahlungsziel (Tage)</label>
+            <label lang="nl-NL">Betalingstermijn (Dagen)</label>
+            <label lang="es-ES">Plazo de pago (días)</label>
+            <label lang="fr-FR">Délai de paiement (jours)</label>
+            <label lang="it-IT">Termine di pagamento (Giorni)</label>
             <options>
                 <position>28</position>
             </options>

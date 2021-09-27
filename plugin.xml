@@ -5,6 +5,9 @@
     <label lang="en">Mollie</label>
     <label lang="de">Mollie</label>
     <label lang="nl">Mollie</label>
+    <label lang="es">Mollie</label>
+    <label lang="fr">Mollie</label>
+    <label lang="it">Mollie</label>
 
     <version>1.8.9</version>
     <copyright>(c) Mollie B.V.</copyright>
