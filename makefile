@@ -55,6 +55,9 @@ jest: ## Starts all Jest tests
 eslint: ## Starts ESLint
 	./node_modules/eslint/bin/eslint.js --config ./.eslintrc.json ./Resources/views/frontend
 
+stylelint: ## Starts the Stylelinter
+	./node_modules/.bin/stylelint --allow-empty-input ./Resources/**/*.less
+
 snippetcheck: ## Validates the Snippets (requires Shopware)
 	cd ./Tests/Snippets && php validate.php
 	cd ../../.. && php bin/console sw:snippets:validate custom/plugins/MollieShopware
