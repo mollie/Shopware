@@ -52,6 +52,14 @@ interface MollieGatewayInterface
     public function updateOrderNumber($mollieId, $orderNumber);
 
     /**
+     * @param $paymentId
+     * @param $description
+     * @return void
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function updatePaymentDescription($paymentId, $description);
+
+    /**
      * @param Order $mollieOrder
      * @param string $carrier
      * @param string $trackingNumber

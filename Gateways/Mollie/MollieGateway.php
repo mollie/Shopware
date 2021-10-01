@@ -156,6 +156,22 @@ class MollieGateway implements MollieGatewayInterface
     }
 
     /**
+     * @param $paymentId
+     * @param $description
+     * @return void
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
+    public function updatePaymentDescription($paymentId, $description)
+    {
+        $this->apiClient->payments->update(
+            $paymentId,
+            [
+                'description' => $description,
+            ]
+        );
+    }
+
+    /**
      * @param Order $mollieOrder
      * @param string $carrier
      * @param string $trackingNumber
