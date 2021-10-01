@@ -69,7 +69,7 @@ pr: ## Prepares everything for a Pull Request
 	@make stan -B
 	@make jest -B
 	@make eslint -B
-	@make snippets -B
+	@make snippetcheck -B
 
 # ------------------------------------------------------------------------------------------------------------
 
