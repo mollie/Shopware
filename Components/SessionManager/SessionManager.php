@@ -72,6 +72,13 @@ class SessionManager implements SessionManagerInterface
      */
     public function extendSessionLifespan($days)
     {
+        # ATTENTION!
+        # this works most of the time, but not all the time!
+        # it causes the finish-page to have missing data, like missing address.
+        # it does not make any sense, but its a deep logic of shopware or the session handling
+        # and we have to remove it for now and stick with the default server and system configuration.
+        return;
+
         $session = $this->container->get('session');
 
         # write session data and commit database transaction to avoid locks
