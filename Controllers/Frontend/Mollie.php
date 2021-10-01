@@ -136,6 +136,16 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $this->loadServices();
 
+            # we have to manually test for empty carts,
+            # otherwise a fatal would be thrown which cannot be
+            # handle by all PHP version that easy
+            $session = $this->get('session');
+            $basket = $session->offsetGet('sOrderVariables');
+
+            if ($basket === null) {
+                throw new Exception('Empty Cart! Checkout not possible');
+            }
+
             # persist the basket in the database
             # by saving it from the session
             $signature = $this->doPersistBasket();
