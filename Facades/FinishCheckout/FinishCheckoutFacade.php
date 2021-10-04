@@ -8,6 +8,7 @@ use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
+use MollieShopware\Components\Mollie\Builder\Payment\DescriptionBuilder;
 use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\OrderService;
@@ -254,10 +255,26 @@ class FinishCheckoutFacade
             # we either extract that data from the Mollie Order or Mollie Payment
             if ($transaction->isTypeOrder()) {
                 $this->swOrderUpdater->updateReferencesFromMollieOrder($swOrder, $mollieOrder, $transaction);
+            }
 
-                # if we have a separate order entry in Mollie
-                # make sure we update its number with the one from Shopware
-                $this->gwMollie->updateOrderNumber($mollieOrder->id, (string)$orderNumber);
+            # if our shopware order has just been created, then mollie does not yet know the correct numbers.
+            # In this case, we try to update everything inside Mollie to match the Shopware order data.
+            if ($orderCreation === OrderCreationType::AFTER_PAYMENT) {
+
+                # TODO this is not perfect, and should be changed one day. there might be prefixes based on templates anyway one day
+                $descriptionBuilder = new DescriptionBuilder();
+                $newDescription = $descriptionBuilder->buildDescription($transaction, '');
+
+                if ($transaction->isTypeOrder()) {
+                    # update ORDER
+                    $this->gwMollie->updateOrderNumber($mollieOrder->id, $newDescription);
+                    # update PAYMENT
+                    $tmpPayment = $mollieOrder->_embedded->payments[0];
+                    $this->gwMollie->updatePaymentDescription($tmpPayment->id, $newDescription);
+
+                } else {
+                    $this->gwMollie->updatePaymentDescription($molliePayment->id, $newDescription);
+                }
             }
 
             # -------------------------------------------------------------------------------------------------------------
