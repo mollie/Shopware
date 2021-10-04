@@ -31,13 +31,15 @@ export default class ConfigSetupAction {
 
         this._loginToBackend();
 
-        this.__configurePayments();
+        if (this.paymentsConfig != null) {
+            this.__configurePayments();
+            cy.reload();
+        }
 
-        cy.reload();
-
-        this._configurePlugin();
-
-        cy.reload();
+        if (this.pluginConfig != null) {
+            this._configurePlugin();
+            cy.reload();
+        }
 
         this.__clearCaches();
     }
@@ -112,7 +114,7 @@ export default class ConfigSetupAction {
                     repoPaymentMethods.getActiveCheckbox().click();
                 }
             })
-            
+
 
             // ---------------------------------------------------------------
             // METHOD TYPE
@@ -139,6 +141,16 @@ export default class ConfigSetupAction {
             }
 
             // ---------------------------------------------------------------
+
+            if (this.paymentsConfig.isEasyBankTransferFlow() !== null) {
+                repoPaymentMethods.getDropdownExpandButton('mollie_banktransfer_flow').click({force: true});
+
+                if (this.paymentsConfig.isEasyBankTransferFlow()) {
+                    repoPaymentMethods.getDropdownItem('mollie_banktransfer_flow', 2).click({force: true});
+                } else {
+                    repoPaymentMethods.getDropdownItem('mollie_banktransfer_flow', 1).click({force: true});
+                }
+            }
 
             cy.wait(500);
             cy.contains('Speichern').click({force: true});

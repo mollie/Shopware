@@ -8,6 +8,7 @@ export default class PluginConfig {
         this.useMethodsPaymentsAPI = true;
         this.useOrderCreationGlobal = true;
         this.useOrderCreationBefore = true;
+        this.useEasyBankTransferFlow = null;
     }
 
     /**
@@ -74,6 +75,22 @@ export default class PluginConfig {
      */
     isOrderCreationBefore() {
         return this.useOrderCreationBefore;
+    }
+
+    /**
+     *
+     * @param enabled
+     */
+    setEasyBankTransferFlow(enabled) {
+        this.useEasyBankTransferFlow = enabled;
+    }
+
+    /**
+     *
+     * @returns {boolean,null}
+     */
+    isEasyBankTransferFlow() {
+        return this.useEasyBankTransferFlow;
     }
 
 }

@@ -10,6 +10,7 @@ use Mollie\Api\Resources\BaseCollection;
 use Mollie\Api\Resources\Method;
 use Mollie\Api\Resources\MethodCollection;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\BankTransferFlow;
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
@@ -258,6 +259,10 @@ class PaymentMethodsInstaller
 
             if ($paymentConfig->getOrderCreation() === OrderCreationType::UNDEFINED) {
                 $paymentConfig->setOrderCreation(OrderCreationType::GLOBAL_SETTING);
+            }
+
+            if ($paymentConfig->getBankTransferFlow() === BankTransferFlow::UNDEFINED) {
+                $paymentConfig->setBankTransferFlow(BankTransferFlow::NORMAL);
             }
 
             $this->repoConfiguration->save($paymentConfig);

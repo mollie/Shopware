@@ -353,23 +353,34 @@ class PaymentService
 
         # ------------------------------------------------------------------------------------------------------
 
-        # some payment methods with credit card, e.g. "non-3d-secure" or apple pay
-        # have no checkout url, because they might already be paid immediately.
-        # so we check for their payment methods and return our special checkout URL
-        # to tell our calling function that we should redirect to the return url immediately.
+        # some payment methods do not need the checkout URL
+        # in this case, the payment in Mollie is already successfully done
+        # and we can immediately redirect to the return page for further validation
+        if ($paymentMethodObject->isCheckoutUrlIgnored()) {
+            $checkoutUrl = PaymentService::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
+        }
+
+        # credit card might come without a checkout URL
+        # but this is totally fine for some non-3d secure cards in "earlier times".
+        # so we verify if the payment is paid, and in that case, we simply redirect to the return page
+        # for further verification.
         if (empty($checkoutUrl)) {
             if ($mollieOrder !== null && $paymentMethodObject->isOrdersApiEnabled()) {
+                # ORDERS API
                 if ($mollieOrder->method === PaymentMethod::CREDITCARD &&
                     $mollieOrder->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
                 }
             } else {
+                # PAYMENTS API
                 if ($molliePayment !== null && $molliePayment->method === PaymentMethod::CREDITCARD &&
                     $molliePayment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                     $checkoutUrl = self::CHECKOUT_URL_NO_REDIRECT_TO_MOLLIE_REQUIRED;
                 }
             }
         }
+
+        # ------------------------------------------------------------------------------------------------------
 
         return $checkoutUrl;
     }
@@ -610,13 +621,18 @@ class PaymentService
         # CONFIGURE INDIVIDUAL PAYMENT SPECIFIC DATA
         if ($paymentMethodObject instanceof ApplePay) {
 
-            $aaToken = $this->applePayFactory->createHandler()->getPaymentToken();
+            $applePaymentToken = $this->applePayFactory->createHandler()->getPaymentToken();
 
-            if (!empty($aaToken)) {
+            if (!empty($applePaymentToken)) {
                 /** @var ApplePay $paymentMethodObject */
-                $paymentMethodObject->setPaymentToken($aaToken);
+                $paymentMethodObject->setPaymentToken($applePaymentToken);
+
+                # if we have a token, then we use apple pay direct
+                # and that one has no external mollie page
+                $paymentMethodObject->setIgnoreCheckoutURL(true);
             }
         }
+
 
         if ($paymentMethodObject instanceof IDeal) {
             # test if we have a current customer (we should have one)
@@ -652,6 +668,11 @@ class PaymentService
                 /** @var BankTransfer $paymentMethodObject */
                 $paymentMethodObject->setDueDateDays($dueDateDays);
             }
+
+            # if we have enabled the easy bank transfer flow
+            # then ignore our checkout url for this payment
+            $isEasyBankTransferFlow = $this->paymentConfig->getFinalIsEasyBankTransfer($cleanPaymentMethod, $shopID);
+            $paymentMethodObject->setIgnoreCheckoutURL($isEasyBankTransferFlow);
         }
 
         return $paymentMethodObject;

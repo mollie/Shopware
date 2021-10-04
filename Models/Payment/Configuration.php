@@ -3,6 +3,7 @@
 namespace MollieShopware\Models\Payment;
 
 use Doctrine\ORM\Mapping as ORM;
+use MollieShopware\Components\Constants\BankTransferFlow;
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use Shopware\Models\Order\Order;
@@ -58,6 +59,13 @@ class Configuration
      * @ORM\Column(name="order_creation", type="integer", nullable=true)
      */
     private $orderCreation;
+
+    /**
+     * @var int|null
+     *
+     * @ORM\Column(name="bank_transfer_flow", type="integer", nullable=true)
+     */
+    private $bankTransferFlow;
 
 
     /**
@@ -194,6 +202,37 @@ class Configuration
     public function setOrderCreation($orderCreation)
     {
         $this->orderCreation = $orderCreation;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getBankTransferFlow()
+    {
+        if ($this->bankTransferFlow === null) {
+            return BankTransferFlow::UNDEFINED;
+        }
+
+        $availableTypes = [
+            BankTransferFlow::NORMAL,
+            BankTransferFlow::EASY,
+        ];
+
+        $value = (int)$this->bankTransferFlow;
+
+        if (!in_array($value, $availableTypes)) {
+            return BankTransferFlow::NORMAL;
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param int|null $bankTransferFlow
+     */
+    public function setBankTransferFlow($bankTransferFlow)
+    {
+        $this->bankTransferFlow = $bankTransferFlow;
     }
 
 }

@@ -31,6 +31,17 @@ interface PaymentInterface
     public function setExpirationDays($expirationDays);
 
     /**
+     * @param bool $ignore
+     * @return void
+     */
+    public function setIgnoreCheckoutURL($ignore);
+
+    /**
+     * @return bool
+     */
+    public function isCheckoutUrlIgnored();
+
+    /**
      * @return mixed[]
      */
     public function buildBodyPaymentsAPI();
