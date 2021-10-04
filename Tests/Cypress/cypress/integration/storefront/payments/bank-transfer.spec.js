@@ -16,7 +16,7 @@ const checkout = new CheckoutAction();
 const molliePayment = new PaymentScreenAction();
 
 
-const scenarioDummyBasket = new DummyBasketScenario(66, 'Max', 'Mustermann');
+const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 const device = devices.getFirstDevice();
 
