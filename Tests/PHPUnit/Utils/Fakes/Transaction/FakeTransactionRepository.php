@@ -11,6 +11,15 @@ class FakeTransactionRepository implements TransactionRepositoryInterface
 {
 
     /**
+     * @param string $mollieID
+     * @return null
+     */
+    public function getTransactionByMollieIdentifier($mollieID)
+    {
+        return null;
+    }
+
+    /**
      * @return int
      */
     public function getLastId()
