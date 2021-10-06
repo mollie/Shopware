@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>1.8.9</version>
+    <version>1.8.10</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -44,6 +44,27 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="1.8.10">
+        <changes lang="de">
+            - Das Mollie Plugin ist nun offiziell in 6 Sprachen verfügbar (Englisch, Deutsch, Niederländisch, Spanisch, Französisch, Italienisch)
+            - Neuer "Bank Transfer Flow" Modus für SEPA Bank Transfer um direkt auf die Shopware Vielen-Dank Seite weiterzuleiten anstatt auf die Mollie Zahlungsseite. Bitte beachten Sie die WIKI Dokumentation für Angaben der Bankdaten in der Bestellbestätigungs E-Mail.
+            - Zusätzlich zur Mollie Bestellung wird nun auch die Beschreibung der Mollie Transaktion aktualisiert, um die Shopware Bestellnummer anzuzeigen, sofern die Option "Shopware Bestellung nach Zahlung anlegen" aktiviert ist.
+            - Entfernung der zuletzt hinzugefügten künstlichen Verlängerung der Session Zeit in Shopware, aufgrund sporadischer Probleme mit fehlenden Adressdaten auf der Vielen-Dank Seite in Shopware. Das Plugin verwendet nun weiterhin das Standard Session Verhalten von Shopware.
+            - Verhindern eines ungewöhnlichen Konfigurations Problems mancher Kunden, bei dem das Plugin deaktiviert und erneut aktiviert werden musste um erneut Zahlungen zuzulassen.
+            - Das manuelle Aufrufen der Bezahlt-URL ohne Warenkorb liefert nun keinen Fehler mehr, sondern navigiert zur Login Seite.
+            - Problembehebung beim Aufruf der Zahlungsmethoden im Shopware Backend via Safari.
+        </changes>
+        <changes lang="en">
+            - The Mollie plugin is now fully available in 6 languages (English, German, Dutch, Spanish, French, Italian).
+            - Add new "Bank Transfer Flow" for SEPA Bank Transfer to redirect to the Shopware finish page instead of the Mollie page. Please read the WIKI documentation about providing bank account data within your order confirmation emails.
+            - In addition to Mollie Orders also descriptions of Mollie Transactions will now be updated to match the Shopware order number if orders in Shopware are created after the payment.
+            - Removed previous extension of Shopware Session due to some random errors on missing address data on the finish page. The plugin will for now stick with the Shopware default behaviour.
+            - Avoid unusual configuration problem of some merchants, where it was necessary to deactivate and activate the plugin again to make payments work.
+            - Manually loading of the payment action with an empty cart will not lead to an error anymore, but instead show the login page.
+            - Fix Shopware Backend problem in Safari when opening the payment methods.
+        </changes>
+    </changelog>
 
     <changelog version="1.8.9">
         <changes lang="de">
