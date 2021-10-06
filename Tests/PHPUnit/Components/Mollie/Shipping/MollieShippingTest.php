@@ -206,8 +206,11 @@ class MollieShippingTest extends TestCase
         return [
             'invalid-url' => ['no-http-url'],
             'unknown-smarty-variable' => ['https://nolp.dhl.de/de/search?piececode={abc.trackingcode}'],
-            'invalid-characters' => ['https://nolp.dhl.de/de/search?piececode={}'],
-            'invalid-hashtags' => ['https://nolp.dhl.de/de/search?piececode=#test#'],
+            'invalid-characters-bracket1' => ['https://nolp.dhl.de/de/search?piececode={'],
+            'invalid-characters-bracket2' => ['https://nolp.dhl.de/de/search?piececode=}'],
+            'invalid-characters-hashtag' => ['https://nolp.dhl.de/de/search?piececode=#test#'],
+            'invalid-characters-less' => ['https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?Paketnummer=<-Zinfo'],
+            'invalid-characters-greater' => ['https://www.dhl.de/de/privatkunden/dhl-sendungsverfolgung.html?Paketnummer=>-Zinfo'],
         ];
     }
 

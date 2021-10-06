@@ -193,6 +193,14 @@ class MollieShipping
             $trackingUrl = '';
         }
 
+        if ($this->stringContains('<', $trackingUrl)) {
+            $trackingUrl = '';
+        }
+
+        if ($this->stringContains('>', $trackingUrl)) {
+            $trackingUrl = '';
+        }
+
         # hashtag is not allowed by Mollie
         if ($this->stringContains('#', $trackingUrl)) {
             $trackingUrl = '';
