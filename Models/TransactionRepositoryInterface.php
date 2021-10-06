@@ -7,6 +7,12 @@ interface TransactionRepositoryInterface
 {
 
     /**
+     * @param string $mollieID
+     * @return Transaction|null
+     */
+    public function getTransactionByMollieIdentifier($mollieID);
+
+    /**
      * @return mixed
      */
     public function getLastId();

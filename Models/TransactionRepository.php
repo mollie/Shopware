@@ -3,6 +3,8 @@
 namespace MollieShopware\Models;
 
 use MollieShopware\Components\Logger;
+use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
+use MollieShopware\Models\Payment\Configuration;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
@@ -36,6 +38,34 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
         ]);
 
         return $transaction;
+    }
+
+    /**
+     * @param string $mollieID
+     * @return Transaction|null
+     */
+    public function getTransactionByMollieIdentifier($mollieID)
+    {
+        $query = $this->getEntityManager()->createQueryBuilder();
+
+        $query->select(['t'])
+            ->from(Transaction::class, 't')
+            ->where(
+                $query->expr()->orX(
+                    $query->expr()->eq('t.mollieId', ':mollieId'),
+                    $query->expr()->eq('t.molliePaymentId', ':mollieId')
+                )
+            )
+            ->setParameter(':mollieId', $mollieID);
+
+        /** @var array $result */
+        $result = $query->getQuery()->getResult();
+
+        if (count($result) >= 1) {
+            return $result[0];
+        }
+
+        return null;
     }
 
     /**

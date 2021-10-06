@@ -10,6 +10,7 @@ use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Mails\BankTransferMailData;
+use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\MollieShopware;
@@ -213,8 +214,11 @@ class MailSubscriber implements SubscriberInterface
             return new BankTransferMailData(false, '', '', '', '');
         }
 
+
+        # we might not have an order ID linked to our transaction
+        # so we have to retrieve the transaction either by the Mollie ord_xyz or tr_xyz
         /** @var Transaction $transaction */
-        $transaction = $this->transactionRepo->findOneBy(['orderId' => $order->getId()]);
+        $transaction = $this->transactionRepo->getTransactionByMollieIdentifier($order->getTransactionId());
 
         if (!$transaction instanceof Transaction) {
             return new BankTransferMailData(false, '', '', '', '');
