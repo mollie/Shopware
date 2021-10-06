@@ -213,6 +213,12 @@ class MollieShopware extends Plugin
             $this->writeConfig($context->getPlugin(), 'orders_api_only_where_mandatory', 'no');
         }
 
+        # update our payment config to have valid
+        # entries and new configs automatically applied
+        /** @var PaymentMethodsInstaller $paymentInstaller */
+        $paymentInstaller = $this->getPaymentMethodInstaller($context);
+        $paymentInstaller->updatePaymentConfigs();
+
         parent::update($context);
     }
 
