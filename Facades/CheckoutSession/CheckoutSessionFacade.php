@@ -209,7 +209,7 @@ class CheckoutSessionFacade
         # it contains all necessary things for upcoming workflows.
         $transaction = $this->buildTransaction($basketSignature, $currencyShortName);
         $this->modelManager->persist($transaction);
-        $this->modelManager->flush();
+        $this->modelManager->flush($transaction);
 
 
         $this->logger->info(
