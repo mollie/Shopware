@@ -96,7 +96,7 @@ configs.forEach(config => {
 
                     // verify that we are on the mollie payment screen
                     // and that our payment method is also visible somewhere in that url
-                    cy.url().should('include', 'https://www.mollie.com/paymentscreen/');
+                    cy.url().should('include', 'https://www.mollie.com/checkout/test-mode');
                     cy.url().should('include', payment.key);
 
                     // verify that the price is really the one
