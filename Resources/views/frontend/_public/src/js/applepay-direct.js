@@ -245,7 +245,7 @@ function initApplePay() {
                 'visa',
                 'vPay',
             ],
-            merchantCapabilities: ['supports3DS', 'supportsEMV', 'supportsCredit', 'supportsDebit'],
+            merchantCapabilities: ['supports3DS'],
             total: {
                 label: label,
                 amount: 0,
