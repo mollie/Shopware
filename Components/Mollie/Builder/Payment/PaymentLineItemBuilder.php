@@ -30,7 +30,7 @@ class PaymentLineItemBuilder
                 $item->getTotalAmount(),
                 $item->getVatRate(),
                 $item->getVatAmount(),
-                null,
+                $item->getSku(),
                 null,
                 null,
                 json_encode(['transaction_item_id' => $item->getId()])

@@ -51,6 +51,7 @@ class PaymentLineItemBuilderTest extends TestCase
         $item1->setTotalAmount(22.45);
         $item1->setVatRate(16);
         $item1->setVatAmount(23.19);
+        $item1->setSku('PRODUCT-123');
 
         $items = new ArrayCollection();
         $items->add($item1);
@@ -74,7 +75,7 @@ class PaymentLineItemBuilderTest extends TestCase
                 22.45,
                 16.00,
                 23.19,
-                null,
+                'PRODUCT-123',
                 null,
                 null,
                 json_encode(['transaction_item_id' => 1520])

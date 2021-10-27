@@ -100,6 +100,10 @@ class TransactionItemBuilder
         $item->setVatRate($taxRate);
         $item->setVatAmount($vatAmount);
 
+        if (!empty($basketItem->getOrderNumber())) {
+            $item->setSku($basketItem->getOrderNumber());
+        }
+
         return $item;
     }
 
