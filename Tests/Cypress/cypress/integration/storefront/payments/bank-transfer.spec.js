@@ -42,7 +42,7 @@ context("Bank Transfer Flow: Normal", () => {
         checkout.switchPaymentMethod(paymentName);
         checkout.placeOrderOnConfirm();
 
-        cy.url().should('include', 'https://www.mollie.com/checkout/test-mode/');
+        cy.url().should('include', 'https://www.mollie.com/checkout/test-mode');
 
         molliePayment.initSandboxCookie();
         molliePayment.selectPaid();
