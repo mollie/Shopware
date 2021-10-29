@@ -62,7 +62,7 @@ function initApplePay() {
             button.dataset.label,
             button.dataset.amount,
             button.dataset.country,
-            button.dataset.currency,
+            button.dataset.currency
         );
 
         // if button is in item mode
