@@ -113,7 +113,7 @@ function initApplePay() {
                             ApplePaySession.STATUS_SUCCESS,
                             data.shippingmethods,
                             data.cart.total,
-                            data.cart.items,
+                            data.cart.items
                         );
                     } else {
                         session.completeShippingContactSelection(
@@ -150,7 +150,7 @@ function initApplePay() {
                             // eslint-disable-next-line no-undef
                             ApplePaySession.STATUS_SUCCESS,
                             data.cart.total,
-                            data.cart.items,
+                            data.cart.items
                         );
                     } else {
                         session.completeShippingMethodSelection(
