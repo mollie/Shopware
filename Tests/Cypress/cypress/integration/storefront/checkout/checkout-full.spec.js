@@ -32,6 +32,7 @@ const configs = [
 
 const payments = [
     {key: 'paypal', name: 'PayPal'},
+    {key: 'klarnapaynow', name: 'Pay now'},
     {key: 'klarnapaylater', name: 'Pay later'},
     {key: 'klarnasliceit', name: 'Slice it'},
     {key: 'ideal', name: 'iDEAL'},
@@ -110,7 +111,7 @@ configs.forEach(config => {
 
                     molliePayment.initSandboxCookie();
 
-                    if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
+                    if (payment.key === 'klarnapaylater' || payment.key === 'klarnapaynow' || payment.key === 'klarnasliceit') {
 
                         molliePayment.selectAuthorized();
 

@@ -4,6 +4,10 @@
     "description": "Cypress Testing Project for Mollie Shopware",
     "dependencies": {},
     "devDependencies": {
+        "@cucumber/tag-expressions": "^4.1.0",
+        "@cypress/webpack-preprocessor": "^5.9.1",
+        "cypress": "^8.7.0",
+        "webpack": "^5.62.2"
     },
     "scripts": {}
 }
