@@ -465,12 +465,12 @@
             <label lang="fr-FR">Mettre à jour le statut de la commande automatiquement</label>
             <label lang="it-IT">Aggiorna automaticamente lo stato dell'ordine</label>
             <value>no</value>
-            <description lang="en">Automatically updates the order status in addition to the payment status.</description>
-            <description lang="de">Aktualisiert zusätzlich zum Bezahlstatus, auch automatisch den Bestellstatus einer Bestellung.</description>
-            <description lang="nl-NL">Automatisch update van de orderstatus naast de betaalstatus.</description>
-            <description lang="es-ES">Actualiza automáticamente el estado del pedido además del estado del pago.</description>
-            <description lang="fr-FR">Met automatiquement à jour le statut de la commande en plus du statut du paiement.</description>
-            <description lang="it-IT">Aggiorna automaticamente lo stato dell'ordine oltre allo stato del pagamento.</description>
+            <description lang="en">Automatically updates the order status in addition to the payment status. These are fixed mappings, but you can adjust those as developer in your shop. Please see our documentation for this.</description>
+            <description lang="de">Aktualisiert zusätzlich zum Bezahlstatus, auch automatisch den Bestellstatus einer Bestellung. Dies sind fixe Einstellungen, können aber als Entwickler individualisiert werden. Bitte lesen Sie dazu unsere Benutzeranleitung.</description>
+            <description lang="nl-NL">Automatisch update van de orderstatus naast de betaalstatus. Dit zijn vaste instellingen, maar kunnen als ontwikkelaar worden aangepast. Lees onze gebruikershandleiding</description>
+            <description lang="es-ES">Actualiza automáticamente el estado del pedido además del estado del pago. Estas son configuraciones fijas, pero se pueden personalizar como desarrollador. Por favor lea nuestra guía de usuario.</description>
+            <description lang="fr-FR">Met automatiquement à jour le statut de la commande en plus du statut du paiement. Ce sont des paramètres fixes, mais qui peuvent être personnalisés en tant que développeur. Veuillez lire notre guide d'utilisation.</description>
+            <description lang="it-IT">Aggiorna automaticamente lo stato dell'ordine oltre allo stato del pagamento. Queste sono impostazioni fisse, ma possono essere personalizzate come sviluppatore. Si prega di leggere la nostra guida per l'utente.</description>
             <store>
                 <option>
                     <value>inherited</value>
