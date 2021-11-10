@@ -88,17 +88,11 @@ class KlarnaShippingCommand extends ShopwareCommand
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('MOLLIE Klarna Ship Command');
-        $io->text('Searching for all non-shipped Klarna Pay Later orders and mark them as shipped if the status is correct...');
+        $io->text('Searching shippable Klarna PayLater/PayNow orders and mark them as shipped if the status is correct...');
 
-        /** @var Transaction[] $transactions */
-        $transactions = $this->repoTransactions->findBy(
-            [
-                'isShipped' => false,
-                'paymentMethod' => 'mollie_' . PaymentMethod::KLARNA_PAY_LATER
-            ]
-        );
+        $transactions = $this->repoTransactions->getShippableKlarnaTransactions();
 
-        if ($transactions === null || !is_array($transactions)) {
+        if (count($transactions) <= 0) {
             $io->success("No Mollie Transactions found!");
             return;
         }
