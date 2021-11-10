@@ -38,6 +38,7 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::BELFIUS,
             PaymentMethod::CREDITCARD,
             PaymentMethod::EPS,
+            PaymentMethod::GIFTCARD,
             PaymentMethod::GIROPAY,
             PaymentMethod::IDEAL,
             PaymentMethod::KBC,
