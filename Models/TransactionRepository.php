@@ -2,9 +2,11 @@
 
 namespace MollieShopware\Models;
 
+use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Logger;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
+use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
@@ -66,6 +68,42 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
         }
 
         return null;
+    }
+
+    /**
+     * This function gets all orders Klarna PAY NOW or PAY LATER orders
+     * that have not yet been shipped.
+     *
+     * @return Transaction[]
+     */
+    public function getShippableKlarnaTransactions()
+    {
+        $query = $this->getEntityManager()->createQueryBuilder();
+
+        $query
+            ->select(['t'])
+            ->from(Transaction::class, 't')
+            ->where(
+                $query->expr()->eq('t.isShipped', ':isShipped')
+            )
+            ->andWhere(
+                $query->expr()->orX(
+                    $query->expr()->eq('t.paymentMethod', ':payLater'),
+                    $query->expr()->eq('t.paymentMethod', ':payNow')
+                )
+            )
+            ->setParameter(':isShipped', false)
+            ->setParameter(':payLater', MollieShopware::PAYMENT_PREFIX . PaymentMethod::KLARNA_PAY_LATER)
+            ->setParameter(':payNow', MollieShopware::PAYMENT_PREFIX . PaymentMethod::KLARNA_PAY_NOW);
+
+        /** @var Transaction[] $result */
+        $result = $query->getQuery()->getResult();
+
+        if ($result === null || !is_array($result)) {
+            return [];
+        }
+
+        return $result;
     }
 
     /**
