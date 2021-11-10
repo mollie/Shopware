@@ -3,10 +3,13 @@ import Session from "Actions/utils/Session"
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
 // ------------------------------------------------------
+import PaymentScreenAction from 'Actions/mollie/PaymentScreenAction';
+import GiftCardsScreenAction from "Actions/mollie/GiftCardsScreenAction";
+import IssuerScreenAction from 'Actions/mollie/IssuerScreenAction';
+import PaymentMethodsScreenAction from "Actions/mollie/PaymentMethodsScreenAction";
+// ------------------------------------------------------
 import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
 import CheckoutAction from 'Actions/storefront/checkout/CheckoutAction';
-import PaymentScreenAction from 'Actions/mollie/PaymentScreenAction';
-import IssuerScreenAction from 'Actions/mollie/IssuerScreenAction';
 import DummyBasketScenario from "Scenarios/DummyBasketScenario";
 
 
@@ -15,8 +18,11 @@ const session = new Session();
 
 const plugin = new ConfigSetupAction();
 const checkout = new CheckoutAction();
-const molliePayment = new PaymentScreenAction();
-const mollieIssuer = new IssuerScreenAction();
+
+const molliePaymentScreen = new PaymentScreenAction();
+const molliePaymentMethodScreen = new PaymentMethodsScreenAction();
+const mollieIssuerScreen = new IssuerScreenAction();
+const mollieGiftCardsScreen = new GiftCardsScreenAction();
 
 const scenarioDummyBasket = new DummyBasketScenario(66, 'Max', 'Mustermann');
 
@@ -31,6 +37,7 @@ const configs = [
 ];
 
 const payments = [
+    {key: 'giftcard', name: 'Gift cards'},
     {key: 'paypal', name: 'PayPal'},
     {key: 'klarnapaylater', name: 'Pay later'},
     {key: 'klarnasliceit', name: 'Slice it'},
@@ -108,23 +115,32 @@ configs.forEach(config => {
                     })
 
 
-                    molliePayment.initSandboxCookie();
+                    molliePaymentScreen.initSandboxCookie();
 
                     if (payment.key === 'klarnapaylater' || payment.key === 'klarnasliceit') {
 
-                        molliePayment.selectAuthorized();
+                        molliePaymentScreen.selectAuthorized();
+
+                    } else if (payment.key === 'giftcard') {
+
+                        mollieGiftCardsScreen.selectBeautyCards();
+                        molliePaymentScreen.selectPaid();
+                        molliePaymentMethodScreen.selectPaypal();
+                        molliePaymentScreen.selectPaid();
+
+                    } else if (payment.key === 'ideal') {
+
+                        mollieIssuerScreen.selectIDEAL();
+                        molliePaymentScreen.selectPaid();
+
+                    } else if (payment.key === 'kbc') {
+
+                        mollieIssuerScreen.selectKBC();
+                        molliePaymentScreen.selectPaid();
 
                     } else {
 
-                        if (payment.key === 'ideal') {
-                            mollieIssuer.selectIDEAL();
-                        }
-
-                        if (payment.key === 'kbc') {
-                            mollieIssuer.selectKBC();
-                        }
-
-                        molliePayment.selectPaid();
+                        molliePaymentScreen.selectPaid();
                     }
 
                     // we should now get back to the shop
@@ -148,9 +164,9 @@ configs.forEach(config => {
                 checkout.switchPaymentMethod('PayPal');
                 checkout.placeOrderOnConfirm();
 
-                molliePayment.initSandboxCookie();
+                molliePaymentScreen.initSandboxCookie();
 
-                molliePayment.selectFailed();
+                molliePaymentScreen.selectFailed();
 
                 // verify that we are back in the shop
                 // and that our order payment has failed

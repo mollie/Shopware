@@ -9,6 +9,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\Belfius;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\EPS;
+use MollieShopware\Services\Mollie\Payments\Requests\Giftcard;
 use MollieShopware\Services\Mollie\Payments\Requests\Giropay;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use MollieShopware\Services\Mollie\Payments\Requests\KBC;
@@ -60,6 +61,9 @@ class PaymentFactory
 
             case PaymentMethod::DIRECTDEBIT:
                 return new SepaDirectDebit();
+
+            case PaymentMethod::GIFTCARD:
+                return new Giftcard();
 
             case PaymentMethod::GIROPAY:
                 return new Giropay();
