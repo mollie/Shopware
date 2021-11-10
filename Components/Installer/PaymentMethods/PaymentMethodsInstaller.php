@@ -123,6 +123,7 @@ class PaymentMethodsInstaller
             PaymentMethod::IDEAL,
             PaymentMethod::KBC,
             PaymentMethod::KLARNA_PAY_LATER,
+            PaymentMethod::KLARNA_PAY_NOW,
             PaymentMethod::KLARNA_SLICE_IT,
             PaymentMethod::PAYPAL,
             PaymentMethod::P24,
@@ -252,7 +253,7 @@ class PaymentMethodsInstaller
                 $paymentConfig = new Configuration();
                 $paymentConfig->setPaymentMeanId($method->getId());
             }
-            
+
             # if not set yet, then use our global plugin configuration
             if ($paymentConfig->getMethodType() === PaymentMethodType::UNDEFINED) {
                 $paymentConfig->setMethodType(PaymentMethodType::GLOBAL_SETTING);

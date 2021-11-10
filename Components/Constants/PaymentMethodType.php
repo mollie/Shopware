@@ -23,8 +23,10 @@ class PaymentMethodType
 
         $onlyOrders = [
             PaymentMethod::KLARNA_PAY_LATER,
+            PaymentMethod::KLARNA_PAY_NOW,
             PaymentMethod::KLARNA_SLICE_IT,
             $prefix . PaymentMethod::KLARNA_PAY_LATER,
+            $prefix . PaymentMethod::KLARNA_PAY_NOW,
             $prefix . PaymentMethod::KLARNA_SLICE_IT,
         ];
 

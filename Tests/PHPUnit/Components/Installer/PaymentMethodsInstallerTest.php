@@ -43,6 +43,7 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::IDEAL,
             PaymentMethod::KBC,
             PaymentMethod::KLARNA_PAY_LATER,
+            PaymentMethod::KLARNA_PAY_NOW,
             PaymentMethod::KLARNA_SLICE_IT,
             PaymentMethod::PAYPAL,
             PaymentMethod::P24,

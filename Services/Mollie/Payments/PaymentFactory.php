@@ -3,6 +3,7 @@
 namespace MollieShopware\Services\Mollie\Payments;
 
 use MollieShopware\Components\Constants\PaymentMethod;
+use MollieShopware\Services\Mollie\Payments\Models\Payment;
 use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\Bancontact;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
@@ -14,6 +15,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Giropay;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use MollieShopware\Services\Mollie\Payments\Requests\KBC;
 use MollieShopware\Services\Mollie\Payments\Requests\PayLater;
+use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
 use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
@@ -73,6 +75,9 @@ class PaymentFactory
 
             case PaymentMethod::KLARNA_PAY_LATER:
                 return new PayLater();
+
+            case PaymentMethod::KLARNA_PAY_NOW:
+                return new PayNow();
 
             case PaymentMethod::KLARNA_SLICE_IT:
                 return new SliceIt();
