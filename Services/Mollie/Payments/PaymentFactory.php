@@ -17,6 +17,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\KBC;
 use MollieShopware\Services\Mollie\Payments\Requests\PayLater;
 use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
+use MollieShopware\Services\Mollie\Payments\Requests\Paysafecard;
 use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
@@ -81,6 +82,9 @@ class PaymentFactory
 
             case PaymentMethod::KLARNA_SLICE_IT:
                 return new SliceIt();
+
+            case PaymentMethod::PAYSAFECARD:
+                return new Paysafecard();
 
             case PaymentMethod::P24:
                 return new Przelewy24();
