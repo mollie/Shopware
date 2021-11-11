@@ -126,6 +126,7 @@ class PaymentMethodsInstaller
             PaymentMethod::KLARNA_PAY_NOW,
             PaymentMethod::KLARNA_SLICE_IT,
             PaymentMethod::PAYPAL,
+            PaymentMethod::PAYSAFECARD,
             PaymentMethod::P24,
             PaymentMethod::DIRECTDEBIT,
             PaymentMethod::SOFORT,
