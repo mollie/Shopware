@@ -69,6 +69,7 @@ configs.forEach(config => {
             const paymentConfig = new PaymentConfig();
             paymentConfig.setMethodsGlobal(true);
             paymentConfig.setOrderCreationGlobal(true);
+            paymentConfig.setEasyBankTransferFlow(false);
 
             const configurationPayments = payments.map(payment => {
                 return payment.name;
