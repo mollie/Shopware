@@ -99,6 +99,8 @@ export default class ConfigSetupAction {
 
         this.payments.forEach(payment => {
 
+            cy.log('Configure Payment: ' + payment);
+
             cy.contains(payment).click({force: true});
             cy.wait(500);
 
@@ -142,7 +144,7 @@ export default class ConfigSetupAction {
 
             // ---------------------------------------------------------------
 
-            if (this.paymentsConfig.isEasyBankTransferFlow() !== null) {
+            if (payment === 'Bank transfer' && this.paymentsConfig.isEasyBankTransferFlow() !== null) {
                 repoPaymentMethods.getDropdownExpandButton('mollie_banktransfer_flow').click({force: true});
 
                 if (this.paymentsConfig.isEasyBankTransferFlow()) {
