@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>1.8.11</version>
+    <version>1.8.12</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -43,6 +43,22 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+
+    <changelog version="1.8.12">
+        <changes lang="de">
+            - Neue Zahlart "Klarna Pay Now" ist nun verfügbar
+            - Neue Zahlart "Giftcards" ist nun verfügbar
+            - Neue Zahlart "Paysafecard" ist nun verfügbar
+            - Verbesserung des Plugin um auch mit "abgelaufenen" Bezahlungen korrekt umzugehen, wenn diese in den Shop zurückleiten. Dies war kürzlich (unbeabsichtigt) in manchen Situationen möglich.
+        </changes>
+        <changes lang="en">
+            - Add new "Klarna Pay Now" payment method.
+            - Add new "Giftcards" payment method.
+            - Add new "Paysafecard" payment method.
+            - Improve plugin to correctly handle "expired" payments when being returned to the shop. This was recently (accidentally) possible in some circumstances.
+        </changes>
+    </changelog>
 
 
     <changelog version="1.8.11">
