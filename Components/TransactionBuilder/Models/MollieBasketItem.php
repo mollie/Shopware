@@ -2,7 +2,10 @@
 
 namespace MollieShopware\Components\TransactionBuilder\Models;
 
-class BasketItem
+use MollieShopware\Models\Voucher\VoucherType;
+use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
+
+class MollieBasketItem
 {
 
     /**
@@ -60,6 +63,11 @@ class BasketItem
      */
     private $isGrossPrice;
 
+    /**
+     * @var string
+     */
+    private $voucherType;
+
 
     /**
      * @param int $id
@@ -72,8 +80,9 @@ class BasketItem
      * @param float $unitPriceNet
      * @param int $quantity
      * @param int $taxRate
+     * @param string $voucherType
      */
-    public function __construct($id, $articleID, $orderNumber, $esdArticle, $mode, $name, $unitPrice, $unitPriceNet, $quantity, $taxRate)
+    public function __construct($id, $articleID, $orderNumber, $esdArticle, $mode, $name, $unitPrice, $unitPriceNet, $quantity, $taxRate, $voucherType)
     {
         $this->id = $id;
         $this->articleID = $articleID;
@@ -85,6 +94,7 @@ class BasketItem
         $this->unitPriceNet = $unitPriceNet;
         $this->quantity = $quantity;
         $this->taxRate = $taxRate;
+        $this->voucherType = $voucherType;
 
         $this->isGrossPrice = true;
     }
@@ -183,6 +193,25 @@ class BasketItem
     public function isGrossPrice()
     {
         return $this->isGrossPrice;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVoucherType()
+    {
+        $allowed = [
+            VoucherType::NONE,
+            VoucherType::ECO,
+            VoucherType::MEAL,
+            VoucherType::GIFT
+        ];
+
+        if (!in_array($this->voucherType, $allowed)) {
+            return VoucherType::NONE;
+        }
+
+        return $this->voucherType;
     }
 
 }

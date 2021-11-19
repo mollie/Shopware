@@ -2,7 +2,7 @@
 
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
@@ -12,7 +12,7 @@ class TransactionItemTest extends TestCase
 {
 
     /**
-     * @var BasketItem
+     * @var MollieBasketItem
      */
     private $sampleItem;
 
@@ -22,7 +22,7 @@ class TransactionItemTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->sampleItem = new BasketItem(
+        $this->sampleItem = new MollieBasketItem(
             1560,
             55,
             'ART-55',
@@ -32,7 +32,8 @@ class TransactionItemTest extends TestCase
             119,
             100,
             2,
-            19
+            19,
+            ''
         );
     }
 
@@ -130,7 +131,7 @@ class TransactionItemTest extends TestCase
         $taxMode = new TaxMode(false);
         $builder = new TransactionItemBuilder($taxMode, false);
 
-        $basket = new BasketItem(
+        $basket = new MollieBasketItem(
             1560,
             55,
             $ordernumber,
@@ -140,7 +141,8 @@ class TransactionItemTest extends TestCase
             $unitPrice,
             0.0,
             1,
-            16
+            16,
+            ''
         );
 
         $transaction = new Transaction();

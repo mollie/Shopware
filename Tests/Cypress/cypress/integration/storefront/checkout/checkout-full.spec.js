@@ -37,7 +37,6 @@ const configs = [
 ];
 
 const payments = [
-    {key: 'giftcard', name: 'Gift cards'},
     {key: 'paypal', name: 'PayPal'},
     {key: 'klarnapaynow', name: 'Pay now'},
     {key: 'klarnapaylater', name: 'Pay later'},
@@ -51,6 +50,9 @@ const payments = [
     {key: 'kbc', name: 'KBC'},
     {key: 'belfius', name: 'Belfius'},
     {key: 'banktransfer', name: 'Bank transfer'},
+    {key: 'giftcard', name: 'Gift cards'},
+    // now working without preparing articles: {key: 'voucher', name: 'Voucher'},
+    // now working with our account: {key: 'paysafecard', name: 'Paysafecard'},
 ];
 
 

@@ -2,9 +2,11 @@
 
 namespace MollieShopware\Components\Basket;
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Article;
+use Shopware\Models\Article\Detail;
 use Shopware\Models\Order\Repository;
 
 class Basket implements BasketInterface
@@ -20,7 +22,11 @@ class Basket implements BasketInterface
      */
     private $logger;
 
-    
+    /**
+     * @var \Shopware\Models\Detail\Repository
+     */
+    private $repoArticles;
+
     /**
      * Basket constructor.
      * @param ModelManager $modelManager
@@ -30,6 +36,8 @@ class Basket implements BasketInterface
     {
         $this->modelManager = $modelManager;
         $this->logger = $logger;
+
+        $this->repoArticles = $modelManager->getRepository(Detail::class);
     }
 
 
@@ -37,10 +45,10 @@ class Basket implements BasketInterface
      * Get positions from basket
      *
      * @param array $userData
-     * @return BasketItem[]
+     * @return MollieBasketItem[]
      * @throws \Exception
      */
-    public function getBasketLines($userData = [])
+    public function getMollieBasketLines($userData = [])
     {
         $items = [];
 
@@ -51,10 +59,19 @@ class Basket implements BasketInterface
 
             /** @var Basket[] $basketItems */
             $basketItems = $basketRepo->findBy(['sessionId' => Shopware()->Session()->offsetGet('sessionId')]);
-       
+
             /** @var \Shopware\Models\Order\Basket $basketItem */
             foreach ($basketItems as $basketItem) {
-                $item = new BasketItem(
+
+                $voucherType = '';
+
+                # if we do have an article number
+                # then let's try to get its voucher type
+                if (!empty($basketItem->getOrderNumber())) {
+                    $voucherType = $this->getArticleVoucherType($basketItem);
+                }
+
+                $item = new MollieBasketItem(
                     $basketItem->getId(),
                     $basketItem->getArticleId(),
                     $basketItem->getOrderNumber(),
@@ -64,9 +81,10 @@ class Basket implements BasketInterface
                     $basketItem->getPrice(),
                     $basketItem->getNetPrice(),
                     $basketItem->getQuantity(),
-                    $basketItem->getTaxRate()
+                    $basketItem->getTaxRate(),
+                    $voucherType
                 );
-               
+
                 # update our basket item ID if we have that attribute
                 # i dont know why - isn't it in the ID already?, but let's keep with it for now
                 if ($basketItem !== null && $basketItem->getAttribute() !== null && method_exists($basketItem->getAttribute(), 'setBasketItemId')) {
@@ -89,4 +107,23 @@ class Basket implements BasketInterface
 
         return $items;
     }
+
+    /**
+     * @param \Shopware\Models\Order\Basket $basketItem
+     * @return string
+     */
+    private function getArticleVoucherType(\Shopware\Models\Order\Basket $basketItem)
+    {
+        $articles = $this->repoArticles->findBy(['number' => $basketItem->getOrderNumber()]);
+
+        if (count($articles) <= 0) {
+            return '';
+        }
+
+        /** @var Detail $article */
+        $article = $articles[0];
+
+        return (string)$article->getAttribute()->getMollieVoucherType();
+    }
+
 }

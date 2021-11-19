@@ -110,7 +110,7 @@ class ApplePaySubscriber implements SubscriberInterface
         }
 
         $currentPaymentMethod = $this->modules->Admin()->sGetUserData()['additional']['payment']['name'];
-   
+
         try {
             if ($this->paymentMethodService->isApplePayPaymentMethod((string)$currentPaymentMethod) === false) {
                 return;
@@ -129,8 +129,12 @@ class ApplePaySubscriber implements SubscriberInterface
      * @param array $paymentMeans
      * @return array
      */
-    private function removeApplePaymentMethodsFromPaymentMeans(array $paymentMeans)
+    private function removeApplePaymentMethodsFromPaymentMeans($paymentMeans)
     {
+        if ($paymentMeans === null) {
+            return $paymentMeans;
+        }
+
         return array_filter($paymentMeans, function ($item) {
             if (!in_array($item['name'], [ShopwarePaymentMethod::APPLEPAYDIRECT, ShopwarePaymentMethod::APPLEPAY])) {
                 return true;

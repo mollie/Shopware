@@ -28,6 +28,8 @@ class PaymentMethodType
             $prefix . PaymentMethod::KLARNA_PAY_LATER,
             $prefix . PaymentMethod::KLARNA_PAY_NOW,
             $prefix . PaymentMethod::KLARNA_SLICE_IT,
+            PaymentMethod::VOUCHERS,
+            $prefix . PaymentMethod::VOUCHERS,
         ];
 
         if (in_array($paymentMethod, $onlyOrders, true)) {

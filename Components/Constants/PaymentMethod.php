@@ -25,4 +25,5 @@ class PaymentMethod
     const P24 = "przelewy24";
     const APPLE_PAY = "applepay";
     const APPLEPAY_DIRECT = "applepaydirect";
+    const VOUCHERS = "voucher";
 }

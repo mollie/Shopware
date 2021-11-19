@@ -26,7 +26,8 @@ class PaymentLineItemFixture
             'sku-1',
             'https://my-image',
             'https://my-product',
-            '{ data: true }'
+            '{ data: true }',
+            '3'
         );
     }
 

@@ -226,7 +226,6 @@ abstract class AbstractPayment implements PaymentInterface
             $data['lines'][] = $this->lineItemBuilder->convertItem($item);
         }
 
-
         # if we have an expiration days value set
         # then calculate the matching date and
         # set it in our request
@@ -238,6 +237,15 @@ abstract class AbstractPayment implements PaymentInterface
         }
 
         return $data;
+    }
+
+
+    /**
+     * @return PaymentLineItem[]
+     */
+    protected function getLineItems()
+    {
+        return $this->lineItems;
     }
 
 }

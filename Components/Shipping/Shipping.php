@@ -6,7 +6,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Enlight_Components_Session_Namespace;
 use MollieShopware\Components\Shipping\Models\ShippingCosts;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
+use MollieShopware\Models\Voucher\VoucherType;
 
 class Shipping implements ShippingInterface
 {
@@ -126,14 +127,14 @@ class Shipping implements ShippingInterface
      * Gets the shipping costs of
      * the current basket and its items.
      *
-     * @return BasketItem
+     * @return MollieBasketItem
      */
     public function getCartShippingCosts()
     {
         /** @var ShippingCosts $costs */
         $costs = $this->basketShippingProvider->getShippingCosts();
 
-        return new BasketItem(
+        return new MollieBasketItem(
             0,
             0,
             self::ITEM_KEY,
@@ -143,7 +144,8 @@ class Shipping implements ShippingInterface
             $costs->getUnitPrice(),
             $costs->getUnitPriceNet(),
             1,
-            $costs->getTaxRate()
+            $costs->getTaxRate(),
+            VoucherType::NONE
         );
     }
 

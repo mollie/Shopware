@@ -3,7 +3,7 @@
 namespace MollieShopware\Tests\Utils\Fixtures;
 
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 
 class BasketLineItemFixture
 {
@@ -12,11 +12,11 @@ class BasketLineItemFixture
      * @param float $unitPriceNet
      * @param int $quantity
      * @param int $taxRate
-     * @return BasketItem
+     * @return MollieBasketItem
      */
     public function buildProductItemNet($unitPriceNet, $quantity, $taxRate)
     {
-        $item = new BasketItem(
+        $item = new MollieBasketItem(
             1560,
             55,
             'ART-55',
@@ -26,7 +26,8 @@ class BasketLineItemFixture
             $unitPriceNet,
             $unitPriceNet,
             $quantity,
-            $taxRate
+            $taxRate,
+            ''
         );
 
         $item->setIsGrossPrice(false);
@@ -38,13 +39,13 @@ class BasketLineItemFixture
      * @param $unitPriceGross
      * @param $quantity
      * @param $taxRate
-     * @return BasketItem
+     * @return MollieBasketItem
      */
     public function buildProductItemGross($unitPriceGross, $quantity, $taxRate)
     {
         $netPrice = ($unitPriceGross / (100 + $taxRate)) * 100;
 
-        $item = new BasketItem(
+        $item = new MollieBasketItem(
             1560,
             55,
             'ART-55',
@@ -54,7 +55,8 @@ class BasketLineItemFixture
             $unitPriceGross,
             $netPrice,
             $quantity,
-            $taxRate
+            $taxRate,
+            ''
         );
 
         $item->setIsGrossPrice(true);

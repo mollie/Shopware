@@ -130,6 +130,7 @@ class PaymentMethodsInstaller
             PaymentMethod::P24,
             PaymentMethod::DIRECTDEBIT,
             PaymentMethod::SOFORT,
+            PaymentMethod::VOUCHERS,
         ];
     }
 

@@ -2,7 +2,7 @@
 
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;

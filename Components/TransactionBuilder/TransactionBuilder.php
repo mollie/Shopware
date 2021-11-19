@@ -4,11 +4,9 @@ namespace MollieShopware\Components\TransactionBuilder;
 
 
 use MollieShopware\Components\Basket\BasketInterface;
-use MollieShopware\Components\Helpers\LocaleFinder;
-use MollieShopware\Components\SessionManager\SessionManager;
 use MollieShopware\Components\SessionManager\SessionManagerInterface;
 use MollieShopware\Components\Shipping\ShippingInterface;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\TransactionItemBuilder;
 use MollieShopware\Models\Transaction;
@@ -116,8 +114,8 @@ class TransactionBuilder
         $transactionBuilder = new TransactionItemBuilder($taxMode, $this->roundAfterTax);
 
 
-        /** @var BasketItem[] $basketLines */
-        $basketLines = $this->basket->getBasketLines($userData);
+        /** @var MollieBasketItem[] $basketLines */
+        $basketLines = $this->basket->getMollieBasketLines($userData);
 
         foreach ($basketLines as $basketItem) {
 
@@ -130,7 +128,7 @@ class TransactionBuilder
         }
 
 
-        /** @var BasketItem $shippingItem */
+        /** @var MollieBasketItem $shippingItem */
         $shippingItem = $this->shipping->getCartShippingCosts();
 
         if ($shippingItem->getUnitPrice() > 0) {

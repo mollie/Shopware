@@ -3,7 +3,7 @@
 namespace MollieShopware\Components\Basket;
 
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use Shopware\Models\Order\Repository;
 
 interface BasketInterface
@@ -14,6 +14,6 @@ interface BasketInterface
      * @param array $userData
      * @return mixed
      */
-    public function getBasketLines($userData = []);
+    public function getMollieBasketLines($userData = []);
 
 }
