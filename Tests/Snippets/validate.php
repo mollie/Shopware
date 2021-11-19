@@ -7,12 +7,9 @@ $frontendValidator = new SnippetsValidator(false);
 $backendValidator = new SnippetsValidator(true);
 
 $snippetsFolder = __DIR__ . "/../../Resources/snippets";
-$backendFolder = $snippetsFolder . "/backend/mollie/*.ini";
-$frontendFolder = $snippetsFolder . "/frontend/mollie/*.ini";
 
-
-$backendFiles = glob($backendFolder);
-$frontendFiles = glob($frontendFolder);
+$backendFiles = searchFiles($snippetsFolder . "/backend");
+$frontendFiles = searchFiles($snippetsFolder . "/frontend");
 
 
 echo PHP_EOL;
@@ -24,10 +21,10 @@ echo "======================================================================" . 
 runValidation($frontendValidator, $frontendFiles);
 runValidation($backendValidator, $backendFiles);
 
+
+
 function runValidation(SnippetsValidator $validator, array $files)
 {
-
-
     $allFiles = array_merge($files);
 
     foreach ($allFiles as $file) {
@@ -35,6 +32,8 @@ function runValidation(SnippetsValidator $validator, array $files)
         if ($file === '.' || $file === '..') {
             continue;
         }
+
+        echo $file . PHP_EOL;
 
         $errors = $validator->validate($file);
 
@@ -52,4 +51,10 @@ function runValidation(SnippetsValidator $validator, array $files)
         }
     }
 
+}
+
+
+function searchFiles($folder)
+{
+    return glob($folder . "/{,*/,*/*/,*/*/*/}*.ini", GLOB_BRACE);
 }
