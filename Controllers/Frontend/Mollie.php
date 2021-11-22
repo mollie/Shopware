@@ -677,7 +677,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->orderCancellation,
                 $sessionManager,
                 $paymentStatusResolver,
-                $paymentConfigResolver
+                $paymentConfigResolver,
+                $entityManager
             );
 
             $this->restoreSessionFacade = new RestoreSessionFacade(

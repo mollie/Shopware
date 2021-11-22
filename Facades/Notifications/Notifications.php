@@ -16,6 +16,8 @@ use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
 
 class Notifications
@@ -66,9 +68,13 @@ class Notifications
      */
     private $paymentConfig;
 
+    /**
+     * @var ModelManager $entityManager
+     */
+    private $entityManager;
+
 
     /**
-     * Notifications constructor.
      * @param LoggerInterface $logger
      * @param Config $config
      * @param TransactionRepository $repoTransactions
@@ -78,8 +84,9 @@ class Notifications
      * @param SessionManager $sessionManager
      * @param PaymentStatusResolver $paymentStatusResolver
      * @param Config\PaymentConfigResolver $paymentConfig
+     * @param ModelManager $entityManager
      */
-    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig)
+    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig, ModelManager $entityManager)
     {
         $this->logger = $logger;
         $this->config = $config;
@@ -90,6 +97,7 @@ class Notifications
         $this->sessionManager = $sessionManager;
         $this->paymentStatusResolver = $paymentStatusResolver;
         $this->paymentConfig = $paymentConfig;
+        $this->entityManager = $entityManager;
     }
 
 
@@ -162,6 +170,16 @@ class Notifications
             # if configured, also update the order status
             if ($this->config->updateOrderStatus()) {
                 $this->orderUpdater->updateShopwareOrderStatus($order, $molliePaymentStatus);
+            }
+
+            # if we have a "paid" state, then make sure to set
+            # our cleared-data too if not already set
+            if ($molliePaymentStatus === PaymentStatus::MOLLIE_PAYMENT_PAID && empty($order->getClearedDate())) {
+
+                $order->setClearedDate(date('Y-m-d H:i:s'));
+
+                $this->entityManager->persist($order);
+                $this->entityManager->flush($order);
             }
         }
 
