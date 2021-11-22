@@ -164,7 +164,23 @@ class MailSubscriber implements SubscriberInterface
 
         try {
 
-            $transaction->setOrdermailVariables(json_encode($variables));
+            # before we really encode our json, let's first
+            # test it, and check if we have an error in there.
+            $testJSON = json_encode($variables);
+            $errorCode = json_last_error();
+
+            # if we have an error in our json
+            # then create a warning entry, but do not abort only because of emails
+            if ($errorCode !== JSON_ERROR_NONE) {
+                $this->logger->warning('Attention, the order confirmation mail data contains invalid symbols. JSON Encode Error Code: ' . $errorCode);
+            }
+
+            # if we have any NaN number values, when we do not want to crash those mails.
+            # in that case, we use the provided json encode parameter to substitute those with 0
+            $repairedJSON = json_encode($variables, JSON_PARTIAL_OUTPUT_ON_ERROR);
+
+            # JSON_PARTIAL_OUTPUT_ON_ERROR
+            $transaction->setOrdermailVariables($repairedJSON);
             $this->transactionRepo->save($transaction);
 
         } catch (\Exception $e) {
