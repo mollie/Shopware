@@ -73,7 +73,7 @@ export default class ConfigSetupAction {
         cy.wait(5000);
 
         cy.contains('Installiert').click({force: true});
-        cy.wait(2000);
+        cy.wait(3000);
 
         this._openPluginSettings('Mollie');
 
