@@ -257,7 +257,7 @@ jobs:
 
       - name: Start Docker
         run: |
-          if [[ $PHP_VERSION == 'default ]]; then
+          if [[ $PHP_VERSION == 'default' ]]; then
              docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
           else
              docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
