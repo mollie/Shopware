@@ -133,6 +133,14 @@ class TransactionItem
     private $orderLineId;
 
     /**
+     * @return string
+     *
+     * @ORM\Column(name="voucher_type", type="string", nullable=true)
+     */
+    private $voucherType;
+
+
+    /**
      * @return int
      */
     public function getId()
@@ -437,4 +445,21 @@ class TransactionItem
         $this->orderLineId = $orderLineId;
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherType()
+    {
+        return $this->voucherType;
+    }
+
+    /**
+     * @param mixed $voucherType
+     */
+    public function setVoucherType($voucherType)
+    {
+        $this->voucherType = $voucherType;
+    }
+
 }

@@ -10,6 +10,7 @@ use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayDomainFileDownloader;
 use MollieShopware\Components\Attributes;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Installer\Attributes\AttributesInstaller;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Schema;
@@ -185,15 +186,17 @@ class MollieShopware extends Plugin
         $this->updateDbTables();
 
         // add extra attributes
-        $this->updateAttributes();
+        $attributes = $this->createAttributesInstaller();
+        $attributes->updateAttributes();
 
         parent::install($context);
     }
 
+
     /**
      * @param UpdateContext $context
-     *
-     * @throws Exception
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function update(UpdateContext $context)
     {
@@ -206,7 +209,8 @@ class MollieShopware extends Plugin
         $this->updateDbTables();
 
         // add extra attributes
-        $this->updateAttributes();
+        $attributes = $this->createAttributesInstaller();
+        $attributes->updateAttributes();
 
         // set config value for upgraders from version 1.3
         if (substr($context->getPlugin()->getVersion(), 0, strlen('1.3')) == '1.3') {
@@ -224,6 +228,8 @@ class MollieShopware extends Plugin
 
     /**
      * @param UninstallContext $context
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function uninstall(UninstallContext $context)
     {
@@ -232,7 +238,8 @@ class MollieShopware extends Plugin
         $paymentInstaller->uninstallPaymentMethods();
 
         // remove extra attributes
-        $this->removeAttributes();
+        $attributes = $this->createAttributesInstaller();
+        $attributes->removeAttributes();
 
         parent::uninstall($context);
     }
@@ -342,82 +349,6 @@ class MollieShopware extends Plugin
         }
     }
 
-    /**
-     * Create a new Attributes object
-     */
-    protected function makeAttributes()
-    {
-        return new Attributes(
-            $this->container->get('models'),
-            $this->container->get('shopware_attribute.crud_service')
-        );
-    }
-
-    /**
-     * Update extra attributes
-     */
-    protected function updateAttributes()
-    {
-        try {
-            $this->makeAttributes()->create([['s_order_basket_attributes', 'basket_item_id', 'int', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_order_details_attributes', 'basket_item_id', 'int', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_transaction_id', 'int', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_order_line_id', 'int', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_order_details_attributes', 'mollie_return', 'int', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_ideal_issuer', 'string', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->create([['s_user_attributes', 'mollie_shopware_credit_card_token', 'string', []]]);
-        } catch (Exception $ex) {
-            //
-        }
-    }
-
-    /**
-     * Remove extra attributes
-     */
-    protected function removeAttributes()
-    {
-        try {
-            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_ideal_issuer']]);
-        } catch (Exception $ex) {
-            //
-        }
-
-        try {
-            $this->makeAttributes()->remove([['s_user_attributes', 'mollie_shopware_credit_card_token']]);
-        } catch (Exception $ex) {
-            //
-        }
-    }
 
     /**
      * Write value to the config
@@ -590,5 +521,17 @@ class MollieShopware extends Plugin
 
         $repoPaymentConfig->cleanLegacyData();
     }
+
+    /**
+     * @return AttributesInstaller
+     */
+    private function createAttributesInstaller()
+    {
+        return new AttributesInstaller(
+            $this->container->get('models'),
+            $this->container->get('shopware_attribute.crud_service')
+        );
+    }
+
 
 }

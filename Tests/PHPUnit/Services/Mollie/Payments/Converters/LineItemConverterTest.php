@@ -31,7 +31,8 @@ class LineItemConverterTest extends TestCase
             'sku-1',
             'img-url',
             'product-url',
-            '{ data: true }'
+            '{ data: true }',
+            ''
         );
 
         $data = $builder->convertItem($lineItem);
@@ -82,7 +83,8 @@ class LineItemConverterTest extends TestCase
             null,
             null,
             null,
-            null
+            null,
+            ''
         );
 
         $data = $builder->convertItem($lineItem);

@@ -22,6 +22,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
+use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
 
 
 class PaymentFactory
@@ -91,6 +92,9 @@ class PaymentFactory
 
             case PaymentMethod::SOFORT:
                 return new Sofort();
+
+            case PaymentMethod::VOUCHERS:
+                return new Voucher();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);

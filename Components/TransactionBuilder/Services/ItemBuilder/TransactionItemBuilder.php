@@ -2,7 +2,7 @@
 
 namespace MollieShopware\Components\TransactionBuilder\Services\ItemBuilder;
 
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Components\TransactionBuilder\Models\TaxMode;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionItem;
@@ -34,10 +34,10 @@ class TransactionItemBuilder
 
     /**
      * @param Transaction $transaction
-     * @param BasketItem $basketItem
+     * @param MollieBasketItem $basketItem
      * @return TransactionItem
      */
-    public function buildTransactionItem(Transaction $transaction, BasketItem $basketItem)
+    public function buildTransactionItem(Transaction $transaction, MollieBasketItem $basketItem)
     {
         $unitPrice = $basketItem->getUnitPrice();
         $netPrice = $basketItem->getUnitPriceNet();
@@ -123,6 +123,11 @@ class TransactionItemBuilder
         if (!empty($basketItem->getOrderNumber())) {
             $item->setSku($basketItem->getOrderNumber());
         }
+
+        # also pass on our voucher type
+        # that might be used in further processing
+        $item->setVoucherType($basketItem->getVoucherType());
+
 
         return $item;
     }

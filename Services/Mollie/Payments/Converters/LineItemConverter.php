@@ -29,7 +29,7 @@ class LineItemConverter
      */
     public function convertItem(PaymentLineItem $item)
     {
-        return [
+        $data = [
             'type' => (string)$item->getType(),
             'name' => (string)$item->getName(),
             'quantity' => (int)$item->getQuantity(),
@@ -51,6 +51,8 @@ class LineItemConverter
             'productUrl' => (string)$item->getProductUrl(),
             'metadata' => (string)$item->getMetadata(),
         ];
+
+        return $data;
     }
 
 }

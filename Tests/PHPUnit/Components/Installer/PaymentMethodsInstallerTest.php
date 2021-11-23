@@ -50,6 +50,7 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::P24,
             PaymentMethod::DIRECTDEBIT,
             PaymentMethod::SOFORT,
+            PaymentMethod::VOUCHERS,
         ];
 
         $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());

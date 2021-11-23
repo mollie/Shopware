@@ -20,7 +20,7 @@ class FakeBasket implements \MollieShopware\Components\Basket\BasketInterface
     }
 
 
-    public function getBasketLines($userData = [])
+    public function getMollieBasketLines($userData = [])
     {
       return $this->items;
     }

@@ -57,6 +57,7 @@ class PaymentMethodTypeTest extends TestCase
             [false, PaymentMethod::KLARNA_PAY_LATER],
             [false, PaymentMethod::KLARNA_PAY_NOW],
             [false, PaymentMethod::KLARNA_SLICE_IT],
+            [false, PaymentMethod::VOUCHERS],
             [true, PaymentMethod::PAYPAL],
             [true, PaymentMethod::APPLEPAY_DIRECT],
             [true, PaymentMethod::APPLE_PAY],

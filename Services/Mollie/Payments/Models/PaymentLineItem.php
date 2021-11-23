@@ -67,6 +67,12 @@ class PaymentLineItem
     private $metadata;
 
     /**
+     * @var string
+     */
+    private $voucherType;
+
+
+    /**
      * @param string $type
      * @param string $name
      * @param int $quantity
@@ -79,8 +85,9 @@ class PaymentLineItem
      * @param string $imageUrl
      * @param string $productUrl
      * @param string $metadata
+     * @param string $voucherType
      */
-    public function __construct($type, $name, $quantity, $currency, $unitPrice, $totalAmount, $vatRate, $vatAmount, $sku, $imageUrl, $productUrl, $metadata)
+    public function __construct($type, $name, $quantity, $currency, $unitPrice, $totalAmount, $vatRate, $vatAmount, $sku, $imageUrl, $productUrl, $metadata, $voucherType)
     {
         $this->type = $type;
         $this->name = $name;
@@ -94,6 +101,7 @@ class PaymentLineItem
         $this->imageUrl = $imageUrl;
         $this->productUrl = $productUrl;
         $this->metadata = $metadata;
+        $this->voucherType = $voucherType;
     }
 
     /**
@@ -190,6 +198,14 @@ class PaymentLineItem
     public function getMetadata()
     {
         return $this->metadata;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVoucherType()
+    {
+        return $this->voucherType;
     }
 
 }

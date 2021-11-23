@@ -78,7 +78,8 @@ class PaymentLineItemBuilderTest extends TestCase
                 'PRODUCT-123',
                 null,
                 null,
-                json_encode(['transaction_item_id' => 1520])
+                json_encode(['transaction_item_id' => 1520]),
+                ''
             ),
         ];
 

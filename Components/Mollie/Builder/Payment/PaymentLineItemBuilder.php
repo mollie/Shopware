@@ -33,7 +33,8 @@ class PaymentLineItemBuilder
                 $item->getSku(),
                 null,
                 null,
-                json_encode(['transaction_item_id' => $item->getId()])
+                json_encode(['transaction_item_id' => $item->getId()]),
+                $item->getVoucherType()
             );
         }
 

@@ -6,7 +6,7 @@ use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Logger;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\DependencyInjection\Container as DIContainer;
 use Shopware\Components\Model\ModelManager;

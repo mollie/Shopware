@@ -4,21 +4,21 @@ namespace MollieShopware\Tests\Utils\Fakes\Shipping;
 
 
 use MollieShopware\Components\Shipping\ShippingInterface;
-use MollieShopware\Components\TransactionBuilder\Models\BasketItem;
+use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 
 class FakeShipping implements ShippingInterface
 {
 
 
     /**
-     * @var BasketItem
+     * @var MollieBasketItem
      */
     private $item;
 
     /**
-     * @param BasketItem $item
+     * @param MollieBasketItem $item
      */
-    public function __construct(BasketItem $item)
+    public function __construct(MollieBasketItem $item)
     {
         $this->item = $item;
     }
