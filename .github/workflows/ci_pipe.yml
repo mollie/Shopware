@@ -233,7 +233,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        shopware: [ '5.7.6', '5.7.4', '5.7.3', '5.7.2', '5.7.1', '5.6.10', '5.6.9', '5.6.6', '5.6.4', '5.3.0' ]
+        shopware: [ '5.7.6', '5.7.3', '5.7.2', '5.6.9', '5.6.6', '5.6.4' ]
+        php: [ 'default' ]
+        include:
+          - shopware: '5.3.0'
+            php: 5.6
+          - shopware: '5.6.10'
+            php: 7.0
+          - shopware: '5.6.10'
+            php: 7.1
+          - shopware: '5.6.10'
+            php: 7.2
+          - shopware: '5.6.10'
+            php: 7.3
+          - shopware: '5.7.4'
+            php: 7.4
+          - shopware: '5.7.4'
+            php: 8.0
     steps:
 
       - name: Clone Code
@@ -241,7 +257,11 @@ jobs:
 
       - name: Start Docker
         run: |
-          docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          if [[ $PHP_VERSION == 'default ]]; then
+             docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          else
+             docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
+          fi
           sleep 30
           docker logs shop
           # now change the domain of our shop, mollie doesn't work with localhost
@@ -269,6 +289,7 @@ jobs:
         run: cd Tests/Cypress && make run shopware=$SW_VERSION url=http://local.mollie.shop
         env:
           SW_VERSION: ${{ matrix.shopware }}
+          PHP_VERSION: ${{ matrix.php }}
 
       - name: Download Logs
         if: ${{ always() }}
