@@ -244,14 +244,14 @@ jobs:
             php: '7.4'
           - shopware: '5.6.10'
             php: '7.3'
-          - shopware: '5.6.10'
-            php: '7.2'
           - shopware: '5.6.9'
-            php: '7.1'
+            php: '7.2'
           - shopware: '5.6.6'
-            php: '7.1'
+            php: '7.2'
           - shopware: '5.6.4'
-            php: '7.1'
+            php: '7.2'
+          - shopware: '5.3.0'
+            php: '7.0'
           - shopware: '5.3.0'
             php: '5.6'
     steps:
@@ -261,11 +261,7 @@ jobs:
 
       - name: Start Docker
         run: |
-          if [[ $PHP_VERSION == 'default' ]]; then
-             docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
-          else
-             docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
-          fi
+          docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
           sleep 30
           docker ps -a
           docker logs shop
@@ -294,7 +290,6 @@ jobs:
         run: cd Tests/Cypress && make run shopware=$SW_VERSION url=http://local.mollie.shop
         env:
           SW_VERSION: ${{ matrix.shopware }}
-          PHP_VERSION: ${{ matrix.php }}
 
       - name: Download Logs
         if: ${{ always() }}
