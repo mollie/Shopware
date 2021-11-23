@@ -233,8 +233,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        shopware: [ ]
-        php: [  ]
         include:
           - shopware: '5.7.6'
             php: '8.0'
