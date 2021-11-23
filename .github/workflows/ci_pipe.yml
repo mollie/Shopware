@@ -238,8 +238,6 @@ jobs:
             php: '8.0'
           - shopware: '5.7.3'
             php: '7.4'
-          - shopware: '5.7.2'
-            php: '7.4'
           - shopware: '5.6.10'
             php: '7.4'
           - shopware: '5.6.10'
@@ -250,6 +248,8 @@ jobs:
             php: '7.2'
           - shopware: '5.6.4'
             php: '7.2'
+          - shopware: '5.5.10'
+            php: '7.1'
           - shopware: '5.3.0'
             php: '7.0'
           - shopware: '5.3.0'
@@ -263,7 +263,6 @@ jobs:
         run: |
           docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
           sleep 30
-          docker ps -a
           docker logs shop
           # now change the domain of our shop, mollie doesn't work with localhost
           sudo echo "127.0.0.1 local.mollie.shop" | sudo tee -a /etc/hosts
