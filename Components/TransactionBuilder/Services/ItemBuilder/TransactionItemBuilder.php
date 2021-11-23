@@ -45,28 +45,50 @@ class TransactionItemBuilder
         $quantity = $basketItem->getQuantity();
 
 
-        # if we charge taxes but our line item is
-        # not already a gross price, then we need to calculate
-        # it into a gross price.
-        if ($basketItem->isGrossPrice() === false && $this->taxMode->isChargeTaxes()) {
+        # if we don't charge taxes just set the values to 0.0
+        if (!$this->taxMode->isChargeTaxes()) {
+            $taxRate = 0;
+        }
 
-            # shopware calculates gross
-            $unitPriceGross = $unitPrice * ($taxRate + 100) / 100;
 
-            if ($this->roundAfterTax) {
-                # also round that sum
-                # Shopware does the same, and also Mollie needs
-                # unit prices with 2 decimals
-                $unitPriceGross = round($unitPriceGross, 2);
+        if ($basketItem->isGrossPrice() === false) {
+
+            # if we have a NET price, and we do charge taxes
+            # then our unit price is already the correct NET price.
+            # in that case we manually calculate the gross price for Mollie
+            # based on this unit price
+            if ($this->taxMode->isChargeTaxes()) {
+
+                # shopware calculates gross
+                $mollieItemPrice = $unitPrice * ($taxRate + 100) / 100;
+
+                if ($this->roundAfterTax) {
+                    # also round that sum
+                    # Shopware does the same, and also Mollie needs
+                    # unit prices with 2 decimals
+                    $mollieItemPrice = round($mollieItemPrice, 2);
+                }
+
+            } else {
+
+                # if we do not charge taxes
+                # then we always have to use the NET price as it is.
+                # it could be that the unitPrice is still a gross price...
+                # i cannot reproduce this, but it works with this approach.
+                $mollieItemPrice = $netPrice;
             }
 
         } else {
-            $unitPriceGross = $unitPrice;
+
+            # if we have a gross price configuration
+            # then lets just use the unitPrice which is already the gross price.
+            $mollieItemPrice = $unitPrice;
         }
+
 
         # now calculate the total amount
         # and make sure to round it again
-        $totalAmount = $unitPriceGross * $quantity;
+        $totalAmount = $mollieItemPrice * $quantity;
         $totalAmount = round($totalAmount, 2);
 
 
@@ -78,23 +100,21 @@ class TransactionItemBuilder
         # also round in the end!
         $vatAmount = round($vatAmount, 2);
 
-
-        # if we dont charge taxes
-        # just set the values to 0.0
+        # if we don#t charge taxes
+        # then just set the vatAmount to 0,00 again...better safe than sorry
         if (!$this->taxMode->isChargeTaxes()) {
-            $taxRate = 0;
             $vatAmount = 0;
         }
 
 
         $item = new TransactionItem();
-        $item->setType($this->getOrderType($basketItem, $unitPriceGross));
+        $item->setType($this->getOrderType($basketItem, $mollieItemPrice));
         $item->setTransaction($transaction);
         $item->setArticleId($basketItem->getArticleId());
         $item->setBasketItemId($basketItem->getId());
         $item->setName($basketItem->getName());
         $item->setQuantity($basketItem->getQuantity());
-        $item->setUnitPrice($unitPriceGross);
+        $item->setUnitPrice($mollieItemPrice);
         $item->setNetPrice($netPrice);
         $item->setTotalAmount($totalAmount);
         $item->setVatRate($taxRate);
