@@ -593,6 +593,8 @@ class PaymentMethodsInstaller
                         'error' => $e->getMessage(),
                     ]
                 );
+
+                continue;
             }
 
             try {
