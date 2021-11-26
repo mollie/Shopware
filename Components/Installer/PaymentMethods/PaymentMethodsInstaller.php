@@ -15,6 +15,8 @@ use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use MollieShopware\Components\MollieApiFactory;
+use MollieShopware\Components\Services\ShopService;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Payment\Repository;
@@ -298,14 +300,8 @@ class PaymentMethodsInstaller
      */
     private function getAvailableMolliePayments()
     {
-        /** @var MethodCollection $methods */
+        /** @var array $methods */
         $methods = $this->getActivePaymentMethodsFromMollie();
-
-        if ($methods !== null) {
-            $methods = $methods->getArrayCopy();
-        } else {
-            $methods = [];
-        }
 
         # if its not null, do the same again
         # please note we give the original list into it
@@ -574,30 +570,52 @@ class PaymentMethodsInstaller
     /**
      * Returns a collection of active payment methods from the Mollie API.
      *
-     * @return null|BaseCollection|MethodCollection
+     * @return array
      */
     private function getActivePaymentMethodsFromMollie()
     {
-        /** @var MethodCollection $methods */
-        $methods = null;
+        $allMethods = [];
+        $allMethodIds = [];
+        $mollieApiFactory = new MollieApiFactory(clone $this->config, $this->logger);
+        $shopService = new ShopService($this->modelManager);
+        $shops = $shopService->getAllShops();
 
-        try {
-            $methods = $this->mollieApiClient->methods->allActive(
-                [
-                    'resource' => 'orders',
-                    'includeWallets' => 'applepay',
-                ]
-            );
-        } catch (ApiException $e) {
-            $this->logger->error(
-                'Error when loading active payment methods from Mollie',
-                [
-                    'error' => $e->getMessage(),
-                ]
-            );
+        if (empty($shops)) {
+            return $allMethods;
         }
 
-        return $methods;
+        foreach($shops as $shop) {
+            $mollieApiClient = $mollieApiFactory->create($shop->getId());
+
+            try {
+                $methods = $mollieApiClient->methods->allActive(
+                    [
+                        'resource' => 'orders',
+                        'includeWallets' => 'applepay',
+                    ]
+                );
+
+                if ($methods->count()) {
+                    foreach ($methods->getArrayCopy() as $method) {
+                        if (in_array($method->id, $allMethodIds, true)) {
+                            continue;
+                        }
+
+                        $allMethods[] = $method;
+                        $allMethodIds[] = $method->id;
+                    }
+                }
+            } catch (ApiException $e) {
+                $this->logger->error(
+                    sprintf('Error when loading active payment methods from Mollie for shop %s', $shop->getName()),
+                    [
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
+        }
+
+        return $allMethods;
     }
 
     /**
