@@ -574,36 +574,45 @@ class PaymentMethodsInstaller
      */
     private function getActivePaymentMethodsFromMollie()
     {
-        $allMethods = [];
-        $allMethodIds = [];
+        $methods = [];
         $mollieApiFactory = new MollieApiFactory(clone $this->config, $this->logger);
         $shopService = new ShopService($this->modelManager);
         $shops = $shopService->getAllShops();
 
         if (empty($shops)) {
-            return $allMethods;
+            return $methods;
         }
 
         foreach($shops as $shop) {
-            $mollieApiClient = $mollieApiFactory->create($shop->getId());
+            try {
+                $mollieApiClient = $mollieApiFactory->create($shop->getId());
+            } catch (ApiException $e) {
+                $this->logger->error(
+                    sprintf('Error when creating a Mollie API client for shop %s', $shop->getName()),
+                    [
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
 
             try {
-                $methods = $mollieApiClient->methods->allActive(
+                $activeMethods = $mollieApiClient->methods->allActive(
                     [
                         'resource' => 'orders',
                         'includeWallets' => 'applepay',
                     ]
                 );
 
-                if ($methods->count()) {
-                    foreach ($methods->getArrayCopy() as $method) {
-                        if (in_array($method->id, $allMethodIds, true)) {
-                            continue;
-                        }
+                foreach ($activeMethods->getArrayCopy() as $method) {
+                    $methodIsInArray = !empty(array_filter($methods, static function ($item) use ($method) {
+                        return $item->id === $method->id;
+                    }));
 
-                        $allMethods[] = $method;
-                        $allMethodIds[] = $method->id;
+                    if ($methodIsInArray) {
+                        continue;
                     }
+
+                    $methods[] = $method;
                 }
             } catch (ApiException $e) {
                 $this->logger->error(
@@ -615,7 +624,7 @@ class PaymentMethodsInstaller
             }
         }
 
-        return $allMethods;
+        return $methods;
     }
 
     /**
