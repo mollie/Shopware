@@ -437,12 +437,8 @@ class MollieShopware extends Plugin
         /** @var ModelManager $modelManager */
         $modelManager = $this->container->get('models');
 
-        /** @var MollieApiClient $mollieApiClient */
-        $mollieApiClient = $this->getMollieApiClient();
-
         /** @var Plugin\PaymentInstaller $paymentInstaller */
         $paymentInstaller = $this->container->get('shopware.plugin_payment_installer');
-
 
         /** @var PaymentMethodService $paymentMethodService */
         $paymentMethodService = null;
@@ -450,7 +446,7 @@ class MollieShopware extends Plugin
         /** @var Enlight_Template_Manager $templateManager */
         $templateManager = $this->container->get('template');
 
-        if ($modelManager !== null && $mollieApiClient !== null && $paymentInstaller !== null && $templateManager !== null) {
+        if ($modelManager !== null && $paymentInstaller !== null && $templateManager !== null) {
 
             $config = new Config(
                 $this->container->get('shopware.plugin.cached_config_reader'),
@@ -460,7 +456,6 @@ class MollieShopware extends Plugin
             $paymentMethodService = new PaymentMethodsInstaller(
                 $modelManager,
                 $config,
-                $mollieApiClient,
                 $paymentInstaller,
                 $templateManager,
                 $this->getPluginLogger(),

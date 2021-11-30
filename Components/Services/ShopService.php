@@ -2,14 +2,15 @@
 
 namespace MollieShopware\Components\Services;
 
+use Doctrine\Common\Collections\Collection;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Shop\Repository as ShopRepository;
 use Shopware\Models\Shop\Shop;
 
 class ShopService
 {
-    /** @var ModelManager */
-    private $modelManager;
+    /** @var ShopRepository $shopRepo */
+    private $shopRepo;
 
     /**
      * Creates a new instance of the shop helper.
@@ -19,7 +20,7 @@ class ShopService
     public function __construct(
         ModelManager $modelManager
     ) {
-        $this->modelManager = $modelManager;
+        $this->shopRepo = $modelManager->getRepository(Shop::class);
     }
 
     /**
@@ -30,12 +31,19 @@ class ShopService
      */
     public function shopById($id)
     {
-        /** @var ShopRepository $shopRepo */
-        $shopRepo = $this->modelManager->getRepository(Shop::class);
-
         /** @var Shop $shop */
-        return $shopRepo->findOneBy([
+        return $this->shopRepo->findOneBy([
             'id' => $id
         ]);
+    }
+
+    /**
+     * Returns a collection of all shops.
+     *
+     * @return Shop[]
+     */
+    public function getAllShops()
+    {
+        return $this->shopRepo->findAll();
     }
 }
