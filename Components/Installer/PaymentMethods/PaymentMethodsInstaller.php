@@ -4,7 +4,7 @@ namespace MollieShopware\Components\Installer\PaymentMethods;
 
 
 use Enlight_Template_Manager;
-use Mollie\Api\Exceptions\ApiException;
+use Exception;
 use Mollie\Api\Resources\Method;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\BankTransferFlow;
@@ -594,7 +594,7 @@ class PaymentMethodsInstaller
 
                     $methods[] = $method;
                 }
-            } catch (ApiException $e) {
+            } catch (Exception $e) {
                 $this->logger->error(
                     sprintf('Error when loading active payment methods from Mollie for shop %s', $shop->getName()),
                     [
