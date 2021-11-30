@@ -5,10 +5,7 @@ namespace MollieShopware\Components\Installer\PaymentMethods;
 
 use Enlight_Template_Manager;
 use Mollie\Api\Exceptions\ApiException;
-use Mollie\Api\MollieApiClient;
-use Mollie\Api\Resources\BaseCollection;
 use Mollie\Api\Resources\Method;
-use Mollie\Api\Resources\MethodCollection;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\BankTransferFlow;
 use MollieShopware\Components\Constants\OrderCreationType;
@@ -51,11 +48,6 @@ class PaymentMethodsInstaller
     private $modelManager;
 
     /**
-     * @var MollieApiClient
-     */
-    private $mollieApiClient;
-
-    /**
      * @var PaymentInstaller
      */
     private $paymentInstaller;
@@ -84,22 +76,19 @@ class PaymentMethodsInstaller
     /**
      * @param ModelManager $modelManager
      * @param Config $config
-     * @param MollieApiClient $mollieApiClient
      * @param PaymentInstaller $paymentInstaller
      * @param Enlight_Template_Manager $templateManager
      * @param LoggerInterface $logger
      * @param $pluginName
      */
-    public function __construct(ModelManager $modelManager, Config $config, MollieApiClient $mollieApiClient, PaymentInstaller $paymentInstaller, Enlight_Template_Manager $templateManager, LoggerInterface $logger, $pluginName)
+    public function __construct(ModelManager $modelManager, Config $config, PaymentInstaller $paymentInstaller, Enlight_Template_Manager $templateManager, LoggerInterface $logger, $pluginName)
     {
         $this->modelManager = $modelManager;
         $this->config = $config;
-        $this->mollieApiClient = $mollieApiClient;
         $this->paymentInstaller = $paymentInstaller;
         $this->templateManager = $templateManager;
         $this->logger = $logger;
         $this->pluginName = $pluginName;
-
 
         $this->repoConfiguration = $modelManager->getRepository(Configuration::class);
     }
@@ -586,18 +575,7 @@ class PaymentMethodsInstaller
         foreach($shops as $shop) {
             try {
                 $mollieApiClient = $mollieApiFactory->create($shop->getId());
-            } catch (ApiException $e) {
-                $this->logger->error(
-                    sprintf('Error when creating a Mollie API client for shop %s', $shop->getName()),
-                    [
-                        'error' => $e->getMessage(),
-                    ]
-                );
 
-                continue;
-            }
-
-            try {
                 $activeMethods = $mollieApiClient->methods->allActive(
                     [
                         'resource' => 'orders',
