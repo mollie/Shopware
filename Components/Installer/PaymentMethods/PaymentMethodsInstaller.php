@@ -4,7 +4,6 @@ namespace MollieShopware\Components\Installer\PaymentMethods;
 
 
 use Enlight_Template_Manager;
-use Exception;
 use Mollie\Api\Resources\Method;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\BankTransferFlow;
@@ -12,8 +11,8 @@ use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
-use MollieShopware\Components\MollieApiFactory;
-use MollieShopware\Components\Services\ShopService;
+use MollieShopware\Components\Payment\ActivePaymentMethodsProviderInterface;
+use MollieShopware\Components\Payment\Provider\ActivePaymentMethodsProvider;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Models\Payment\Configuration;
 use MollieShopware\Models\Payment\Repository;
@@ -72,6 +71,11 @@ class PaymentMethodsInstaller
      */
     private $logger;
 
+    /**
+     * @var ActivePaymentMethodsProviderInterface
+     */
+    private $activePaymentMethodsProvider;
+
 
     /**
      * @param ModelManager $modelManager
@@ -90,9 +94,9 @@ class PaymentMethodsInstaller
         $this->logger = $logger;
         $this->pluginName = $pluginName;
 
+        $this->activePaymentMethodsProvider = new ActivePaymentMethodsProvider($config, $logger);
         $this->repoConfiguration = $modelManager->getRepository(Configuration::class);
     }
-
 
     /**
      * Gets the official list of supported payment methods by this plugin.
@@ -283,14 +287,13 @@ class PaymentMethodsInstaller
         }
     }
 
-
     /**
      * @return array
      */
     private function getAvailableMolliePayments()
     {
         /** @var array $methods */
-        $methods = $this->getActivePaymentMethodsFromMollie();
+        $methods = $this->activePaymentMethodsProvider->getActivePaymentMethodsFromMollie();
 
         # if its not null, do the same again
         # please note we give the original list into it
@@ -554,57 +557,6 @@ class PaymentMethodsInstaller
         $payment->setActive($isActive);
 
         $this->modelManager->flush($payment);
-    }
-
-    /**
-     * Returns a collection of active payment methods from the Mollie API.
-     *
-     * @return array
-     */
-    private function getActivePaymentMethodsFromMollie()
-    {
-        $methods = [];
-        $mollieApiFactory = new MollieApiFactory(clone $this->config, $this->logger);
-        $shopService = new ShopService($this->modelManager);
-        $shops = $shopService->getAllShops();
-
-        if (empty($shops)) {
-            return $methods;
-        }
-
-        foreach($shops as $shop) {
-            try {
-                $mollieApiClient = $mollieApiFactory->create($shop->getId());
-
-                $activeMethods = $mollieApiClient->methods->allActive(
-                    [
-                        'resource' => 'orders',
-                        'includeWallets' => 'applepay',
-                    ]
-                );
-
-                foreach ($activeMethods->getArrayCopy() as $method) {
-                    $methodIsInArray = !empty(array_filter($methods, static function ($item) use ($method) {
-                        return $item->id === $method->id;
-                    }));
-
-                    if ($methodIsInArray) {
-                        continue;
-                    }
-
-                    $methods[] = $method;
-                }
-            } catch (Exception $e) {
-                $this->logger->error(
-                    sprintf('Error when loading active payment methods from Mollie for shop %s', $shop->getName()),
-                    [
-                        'error' => $e->getMessage(),
-                    ]
-                );
-            }
-        }
-
-        return $methods;
     }
 
     /**
