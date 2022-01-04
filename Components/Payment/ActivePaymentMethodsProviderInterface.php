@@ -7,11 +7,10 @@ use Shopware\Models\Shop\DetachedShop;
 interface ActivePaymentMethodsProviderInterface
 {
     /**
-     * @param string $value
-     * @param string $currency
+     * @param array $parameters
      * @param DetachedShop[] $shops
      *
      * @return mixed
      */
-    public function getActivePaymentMethodsFromMollie($value = '', $currency = '', $shops = []);
+    public function getActivePaymentMethodsFromMollie($parameters = [], $shops = []);
 }

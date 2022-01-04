@@ -26,13 +26,12 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
     /**
      * Returns a collection of active payment methods from the Mollie API.
      *
-     * @param string|null $value
-     * @param string|null $currency
+     * @param array $parameters
      * @param DetachedShop[]|null $shops
      *
      * @return array
      */
-    public function getActivePaymentMethodsFromMollie($value = '', $currency = '', $shops = [])
+    public function getActivePaymentMethodsFromMollie($parameters = [], $shops = [])
     {
         $methods = [];
         $mollieApiFactory = new MollieApiFactory($this->config, $this->logger);
@@ -45,19 +44,15 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
             try {
                 $mollieApiClient = $mollieApiFactory->create($shop->getId());
 
-                $params = [
-                    'resource' => 'orders',
-                    'includeWallets' => 'applepay',
-                ];
-
-                if ($value !== '' && $currency !== '') {
-                    $params['amount'] = [
-                        'value' => (string) $value,
-                        'currency' => $currency,
-                    ];
+                if (!in_array('resource', $parameters, true)) {
+                    $parameters['resource'] = 'orders';
                 }
 
-                $activeMethods = $mollieApiClient->methods->allActive($params);
+                if (!in_array('includeWallets', $parameters, true)) {
+                    $parameters['includeWallets'] = 'applepay';
+                }
+
+                $activeMethods = $mollieApiClient->methods->allActive($parameters);
 
                 foreach ($activeMethods->getArrayCopy() as $method) {
                     $methodIsInArray = !empty(array_filter($methods, static function ($item) use ($method) {

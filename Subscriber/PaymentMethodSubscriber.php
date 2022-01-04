@@ -5,6 +5,7 @@ namespace MollieShopware\Subscriber;
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Enlight_View;
+use Exception;
 use Mollie\Api\Resources\Method;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
@@ -45,14 +46,14 @@ class PaymentMethodSubscriber implements SubscriberInterface
 
     /**
      * @param Enlight_Event_EventArgs $args
-     * @throws \Exception
+     * @throws Exception
      */
     public function onFrontendCheckoutPostDispatch(\Enlight_Event_EventArgs $args)
     {
         $actionName = $args->getRequest()->getActionName();
         $config = $this->mollieShopSwitcher->getConfig(Shopware()->Shop()->getId());
 
-        if ($actionName !== 'shippingPayment' && $actionName !== 'confirm' && $config->isTestmodeActive() !== false) {
+        if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
         }
 
@@ -66,50 +67,59 @@ class PaymentMethodSubscriber implements SubscriberInterface
             return;
         }
 
+        # get all active and available payment methods for a certain amount from Mollie
         $availableMethods = $this->getActivePaymentMethodsProvider($config)->getActivePaymentMethodsFromMollie(
-            number_format($value, 2),
-            $currency,
+            [
+                'amount' => [
+                    'value' => number_format($value, 2),
+                    'currency' => $currency,
+                ]
+            ],
             [Shopware()->Shop()]
         );
 
-        $availableMethods = $this->filterSupportedMethod($availableMethods);
-
-        if (empty($availableMethods)) {
-            return;
-        }
-
-        # remove our voucher if no valid product
-        # has been found in the current cart.
-        $sPayments = $view->getAssign('sPayments');
-        $sPayments = $this->removeUnavailablePaymentMethods(
-            $this->filterIdsFromPaymentMethodArray($availableMethods),
-            $sPayments
-        );
-
-        $view->assign('sPayments', $sPayments);
+        # remove unavailable payment methods from the checkout view
+        $this->removeUnavailablePaymentMethods($view, $availableMethods);
     }
 
     /**
-     * @param array $availablePaymentMethodIds
-     * @param array|null $sPayments
-     * @return array|null
+     * @param Enlight_View $view
+     * @param array $paymentMethods
+     * @return void
      */
-    private function removeUnavailablePaymentMethods($availablePaymentMethodIds, $sPayments)
+    public function removeUnavailablePaymentMethods(Enlight_View $view, array $paymentMethods)
     {
-        if ($sPayments === null) {
-            return $sPayments;
+        # filter payment methods
+        $paymentMethods = $this->filterSupportedMethods($paymentMethods);
+        $paymentMethodIds = $this->filterIdsFromPaymentMethodArray($paymentMethods);
+
+        if (empty($paymentMethodIds)) {
+            return;
+        }
+
+        # get all payment methods assigned to the checkout
+        $sPayments = $view->getAssign('sPayments');
+
+        if (!is_array($sPayments)) {
+            return;
         }
 
         foreach ($sPayments as $index => $payment) {
+            # skip payment method if it's not a Mollie payment method
+            if (strpos($payment['name'], MollieShopware::PAYMENT_PREFIX) === false) {
+                continue;
+            }
+
+            # get the id of the payment method without the prefix
             $id = substr($payment['name'], strlen(MollieShopware::PAYMENT_PREFIX));
 
-            if (!in_array($id, $availablePaymentMethodIds, true)) {
+            # remove the payment method if it's not part of the available payment methods
+            if (!in_array($id, $paymentMethodIds, true)) {
                 unset($sPayments[$index]);
-                break;
             }
         }
 
-        return $sPayments;
+        $view->assign('sPayments', $sPayments);
     }
 
     /**
@@ -132,7 +142,7 @@ class PaymentMethodSubscriber implements SubscriberInterface
      * @param array $paymentMethods
      * @return array
      */
-    private function filterSupportedMethod(array $paymentMethods)
+    private function filterSupportedMethods(array $paymentMethods)
     {
         return array_filter($paymentMethods, static function (Method $paymentMethod) {
             return in_array($paymentMethod->id, PaymentMethodsInstaller::getSupportedPaymentMethods(), true);
