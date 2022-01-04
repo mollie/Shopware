@@ -21,6 +21,7 @@ Once the onboarding process in your Mollie account is completed, start accepting
 
 
 
+
 ## Manual Installation
 
 There are 2 ways of installing the plugin manually:

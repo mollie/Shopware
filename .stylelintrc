@@ -3,7 +3,10 @@
     "plugins": [
         "stylelint-less"
     ],
-    "ignoreFiles": [],
+    "ignoreFiles": [
+        "Resources/views/frontend/_public/src/less/checkout.less",
+        "Resources/views/frontend/_public/src/less/components.less"
+    ],
     "rules": {
         "indentation": 4,
         "color-hex-case": "lower",

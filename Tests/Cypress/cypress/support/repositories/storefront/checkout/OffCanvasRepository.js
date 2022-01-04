@@ -21,7 +21,7 @@ export default class OffCanvasRepository {
      * @returns {*}
      */
     getApplePayDirectContainer() {
-        return cy.get('.apple-pay--container--ajax-cart');
+        return cy.get('.apple-pay-container-ajax-cart');
     }
 
 }
