@@ -696,14 +696,14 @@
 
 
         <element type="select" scope="shop">
-            <name>hide_unavailable_payment_methods</name>
-            <label lang="en">Hide unavailable payment methods</label>
-            <label lang="de">Nicht verfügbare Zahlungsarten verstecken</label>
-            <label lang="nl-NL">Niet beschikbare betaalmethoden verbergen</label>
-            <label lang="es-ES">Ocultar métodos de pago no disponibles</label>
-            <label lang="fr-FR">Masquer les modes de paiement non disponibles</label>
-            <label lang="it-IT">Nascondi metodi di pagamento non disponibili</label>
-            <value>yes</value>
+            <name>use_mollie_payment_method_limits</name>
+            <label lang="en">Use Mollie payment method limits</label>
+            <label lang="de">Verwenden Sie die Limits der Mollie-Zahlungsarten</label>
+            <label lang="nl-NL">Gebruik Mollie's betaalmethodelimieten</label>
+            <label lang="es-ES">Utilice los límites de los métodos de pago de Mollie</label>
+            <label lang="fr-FR">Utiliser les limites des modes de paiement Mollie</label>
+            <label lang="it-IT">Utilizza i limiti del metodo di pagamento Mollie</label>
+            <value>no</value>
             <description lang="en">Automatically hides payment methods in the checkout based on the limits of Mollie. For instance, if you can only accept credit card payments up to 500 euros, the checkout for a cart of 600 euros will not display credit card as a payment method.</description>
             <description lang="de">Blendet automatisch Zahlungsarten im Checkout basierend auf den Limits von Mollie aus. Wenn Sie beispielsweise nur Kreditkartenzahlungen bis zu 500 Euro akzeptieren können, wird an der Kasse für einen Warenkorb von 600 Euro keine Kreditkarte als Zahlungsarte angezeigt.</description>
             <description lang="es-ES">Oculta automáticamente los métodos de pago en la caja según los límites de Mollie. Por ejemplo, si solo puede aceptar pagos con tarjeta de crédito de hasta 500 euros, no se mostrará ninguna tarjeta de crédito como método de pago en la caja para un carrito de la compra de 600 euros.</description>

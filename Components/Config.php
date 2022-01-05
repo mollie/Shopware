@@ -362,9 +362,9 @@ class Config implements ConfigInterface
     /**
      * @return bool
      */
-    public function hideUnavailablePaymentMethods()
+    public function useMolliePaymentMethodLimits()
     {
-        return ($this->get('hide_unavailable_payment_methods', 'no') === 'yes');
+        return ($this->get('use_mollie_payment_method_limits', 'no') === 'yes');
     }
 
     /**

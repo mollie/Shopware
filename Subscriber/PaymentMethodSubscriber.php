@@ -48,10 +48,15 @@ class PaymentMethodSubscriber implements SubscriberInterface
      * @param Enlight_Event_EventArgs $args
      * @throws Exception
      */
-    public function onFrontendCheckoutPostDispatch(\Enlight_Event_EventArgs $args)
+    public function onFrontendCheckoutPostDispatch(Enlight_Event_EventArgs $args)
     {
+        $shop = Shopware()->Shop();
         $actionName = $args->getRequest()->getActionName();
-        $config = $this->mollieShopSwitcher->getConfig(Shopware()->Shop()->getId());
+        $config = $shop ? $this->mollieShopSwitcher->getConfig($shop->getId()) : null;
+
+        if (!$config || !$config->useMolliePaymentMethodLimits()) {
+            return;
+        }
 
         if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
@@ -75,7 +80,7 @@ class PaymentMethodSubscriber implements SubscriberInterface
                     'currency' => $currency,
                 ]
             ],
-            [Shopware()->Shop()]
+            [$shop]
         );
 
         # remove unavailable payment methods from the checkout view
