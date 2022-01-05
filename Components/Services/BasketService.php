@@ -22,6 +22,10 @@ use Zend_Db_Adapter_Exception;
 
 class BasketService
 {
+
+    const MODE_PREMIUM = 1;
+    const MODE_VOUCHER = 2;
+
     /** @var Config $config */
     protected $config;
 
@@ -95,10 +99,11 @@ class BasketService
                 $commentText = "The payment on this order failed, the customer is retrying. ";
 
                 // iterate over products and add them to the basket
+                /** @var Detail $orderDetail */
                 foreach ($orderDetails as $orderDetail) {
                     $result = null;
 
-                    if ($orderDetail->getMode() == 2) {
+                    if ($orderDetail->getMode() == self::MODE_VOUCHER) {
                         // get voucher from database
                         $voucher = $this->getVoucherById($orderDetail->getArticleId());
 
@@ -117,18 +122,33 @@ class BasketService
                             $order->setInvoiceAmount($order->getInvoiceAmount() - $orderDetail->getPrice());
                         }
                     } else {
+
                         $attributes = $orderDetail->getAttribute();
+
                         // if swagCustomProductsConfigurationHash exists for orderDetail restore it in request
                         if (property_exists($attributes, 'swagCustomProductsConfigurationHash')) {
                             $customProductsHash = $attributes->getSwagCustomProductsConfigurationHash();
                             $this->container->get('front')->Request()->setParam('customProductsHash', $customProductsHash);
                         }
 
-                        // add product to basket
-                        $id = $this->basketModule->sAddArticle(
-                            $orderDetail->getArticleNumber(),
-                            $orderDetail->getQuantity()
-                        );
+                        if ((int)$orderDetail->getMode() === self::MODE_PREMIUM) {
+                            # we must not add free premium articles like other products
+                            # otherwise they would get a price.
+                            # in this case we have to use the separate function and also do a small hack before it.
+                            # we set the sAddPremium parameter with our article number, then the premium function
+                            # will make sure to add the free product if allowed.
+                            Shopware()->Front()->Request()->setQuery('sAddPremium', $orderDetail->getArticleNumber());
+                            $id = $this->basketModule->sInsertPremium();
+
+                        } else {
+
+                            # product is nothing special, ordinary one
+                            # so just add it to our new cart
+                            $id = $this->basketModule->sAddArticle(
+                                $orderDetail->getArticleNumber(),
+                                $orderDetail->getQuantity()
+                            );
+                        }
 
                         if (is_int($id)) {
                             // set attributes
