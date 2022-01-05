@@ -243,7 +243,7 @@ class Config implements ConfigInterface
      */
     public function isPaymentStatusMailEnabled()
     {
-        return $this->get('send_status_mail', 'no') == 'yes';
+        return $this->get('send_status_mail', 'no') === 'yes';
     }
 
     /**
@@ -253,7 +253,7 @@ class Config implements ConfigInterface
      */
     public function autoResetStock()
     {
-        return $this->get('auto_reset_stock', 'no') == 'yes';
+        return $this->get('auto_reset_stock', 'no') === 'yes';
     }
 
     /**
@@ -269,7 +269,7 @@ class Config implements ConfigInterface
      */
     public function getPaymentMethodsType()
     {
-        $oldConfigUsePaymentsAPI = ($this->get('orders_api_only_where_mandatory', 'yes') == 'yes');
+        $oldConfigUsePaymentsAPI = ($this->get('orders_api_only_where_mandatory', 'yes') === 'yes');
 
         $newConfig = $this->get('payment_method', null);
 
@@ -357,6 +357,14 @@ class Config implements ConfigInterface
     public function getShippedStatus()
     {
         return $this->get('klarna_shipped_status', null);
+    }
+
+    /**
+     * @return bool
+     */
+    public function hideUnavailablePaymentMethods()
+    {
+        return ($this->get('hide_unavailable_payment_methods', 'no') === 'yes');
     }
 
     /**

@@ -6,12 +6,12 @@ use Enlight_Template_Manager;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Method;
 use MollieShopware\Components\Constants\PaymentMethod;
-use MollieShopware\MollieShopware;
-use MollieShopware\Tests\PHPUnit\Utils\Fakes\View\FakeView;
-use Psr\Log\LoggerInterface;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
+use MollieShopware\MollieShopware;
 use MollieShopware\Subscriber\PaymentMethodSubscriber;
+use MollieShopware\Tests\PHPUnit\Utils\Fakes\View\FakeView;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class PaymentMethodSubscriberTest extends TestCase
 {
