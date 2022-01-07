@@ -6,6 +6,11 @@
 
     <services>
 
+        <service id="mollie_shopware.command.apple_pay_download_command" class="MollieShopware\Command\ApplePayDownloadCommand" public="true">
+            <tag name="console.command" command="mollie:applepay:download-verification"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
         <service id="mollie_shopware.klarna_shipping_command" class="MollieShopware\Command\KlarnaShippingCommand" public="true">
             <tag name="console.command" command="mollie:ship:klarna"/>
             <argument type="service" id="mollie_shopware.config"/>
