@@ -171,6 +171,7 @@ jobs:
     name: Integration Tests | Shopware ${{ matrix.shopware }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         shopware: [ '5.7.0' ]
     steps:
@@ -232,6 +233,7 @@ jobs:
     needs: snippets
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - shopware: '5.7.7'
