@@ -21,7 +21,7 @@ export default class PDPRepository {
      * @returns {*}
      */
     getApplePayDirectContainer() {
-        return cy.get('.apple-pay--container--detail');
+        return cy.get('.apple-pay-container--detail');
     }
 
 }
