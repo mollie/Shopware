@@ -44,7 +44,7 @@ const payments = [
     {key: 'ideal', name: 'iDEAL'},
     {key: 'sofort', name: 'SOFORT'},
     {key: 'eps', name: 'eps'},
-    {key: 'giropay', name: 'Giropay'},
+    {key: 'giropay', name: 'giropay'},
     {key: 'mistercash', name: 'Bancontact'},
     {key: 'przelewy24', name: 'Przelewy24'},
     {key: 'kbc', name: 'KBC'},
