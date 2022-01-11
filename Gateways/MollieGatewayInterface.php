@@ -45,6 +45,12 @@ interface MollieGatewayInterface
     public function getIdealIssuers();
 
     /**
+     * @param array $requestData
+     * @return Order
+     */
+    public function createOrder(array $requestData);
+
+    /**
      * @param $mollieId
      * @param $orderNumber
      * @return mixed

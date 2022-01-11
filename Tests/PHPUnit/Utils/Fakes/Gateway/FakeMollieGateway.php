@@ -151,6 +151,14 @@ class FakeMollieGateway implements MollieGatewayInterface
     }
 
     /**
+     * @param array $requestData
+     * @return Order|void
+     */
+    public function createOrder(array $requestData)
+    {
+    }
+
+    /**
      * @param $paymentId
      * @param $description
      */
