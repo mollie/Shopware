@@ -75,7 +75,8 @@ class TransactionItemBuilder
                 # then we always have to use the NET price as it is.
                 # it could be that the unitPrice is still a gross price...
                 # i cannot reproduce this, but it works with this approach.
-                $mollieItemPrice = $netPrice;
+                # we also have to round for higher quantities (tested in a merchant shop).
+                $mollieItemPrice = round($netPrice, 2);
             }
 
         } else {
