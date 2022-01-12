@@ -74,7 +74,7 @@ class TotalAmountTest extends TestCase
      * We have a net priced article with a high quantity.
      * In this case, we also test the correct rounding for the total amount.
      */
-    public function testTotalAmountWithNetPrice()
+    public function testTotalAmountWithNetPriceHighQuantity()
     {
         $taxMode = new TaxMode(true);
         $builder = new TransactionItemBuilder($taxMode, false);
@@ -87,6 +87,35 @@ class TotalAmountTest extends TestCase
         $item = $builder->buildTransactionItem($transaction, $basketItem);
 
         $this->assertEquals(1319.47, $item->getTotalAmount());
+    }
+
+    /**
+     * This test verifies our total sum for tax free countries.
+     * It's important that we do not charge taxes.
+     * Our price is originally based on a gross price, this means that the calculated NET price
+     * from Shopware has more than 2 decimals.
+     * Also, the cart quantity needs to be a high number, otherwise the rounding isn't tested.
+     */
+    public function testTotalAmountWithNetPriceHighQuantityAndDecimals()
+    {
+        $taxMode = new TaxMode(false);
+        $builder = new TransactionItemBuilder($taxMode, false);
+
+        # create an item with a calculated NET prices
+        # that has multiple decimals and also a high quantity
+        $basketItem = $this->itemFixtures->buildProductItemNet(11.9626, 6, 7);
+
+
+        # mark our item as NET line item
+        $basketItem->setIsGrossPrice(false);
+
+        $transaction = new Transaction();
+        $transaction->setId(15);
+
+        $item = $builder->buildTransactionItem($transaction, $basketItem);
+
+        # this is the sum of round(11.9626) * 6 quantity = 71.76
+        $this->assertEquals(71.76, $item->getTotalAmount());
     }
 
 }
