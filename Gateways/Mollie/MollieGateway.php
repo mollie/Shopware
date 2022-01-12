@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Gateways\Mollie;
 
+use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
@@ -9,6 +10,7 @@ use Mollie\Api\Resources\Profile;
 use Mollie\Api\Resources\Shipment;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
+use MollieShopware\Gateways\Mollie\Exceptions\InvalidOrderAmountException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 
@@ -137,6 +139,30 @@ class MollieGateway implements MollieGatewayInterface
         }
 
         return $issuers;
+    }
+
+    /**
+     * @param array $requestData
+     * @return Order
+     * @throws ApiException
+     * @throws InvalidOrderAmountException
+     */
+    public function createOrder(array $requestData)
+    {
+        try {
+
+            return $this->apiClient->orders->create($requestData);
+
+        } catch (ApiException $ex) {
+
+            # we need custom exceptions for some errors
+            # because they need a custom handling
+            if (strpos($ex->getMessage(), 'The amount contains an invalid value') !== false) {
+                throw new InvalidOrderAmountException($ex);
+            }
+
+            throw $ex;
+        }
     }
 
     /**
