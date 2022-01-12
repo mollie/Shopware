@@ -277,6 +277,16 @@ class Payment extends BaseResource
     public $applicationFee;
 
     /**
+     * An optional routing configuration which enables you to route a successful payment,
+     * or part of the payment, to one or more connected accounts. Additionally, you can
+     * schedule (parts of) the payment to become available on the connected account on a
+     * future date.
+     *
+     * @var \array|null
+     */
+    public $routing;
+
+    /**
      * The date and time the payment became authorized, in ISO 8601 format. This
      * parameter is omitted if the payment is not authorized (yet).
      *
@@ -487,6 +497,31 @@ class Payment extends BaseResource
     }
 
     /**
+     * Get the total amount that was charged back for this payment. Only available when the
+     * total charged back amount is not zero.
+     *
+     * @return float
+     */
+    public function getAmountChargedBack()
+    {
+        if ($this->amountChargedBack) {
+            return (float)$this->amountChargedBack->value;
+        }
+
+        return 0.0;
+    }
+
+    /**
+     * Does the payment have split payments
+     *
+     * @return bool
+     */
+    public function hasSplitPayments()
+    {
+        return ! empty($this->routing);
+    }
+
+    /**
      * Retrieves all refunds associated with this payment
      *
      * @return RefundCollection
@@ -516,6 +551,7 @@ class Payment extends BaseResource
      * @param array $parameters
      *
      * @return Refund
+     * @throws ApiException
      */
     public function getRefund($refundId, array $parameters = [])
     {
@@ -526,6 +562,7 @@ class Payment extends BaseResource
      * @param array $parameters
      *
      * @return Refund
+     * @throws ApiException
      */
     public function listRefunds(array $parameters = [])
     {
@@ -562,6 +599,7 @@ class Payment extends BaseResource
      * @param array $parameters
      *
      * @return Capture
+     * @throws ApiException
      */
     public function getCapture($captureId, array $parameters = [])
     {
@@ -604,6 +642,7 @@ class Payment extends BaseResource
      * @param array $parameters
      *
      * @return Chargeback
+     * @throws ApiException
      */
     public function getChargeback($chargebackId, array $parameters = [])
     {
@@ -644,6 +683,10 @@ class Payment extends BaseResource
         );
     }
 
+    /**
+     * @return \Mollie\Api\Resources\BaseResource
+     * @throws \Mollie\Api\Exceptions\ApiException
+     */
     public function update()
     {
         $body = [

@@ -8,7 +8,7 @@
     ],
     "homepage": "https://www.mollie.com",
     "require": {
-        "mollie/mollie-api-php": "2.37.1"
+        "mollie/mollie-api-php": "2.39.0"
     },
     "require-dev": {
         "phpunit/phpunit": "*",
