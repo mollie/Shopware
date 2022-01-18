@@ -18,6 +18,7 @@ class FrontendViewSubscriber implements SubscriberInterface
             'Enlight_Controller_Action_PreDispatch' => 'addComponentsVariables',
             'Enlight_Controller_Action_PreDispatch_Frontend' => 'addViewDirectory',
             'Enlight_Controller_Action_PreDispatch_Frontend_Checkout' => 'getController',
+            'Enlight_Controller_Action_PreDispatch_Frontend_Detail' => 'getController',
             'Theme_Compiler_Collect_Plugin_Javascript' => 'onCollectJavascript',
             'Theme_Compiler_Collect_Plugin_Less' => 'onCollectLess',
         ];
@@ -113,6 +114,15 @@ class FrontendViewSubscriber implements SubscriberInterface
             $session->mollieStatusError = null;
             $session->mollieError = null;
         }
+
+        # assigned already translated texts to the view
+        if ($session !== null && $view !== null && $session->offsetGet('mollieErrorMessage')) {
+            // assign errors to view
+            $view->assign('sMollieErrorMessage', $session->offsetGet('mollieErrorMessage'));
+            // unset error, so it won't show up on next page view
+            $session->mollieErrorMessage = null;
+        }
+
     }
 
     /**

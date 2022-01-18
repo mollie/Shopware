@@ -61,6 +61,25 @@ trait RedirectTrait
 
     /**
      * @param \Enlight_Controller_Action $controller
+     * @param int $articleID
+     * @param string $errorMessage
+     * @throws \Exception
+     */
+    protected function redirectToPDPWithError(\Enlight_Controller_Action $controller, $articleID, $errorMessage)
+    {
+        Shopware()->Session()->offsetSet('mollieErrorMessage', $errorMessage);
+
+        $url = $controller->Front()->Router()->assemble([
+            'controller' => 'detail',
+            'action' => 'index',
+            'sArticle' => $articleID,
+        ]);
+
+        $controller->redirect($url);
+    }
+
+    /**
+     * @param \Enlight_Controller_Action $controller
      * @param $uniqueId
      * @throws \Exception
      */

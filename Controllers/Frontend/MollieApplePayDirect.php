@@ -2,6 +2,7 @@
 
 use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\Components\Account\Account;
+use MollieShopware\Components\Account\Exception\RegistrationMissingFieldException;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectFactory;
 use MollieShopware\Components\ApplePayDirect\ApplePayDirectHandlerInterface;
 use MollieShopware\Components\ApplePayDirect\Models\UserData\UserData;
@@ -13,12 +14,14 @@ use MollieShopware\Components\Country\CountryIsoParser;
 use MollieShopware\Components\Order\OrderAddress;
 use MollieShopware\Components\Order\OrderSession;
 use MollieShopware\Components\Shipping\Shipping;
+use MollieShopware\Components\Translation\FrontendTranslation;
 use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\RiskManagementBlockedException;
 use MollieShopware\Traits\Controllers\RedirectTrait;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContext;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\CSRFWhitelistAware;
+use Shopware\Models\Article\Detail;
 
 class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Controllers_Frontend_Checkout implements CSRFWhitelistAware
 {
@@ -81,6 +84,16 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     private $config;
 
+    /**
+     * @var \Shopware\Models\Detail\Repository
+     */
+    private $repoArticles;
+
+    /**
+     * @var FrontendTranslation
+     */
+    private $translation;
+
 
     /**
      * @return string[]
@@ -112,6 +125,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
         $this->orderSession = Shopware()->Container()->get('mollie_shopware.components.order_session');
         $this->account = Shopware()->Container()->get('mollie_shopware.components.account.account');
         $this->basketSnapshot = Shopware()->Container()->get('mollie_shopware.components.basket_snapshot.basket_snapshot');
+        $this->translation = Shopware()->Container()->get('mollie_shopware.components.translation.frontend');
 
         $this->config = Shopware()->Container()->get('mollie_shopware.config');
 
@@ -121,6 +135,8 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
         /** @var ApplePayDirectFactory $applePayFactory */
         $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
         $this->handlerApplePay = $applePayFactory->createHandler();
+
+        $this->repoArticles = Shopware()->Models()->getRepository(Detail::class);
     }
 
     /**
@@ -427,6 +443,9 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     public function startPaymentAction()
     {
+        /** @var Detail|null $article */
+        $article = null;
+
         try {
             $this->loadServices();
 
@@ -439,6 +458,8 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $zipcode = $this->Request()->getParam('postalCode', '');
             $city = $this->Request()->getParam('city', '');
             $countryCode = $this->Request()->getParam('countryCode', '');
+            $phone = $this->Request()->getParam('phone', '');
+            $productNumber = $this->Request()->getParam('productNumber', '');
 
             /** @var array $country */
             $country = $this->getCountry($countryCode);
@@ -447,6 +468,15 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 throw new Exception('No Country found for code ' . $countryCode);
             }
 
+            # search for our product
+            # if that is not found, then we have a problem anyway
+            $articles = $this->repoArticles->findBy(['number' => $productNumber]);
+
+            if (count($articles) <= 0) {
+                throw new Exception('Article with number: ' . $productNumber . ' not found!');
+            }
+
+            $article = array_shift($articles);
 
             # now check if we are already signed in
             # if so, then we can just continue, because sessions are already set.
@@ -460,7 +490,8 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                     $street,
                     $zipcode,
                     $city,
-                    $country['id']
+                    $country['id'],
+                    $phone
                 );
 
                 $this->account->loginAccount($email);
@@ -508,20 +539,47 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                     'action' => 'finishPayment',
                 ]
             );
+        } catch (RegistrationMissingFieldException $ex) {
+
+            $this->logger->warning(
+                'Apple Pay Direct Guest Account registration failed',
+                [
+                    'error' => $ex->getMessage(),
+                    'missing' => $ex->getField(),
+                ]
+            );
+
+            # now get our snippet translation for our error
+            $errorMessage = $this->translation->getWithPlaceholder(FrontendTranslation::REGISTRATION_MISSING_FIELD, $ex->getField());
+
+            # finally redirect the user to the PDP page
+            # we don't even have a user and a cart, so we cannot even continue
+            $this->redirectToPDPWithError($this, $article->getId(), $errorMessage);
+
+        } catch (RiskManagementBlockedException $ex) {
+
+            $this->logger->notice(
+                'Apple Pay Direct checkout blocked due to Risk Management',
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
+
+            # we do have at least a guest user and a cart,
+            # so redirect to the checkout page to increase the chance of
+            # finishing the order ;)
+            $this->redirectToShopwareCheckoutFailedWithError($this, $this->ERROR_PAYMENT_FAILED_RISKMANAGEMENT);
+
         } catch (\Exception $ex) {
 
-            if ($ex instanceof RiskManagementBlockedException) {
+            $this->logger->error(
+                'Error starting Mollie Apple Pay Direct payment',
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
 
-                $this->logger->notice('Apple Pay Direct checkout blocked due to Risk Management', ['error' => $ex->getMessage()]);
-
-                $this->redirectToShopwareCheckoutFailedWithError($this, $this->ERROR_PAYMENT_FAILED_RISKMANAGEMENT);
-
-            } else {
-
-                $this->logger->error('Error starting Mollie Apple Pay Direct payment', ['error' => $ex->getMessage()]);
-
-                $this->redirectToShopwareCheckoutFailed($this);
-            }
+            $this->redirectToShopwareCheckoutFailed($this);
         }
     }
 
@@ -534,7 +592,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $this->loadServices();
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
-
 
             /** @var UserData|null $userData */
             $userData = $this->handlerApplePay->getUserData();

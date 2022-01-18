@@ -35,17 +35,24 @@ class ApplePayButton
      */
     private $restrictionIds;
 
+    /**
+     * @var bool
+     */
+    private $requirePhoneNumber;
+
 
     /**
      * @param bool $active
      * @param string $country
      * @param string $currency
+     * @param bool $requirePhoneNumber
      */
-    public function __construct($active, $country, $currency)
+    public function __construct($active, $country, $currency, $requirePhoneNumber)
     {
         $this->active = $active;
         $this->country = $country;
         $this->currency = $currency;
+        $this->requirePhoneNumber = $requirePhoneNumber;
 
         $this->displayOption = [];
         $this->restrictionIds = [];
@@ -93,6 +100,9 @@ class ApplePayButton
             'country' => $this->country,
             'currency' => $this->currency,
             'itemMode' => $this->isItemMode(),
+            'requirements' => [
+                'phone' => $this->requirePhoneNumber,
+            ],
             'displayOptions' => [],
         ];
 
