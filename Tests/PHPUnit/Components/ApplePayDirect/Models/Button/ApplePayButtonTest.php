@@ -14,7 +14,7 @@ class ApplePayButtonTest extends TestCase
      */
     public function testItemModeOff()
     {
-        $button = new ApplePayButton(true, 'NL', 'EUR');
+        $button = new ApplePayButton(true, 'NL', 'EUR', false);
 
         $this->assertEquals(false, $button->isItemMode());
     }
@@ -25,7 +25,7 @@ class ApplePayButtonTest extends TestCase
      */
     public function testItemModeOn()
     {
-        $button = new ApplePayButton(true, 'NL', 'EUR');
+        $button = new ApplePayButton(true, 'NL', 'EUR', false);
         $button->setItemMode('ABC');
 
         $this->assertEquals(true, $button->isItemMode());
@@ -39,7 +39,7 @@ class ApplePayButtonTest extends TestCase
      */
     public function testFormatButton()
     {
-        $button = new ApplePayButton(true, 'NL', 'EUR');
+        $button = new ApplePayButton(true, 'NL', 'EUR', false);
         $button->setItemMode('ABC');
 
         $expected = [
@@ -49,8 +49,23 @@ class ApplePayButtonTest extends TestCase
             'itemMode' => true,
             'addNumber' => 'ABC',
             'displayOptions' => [],
+            'requirements' => [
+                'phone' => false,
+            ],
         ];
 
         $this->assertEquals($expected, $button->toArray());
     }
+
+    /**
+     * This test verifies that we also ask for the
+     * phone number if required
+     */
+    public function testPhoneNumberRequired()
+    {
+        $button = new ApplePayButton(true, 'NL', 'EUR', true);
+
+        $this->assertEquals(true, $button->toArray()['requirements']['phone']);
+    }
+
 }

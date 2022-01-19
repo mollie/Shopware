@@ -68,7 +68,7 @@ pr: ## Prepares everything for a Pull Request
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
 	@make phpcheck -B
 	@make phpmin -B
-	@make test -B
+	@make phpunit -B
 	@make stan -B
 	@make jest -B
 	@make eslint -B

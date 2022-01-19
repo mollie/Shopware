@@ -180,5 +180,9 @@
             <argument type="service" id="dbal_connection"/>
         </service>
 
+        <service id="mollie_shopware.components.translation.frontend" class="MollieShopware\Components\Translation\FrontendTranslation" public="true">
+            <argument type="service" id="snippets"/>
+        </service>
+
     </services>
 </container>

@@ -2,13 +2,16 @@
 
 namespace MollieShopware\Components\Account;
 
+use MollieShopware\Components\Account\Exception\RegistrationMissingFieldException;
 use MollieShopware\Components\Account\Gateway\GuestAccountGatewayInterface;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use Shopware\Components\Api\Exception\ValidationException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Password\Manager;
 use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
 use Shopware_Components_Config;
+use Symfony\Component\Validator\ConstraintViolation;
 use Throwable;
 
 class Account
@@ -50,13 +53,7 @@ class Account
      * @param GuestAccountGatewayInterface $gwGuestCustomer
      * @param ModelManager $modelManager
      */
-    public function __construct(
-        \Enlight_Components_Session_Namespace $session,
-        Manager $pwdEncoder,
-        GuestAccountGatewayInterface $gwGuestCustomer,
-        ModelManager $modelManager,
-        Shopware_Components_Config $config
-    )
+    public function __construct(\Enlight_Components_Session_Namespace $session, Manager $pwdEncoder, GuestAccountGatewayInterface $gwGuestCustomer, ModelManager $modelManager, Shopware_Components_Config $config)
     {
         # attention, modules doesnt exist in CLI
         $this->admin = Shopware()->Modules()->sAdmin();
@@ -103,58 +100,78 @@ class Account
      * @param string $zip
      * @param string $city
      * @param int $countryID
+     * @param string $phone
      *
      * @throws \Enlight_Exception
+     * @throws RegistrationMissingFieldException
      */
-    public function createGuestAccount($email, $firstname, $lastname, $street, $zip, $city, $countryID)
+    public function createGuestAccount($email, $firstname, $lastname, $street, $zip, $city, $countryID, $phone)
     {
-        $data['auth']['accountmode'] = '1';
+        try {
+            $data['auth']['accountmode'] = '1';
 
-        $data['auth']['email'] = $email;
-        $data['auth']['password'] = $email; # just use email for this
-        $data['auth']['passwordMD5'] = $this->gwGuestCustomer->getPasswordMD5($email);
+            $data['auth']['email'] = $email;
+            $data['auth']['password'] = $email; # just use email for this
+            $data['auth']['passwordMD5'] = $this->gwGuestCustomer->getPasswordMD5($email);
 
-        $data['billing']['company'] = '';
-        $data['billing']['salutation'] = 'mr';
-        $data['billing']['firstname'] = $firstname;
-        $data['billing']['lastname'] = $lastname;
-        $data['billing']['customer_type'] = 'private';
-        $data['billing']['department'] = '';
+            $data['billing']['company'] = '';
+            $data['billing']['salutation'] = 'mr';
+            $data['billing']['firstname'] = $firstname;
+            $data['billing']['lastname'] = $lastname;
+            $data['billing']['customer_type'] = 'private';
+            $data['billing']['department'] = '';
 
-        $data['billing']['street'] = $street;
-        $data['billing']['streetnumber'] = '';
-        $data['billing']['zipcode'] = $zip;
-        $data['billing']['city'] = $city;
-        $data['billing']['stateID'] = '';
-        $data['billing']['country'] = $countryID;
+            $data['billing']['street'] = $street;
+            $data['billing']['streetnumber'] = '';
+            $data['billing']['zipcode'] = $zip;
+            $data['billing']['city'] = $city;
+            $data['billing']['stateID'] = '';
+            $data['billing']['country'] = $countryID;
 
-        $paymentMeanId = $this->gwGuestCustomer->getPaymentMeanId();
+            $data['billing']['phone'] = $phone;
 
-        $data['payment']['object'] = $this->gwGuestCustomer->getPaymentMeanById($paymentMeanId);
+            $paymentMeanId = $this->gwGuestCustomer->getPaymentMeanId();
 
-
-        $data['shipping'] = $data['billing'];
-
-        // First try login / Reuse apple pay account
-        $this->tryLogin($data['auth']);
+            $data['payment']['object'] = $this->gwGuestCustomer->getPaymentMeanById($paymentMeanId);
 
 
-        // Check login status
-        if ($this->admin->sCheckUser()) {
-            $this->gwGuestCustomer->updateShipping($this->session->offsetGet('sUserId'), $data['shipping']);
+            $data['shipping'] = $data['billing'];
 
-            $this->admin->sSYSTEM->_POST = ['sPayment' => $paymentMeanId];
-            $this->admin->sUpdatePayment();
-        } else {
-            $encoderName = $this->pwdEncoder->getDefaultPasswordEncoderName();
-            $data['auth']['encoderName'] = $encoderName;
-            $data['auth']['password'] = $this->pwdEncoder->getEncoderByName($encoderName)->encodePassword($data['auth']['password']);
-
-            $this->session->offsetSet('sRegisterFinished', false);
-
-            $this->gwGuestCustomer->saveUser($data['auth'], $data['shipping']);
-
+            // First try login / Reuse apple pay account
             $this->tryLogin($data['auth']);
+
+
+            // Check login status
+            if ($this->admin->sCheckUser()) {
+                $this->gwGuestCustomer->updateShipping($this->session->offsetGet('sUserId'), $data['shipping']);
+
+                $this->admin->sSYSTEM->_POST = ['sPayment' => $paymentMeanId];
+                $this->admin->sUpdatePayment();
+            } else {
+                $encoderName = $this->pwdEncoder->getDefaultPasswordEncoderName();
+                $data['auth']['encoderName'] = $encoderName;
+                $data['auth']['password'] = $this->pwdEncoder->getEncoderByName($encoderName)->encodePassword($data['auth']['password']);
+
+                $this->session->offsetSet('sRegisterFinished', false);
+
+                $this->gwGuestCustomer->saveUser($data['auth'], $data['shipping']);
+
+                $this->tryLogin($data['auth']);
+            }
+        } catch (ValidationException $ex) {
+
+            # somehow we are still signed in as guest
+            # so always make sure to completely logout
+            $this->admin->logout();
+
+            # now extract the field that leads to
+            # a constraint violation (propertyPath)
+            # just grab the first one, always existing as far as I know
+            /** @var ConstraintViolation $violation */
+            $violation = $ex->getViolations()[0];
+            $field = $violation->getPropertyPath();
+
+            throw new RegistrationMissingFieldException($field);
         }
     }
 

@@ -10,6 +10,7 @@
    data-amount="{$sMollieApplePayDirectButton.amount}"
    data-country="{$sMollieApplePayDirectButton.country}"
    data-currency="{$sMollieApplePayDirectButton.currency}"
+   data-requirephone="{$sMollieApplePayDirectButton.requirements.phone}"
         {if $sMollieApplePayDirectButton.itemMode}
             data-addproducturl="{url module=frontend controller="MollieApplePayDirect" action="addProduct" forceSecure}"
             data-productnumber="{$sMollieApplePayDirectButton.addNumber}"
