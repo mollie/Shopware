@@ -13,7 +13,7 @@ class MollieOrderRequestAnonymizer
 
 
     /**
-     * @param  $placeholder
+     * @param string $placeholder
      */
     public function __construct($placeholder)
     {
