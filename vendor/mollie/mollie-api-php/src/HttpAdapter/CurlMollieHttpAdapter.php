@@ -28,7 +28,7 @@ final class CurlMollieHttpAdapter implements MollieHttpAdapterInterface
      * @param string $url
      * @param array $headers
      * @param $httpBody
-     * @return \stdClass|void|null
+     * @return \stdClass|null
      * @throws \Mollie\Api\Exceptions\ApiException
      */
     public function send($httpMethod, $url, $headers, $httpBody)
