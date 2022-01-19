@@ -16,7 +16,7 @@ class MollieOrderRequestAnonymizerTest extends TestCase
      */
     public function testAnonymizeNull()
     {
-        $anonymizer = new MollieOrderRequestAnonymizer();
+        $anonymizer = new MollieOrderRequestAnonymizer('****');
 
         $requestData = [];
 
@@ -31,7 +31,7 @@ class MollieOrderRequestAnonymizerTest extends TestCase
      */
     public function testMissingKeys()
     {
-        $anonymizer = new MollieOrderRequestAnonymizer();
+        $anonymizer = new MollieOrderRequestAnonymizer('****');
 
         $requestData = [
             'zipcode' => 'ABC',
@@ -52,7 +52,7 @@ class MollieOrderRequestAnonymizerTest extends TestCase
      */
     public function testFullData()
     {
-        $anonymizer = new MollieOrderRequestAnonymizer();
+        $anonymizer = new MollieOrderRequestAnonymizer('****');
 
         $requestData = [
             'billingAddress' => [
@@ -75,20 +75,20 @@ class MollieOrderRequestAnonymizerTest extends TestCase
 
         $expected = [
             'billingAddress' => [
-                'organizationName' => '',
-                'streetAndNumber' => '',
-                'givenName' => '',
-                'familyName' => '',
-                'email' => '',
-                'phone' => '',
+                'organizationName' => '****',
+                'streetAndNumber' => '****',
+                'givenName' => '****',
+                'familyName' => '****',
+                'email' => '****',
+                'phone' => '****',
             ],
             'shippingAddress' => [
-                'organizationName' => '',
-                'streetAndNumber' => '',
-                'givenName' => '',
-                'familyName' => '',
-                'email' => '',
-                'phone' => '',
+                'organizationName' => '****',
+                'streetAndNumber' => '****',
+                'givenName' => '****',
+                'familyName' => '****',
+                'email' => '****',
+                'phone' => '****',
             ],
         ];
 
