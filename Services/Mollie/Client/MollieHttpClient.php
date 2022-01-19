@@ -148,10 +148,6 @@ class MollieHttpClient implements MollieHttpAdapterInterface
                 $message .= ". Documentation: {$body->_links->documentation->href}";
             }
 
-            if ($httpBody) {
-                $message .= ". Request body: {$httpBody}";
-            }
-
             throw new ApiException($message, $statusCode, $field);
         }
 
