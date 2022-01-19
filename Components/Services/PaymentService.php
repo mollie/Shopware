@@ -191,7 +191,7 @@ class PaymentService
         $this->smarty = Shopware()->Container()->get('template');
 
         $this->paymentFactory = new PaymentFactory();
-        $this->mollieOrderAnonymizer = new MollieOrderRequestAnonymizer();
+        $this->mollieOrderAnonymizer = new MollieOrderRequestAnonymizer('***');
     }
 
     /**

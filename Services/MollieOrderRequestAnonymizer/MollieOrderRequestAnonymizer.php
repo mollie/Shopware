@@ -6,6 +6,20 @@ namespace MollieShopware\Services\MollieOrderRequestAnonymizer;
 class MollieOrderRequestAnonymizer
 {
 
+    /**
+     * @var string
+     */
+    private $placeholder;
+
+
+    /**
+     * @param  $placeholder
+     */
+    public function __construct($placeholder)
+    {
+        $this->placeholder = $placeholder;
+    }
+
 
     /**
      * Anonymizes the Mollie Orders API request data
@@ -21,21 +35,21 @@ class MollieOrderRequestAnonymizer
         }
 
         if (isset($requestData['billingAddress'])) {
-            $requestData['billingAddress']['organizationName'] = '';
-            $requestData['billingAddress']['streetAndNumber'] = '';
-            $requestData['billingAddress']['givenName'] = '';
-            $requestData['billingAddress']['familyName'] = '';
-            $requestData['billingAddress']['email'] = '';
-            $requestData['billingAddress']['phone'] = '';
+            $requestData['billingAddress']['organizationName'] = $this->placeholder;
+            $requestData['billingAddress']['streetAndNumber'] = $this->placeholder;
+            $requestData['billingAddress']['givenName'] = $this->placeholder;
+            $requestData['billingAddress']['familyName'] = $this->placeholder;
+            $requestData['billingAddress']['email'] = $this->placeholder;
+            $requestData['billingAddress']['phone'] = $this->placeholder;
         }
 
         if (isset($requestData['shippingAddress'])) {
-            $requestData['shippingAddress']['organizationName'] = '';
-            $requestData['shippingAddress']['streetAndNumber'] = '';
-            $requestData['shippingAddress']['givenName'] = '';
-            $requestData['shippingAddress']['familyName'] = '';
-            $requestData['shippingAddress']['email'] = '';
-            $requestData['shippingAddress']['phone'] = '';
+            $requestData['shippingAddress']['organizationName'] = $this->placeholder;
+            $requestData['shippingAddress']['streetAndNumber'] = $this->placeholder;
+            $requestData['shippingAddress']['givenName'] = $this->placeholder;
+            $requestData['shippingAddress']['familyName'] = $this->placeholder;
+            $requestData['shippingAddress']['email'] = $this->placeholder;
+            $requestData['shippingAddress']['phone'] = $this->placeholder;
         }
 
         return $requestData;
