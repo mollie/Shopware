@@ -10,6 +10,7 @@ use MollieShopware\Components\ApplePayDirect\Models\Button\DisplayOption;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Country\CountryIsoParser;
 use Shopware\Models\Shop\Shop;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ApplePayButtonBuilder
 {
@@ -25,7 +26,12 @@ class ApplePayButtonBuilder
     /**
      * @var Config
      */
-    private $config;
+    private $configMollie;
+
+    /**
+     * @var \Shopware_Components_Config
+     */
+    private $configShopware;
 
     /**
      * @var \sAdmin
@@ -44,13 +50,15 @@ class ApplePayButtonBuilder
 
 
     /**
-     * @param Config $config
+     * @param Config $configMollie
+     * @param \Shopware_Components_Config $configShopware
      * @param ApplePayPaymentMethod $applePayPaymentMethod
      * @param ApplePayDirectDisplayOptions $restrictionService
      */
-    public function __construct(Config $config, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService)
+    public function __construct(Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService)
     {
-        $this->config = $config;
+        $this->configMollie = $configMollie;
+        $this->configShopware = $configShopware;
         $this->restrictionService = $restrictionService;
 
         # attention, modules does not exist in CLI
@@ -95,16 +103,21 @@ class ApplePayButtonBuilder
         $isoParser = new CountryIsoParser();
         $country = $isoParser->getISO($firstCountry);
 
+        # the shopware shop might be configured to require a phone field
+        # in this case, that requirement is passed on to apple pay as well
+        $requirePhoneNumber = $this->configShopware->offsetGet('requirePhoneField');
+
         $button = new ApplePayButton(
             $isActive,
             $country,
-            $shop->getCurrency()->getCurrency()
+            $shop->getCurrency()->getCurrency(),
+            $requirePhoneNumber
         );
 
 
         # add our custom restrictions so that
         # we know when the button must not be displayed
-        $pluginRestrictions = $this->config->getApplePayDirectRestrictions();
+        $pluginRestrictions = $this->configMollie->getApplePayDirectRestrictions();
 
         /** @var DisplayOption $option */
         foreach ($this->restrictionService->getDisplayOptions() as $option) {

@@ -5,7 +5,7 @@ export default class BasketRepository {
      * @returns {*}
      */
     getApplePayDirectContainerTop() {
-        return cy.get('.apple-pay--container--cart.is--top');
+        return cy.get('.apple-pay-container-cart.is-top');
     }
 
     /**
@@ -13,7 +13,7 @@ export default class BasketRepository {
      * @returns {*}
      */
     getApplePayDirectContainerBottom() {
-        return cy.get('.apple-pay--container--cart.is--bot');
+        return cy.get('.apple-pay-container-cart.is--bot');
     }
 
 }

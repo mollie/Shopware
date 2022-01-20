@@ -26,6 +26,7 @@ use MollieShopware\Exceptions\MollieOrderNotFound;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Exceptions\MolliePaymentNotFound;
 use MollieShopware\Exceptions\TransactionNotFoundException;
+use MollieShopware\Gateways\Mollie\Exceptions\InvalidOrderAmountException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\Payment\Configuration;
@@ -40,6 +41,8 @@ use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
+use MollieShopware\Services\MollieOrderRequestAnonymizer\MollieOrderRequestAnonymizer;
+use Psr\Log\LoggerInterface;
 use Shopware\Models\Customer\Address;
 use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
@@ -142,25 +145,39 @@ class PaymentService
      */
     private $smarty;
 
+    /**
+     * @var EntityRepository|\MollieShopware\Models\OrderLinesRepository
+     */
     private $orderLinesRepo;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var MollieOrderRequestAnonymizer
+     */
+    private $mollieOrderAnonymizer;
 
 
     /**
-     * PaymentService constructor.
      * @param MollieApiFactory $apiFactory
      * @param Config $config
      * @param Config\PaymentConfigResolver $paymentConfig
      * @param MollieGatewayInterface $gwMollie
+     * @param LoggerInterface $logger
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, LoggerInterface $logger, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->paymentConfig = $paymentConfig;
         $this->gwMollie = $gwMollie;
+        $this->logger = $logger;
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
         $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
@@ -174,6 +191,7 @@ class PaymentService
         $this->smarty = Shopware()->Container()->get('template');
 
         $this->paymentFactory = new PaymentFactory();
+        $this->mollieOrderAnonymizer = new MollieOrderRequestAnonymizer('***');
     }
 
     /**
@@ -291,10 +309,21 @@ class PaymentService
         if ($paymentMethodObject->isOrdersApiEnabled()) {
 
             $requestBody = $paymentMethodObject->buildBodyOrdersAPI();
+            
+            try {
 
-            # create a new ORDER in mollie
-            # using our orders api request body
-            $mollieOrder = $this->apiClient->orders->create($requestBody);
+                # create a new ORDER in mollie
+                # using our orders api request body
+                $mollieOrder = $this->gwMollie->createOrder($requestBody);
+
+            } catch (InvalidOrderAmountException $ex) {
+                # we have to log the request body in that case
+                # to have easier debugging options. but before, anonymize it
+                $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestBody);
+                $this->logger->critical('Invalid Order Amount Exception for Request: ' . json_encode($anonymizedRequest));
+                # now pass on the error for a correct exception handling
+                throw $ex;
+            }
 
             # update the orderId field of our transaction
             # this helps us to see the difference to a transaction

@@ -322,21 +322,29 @@ class FinishCheckoutFacade
 
             # if we have created the order before this
             # then send the order confirmation mail NOW,
-            # if the mollie payment is valid
+            # if the mollie payment is valid.
+
             if ($orderCreation === OrderCreationType::BEFORE_PAYMENT && PaymentStatus::isApprovedStatus($mollieStatus)) {
-                try {
 
-                    $this->confirmationMail->sendConfirmationEmail($transaction);
+                # also check for multiple returns on this page.
+                # only send the first time, as long as the mail has not been sent.
+                $isFirstRequest = (string)$transaction->getOrdermailVariables() !== '';
 
-                } catch (\Exception $ex) {
-                    # never ever break if only an email cannot be sent
-                    # lets just add a log here.
-                    $this->logger->warning(
-                        'Problem when sending confirmation email for order: ' . $swOrder->getNumber(),
-                        [
-                            'error' => $ex->getMessage()
-                        ]
-                    );
+                if ($isFirstRequest) {
+                    try {
+
+                        $this->confirmationMail->sendConfirmationEmail($transaction);
+
+                    } catch (\Exception $ex) {
+                        # never ever break if only an email cannot be sent
+                        # lets just add a log here.
+                        $this->logger->warning(
+                            'Problem when sending confirmation email for order: ' . $swOrder->getNumber(),
+                            [
+                                'error' => $ex->getMessage()
+                            ]
+                        );
+                    }
                 }
             }
 

@@ -30,9 +30,6 @@ clean: ## Cleans all dependencies
 
 # ------------------------------------------------------------------------------------------------------------
 
-test: ## Starts all Tests
-	@XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=phpunit.xml
-
 phpcheck: ## Starts the PHP syntax checks
 	@find . -name '*.php' -not -path "./vendor/*" -not -path "./Tests/*" | xargs -n 1 -P4 php -l
 
@@ -48,6 +45,9 @@ stan: ## Starts the PHPStan Analyser
 
 metrics: ## Starts the PHPMetrics Analyser
 	@php vendor/bin/phpmetrics --config=.phpmetrics.json
+
+phpunit: ## Starts all PHPUnit Tests
+	@XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=phpunit.xml
 
 jest: ## Starts all Jest tests
 	./node_modules/.bin/jest --config=.jest.config.js
@@ -68,7 +68,7 @@ pr: ## Prepares everything for a Pull Request
 	@php vendor/bin/php-cs-fixer fix --config=./.php_cs.php
 	@make phpcheck -B
 	@make phpmin -B
-	@make test -B
+	@make phpunit -B
 	@make stan -B
 	@make jest -B
 	@make eslint -B

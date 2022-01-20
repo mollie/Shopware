@@ -62,7 +62,8 @@ function initApplePay() {
             button.dataset.label,
             button.dataset.amount,
             button.dataset.country,
-            button.dataset.currency
+            button.dataset.currency,
+            button.dataset.requirephone
         );
 
         // if button is in item mode
@@ -215,7 +216,7 @@ function initApplePay() {
 
             // now finish our payment by filling a form
             // and submitting it along with our payment token
-            finishPayment(button.dataset.checkouturl, paymentToken, e.payment);
+            finishPayment(button.dataset.checkouturl, paymentToken, e.payment, button.dataset.productnumber);
         };
 
         session.begin();
@@ -227,17 +228,25 @@ function initApplePay() {
      * @param amount
      * @param country
      * @param currency
+     * @param requirePhone
      * @returns {ApplePaySession}
      */
-    function createApplePaySession(label, amount, country, currency) {
+    function createApplePaySession(label, amount, country, currency, requirePhone) {
+
+        const reqShippingFields = [
+            'name',
+            'email',
+            'postalAddress',
+        ];
+
+        if (requirePhone) {
+            reqShippingFields.push('phone');
+        }
+
         var request = {
             countryCode: country,
             currencyCode: currency,
-            requiredShippingContactFields: [
-                'name',
-                'email',
-                'postalAddress',
-            ],
+            requiredShippingContactFields: reqShippingFields,
             supportedNetworks: [
                 'amex',
                 'maestro',
@@ -261,8 +270,9 @@ function initApplePay() {
      * @param checkoutURL
      * @param paymentToken
      * @param payment
+     * @param productnumber
      */
-    function finishPayment(checkoutURL, paymentToken, payment) {
+    function finishPayment(checkoutURL, paymentToken, payment, productnumber) {
 
         var createField = function (name, val) {
             return $('<input>', {
@@ -277,7 +287,6 @@ function initApplePay() {
             method: 'POST',
         });
 
-
         // add billing data
         createField('email', payment.shippingContact.emailAddress).appendTo($form);
         createField('lastname', payment.shippingContact.familyName).appendTo($form);
@@ -286,6 +295,11 @@ function initApplePay() {
         createField('postalCode', payment.shippingContact.postalCode).appendTo($form);
         createField('city', payment.shippingContact.locality).appendTo($form);
         createField('countryCode', payment.shippingContact.countryCode).appendTo($form);
+        createField('phone', payment.shippingContact.phoneNumber).appendTo($form);
+
+        // add our article, so we can get back to the PDP
+        createField('productNumber', productnumber).appendTo($form);
+
         // also add our payment token
         createField('paymentToken', paymentToken).appendTo($form);
 

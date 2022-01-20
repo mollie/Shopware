@@ -3,6 +3,7 @@
 namespace Mollie\Api;
 
 use Mollie\Api\Endpoints\ChargebackEndpoint;
+use Mollie\Api\Endpoints\ClientEndpoint;
 use Mollie\Api\Endpoints\CustomerEndpoint;
 use Mollie\Api\Endpoints\CustomerPaymentsEndpoint;
 use Mollie\Api\Endpoints\InvoiceEndpoint;
@@ -14,11 +15,13 @@ use Mollie\Api\Endpoints\OrderLineEndpoint;
 use Mollie\Api\Endpoints\OrderPaymentEndpoint;
 use Mollie\Api\Endpoints\OrderRefundEndpoint;
 use Mollie\Api\Endpoints\OrganizationEndpoint;
+use Mollie\Api\Endpoints\OrganizationPartnerEndpoint;
 use Mollie\Api\Endpoints\PaymentCaptureEndpoint;
 use Mollie\Api\Endpoints\PaymentChargebackEndpoint;
 use Mollie\Api\Endpoints\PaymentEndpoint;
 use Mollie\Api\Endpoints\PaymentLinkEndpoint;
 use Mollie\Api\Endpoints\PaymentRefundEndpoint;
+use Mollie\Api\Endpoints\PaymentRouteEndpoint;
 use Mollie\Api\Endpoints\PermissionEndpoint;
 use Mollie\Api\Endpoints\ProfileEndpoint;
 use Mollie\Api\Endpoints\ProfileMethodEndpoint;
@@ -29,6 +32,7 @@ use Mollie\Api\Endpoints\ShipmentEndpoint;
 use Mollie\Api\Endpoints\SubscriptionEndpoint;
 use Mollie\Api\Endpoints\WalletEndpoint;
 use Mollie\Api\Exceptions\ApiException;
+use Mollie\Api\Exceptions\HttpAdapterDoesNotSupportDebuggingException;
 use Mollie\Api\Exceptions\IncompatiblePlatform;
 use Mollie\Api\HttpAdapter\MollieHttpAdapterPicker;
 
@@ -37,7 +41,7 @@ class MollieApiClient
     /**
      * Version of our client.
      */
-    const CLIENT_VERSION = "2.37.1";
+    const CLIENT_VERSION = "2.40.1";
 
     /**
      * Endpoint of the remote API.
@@ -204,6 +208,13 @@ class MollieApiClient
     public $paymentRefunds;
 
     /**
+     * RESTful Payment Route resource.
+     *
+     * @var PaymentRouteEndpoint
+     */
+    public $paymentRoutes;
+
+    /**
      * RESTful Payment Captures resource.
      *
      * @var PaymentCaptureEndpoint
@@ -239,6 +250,13 @@ class MollieApiClient
     public $paymentLinks;
 
     /**
+     * RESTful Onboarding resource.
+     *
+     * @var OrganizationPartnerEndpoint
+     */
+    public $organizationPartners;
+  
+    /**
      * Manages Wallet requests
      *
      * @var WalletEndpoint
@@ -261,6 +279,13 @@ class MollieApiClient
      * @var array
      */
     protected $versionStrings = [];
+
+    /**
+     * RESTful Client resource.
+     *
+     * @var ClientEndpoint
+     */
+    public $clients;
 
     /**
      * @param \GuzzleHttp\ClientInterface|\Mollie\Api\HttpAdapter\MollieHttpAdapterInterface|null $httpClient
@@ -310,10 +335,13 @@ class MollieApiClient
         $this->refunds = new RefundEndpoint($this);
         $this->paymentRefunds = new PaymentRefundEndpoint($this);
         $this->paymentCaptures = new PaymentCaptureEndpoint($this);
+        $this->paymentRoutes = new PaymentRouteEndpoint($this);
         $this->chargebacks = new ChargebackEndpoint($this);
         $this->paymentChargebacks = new PaymentChargebackEndpoint($this);
         $this->wallets = new WalletEndpoint($this);
         $this->paymentLinks = new PaymentLinkEndpoint($this);
+        $this->organizationPartners = new OrganizationPartnerEndpoint($this);
+        $this->clients = new ClientEndpoint($this);
     }
 
     /**
@@ -407,7 +435,47 @@ class MollieApiClient
     }
 
     /**
-     * Perform an http call. This method is used by the resource specific classes. Please use the $payments property to
+     * Enable debugging mode. If debugging mode is enabled, the attempted request will be included in the ApiException.
+     * By default, debugging is disabled to prevent leaking sensitive request data into exception logs.
+     *
+     * @throws \Mollie\Api\Exceptions\HttpAdapterDoesNotSupportDebuggingException
+     */
+    public function enableDebugging()
+    {
+        if (
+            ! method_exists($this->httpClient, 'supportsDebugging')
+            || ! $this->httpClient->supportsDebugging()
+        ) {
+            throw new HttpAdapterDoesNotSupportDebuggingException(
+                "Debugging is not supported by " . get_class($this->httpClient) . "."
+            );
+        }
+
+        $this->httpClient->enableDebugging();
+    }
+
+    /**
+     * Disable debugging mode. If debugging mode is enabled, the attempted request will be included in the ApiException.
+     * By default, debugging is disabled to prevent leaking sensitive request data into exception logs.
+     *
+     * @throws \Mollie\Api\Exceptions\HttpAdapterDoesNotSupportDebuggingException
+     */
+    public function disableDebugging()
+    {
+        if (
+            ! method_exists($this->httpClient, 'supportsDebugging')
+            || ! $this->httpClient->supportsDebugging()
+        ) {
+            throw new HttpAdapterDoesNotSupportDebuggingException(
+                "Debugging is not supported by " . get_class($this->httpClient) . "."
+            );
+        }
+
+        $this->httpClient->disableDebugging();
+    }
+
+    /**
+     * Perform a http call. This method is used by the resource specific classes. Please use the $payments property to
      * perform operations on payments.
      *
      * @param string $httpMethod
@@ -427,7 +495,7 @@ class MollieApiClient
     }
 
     /**
-     * Perform an http call to a full url. This method is used by the resource specific classes.
+     * Perform a http call to a full url. This method is used by the resource specific classes.
      *
      * @see $payments
      * @see $isuers

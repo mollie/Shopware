@@ -3,7 +3,6 @@
 namespace MollieShopware\Services\Refund;
 
 use Doctrine\ORM\EntityManager;
-use Enlight_Components_Mail;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\BaseResource;
 use Mollie\Api\Resources\Order as MollieOrder;
@@ -11,7 +10,7 @@ use Mollie\Api\Resources\OrderLine;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Resources\Payment as MolliePayment;
 use Mollie\Api\Resources\Refund;
-use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Exceptions\RefundFailedException;
@@ -20,6 +19,7 @@ use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\OrderLines;
 use MollieShopware\Models\OrderLinesRepository;
 use MollieShopware\Models\Transaction;
+use MollieShopware\MollieShopware;
 use Psr\Container\ContainerInterface;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
@@ -92,9 +92,30 @@ class RefundService implements RefundInterface
 
 
         if ($transaction->isTypeOrder()) {
+
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
-            $refund = $this->sendMollieOrderRefund($order, $mollieOrder, $mollie);
+            # if we have a VOUCHER payment method
+            # then the Mollie API does not calculate the amount that can be refunded
+            # in that case, we have to do this and create a refund with a custom amount
+            if ($order->getPayment()->getName() === MollieShopware::PAYMENT_PREFIX . PaymentMethod::VOUCHERS) {
+
+                $molliePayment = $this->getPaidPaymentOfOrder($mollieOrder);
+
+                if (!$molliePayment instanceof Payment) {
+                    throw new  \Exception('Voucher Order has not paid payment to create a refund for');
+                }
+
+                return $this->refundPartialOrderAmount(
+                    $order,
+                    $transaction,
+                    $molliePayment->getAmountRemaining()
+                );
+
+            } else {
+
+                $refund = $this->sendMollieOrderRefund($order, $mollieOrder, $mollie);
+            }
 
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
@@ -153,15 +174,8 @@ class RefundService implements RefundInterface
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
-            /** @var Payment[] $payments */
-            $payments = $mollieOrder->payments();
+            $molliePayment = $this->getPaidPaymentOfOrder($mollieOrder);
 
-            foreach ($payments as $payment) {
-                if ($payment->status === PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED || $payment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
-                    $molliePayment = $payment;
-                    break;
-                }
-            }
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
         }
@@ -335,4 +349,23 @@ class RefundService implements RefundInterface
         $this->modelManager->persist($attribute);
         $this->modelManager->flush($attribute);
     }
+
+    /**
+     * @param MollieOrder $mollieOrder
+     * @return MolliePayment|null
+     */
+    private function getPaidPaymentOfOrder(\Mollie\Api\Resources\Order $mollieOrder)
+    {
+        /** @var Payment[] $payments */
+        $payments = $mollieOrder->payments();
+
+        foreach ($payments as $payment) {
+            if ($payment->status === PaymentStatus::MOLLIE_PAYMENT_AUTHORIZED || $payment->status === PaymentStatus::MOLLIE_PAYMENT_PAID) {
+                return $payment;
+            }
+        }
+
+        return null;
+    }
+
 }

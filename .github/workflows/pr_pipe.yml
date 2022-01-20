@@ -118,7 +118,7 @@ jobs:
         run: make dev -B
 
       - name: Run PHPUnit
-        run: make test -B
+        run: make phpunit -B
 
   # ------------------------------------------------------------------------------------------------------------------------
 
@@ -169,6 +169,7 @@ jobs:
     needs: phpcsfixer
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         shopware: [ '5.7.0', '5.6.10', '5.6.9', '5.3.0' ]
     steps:

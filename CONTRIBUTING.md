@@ -172,7 +172,7 @@ Please use this command to run your PHPUnit tests.
 It is configured to include Code Coverage reports, so there will be a new report HTML file that you can open and use to improve your testing coverage.
 
 ```bash
-make test
+make phpunit
 ```
 
 ### Jest
