@@ -4,7 +4,6 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Enlight_Controller_ActionEventArgs;
-use Enlight_Event_EventArgs;
 use Enlight_View;
 use Exception;
 use Mollie\Api\Resources\Method;
@@ -78,7 +77,8 @@ class PaymentMethodSubscriber implements SubscriberInterface
             return;
         }
 
-        $config = $this->getConfig();
+        $shop = $this->container->get('shop');
+        $config = $shop instanceof Shop ? $this->getConfig($shop) : null;
 
         if (!$config || !$config->useMolliePaymentMethodLimits()) {
             return;
@@ -96,7 +96,8 @@ class PaymentMethodSubscriber implements SubscriberInterface
 
         # get all active and available payment methods for a certain amount from Mollie
         $availableMethods = $this->activePaymentMethodsProvider->getActivePaymentMethodsForAmount(
-            $basketAmount
+            $basketAmount,
+            [$shop]
         );
 
         # remove unavailable payment methods from the checkout view
@@ -175,10 +176,9 @@ class PaymentMethodSubscriber implements SubscriberInterface
      *
      * @return Config|null
      */
-    private function getConfig()
+    private function getConfig(Shop $shop)
     {
-        $shop = $this->container->get('shop');
 
-        return $shop instanceof Shop ? $this->mollieShopSwitcher->getConfig($shop->getId()) : null;
+        return $this->mollieShopSwitcher->getConfig($shop->getId());
     }
 }

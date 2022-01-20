@@ -180,7 +180,6 @@
         </service>
 
         <service id="mollie_shopware.components.active_payment_methods_provider" class="MollieShopware\Components\Payment\Provider\ActivePaymentMethodsProvider" public="true">
-            <argument type="service" id="service_container"/>
             <argument type="service" id="mollie_shopware.api_factory" />
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>

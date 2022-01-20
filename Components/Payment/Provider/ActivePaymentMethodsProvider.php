@@ -11,13 +11,9 @@ use MollieShopware\Components\Payment\ActivePaymentMethodsProviderInterface;
 use MollieShopware\Services\Mollie\Payments\Formatters\NumberFormatter;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Shop\Shop;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterface
 {
-    /** @var ContainerInterface */
-    private $container;
-
     /** @var NumberFormatter */
     private $formatter;
 
@@ -27,12 +23,12 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
     /** @var MollieApiFactory */
     private $mollieApiFactory;
 
-    public function __construct(ContainerInterface $container, MollieApiFactory $mollieApiFactory, LoggerInterface $logger)
+    public function __construct(MollieApiFactory $mollieApiFactory, LoggerInterface $logger)
     {
-        $this->container = $container;
-        $this->formatter = new NumberFormatter();
         $this->mollieApiFactory = $mollieApiFactory;
         $this->logger = $logger;
+
+        $this->formatter = new NumberFormatter();
     }
 
     /**
@@ -47,16 +43,7 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
     {
         $methods = [];
 
-        # if no shops are provided, we try to get the current shop from the DI container
-        if (empty($shops)) {
-            $shop = $this->container->get('shop');
-
-            if ($shop instanceof Shop) {
-                $shops[] = $shop;
-            }
-        }
-
-        # if still no shops are provided, we return an empty array
+        # if no shops are provided, we return an empty array
         if (empty($shops)) {
             return [];
         }
