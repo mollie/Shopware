@@ -3,33 +3,55 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Enlight_Controller_ActionEventArgs;
 use Enlight_Event_EventArgs;
 use Enlight_View;
 use Exception;
 use Mollie\Api\Resources\Method;
+use MollieShopware\Components\Basket\Basket;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use MollieShopware\Components\Payment\Provider\ActivePaymentMethodsProvider;
 use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
+use Shopware\Models\Shop\Shop;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class PaymentMethodSubscriber implements SubscriberInterface
 {
+    /** @var ActivePaymentMethodsProvider  */
+    private $activePaymentMethodsProvider;
+
+    /** @var Basket */
+    private $basket;
+
+    /** @var ContainerInterface */
+    private $container;
+
     /** @var LoggerInterface */
     private $logger;
 
-    /**
-     * @var MollieShopSwitcher
-     */
+    /** @var MollieShopSwitcher */
     private $mollieShopSwitcher;
 
     /**
+     * @param ActivePaymentMethodsProvider $activePaymentMethodsProvider
+     * @param Basket $basket
+     * @param ContainerInterface $container
      * @param LoggerInterface $logger
      * @param MollieShopSwitcher $mollieShopSwitcher
      */
-    public function __construct(LoggerInterface $logger, MollieShopSwitcher $mollieShopSwitcher)
-    {
+    public function __construct(
+        ActivePaymentMethodsProvider $activePaymentMethodsProvider,
+        Basket $basket,
+        ContainerInterface $container,
+        LoggerInterface $logger,
+        MollieShopSwitcher $mollieShopSwitcher
+    ) {
+        $this->activePaymentMethodsProvider = $activePaymentMethodsProvider;
+        $this->basket = $basket;
+        $this->container = $container;
         $this->logger = $logger;
         $this->mollieShopSwitcher = $mollieShopSwitcher;
     }
@@ -45,42 +67,36 @@ class PaymentMethodSubscriber implements SubscriberInterface
     }
 
     /**
-     * @param Enlight_Event_EventArgs $args
+     * @param Enlight_Controller_ActionEventArgs $args
      * @throws Exception
      */
-    public function onFrontendCheckoutPostDispatch(Enlight_Event_EventArgs $args)
+    public function onFrontendCheckoutPostDispatch(Enlight_Controller_ActionEventArgs $args)
     {
-        $shop = Shopware()->Shop();
         $actionName = $args->getRequest()->getActionName();
-        $config = $shop ? $this->mollieShopSwitcher->getConfig($shop->getId()) : null;
-
-        if (!$config || !$config->useMolliePaymentMethodLimits()) {
-            return;
-        }
 
         if ($actionName !== 'shippingPayment' && $actionName !== 'confirm') {
             return;
         }
 
-        /** @var Enlight_View $view */
-        $view = $args->getSubject()->View();
-        $basket = isset($view->sBasket) && is_array($view->sBasket) ? $view->sBasket : [];
-        $value = isset($basket['AmountNumeric']) ? $basket['AmountNumeric'] : '';
-        $currency = isset($basket['sCurrencyName']) ? $basket['sCurrencyName'] : '';
+        $config = $this->getConfig();
 
-        if ($value === '' || $currency === '') {
+        if (!$config || !$config->useMolliePaymentMethodLimits()) {
+            return;
+        }
+
+        $view = $args->getSubject()->View();
+
+        # get the basket amount for the current view
+        try {
+            $basketAmount = $this->basket->getBasketAmountForView($view);
+        } catch (Exception $exception) {
+            $this->logger->error('Could not retrieve basket amount for view.');
             return;
         }
 
         # get all active and available payment methods for a certain amount from Mollie
-        $availableMethods = $this->getActivePaymentMethodsProvider($config)->getActivePaymentMethodsFromMollie(
-            [
-                'amount' => [
-                    'value' => number_format($value, 2),
-                    'currency' => $currency,
-                ]
-            ],
-            [$shop]
+        $availableMethods = $this->activePaymentMethodsProvider->getActivePaymentMethodsForAmount(
+            $basketAmount
         );
 
         # remove unavailable payment methods from the checkout view
@@ -155,10 +171,14 @@ class PaymentMethodSubscriber implements SubscriberInterface
     }
 
     /**
-     * @return ActivePaymentMethodsProvider
+     * Returns the configuration for the current shop.
+     *
+     * @return Config|null
      */
-    private function getActivePaymentMethodsProvider(Config $config)
+    private function getConfig()
     {
-        return new ActivePaymentMethodsProvider($config, $this->logger);
+        $shop = $this->container->get('shop');
+
+        return $shop instanceof Shop ? $this->mollieShopSwitcher->getConfig($shop->getId()) : null;
     }
 }

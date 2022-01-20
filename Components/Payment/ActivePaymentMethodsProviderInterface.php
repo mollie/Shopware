@@ -2,15 +2,15 @@
 
 namespace MollieShopware\Components\Payment;
 
-use Shopware\Models\Shop\DetachedShop;
+use Shopware\Models\Shop\Shop;
 
 interface ActivePaymentMethodsProviderInterface
 {
     /**
      * @param array $parameters
-     * @param DetachedShop[] $shops
+     * @param array<Shop> $shops
      *
      * @return mixed
      */
-    public function getActivePaymentMethodsFromMollie($parameters = [], $shops = []);
+    public function getActivePaymentMethods(array $parameters = [], array $shops = []);
 }

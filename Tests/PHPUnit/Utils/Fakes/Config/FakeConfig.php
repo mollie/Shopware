@@ -13,6 +13,10 @@ class FakeConfig implements ConfigInterface
      */
     private $paymentStatusMail;
 
+    /**
+     * @var bool
+     */
+    private $useMolliePaymentMethodLimits;
 
     /**
      * @param bool $paymentStatusMail
@@ -30,4 +34,21 @@ class FakeConfig implements ConfigInterface
         return $this->paymentStatusMail;
     }
 
+    /**
+     * @param bool $useMolliePaymentMethodLimits
+     * @return $this
+     */
+    public function setUseMolliePaymentMethodLimits($useMolliePaymentMethodLimits)
+    {
+        $this->useMolliePaymentMethodLimits = $useMolliePaymentMethodLimits;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function useMolliePaymentMethodLimits()
+    {
+        return $this->useMolliePaymentMethodLimits;
+    }
 }

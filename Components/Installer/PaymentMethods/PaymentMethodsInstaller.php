@@ -11,6 +11,7 @@ use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\ShopwarePaymentMethod;
+use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Payment\Provider\ActivePaymentMethodsProvider;
 use MollieShopware\Components\Services\ShopService;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
@@ -285,10 +286,11 @@ class PaymentMethodsInstaller
      */
     private function getAvailableMolliePayments()
     {
-        $activePaymentMethodsProvider = new ActivePaymentMethodsProvider($this->config, $this->logger);
+        $mollieApiFactory = new MollieApiFactory($this->config, $this->logger);
+        $activePaymentMethodsProvider = new ActivePaymentMethodsProvider($mollieApiFactory, $this->logger);
         $shopService = new ShopService($this->modelManager);
 
-        $methods = $activePaymentMethodsProvider->getActivePaymentMethodsFromMollie([], $shopService->getAllShops());
+        $methods = $activePaymentMethodsProvider->getActivePaymentMethods([], $shopService->getAllShops());
 
         # if its not null, do the same again
         # please note we give the original list into it
