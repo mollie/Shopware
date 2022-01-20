@@ -695,6 +695,56 @@
         </element>
 
 
+        <element type="select" scope="shop">
+            <name>use_mollie_payment_method_limits</name>
+            <label lang="en">Use Mollie payment method limits</label>
+            <label lang="de">Verwenden Sie die Limits der Mollie-Zahlungsarten</label>
+            <label lang="nl-NL">Gebruik Mollie's betaalmethodelimieten</label>
+            <label lang="es-ES">Utilice los límites de los métodos de pago de Mollie</label>
+            <label lang="fr-FR">Utiliser les limites des modes de paiement Mollie</label>
+            <label lang="it-IT">Utilizza i limiti del metodo di pagamento Mollie</label>
+            <value>no</value>
+            <description lang="en">Automatically hides payment methods in the checkout based on the limits of Mollie. For instance, if you can only accept credit card payments up to 500 euros, the checkout for a cart of 600 euros will not display credit card as a payment method.</description>
+            <description lang="de">Blendet automatisch Zahlungsart im Checkout basierend auf den Limits von Mollie aus. Wenn Sie beispielsweise nur Kreditkartenzahlungen bis zu 500 Euro akzeptieren können, wird an der Kasse für einen Warenkorb von 600 Euro keine Kreditkarte als Zahlungsarte angezeigt.</description>
+            <description lang="es-ES">Oculta automáticamente los métodos de pago en la caja según los límites de Mollie. Por ejemplo, si solo puede aceptar pagos con tarjeta de crédito de hasta 500 euros, no se mostrará ninguna tarjeta de crédito como método de pago en la caja para un carrito de la compra de 600 euros.</description>
+            <description lang="nl-NL">Verbergt automatisch betaalmethoden in de checkout op basis van Mollie's limieten. Als u bijvoorbeeld alleen creditcardbetalingen tot 500 euro kunt accepteren, wordt bij een winkelwagen van 600 euro geen creditcard weergegeven als betaalmethode bij het afrekenen.</description>
+            <description lang="fr-FR">Masque automatiquement les méthodes de paiement à la caisse en fonction des limites de Mollie. Par exemple, si vous ne pouvez accepter que les paiements par carte de crédit jusqu'à 500 euros, aucune carte de crédit ne sera affichée comme moyen de paiement à la caisse pour un panier de 600 euros.</description>
+            <description lang="it-IT">Nasconde automaticamente i metodi di pagamento alla cassa in base ai limiti di Mollie. Ad esempio, se puoi accettare solo pagamenti con carta di credito fino a 500 euro, nessuna carta di credito verrà visualizzata come metodo di pagamento alla cassa per un carrello della spesa di 600 euro.</description>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="en">Inherited</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="en">Yes</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="en">No</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
+                </option>
+            </store>
+            <options>
+                <position>20</position>
+            </options>
+        </element>
+
+
         <element type="button" required="false">
             <name>separator_mails</name>
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
@@ -704,7 +754,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -747,7 +797,7 @@
                 </option>
             </store>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -760,7 +810,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Carte de crédit ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Carta di credito ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -774,7 +824,7 @@
             <label lang="it-IT">Abilita componenti</label>
             <value>true</value>
             <options>
-                <position>23</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -788,7 +838,7 @@
             <label lang="it-IT">Abilita lo stile per i componenti</label>
             <value>true</value>
             <options>
-                <position>24</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -801,7 +851,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>25</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -848,7 +898,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>26</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -861,7 +911,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Bancaire ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Trasferimento bancario ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>27</position>
+                <position>28</position>
             </options>
         </element>
 
@@ -874,7 +924,7 @@
             <label lang="fr-FR">Délai de paiement (jours)</label>
             <label lang="it-IT">Termine di pagamento (Giorni)</label>
             <options>
-                <position>28</position>
+                <position>29</position>
             </options>
         </element>
 

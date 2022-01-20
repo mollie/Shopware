@@ -2,10 +2,10 @@
 
 namespace MollieShopware\Components\Basket;
 
+use Enlight_View;
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Article\Article;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Order\Repository;
 
@@ -109,6 +109,8 @@ class Basket implements BasketInterface
     }
 
     /**
+     * Returns the voucher type for an article.
+     *
      * @param \Shopware\Models\Order\Basket $basketItem
      * @return string
      */
@@ -126,4 +128,27 @@ class Basket implements BasketInterface
         return (string)$article->getAttribute()->getMollieVoucherType();
     }
 
+    /**
+     * Returns a basket array for the given view.
+     *
+     * @param Enlight_View $view
+     * @return array
+     */
+    public function getBasketForView(Enlight_View $view)
+    {
+        return isset($view->sBasket) && is_array($view->sBasket) ? $view->sBasket : [];
+    }
+
+    /**
+     * Returns a BasketAmount DTO for the given view.
+     *
+     * @param Enlight_View $view
+     * @return BasketAmount
+     */
+    public function getBasketAmountForView(Enlight_View $view)
+    {
+        $basket = $this->getBasketForView($view);
+
+        return new BasketAmount((float) $basket['AmountNumeric'], $basket['sCurrencyName']);
+    }
 }
