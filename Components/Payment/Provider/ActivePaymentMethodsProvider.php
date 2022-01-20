@@ -63,7 +63,19 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
         }
 
         # we return an array of unique active payment methods
-        return array_unique($methods);
+        $handledIds = [];
+
+        return array_filter($methods, static function ($method) use ($handledIds) {
+            $isHandled = in_array($method, $handledIds, true);
+
+            if ($isHandled) {
+                return false;
+            }
+
+            $handledIds[] = $method->id;
+
+            return true;
+        });
     }
 
     /**
