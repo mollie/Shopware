@@ -66,7 +66,7 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
         $handledIds = [];
 
         return array_filter($methods, static function ($method) use ($handledIds) {
-            $isHandled = in_array($method, $handledIds, true);
+            $isHandled = in_array($method->id, $handledIds, true);
 
             if ($isHandled) {
                 return false;
