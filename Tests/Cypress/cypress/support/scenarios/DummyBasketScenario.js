@@ -41,23 +41,26 @@ export default class DummyBasketScenario {
 
         cy.visit('/');
 
-        register.doRegister(user_email, user_pwd, this.firstname, this.lastname);
+        cy.session('login', () => {
+            cy.visit('/');
+            register.doRegister(user_email, user_pwd, this.firstname, this.lastname);
+            session.resetSession();
+            login.doLogin(user_email, user_pwd);
+        });
 
-        session.resetSession();
-
-        login.doLogin(user_email, user_pwd);
+        cy.visit('/');
 
         topMenu.clickOnFirstCategory();
-
         listing.clickOnFirstProduct();
 
         pdp.addToCart(this.quantity);
 
-        // wait 1 second
-        // it stuck 1 time
+        // wait 1 second, it stuck 1 time
         cy.wait(1000);
 
         checkout.goToCheckoutInOffCanvas();
+
+        cy.visit('/checkout/confirm');
     }
 
 }
