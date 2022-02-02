@@ -10,12 +10,12 @@ export default class PaymentsAction {
      * @param name
      */
     selectPayment(name) {
+
         cy.contains(name).click();
 
-        // attention, there is a modal popup appearing
-        // so its not immediately available, lets just wait
-        // until our payment method has been successfully selected
-        cy.wait(3000);
+        // wait until the modal overlay
+        // is removed from the page when a payment is switched
+        cy.get('body', {"timeout": 4000}).should('not.have.class', 'js--overlay-relative')
     }
 
     /**
