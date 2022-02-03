@@ -698,7 +698,7 @@
         <element type="select" scope="shop">
             <name>use_mollie_payment_method_limits</name>
             <label lang="en">Use Mollie payment method limits</label>
-            <label lang="de">Verwenden Sie die Limits der Mollie-Zahlungsarten</label>
+            <label lang="de">Limits der Mollie-Zahlungsarten verwenden</label>
             <label lang="nl-NL">Gebruik Mollie's betaalmethodelimieten</label>
             <label lang="es-ES">Utilice los límites de los métodos de pago de Mollie</label>
             <label lang="fr-FR">Utiliser les limites des modes de paiement Mollie</label>
