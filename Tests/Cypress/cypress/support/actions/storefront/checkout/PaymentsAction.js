@@ -13,9 +13,9 @@ export default class PaymentsAction {
 
         cy.contains(name).click();
 
-        // wait until the modal overlay
-        // is removed from the page when a payment is switched
-        cy.get('body', {"timeout": 4000}).should('not.have.class', 'js--overlay-relative')
+        // changed this back to wait in git because it crashes in older
+        // Shopware 5.3.0 versions and I don't have time for this now
+        cy.wait(3000);
     }
 
     /**
