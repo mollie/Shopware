@@ -12,20 +12,18 @@ help:
 # ------------------------------------------------------------------------------------------------------------
 
 install: ## Installs all production dependencies
-	@make clean -B
+	@composer validate
 	@composer install --no-dev
 	@npm install --production
 
 dev: ## Installs all dev dependencies
-	@make clean -B
+	@composer validate
 	@composer install
 	@npm install
 
 clean: ## Cleans all dependencies
 	@rm -rf vendor
 	@rm -rf node_modules
-	@rm -rf composer.lock
-	@rm -rf package-lock.json
 	@rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
