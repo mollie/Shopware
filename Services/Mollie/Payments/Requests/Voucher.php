@@ -50,7 +50,8 @@ class Voucher extends AbstractPayment implements PaymentInterface
         # if we find a value, only then we add it to the array.
         foreach ($data['lines'] as &$line) {
 
-            $lineItemKey = md5($line['name'] . $line['quantity'] . $line['unitPrice']['value']);
+            # use name + quantity as identifier (price makes problems if format is different on server)
+            $lineItemKey = md5($line['name'] . $line['quantity']);
 
             $category = $this->searchCategory($lineItemKey);
 
@@ -72,7 +73,8 @@ class Voucher extends AbstractPayment implements PaymentInterface
         /** @var PaymentLineItem $lineItem */
         foreach ($this->getLineItems() as $lineItem) {
 
-            $key = md5($lineItem->getName() . $lineItem->getQuantity() . $lineItem->getUnitPrice());
+            # use name + quantity as identifier (price makes problems if format is different on server)
+            $key = md5($lineItem->getName() . $lineItem->getQuantity());
 
             # if we have found the correct entry
             # then extract the category value for the mollie array
