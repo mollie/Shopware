@@ -24,7 +24,7 @@ const molliePaymentMethodScreen = new PaymentMethodsScreenAction();
 const mollieIssuerScreen = new IssuerScreenAction();
 const mollieGiftCardsScreen = new GiftCardsScreenAction();
 
-const scenarioDummyBasket = new DummyBasketScenario(66, 'Max', 'Mustermann');
+const scenarioDummyBasket = new DummyBasketScenario(5, 'Max', 'Mustermann');
 
 const device = devices.getFirstDevice();
 
