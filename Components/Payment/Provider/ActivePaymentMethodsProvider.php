@@ -49,9 +49,29 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
         }
 
         # we loop over the array of shops to get active payment methods for every shop
-        foreach($shops as $shop) {
+        foreach ($shops as $shop) {
             try {
-                $methods = $this->getActivePaymentMethodsForShop($shop, $parameters);
+
+                $shopMethods = $this->getActivePaymentMethodsForShop($shop, $parameters);
+
+                /** @var Method $sMethod */
+                foreach ($shopMethods as $sMethod) {
+                    $found = false;
+
+                    /** @var Method $existingMethod */
+                    foreach ($methods as $existingMethod) {
+
+                        if ((string)$existingMethod->id === (string)$sMethod->id) {
+                            $found = true;
+                            break;
+                        }
+                    }
+
+                    if (!$found) {
+                        $methods[] = $sMethod;
+                    }
+                }
+
             } catch (Exception $e) {
                 $this->logger->error(
                     sprintf('Error when loading active payment methods from Mollie for shop %s', $shop->getName()),
@@ -62,20 +82,7 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
             }
         }
 
-        # we return an array of unique active payment methods
-        $handledIds = [];
-
-        return array_filter($methods, static function ($method) use ($handledIds) {
-            $isHandled = in_array($method->id, $handledIds, true);
-
-            if ($isHandled) {
-                return false;
-            }
-
-            $handledIds[] = $method->id;
-
-            return true;
-        });
+        return $methods;
     }
 
     /**
