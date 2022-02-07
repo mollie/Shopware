@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>1.8.12</version>
+    <version>2.0.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -45,6 +45,37 @@
     </description>
 
 
+    <changelog version="2.0.0">
+        <changes lang="de">
+            - Achtung: Wir werden die Unterstützung von PHP 5.6 in diesem Jahr beenden! Aber keine Angst, nicht mit dem nächsten Update! Wir geben euch genug Zeit, aber bitte aktualisiert eure Systeme zwischenzeitlich und verwendet möglichst aktuelle und sichere PHP Versionen.
+            - Neue Zahlungsmethode "Gutschein" verfügbar. Konfigurieren Sie Artikel als Öko, Mahlzeit- oder Geschenkgutschein und lassen Sie Ihre Kunden mit unterstützten Gutschein Systemen einkaufen.
+            - Neues Feature "Mollie Limits" um automatisch Zahlungsarten auszublenden, sofern der Warenkorbwert laut Mollie nicht als gültig für eine Zahlungsart eingestuft wird.
+            - Neuer CLI-Befehl, um die Apple Pay Domain Verification Datei zu aktualisieren, falls sich diese einmal ändert.
+            - Der Import von Zahlungsarten verwendet nun sämtliche API Keys aus allen Sub Shops.
+            - Das Plugin aktualisiert nun auch das "bezahlt am" Feld einer Bestellung, sobald ein bezahlter Zahlungs-Webhook erfolgt.
+            - Apple Pay Direct verlangt nun auch zwingend die Telefonnummer, sofern der Shopware Shop selbst auch konfiguriert ist, diese vorauszusetzen.
+            - Gratis Prämiumartikel im Warenkorb werden nun bei fehlerhaften Zahlungsversuchen korrekt wiederhergestellt.
+            - Problembehebung "Invalid Order Amount" von Mollie in Kombination mit steuerfreien Ländern und der Orders API bzw. Klarna Zahlungen.
+            - Behebung eines seltenen Fehlers, bei der Bestellbestätigungs-Emails womöglich doppelt versandt wurden in Kombination mit "Bestellung vor Zahlung erstellen".
+            - Verbesserung der Stabilität der Bestellbestätigungs-Emails sofern ein Dritthersteller-Plugin die Daten zerstört oder ungültig macht.
+            - Aktualisierung des Mollie API Clients auf v2.40.1.
+        </changes>
+        <changes lang="en">
+            - Attention: We will drop the support for PHP 5.6 later this year! But no worries - not with the next update! We give you enough time, but please make sure to upgrade your systems to supported and secure PHP versions in the meantime.
+            - Add new payment method "Voucher". Configure your products as Eco-, Meal- or Gift Voucher and let your customers use supported voucher systems.
+            - New feature "Use Mollie Limits" to automatically hide payment methods, if the cart amount is not valid by Mollie for a payment method.
+            - New CLI command to update the Apple Pay Domain Verification file in case it changes.
+            - The import process of payment methods will now consider all API keys across all your sub shops.
+            - The plugin will now set the "paid on" field of the order, once a paid payment webhook is received.
+            - Apple Pay Direct will now automatically require a phone number, if your Shopware shop is also configured to do require this.
+            - Free premium items will now be restored correctly if a payment fails.
+            - Fix problem of invalid amount of an order in combination with tax-free countries and the Orders API (or Klarna payments).
+            - Fix rare problem where order confirmation mails might have been sent out twice in combination with "Create Order Before Payment".
+            - Improve the stability of the order confirmation mails if a 3rd party plugin somehow destroys the data with invalid values.
+            - Update Mollie API Client to v2.40.1.
+        </changes>
+    </changelog>
+
     <changelog version="1.8.12">
         <changes lang="de">
             - Neue Zahlart "Klarna Pay Now" ist nun verfügbar
@@ -59,7 +90,6 @@
             - Improve plugin to correctly handle "expired" payments when being returned to the shop. This was recently (accidentally) possible in some circumstances.
         </changes>
     </changelog>
-
 
     <changelog version="1.8.11">
         <changes lang="de">
