@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="https://info.mollie.com/hubfs/github/shopware/logo.png" width="128" height="128"/>
+   <img src="/.github/assets/home-logo.png">
 </p>
-<h1 align="center">Mollie for Shopware</h1>
+
 
 [![Minimum PHP Version](https://img.shields.io/badge/php-%3E%3D%205.6-8892BF.svg?style=flat)](https://php.net/) ![Build Status](https://github.com/mollie/Shopware/actions/workflows/ci_pipe.yml/badge.svg) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/mollie/Shopware)   ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/mollie/Shopware/latest)
 
