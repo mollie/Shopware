@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Basket;
 
 use Enlight_View;
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
+use MollieShopware\Models\Voucher\VoucherType;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Detail;
@@ -124,6 +125,11 @@ class Basket implements BasketInterface
 
         /** @var Detail $article */
         $article = $articles[0];
+
+        if (!method_exists($article->getAttribute(), 'getMollieVoucherType')) {
+            $this->logger->warning('Method getMollieVoucherType is not existing in Article Attributes. Please clear your cache!');
+            return VoucherType::NONE;
+        }
 
         return (string)$article->getAttribute()->getMollieVoucherType();
     }
