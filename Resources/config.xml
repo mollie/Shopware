@@ -859,7 +859,7 @@
             <name>mollie_applepaydirect_restrictions</name>
             <label lang="en">Display Restrictions</label>
             <label lang="de">Anzeige Einschränkungen</label>
-            <label lang="nl-NL">Beperkingen weergeven</label>
+            <label lang="nl-NL">Displayrestricties</label>
             <label lang="es-ES">Restricciones de visualización</label>
             <label lang="fr-FR">Restrictions d'affichage</label>
             <label lang="it-IT">Restrizioni di visualizzazione</label>
