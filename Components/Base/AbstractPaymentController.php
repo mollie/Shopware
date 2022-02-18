@@ -220,6 +220,37 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
      */
     protected function doPersistBasket()
     {
-        return parent::persistBasket();
+        if (method_exists($this, 'persistBasket')) {
+            return parent::persistBasket();
+        } else {
+            return $this->persistBasketLegacy();
+        }
     }
+
+    /**
+     * This function is used to return a basket signature in versions
+     * before Shopware 5.3.
+     * It just needs a random string. So it did indeed work in older versions.
+     * @return string
+     */
+    private function persistBasketLegacy()
+    {
+        return $this->generateRandomString(10);
+    }
+
+    /**
+     * @param $length
+     * @return string
+     */
+    private function generateRandomString($length)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
 }
