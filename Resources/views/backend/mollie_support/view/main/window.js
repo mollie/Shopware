@@ -3,23 +3,29 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
     extend: 'Enlight.app.Window',
     title: '{s name=title}Mollie support{/s}',
     cls: Ext.baseCSSPrefix + 'mollie-support-main-window',
-    alias: 'widget.mollie-support-main-window',
+    alias: 'widget.mollieSupportMainWindow',
     autoShow: true,
     layout: 'fit',
     height: 600,
     width: 940,
 
+    mollieSnippets: {
+        titleForm: '{s name=titleForm}Form{/s}',
+        titleCollectedData: '{s name=titleCollectedData}Collected data{/s}'
+    },
+
     initComponent: function() {
         var me = this;
-        var tabPanel = me.createTabPanel();
+        var tabPanel = me.createPanel();
 
         me.items = [tabPanel];
         me.callParent(arguments);
     },
 
-    createTabPanel: function() {
+    createPanel: function() {
         var me = this;
-        var tabPanel = Ext.create('Ext.form.Panel', {
+
+        return Ext.create('Ext.form.Panel', {
             layout: {
                 type: 'hbox',
                 align: 'stretch'
@@ -39,29 +45,29 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
             items: [
                 {
                     xtype: 'fieldset',
-                    title: '{s name=titleForm}Form{/s}',
+                    title: me.mollieSnippets.titleForm,
                     flex: 4,
                     layout: 'fit',
 
                     items: [
                         {
-                            xtype: 'mollie-support-form'
+                            xtype: 'mollieSupportForm',
+                            itemId: 'mollieSupportForm'
                         }
                     ]
                 },
                 {
                     xtype: 'fieldset',
-                    title: '{s name=titleCollectedData}Collected data{/s}',
+                    title: me.mollieSnippets.titleCollectedData,
                     margin: '0 0 0 10',
                     items: [
                         {
-                            xtype: 'mollie-support-collected-data'
+                            xtype: 'mollieSupportCollectedData',
+                            itemId: 'mollieSupportCollectedData'
                         }
                     ]
                 }
             ]
         });
-
-        return tabPanel;
     }
 });

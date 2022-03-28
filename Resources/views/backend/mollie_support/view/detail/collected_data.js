@@ -2,8 +2,8 @@
 Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
     extend: 'Ext.Component',
     ui: 'shopware-ui',
-    id: 'mollie-support-collected-data',
-    alias: 'widget.mollie-support-collected-data',
+    id: 'mollieSupportCollectedData',
+    alias: 'widget.mollieSupportCollectedData',
 
     html: [
         '<b>Shopware:</b><br />...<br /><br />',
