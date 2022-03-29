@@ -5,6 +5,13 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     formDataKey: '__mollie_support_form_data',
     views: ['main.Window'],
 
+    mollieSnippets: {
+        loadData: {
+            confirmTitle: '{s name=confirmLoadDataTitle}Existing data{/s}',
+            confirmContent: '{s name=confirmLoadDataContent}You seem to have filled out this form earlier, without sending it. Do you wish to reload that data?.{/s}'
+        }
+    },
+
     refs: [
         { ref: 'fieldName', selector: '#mollieSupportForm #fieldName' },
         { ref: 'fieldEmail', selector: '#mollieSupportForm #fieldEmail' },
@@ -21,7 +28,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
 
         me.bindButtons();
         me.bindFields();
-        me.loadFormData(me);
+        me.confirmLoadFormData();
     },
 
     /**
@@ -100,10 +107,38 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     /**
+     * Shows a confirm message box, asking the user to confirm loading existing form data.
+     */
+    confirmLoadFormData: function () {
+        var formData = JSON.parse(window.localStorage.getItem(this.formDataKey));
+
+        if (!formData) {
+            return;
+        }
+
+        if ((formData.name && formData.name.length) || (formData.message && formData.message.length)) {
+            Ext.MessageBox.confirm(
+                this.mollieSnippets.loadData.confirmTitle,
+                this.mollieSnippets.loadData.confirmContent,
+                this.loadFormData,
+                this
+            );
+        }
+    },
+
+    /**
      * Loads existing form data.
      */
-    loadFormData: function () {
+    loadFormData: function (btn, text) {
+        if (btn !== 'yes') {
+            return;
+        }
+
         var formData = JSON.parse(window.localStorage.getItem(this.formDataKey));
+
+        if (!formData) {
+            return;
+        }
 
         if (formData.name) {
             this.getFieldName().setValue(formData.name);
