@@ -5,16 +5,19 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
     id: 'mollieSupportForm',
     alias: 'widget.mollieSupportForm',
 
-    mollieSnippets: {
+    snippets: {
         fieldName: '{s name=fieldName}Your name{/s}',
         fieldEmail: '{s name=fieldEmail}Your email{/s}',
         fieldTo: '{s name=fieldTo}Send request to{/s}',
         fieldMessage: '{s name=fieldMessage}Message{/s}',
-
         buttonClear: '{s name=buttonClear}Clear{/s}',
-        buttonRequestSupport: '{s name=buttonRequestSupport}Request support{/s}'
+        buttonRequestSupport: '{s name=buttonRequestSupport}Request support{/s}',
     },
 
+    /**
+     * Initializes the component and creates a support form
+     * on it for the user to request support from Mollie.
+     */
     initComponent: function() {
         var me = this;
         var form = this.createForm();
@@ -23,6 +26,11 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
         me.callParent(arguments);
     },
 
+    /**
+     * Creates a panel with the required form fields.
+     *
+     * @returns object
+     */
     createForm: function() {
         var me = this;
 
@@ -34,7 +42,7 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
 
             layout: {
                 type: 'vbox',
-                align: 'stretch'
+                align: 'stretch',
             },
 
             defaults: {
@@ -44,25 +52,25 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
             items: [
                 {
                     allowBlank: false,
-                    fieldLabel: me.mollieSnippets.fieldName,
+                    fieldLabel: me.snippets.fieldName,
                     name: 'name',
                     itemId: 'fieldName',
                     emptyText: 'John Doe',
-                    value: ''
+                    value: '',
                 },
                 {
                     allowBlank: false,
-                    fieldLabel: me.mollieSnippets.fieldEmail,
+                    fieldLabel: me.snippets.fieldEmail,
                     name: 'email',
                     itemId: 'fieldEmail',
                     emptyText: 'john.doe@example.org',
                     vtype: 'email',
-                    value: '{config name=mail}'
+                    value: '',
                 },
                 {
                     allowBlank: false,
                     xtype: 'combo',
-                    fieldLabel: me.mollieSnippets.fieldTo,
+                    fieldLabel: me.snippets.fieldTo,
                     name: 'to',
                     itemId: 'fieldTo',
                     store: {
@@ -70,37 +78,37 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                         fields: ['name', 'email'],
                         data: [
                             ['International Support', 'support@mollie.com'],
-                            ['German Support', 'support@mollie.de']
-                        ]
+                            ['German Support', 'support@mollie.de'],
+                        ],
                     },
                     displayField: 'name',
                     valueField: 'email',
                     value: 'support@mollie.com',
                     typeAhead: true,
-                    queryMode: 'local'
+                    queryMode: 'local',
                 },
                 {
                     xtype: 'tinymce',
-                    fieldLabel: me.mollieSnippets.fieldMessage,
+                    fieldLabel: me.snippets.fieldMessage,
                     name: 'message',
                     itemId: 'fieldMessage',
                     height: 350,
-                    value: ''
-                }
+                    value: '',
+                },
             ],
             buttons: [
                 {
-                    text: me.mollieSnippets.buttonClear,
+                    text: me.snippets.buttonClear,
                     itemId: 'buttonClear',
-                    cls: 'secondary button-clear'
+                    cls: 'secondary button-clear',
                 },
                 {
-                    text: me.mollieSnippets.buttonRequestSupport,
+                    text: me.snippets.buttonRequestSupport,
                     cls: 'primary button-request-support',
                     itemId: 'buttonRequestSupport',
-                    formBind: true
-                }
-            ]
+                    formBind: true,
+                },
+            ],
         });
     },
 });

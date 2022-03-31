@@ -9,11 +9,15 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
     height: 600,
     width: 940,
 
-    mollieSnippets: {
+    snippets: {
         titleForm: '{s name=titleForm}Form{/s}',
-        titleCollectedData: '{s name=titleCollectedData}Collected data{/s}'
+        titleCollectedData: '{s name=titleCollectedData}Collected data{/s}',
     },
 
+    /**
+     * Initializes the component and creates a tab
+     * panel with both a form and collected data.
+     */
     initComponent: function() {
         var me = this;
         var tabPanel = me.createPanel();
@@ -22,13 +26,19 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
         me.callParent(arguments);
     },
 
+    /**
+     * Creates a panel with the form on the left
+     * and the collected data on the right.
+     *
+     * @returns object
+     */
     createPanel: function() {
         var me = this;
 
         return Ext.create('Ext.form.Panel', {
             layout: {
                 type: 'hbox',
-                align: 'stretch'
+                align: 'stretch',
             },
 
             border: false,
@@ -39,35 +49,36 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
                 padding: 10,
                 margin: 0,
                 flex: 1,
-                layout: 'form'
+                layout: 'form',
             },
 
             items: [
                 {
                     xtype: 'fieldset',
-                    title: me.mollieSnippets.titleForm,
+                    title: me.snippets.titleForm,
                     flex: 4,
                     layout: 'fit',
 
                     items: [
                         {
                             xtype: 'mollieSupportForm',
-                            itemId: 'mollieSupportForm'
-                        }
-                    ]
+                            itemId: 'mollieSupportForm',
+                        },
+                    ],
                 },
                 {
                     xtype: 'fieldset',
-                    title: me.mollieSnippets.titleCollectedData,
+                    title: me.snippets.titleCollectedData,
                     margin: '0 0 0 10',
                     items: [
                         {
                             xtype: 'mollieSupportCollectedData',
-                            itemId: 'mollieSupportCollectedData'
-                        }
-                    ]
-                }
-            ]
+                            itemId: 'mollieSupportCollectedData',
+                            apiController: me.apiController,
+                        },
+                    ],
+                },
+            ],
         });
-    }
+    },
 });
