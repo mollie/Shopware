@@ -69,16 +69,16 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
         var me = this;
 
         me.apiController.getLoggedInUser(function (options, success, response) {
-            if (!response.user) {
+            if (!response.data || !response.data.user) {
                 return;
             }
 
-            if (response.user.emailAddress) {
-                me.getFieldEmail().setValue(response.user.emailAddress);
+            if (response.data.user.emailAddress) {
+                me.getFieldEmail().setValue(response.data.user.emailAddress);
             }
 
-            if (response.user.fullName) {
-                me.getFieldName().setValue(response.user.fullName);
+            if (response.data.user.fullName) {
+                me.getFieldName().setValue(response.data.user.fullName);
             }
         });
     },
@@ -151,8 +151,11 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
         var me = this;
 
         me.apiController.sendEmail(this.getFormData(), function (options, success, response) {
-            if (!response.data || !response.data.success) {
-                Shopware.Notification.createGrowlMessage(me.snippets.notices.emailNotSent);
+            if (!response.success) {
+                Shopware.Notification.createGrowlMessage(
+                    response.error ? response.error : me.snippets.notices.emailNotSent
+                );
+
                 return;
             }
 

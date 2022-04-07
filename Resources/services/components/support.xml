@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <!-- Components -->
+        <!-- _______________________________________________________________________________________________________ -->
+
+        <service id="mollie_shopware.components.support.services.log_archiver"
+                 class="MollieShopware\Components\Support\Services\LogArchiver" public="true">
+            <argument type="string">%kernel.root_dir%/files/mollie/support</argument>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+        <service id="mollie_shopware.components.support.services.log_collector"
+                 class="MollieShopware\Components\Support\Services\LogCollector" public="true">
+            <argument type="string">%kernel.logs_dir%</argument>
+            <argument type="string">mollie_%kernel.environment%*.log</argument>
+        </service>
+
+        <service id="mollie_shopware.components.support.email_builder"
+                 class="MollieShopware\Components\Support\EmailBuilder" public="true">
+            <argument type="service" id="mollie_shopware.components.support.services.log_archiver"/>
+            <argument type="service" id="mollie_shopware.components.support.services.log_collector"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
+        </service>
+
+    </services>
+</container>

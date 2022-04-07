@@ -25,8 +25,8 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
         var me = this;
 
         me.apiController.getPluginVersion(function (options, success, response) {
-            if (response.version) {
-                var updatedHtml = me.buildHtml(response.version).join('');
+            if (response.data && response.data.version) {
+                var updatedHtml = me.buildHtml(response.data.version).join('');
 
                 me.update(updatedHtml, true);
             }

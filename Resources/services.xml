@@ -10,6 +10,7 @@
         <import resource="services/components/logger.xml"/>
         <import resource="services/components/session_manager.xml"/>
         <import resource="services/components/basket.xml"/>
+        <import resource="services/components/support.xml"/>
         <import resource="services/subscriber.xml"/>
         <import resource="services/commands.xml"/>
         <import resource="services/gateways.xml"/>

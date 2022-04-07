@@ -1,9 +1,10 @@
 <?php
 
+use MollieShopware\Components\Support\EmailBuilder;
 use MollieShopware\MollieShopware;
 use MollieShopware\Traits\Controllers\BackendControllerTrait;
-use Shopware\Models\Payment\Payment;
 use Psr\Log\LoggerInterface;
+use Shopware\Models\Payment\Payment;
 
 class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Backend_Application
 {
@@ -13,6 +14,11 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
      * @var string
      */
     protected $model = Payment::class;
+
+    /**
+     * @var EmailBuilder
+     */
+    private $emailBuilder;
 
     /**
      * @var LoggerInterface
@@ -31,7 +37,9 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
      */
     public function pluginVersionAction()
     {
-        $this->view->assign('version', MollieShopware::PLUGIN_VERSION);
+        $this->view->assign('data', [
+            'version' => MollieShopware::PLUGIN_VERSION,
+        ]);
     }
 
     /**
@@ -50,7 +58,9 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
             'emailAddress' => isset($identity->email) ? $identity->email : '',
         ];
 
-        $this->view->assign('user', $user);
+        $this->view->assign('data', [
+            'user' => $user,
+        ]);
     }
 
     /**
@@ -62,28 +72,26 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
     {
         $this->loadServices();
 
-        if (!$this->validateRequest($this->request)) {
+        try {
+            $email = $this->emailBuilder
+                ->setFullName($this->request->get('name'))
+                ->setEmailAddress($this->request->get('email'))
+                ->setRecipientEmailAddress($this->request->get('to'))
+                ->setMessage($this->request->get('message'))
+                ->getEmail();
+        } catch (Exception $exception) {
+            $this->returnException($exception);
             return;
         }
 
-        $success = true;
-
         try {
-            $this->mailTransport->send($this->createEmail($this->request));
-        } catch (Zend_Mail_Transport_Exception $exception) {
-            $this->logger->error(
-                'Error when trying to send a support email to Mollie.',
-                [
-                    'error' => $exception->getMessage(),
-                ]
-            );
-
-            $success = false;
+            $this->mailTransport->send($email);
+        } catch (Exception $exception) {
+            $this->returnException($exception);
+            return;
         }
 
-        $this->view->assign('data', [
-            'success' => $success,
-        ]);
+        $this->view->assign('success', true);
     }
 
     /**
@@ -93,64 +101,17 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
      */
     private function loadServices()
     {
+        $this->emailBuilder = $this->container->get('mollie_shopware.components.support.email_builder');
         $this->logger = $this->container->get('mollie_shopware.components.logger');
         $this->mailTransport = $this->container->get('shopware.mail_transport');
     }
 
     /**
-     * Creates a Zend_Mail object based on the request.
-     *
-     * @return Zend_Mail|null
+     * @param Exception $exception
+     * @return void
      */
-    private function createEmail(Enlight_Controller_Request_RequestHttp $request)
+    private function returnException(Exception $exception)
     {
-        $name = $request->get('name');
-        $from = $request->get('email');
-        $to = $request->get('to');
-        $message = $request->get('message');
-
-        $body = sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $message);
-
-        try {
-            $email = (new Zend_Mail())
-                ->addTo($to)
-                ->setBodyHtml($body)
-                ->setFrom($from, $name);
-        } catch (Zend_Mail_Exception $exception) {
-            $this->logger->error(
-                'Error when trying to create a Zend_Mail object for sending a support email to Mollie.',
-                [
-                    'error' => $exception->getMessage(),
-                ]
-            );
-        }
-
-        return isset($email) ? $email : null;
-    }
-
-    /**
-     * Validates if the expected fields in the
-     * request are present and not empty.
-     *
-     * @param Enlight_Controller_Request_RequestHttp $request
-     * @return bool
-     */
-    private function validateRequest(Enlight_Controller_Request_RequestHttp $request)
-    {
-        $isValid = !empty($request->get('name'))
-            && !empty($request->get('email'))
-            && !empty($request->get('to'))
-            && !empty($request->get('message'));
-
-        if ($isValid) {
-            return true;
-        }
-
-        $this->view->assign('data', [
-            'error' => 'Not all fields are set.',
-            'success' => false,
-        ]);
-
-        return false;
+        $this->view->assign('error', $exception->getMessage());
     }
 }
