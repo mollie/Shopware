@@ -124,7 +124,7 @@ class EmailBuilder
         // creates a mail object
         $email = (new Zend_Mail())
             ->addTo($this->recipientEmailAddress)
-            ->setBodyText($this->message)
+            ->setBodyText(strip_tags($this->message))
             ->setBodyHtml($this->getBodyHtml())
             ->setFrom($this->emailAddress, $this->fullName);
 
