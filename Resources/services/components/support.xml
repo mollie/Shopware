@@ -11,8 +11,7 @@
 
         <service id="mollie_shopware.components.support.services.log_archiver"
                  class="MollieShopware\Components\Support\Services\LogArchiver" public="true">
-            <argument type="string">%kernel.root_dir%/files/mollie/support</argument>
-            <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument type="service" id="mollie_shopware.components.logger" />
         </service>
 
         <service id="mollie_shopware.components.support.services.log_collector"
@@ -23,9 +22,9 @@
 
         <service id="mollie_shopware.components.support.email_builder"
                  class="MollieShopware\Components\Support\EmailBuilder" public="true">
-            <argument type="service" id="mollie_shopware.components.support.services.log_archiver"/>
-            <argument type="service" id="mollie_shopware.components.support.services.log_collector"/>
-            <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument type="service" id="mollie_shopware.components.support.services.log_archiver" />
+            <argument type="service" id="mollie_shopware.components.support.services.log_collector" />
+            <argument type="service" id="mollie_shopware.components.logger" />
         </service>
 
     </services>

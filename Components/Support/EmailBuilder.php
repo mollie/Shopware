@@ -8,6 +8,7 @@ use MollieShopware\MollieShopware;
 use RuntimeException;
 use Zend_Mail;
 use Zend_Mail_Exception;
+use Zend_Mime;
 use Zend_Mime_Part;
 
 class EmailBuilder
@@ -117,16 +118,18 @@ class EmailBuilder
      */
     public function getEmail()
     {
+        // validates the properties
         $this->validate();
 
-        $body = sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $this->message);
-
+        // creates a mail object
         $email = (new Zend_Mail())
             ->addTo($this->recipientEmailAddress)
-            ->setBodyHtml($body)
+            ->setBodyText($this->message)
+            ->setBodyHtml($this->getBodyHtml())
             ->setFrom($this->emailAddress, $this->fullName);
 
-        $this->addAttachments($email);
+        // adds an archive of log files as attachment
+        $this->addLogFileArchive($email);
 
         return $email;
     }
@@ -135,16 +138,36 @@ class EmailBuilder
      * @param Zend_Mail $email
      * @return void
      */
-    private function addAttachments(Zend_Mail $email)
+    private function addLogFileArchive(Zend_Mail $email)
     {
-        $logs = $this->logCollector->collect();
+        $name = sprintf('%slog_files-%s', MollieShopware::PAYMENT_PREFIX, date('Y-m-d'));
 
-        $archiveName = sprintf('%s_log_files', MollieShopware::PAYMENT_PREFIX);
-        $archiveFile = $this->logArchiver->archive($archiveName, $logs);
+        // creates an archive for the log files
+        $archive = $this->logArchiver->archive($name, $this->logCollector->collect());
 
-        if ($archiveFile !== false) {
-            $email->addAttachment(new Zend_Mime_Part($archiveFile));
+        if ($archive === false) {
+            return;
         }
+
+        // creates a mime part object
+        $file = new Zend_Mime_Part($archive);
+        $file->filename = sprintf('%s.zip', $name);
+        $file->type = 'application/zip';
+        $file->disposition = Zend_Mime::DISPOSITION_ATTACHMENT;
+
+        // adds the attachment to the mail object
+        $email->addAttachment($file);
+    }
+
+    /**
+     * Returns the message wrapped in a div
+     * with inline styling as the body.
+     *
+     * @return string
+     */
+    private function getBodyHtml()
+    {
+        return sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $this->message);
     }
 
     /**
@@ -157,18 +180,22 @@ class EmailBuilder
     {
         $errors = [];
 
+        // checks if the fullName property is not empty
         if (empty($this->fullName)) {
             $errors[] = 'no name was provided';
         }
 
+        // checks if the emailAddress property is a valid email address
         if (filter_var($this->emailAddress, FILTER_VALIDATE_EMAIL) === false) {
             $errors[] = 'no valid email address was provided';
         }
 
+        // checks if the recipientEmailAddress property is a valid email address
         if (filter_var($this->recipientEmailAddress, FILTER_VALIDATE_EMAIL) === false) {
             $errors[] = 'no valid recipient email address was provided';
         }
 
+        // checks if the message property is not empty
         if (empty($this->message)) {
             $errors[] = 'no message was provided';
         }
@@ -177,6 +204,8 @@ class EmailBuilder
             return;
         }
 
-        throw new RuntimeException(sprintf("Could not create support email, because %s.", implode(', ', $errors)));
+        throw new RuntimeException(
+            sprintf("Could not create support email, because %s.", implode(', ', $errors))
+        );
     }
 }

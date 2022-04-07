@@ -8,11 +8,6 @@ use ZipArchive;
 class LogArchiver
 {
     /**
-     * @var string
-     */
-    private $storagePath;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -20,15 +15,11 @@ class LogArchiver
     /**
      * Creates a new instance of the log archiver.
      *
-     * @param string $storagePath
      * @param LoggerInterface $logger
      */
-    public function __construct($storagePath, $logger)
+    public function __construct($logger)
     {
-        $this->storagePath = $storagePath;
         $this->logger = $logger;
-
-        $this->createDirectoryIfNotExists();
     }
 
     /**
@@ -36,46 +27,38 @@ class LogArchiver
      * collected log files stored inside.
      *
      * @param string $name
-     * @param array $logs
+     * @param array $files
      *
-     * @return false|string
+     * @return false|resource
      */
-    public function archive($name, array $logs)
+    public function archive($name, array $files)
     {
-        if (empty($logs) || !is_dir($this->storagePath)) {
+        // creates a temporary file where
+        // the zip archive can be stored
+        $filename = tempnam(sys_get_temp_dir(), sprintf('%s.zip', $name));
+
+        if (empty($files) || $filename === false) {
             return false;
         }
 
         $archive = new ZipArchive();
-        $filename = sprintf('%s/%s.zip', $this->storagePath, $name);
 
+        // adds the log files to a zip archive
         if ($archive->open($filename, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            foreach ($logs as $file) {
+            foreach ($files as $file) {
                 $archive->addFile($file, basename($file));
             }
         } else {
-            $this->logger->error(sprintf('Could not create or overwrite attachment %s', $filename));
+            $this->logger->error(
+                sprintf(
+                    'Could not create or overwrite zip archive %s when creating a support e-mail to Mollie.',
+                    $filename
+                )
+            );
         }
 
-        return file_get_contents($filename);
-    }
+        $archive->close();
 
-    /**
-     * Creates the directory where the zip file
-     * is being stored, if it doesn't exist.
-     *
-     * @return void
-     */
-    private function createDirectoryIfNotExists()
-    {
-        if (is_dir($this->storagePath)) {
-            return;
-        }
-
-        $created = mkdir($this->storagePath, 0775, true);
-
-        if (!$created) {
-            $this->logger->error(sprintf('Could not create directory %s', $this->storagePath));
-        }
+        return fopen($filename, 'r');
     }
 }

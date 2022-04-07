@@ -34,11 +34,12 @@ class LogCollector
      */
     public function collect()
     {
+        // returns an empty array if the path doesn't exist
         if (!is_dir($this->path)) {
             return [];
         }
 
-        $pattern = sprintf('%s/%s', $this->path, $this->pattern);
+        $pattern = $this->path . DIRECTORY_SEPARATOR . $this->pattern;
 
         return glob($pattern);
     }
