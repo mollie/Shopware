@@ -1,8 +1,6 @@
 //{namespace name="backend/mollie_support/controller/main"}
 Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     extend: 'Ext.app.Controller',
-    formDataUpdateTimer: null,
-    formDataKey: '__mollie_support_form_data',
     views: ['main.Window'],
 
     apiController: null,
@@ -11,10 +9,6 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
         closeWindow: {
             confirmTitle: '{s name=confirmCloseWindowTitle}Close window?{/s}',
             confirmContent: '{s name=confirmCloseWindowTitle}Are you sure you want to close this window?{/s}',
-        },
-        loadData: {
-            confirmTitle: '{s name=confirmLoadDataTitle}Existing data{/s}',
-            confirmContent: '{s name=confirmLoadDataContent}You seem to have filled out this form earlier, without sending it. Do you wish to reload that data?.{/s}',
         },
         notices: {
             emailSent: '{s name=noticeEmailSent}The email is sent to Mollie\'s support. Do you wish to close this window?{/s}',
@@ -54,9 +48,8 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
             apiController: me.apiController,
         });
 
+        me.initForm();
         me.bindButtons();
-        me.bindFields();
-        me.confirmLoadFormData();
     },
 
     /**
@@ -102,35 +95,6 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     /**
-     * Binds the form field to change events.
-     *
-     * @return void
-     */
-    bindFields: function () {
-        var me = this;
-
-        me.control({
-            [me.selectors.fieldName]: {
-                change: me.updateFormData,
-            },
-            [me.selectors.fieldEmail]: {
-                change: me.updateFormData,
-            },
-            [me.selectors.fieldTo]: {
-                change: me.updateFormData,
-            },
-        });
-
-        me.getFieldMessage().tinymce.onKeyUp.add(function (editor, values) {
-            me.updateFormData();
-        });
-
-        me.getFieldMessage().tinymce.onChange.add(function (editor, values) {
-            me.updateFormData();
-        });
-    },
-
-    /**
      * Resets the form when the clear button is clicked.
      *
      * @return void
@@ -164,17 +128,6 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     /**
-     * Clears existing form data from local storage.
-     *
-     * @return void
-     */
-    clearFormData: function () {
-        var me = this;
-
-        window.localStorage.removeItem(me.formDataKey);
-    },
-
-    /**
      * Closes the main window, if the user confirmed to do so.
      *
      * @param btn
@@ -188,29 +141,6 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
 
         me.resetForm();
         me.mainWindow.close();
-    },
-
-    /**
-     * Shows a confirm message box, asking the user
-     * to confirm loading existing form data.
-     *
-     * @return void
-     */
-    confirmLoadFormData: function () {
-        var me = this;
-        var formData = JSON.parse(window.localStorage.getItem(me.formDataKey));
-
-        if (!formData || !formData.message || !formData.message.length) {
-            me.initForm();
-            return;
-        }
-
-        Ext.MessageBox.confirm(
-            me.snippets.loadData.confirmTitle,
-            me.snippets.loadData.confirmContent,
-            me.loadFormData,
-            me
-        );
     },
 
     /**
@@ -251,42 +181,6 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     /**
-     * Loads existing form data.
-     *
-     * @return void
-     */
-    loadFormData: function (btn) {
-        var me = this;
-
-        if (btn !== 'yes') {
-            me.initForm();
-            return;
-        }
-
-        var formData = JSON.parse(window.localStorage.getItem(me.formDataKey));
-
-        if (!formData) {
-            return;
-        }
-
-        if (formData.name) {
-            me.getFieldName().setValue(formData.name);
-        }
-
-        if (formData.email) {
-            me.getFieldEmail().setValue(formData.email);
-        }
-
-        if (formData.to) {
-            me.getFieldTo().setValue(formData.to);
-        }
-
-        if (formData.message) {
-            me.getFieldMessage().setValue(formData.message);
-        }
-    },
-
-    /**
      * Resets the form fields and clears the form data.
      *
      * @return void
@@ -297,27 +191,5 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
         me.getFieldName().setValue('');
         me.getFieldTo().setValue('support@mollie.com');
         me.getFieldMessage().setValue('');
-
-        me.clearFormData();
-    },
-
-    /**
-     * Stores the form data in the local storage.
-     *
-     * @return void
-     */
-    updateFormData: function () {
-        var me = this;
-
-        if (me.formDataUpdateTimer) {
-            clearTimeout(me.formDataUpdateTimer);
-        }
-
-        me.formDataUpdateTimer = setTimeout(function () {
-            window.localStorage.setItem(
-                me.formDataKey,
-                JSON.stringify(me.getFormData())
-            );
-        }, 500);
     },
 });

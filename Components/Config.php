@@ -368,7 +368,7 @@ class Config implements ConfigInterface
     }
 
     /**
-     * @return string
+     * @return bool
      */
     public function resetInvoiceAndShipping()
     {

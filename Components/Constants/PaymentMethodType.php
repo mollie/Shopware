@@ -12,6 +12,12 @@ class PaymentMethodType
     const PAYMENTS_API = 2;
     const ORDERS_API = 3;
 
+    public static $types = [
+        self::UNDEFINED => 'UNDEFINED',
+        self::GLOBAL_SETTING => 'GLOBAL_SETTINGS',
+        self::PAYMENTS_API => 'PAYMENTS_API',
+        self::ORDERS_API => 'ORDERS_API',
+    ];
 
     /**
      * Gets if the payment method allows the payments api,
