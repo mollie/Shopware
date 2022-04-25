@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie_support/controller/main"}
+//{namespace name="backend/mollie/support/controller/main"}
 Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     extend: 'Ext.app.Controller',
     views: ['main.Window'],

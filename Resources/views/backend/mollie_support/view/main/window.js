@@ -7,11 +7,12 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
     autoShow: true,
     layout: 'fit',
     height: 600,
-    width: 940,
+    width: 880,
 
     snippets: {
-        titleForm: '{s name=titleForm}Form{/s}',
+        titleForm: '{s name=titleForm}Support form{/s}',
         titleCollectedData: '{s name=titleCollectedData}Collected data{/s}',
+        titleInformation: '{s name=titleInformation}Information{/s}',
     },
 
     /**
@@ -45,38 +46,69 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
             bodyPadding: 10,
 
             defaults: {
-                xtype: 'panel',
+                xtype: 'fieldset',
                 padding: 10,
                 margin: 0,
                 flex: 1,
-                layout: 'form',
+                layout: 'fit',
             },
 
             items: [
                 {
-                    xtype: 'fieldset',
                     title: me.snippets.titleForm,
-                    flex: 4,
-                    layout: 'fit',
+                    flex: 2.75,
 
                     items: [
                         {
                             xtype: 'mollieSupportForm',
                             itemId: 'mollieSupportForm',
+                            layout: 'fit',
                         },
                     ],
                 },
                 {
                     xtype: 'fieldset',
-                    title: me.snippets.titleCollectedData,
-                    margin: '0 0 0 10',
+                    layout: {
+                        type: 'vbox',
+                        align: 'stretch'
+                    },
+
+                    border: false,
+                    padding: '0 0 0 10px',
+                    flex: 1,
+
+                    defaults: {
+                        xtype: 'fieldset',
+                        padding: 10,
+                        margin: 0,
+                        flex: 1,
+                        layout: 'fit',
+                    },
+
                     items: [
                         {
-                            xtype: 'mollieSupportCollectedData',
-                            itemId: 'mollieSupportCollectedData',
-                            apiController: me.apiController,
+                            title: me.snippets.titleCollectedData,
+                            margin: '0 0 10px 0',
+                            maxHeight: 225,
+                            items: [
+                                {
+                                    xtype: 'mollieSupportCollectedData',
+                                    itemId: 'mollieSupportCollectedData',
+                                    apiController: me.apiController,
+                                },
+                            ],
                         },
-                    ],
+                        {
+                            title: me.snippets.titleInformation,
+                            items: [
+                                {
+                                    xtype: 'mollieSupportInformation',
+                                    itemId: 'mollieSupportInformation',
+                                    apiController: me.apiController,
+                                },
+                            ],
+                        }
+                    ]
                 },
             ],
         });

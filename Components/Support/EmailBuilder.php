@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Components\Support;
 
+use MollieShopware\Components\Config\ConfigExporter;
 use MollieShopware\Components\Support\Services\LogArchiver;
 use MollieShopware\Components\Support\Services\LogCollector;
 use MollieShopware\MollieShopware;
@@ -14,6 +15,11 @@ use Zend_Mime_Part;
 class EmailBuilder
 {
     /**
+     * @var ConfigExporter
+     */
+    private $configExporter;
+
+    /**
      * @var LogArchiver
      */
     private $logArchiver;
@@ -22,6 +28,11 @@ class EmailBuilder
      * @var LogCollector
      */
     private $logCollector;
+
+    /**
+     * @var string
+     */
+    private $shopwareVersion;
 
     /**
      * @var string
@@ -46,13 +57,17 @@ class EmailBuilder
     /**
      * Creates a new instance of the email builder.
      *
+     * @param ConfigExporter $configExporter
      * @param LogArchiver $logArchiver
      * @param LogCollector $logCollector
+     * @param string $shopwareVersion
      */
-    public function __construct(LogArchiver $logArchiver, LogCollector $logCollector)
+    public function __construct(ConfigExporter $configExporter, LogArchiver $logArchiver, LogCollector $logCollector, $shopwareVersion)
     {
+        $this->configExporter = $configExporter;
         $this->logArchiver = $logArchiver;
         $this->logCollector = $logCollector;
+        $this->shopwareVersion = $shopwareVersion;
     }
 
     /**
@@ -124,9 +139,12 @@ class EmailBuilder
         // creates a mail object
         $email = (new Zend_Mail())
             ->addTo($this->recipientEmailAddress)
-            ->setBodyText(strip_tags($this->message))
+            ->setBodyText($this->getBodyText())
             ->setBodyHtml($this->getBodyHtml())
             ->setFrom($this->emailAddress, $this->fullName);
+
+        // adds a text file of the configuration as attachment
+        $this->addConfigurationFile($email);
 
         // adds an archive of log files as attachment
         $this->addLogFileArchive($email);
@@ -135,6 +153,34 @@ class EmailBuilder
     }
 
     /**
+     * Adds the configuration file as an
+     * attachment to the email object.
+     *
+     * @param Zend_Mail $email
+     * @return void
+     */
+    private function addConfigurationFile(Zend_Mail $email)
+    {
+        // creates a mime part object
+        $file = new Zend_Mime_Part($this->configExporter->getHumanReadableConfig());
+
+        $file->filename = sprintf(
+            '%sconfiguration-%s.txt',
+            MollieShopware::PAYMENT_PREFIX,
+            date('Y-m-d')
+        );
+
+        $file->type = 'plain/text';
+        $file->disposition = Zend_Mime::DISPOSITION_ATTACHMENT;
+
+        // adds the attachment to the mail object
+        $email->addAttachment($file);
+    }
+
+    /**
+     * Adds the log file archive as an
+     * attachment to the email object.
+     *
      * @param Zend_Mail $email
      * @return void
      */
@@ -167,7 +213,37 @@ class EmailBuilder
      */
     private function getBodyHtml()
     {
-        return sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $this->message);
+        $message = sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $this->message);
+
+        $information = sprintf('
+            <hr />
+            <br>
+            <div style="font-family: sans-serif; font-size: 12pt;">
+                <strong>Shopware version:</strong> %s<br>
+                <strong>Mollie plugin version:</strong> %s
+            </div>
+        ',
+            $this->shopwareVersion,
+            MollieShopware::PLUGIN_VERSION
+        );
+
+        return sprintf("%s<br>%s<br><br>", $message, $information);
+    }
+
+    /**
+     * Returns the message as plain text.
+     *
+     * @return string
+     */
+    private function getBodyText()
+    {
+        $information = sprintf(
+            "-----\n\nShopware version: %s\nMollie plugin version: %s",
+            $this->shopwareVersion,
+            MollieShopware::PLUGIN_VERSION
+        );
+
+        return sprintf("%s\n\n%s\n\n", strip_tags($this->message), $information);
     }
 
     /**

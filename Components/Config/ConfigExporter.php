@@ -56,15 +56,12 @@ class ConfigExporter
     }
 
     /**
-     * Returns an array of configuration values for
-     * all shops, when humanReadable is true, the
-     * keys and values are transformed in a
-     * way that is more reader friendly.
+     * Returns an array of configuration
+     * values for all shops.
      *
-     * @param bool $humanReadable
      * @return array<string, array>
      */
-    public function getConfigArray($humanReadable = false)
+    public function getConfigArray()
     {
         $config = [];
         $shops = $this->shopService->getAllShops();
@@ -74,9 +71,7 @@ class ConfigExporter
         }
 
         foreach ($shops as $shop) {
-            $config[$shop->getId()] = $humanReadable
-                ? $this->getShopHumanReadableConfigArray($shop)
-                : $this->getShopConfigArray($shop);
+            $config[$shop->getId()] = $this->getShopConfigArray($shop);
         }
 
         return $config;
@@ -119,13 +114,35 @@ class ConfigExporter
     }
 
     /**
-     * Returns an array of configuration values for a
-     * specific shop that is more humanly readable.
+     * Returns a humanly readable text with
+     * the configuration of all subshops.
+     *
+     * @return string
+     */
+    public function getHumanReadableConfig()
+    {
+        $humanReadableConfig = '';
+        $shops = $this->shopService->getAllShops();
+
+        if (empty($shops)) {
+            return '';
+        }
+
+        foreach ($shops as $shop) {
+            $humanReadableConfig .= sprintf("%s\n\n", $this->getHumanReadableShopConfig($shop));
+        }
+
+        return $humanReadableConfig;
+    }
+
+    /**
+     * Returns a humanly readable text containing the
+     * configuration values for a specific shop.
      *
      * @param Shop $shop
-     * @return array<string, mixed>
+     * @return string
      */
-    public function getShopHumanReadableConfigArray($shop)
+    public function getHumanReadableShopConfig($shop)
     {
         $config = $this->validateApiKeys($this->getShopConfigArray($shop), $shop);
 
@@ -137,22 +154,37 @@ class ConfigExporter
             $config['logLevel'] = $this->getLogLevelName($config['logLevel']);
         }
 
-        $humanReadableConfig = [];
+        $humanReadableConfig = isset($config['shop'])
+            ? sprintf("[%s]", $config['shop'])
+            : '';
 
         foreach ($config as $key => $value) {
-            if (is_bool($value)) {
-                $config[$key] = $value === true ? 'Yes' : 'No';
+            if ($key === 'shop') {
+                continue;
+            }
+
+            if (is_null($value) || $value === '') {
+                $config[$key] = 'Not set';
             }
 
             if (is_array($value)) {
-                $config[$key] = implode(', ', $value);
+                $config[$key] = !empty($value) ? implode(', ', $value) : 'Not set';
+            }
+
+            if (is_bool($value)) {
+                $config[$key] = $value === true ? 'Yes' : 'No';
             }
 
             if (stripos($key, 'status') !== false) {
                 $config[$key] = $this->getStatusName($value);
             }
 
-            $humanReadableConfig[$this->getHumanReadableLabel($key)] = $config[$key];
+            $humanReadableConfig = sprintf(
+                "%s\n%s: %s",
+                $humanReadableConfig,
+                $this->getHumanReadableLabel($key),
+                $config[$key]
+            );
         }
 
         return $humanReadableConfig;

@@ -11,6 +11,7 @@ Ext.define('Shopware.apps.MollieSupport', {
         'main.Window',
         'detail.CollectedData',
         'detail.Form',
+        'detail.Information',
     ],
 
     /**

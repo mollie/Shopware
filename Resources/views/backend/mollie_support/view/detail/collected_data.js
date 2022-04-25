@@ -5,16 +5,39 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
     id: 'mollieSupportCollectedData',
     alias: 'widget.mollieSupportCollectedData',
 
+    snippets: {
+        labelAttachments: '{s name=labelAttachments}Attachments{/s}',
+        labelPluginLogs: '{s name=labelPluginLogs}Mollie Shopware log files{/s}',
+        labelPluginConfiguration: '{s name=labelPluginConfiguration}Mollie Shopware configuration{/s}',
+        configurationHelpText: '{s name=configurationHelpText}The API keys are blanked out because these are your private keys.{/s}',
+    },
+
+    style: {
+        lineHeight: 1.5,
+    },
+
     /**
      * Initializes the component and sets the initial HTML,
      * without displaying version of the Mollie plugin.
      */
     initComponent: function () {
         var me = this;
-        var initialHtml = me.buildHtml('').join('');
+        var initialHtml = me.buildHtml('');
 
         me.update(initialHtml, true);
         me.loadPluginVersion();
+    },
+
+    /**
+     * Creates a help icon with a tooltip text.
+     *
+     * @returns string
+     */
+    createHelpIcon: function() {
+        var me = this;
+
+        return '<span class="' + Ext.baseCSSPrefix + 'form-help-icon" ' +
+            'data-qtip="' + me.snippets.configurationHelpText + '" style="display: inline-block;"></span>';
     },
 
     /**
@@ -26,7 +49,7 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
 
         me.apiController.getPluginVersion(function (options, success, response) {
             if (response.data && response.data.version) {
-                var updatedHtml = me.buildHtml(response.data.version).join('');
+                var updatedHtml = me.buildHtml(response.data.version);
 
                 me.update(updatedHtml, true);
             }
@@ -38,13 +61,19 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
      * of this plugin and which files will be attached to the e-mail.
      *
      * @param version
-     * @returns string[]
+     * @returns string
      */
     buildHtml: function (version) {
-        return [
-            '<b>Shopware:</b><br />{config name="Version"}<br /><br />',
-            '<b>Mollie Shopware:</b><br />' + version.toString() + '<br /><br />',
-            '<b>{s name=labelAttachments}Attachments{/s}:</b><br />{s name=labelPluginLogs}Mollie Shopware log files{/s}<br /><br />',
-        ];
+        var me = this;
+
+        return  '<div class="mollie-support-collected-data">' +
+                '   <b>Shopware:</b><br />' +
+                '   {config name="Version"}<br /><br />' +
+                '   <b>Mollie Shopware:</b><br />' +
+                '   ' + version.toString() + '<br /><br />' +
+                '   <b>' + me.snippets.labelAttachments + ':' + '</b><br />' +
+                '   ' + me.snippets.labelPluginLogs + '<br />' +
+                '   ' + me.snippets.labelPluginConfiguration + me.createHelpIcon() + '<br /><br />' +
+                '</div>';
     },
 });

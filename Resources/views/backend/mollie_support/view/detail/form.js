@@ -92,8 +92,11 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                     fieldLabel: me.snippets.fieldMessage,
                     name: 'message',
                     itemId: 'fieldMessage',
-                    height: 350,
+                    height: 300,
                     value: '',
+                    editor: {
+                        theme_advanced_buttons1: 'undo,redo,|,bold,italic,underline,|,fontsizeselect,|,bullist,numlist,|,justifyleft,justifycenter,justifyright,|,link,unlink,|,fullscreen,',
+                    }
                 },
             ],
             buttons: [
