@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie/support/view/detail/information"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport.view.detail.Information', {
     extend: 'Ext.Component',
     ui: 'shopware-ui',
@@ -6,11 +6,11 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Information', {
     alias: 'widget.mollieSupportInformation',
 
     snippets: {
-        labelPluginWiki: '{s name=labelPluginWiki}Plugin Wiki{/s}',
-        labelTroubleshooting: '{s name=labelTroubleshooting}Troubleshooting{/s}',
-        labelKnownIssues: '{s name=labelKnownIssues}Known Issues{/s}',
-        labelCompatibilityIssues: '{s name=labelCompatibilityIssues}Compatibility Issues{/s}',
-        labelSupportInformation: '{s name=labelSupportInformation}Support information{/s}',
+        labelPluginWiki: '{s name=support_form_label_plugin_wiki}Plugin Wiki{/s}',
+        labelTroubleshooting: '{s name=support_form_label_troubleshooting}Troubleshooting{/s}',
+        labelKnownIssues: '{s name=support_form_label_known_issues}Known Issues{/s}',
+        labelCompatibilityIssues: '{s name=support_form_label_compatibility_issues}Compatibility Issues{/s}',
+        labelSupportInformation: '{s name=support_form_label_support_information}Support information{/s}',
     },
 
     style: {

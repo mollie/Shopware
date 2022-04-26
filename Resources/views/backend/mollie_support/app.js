@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie_support/app"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport', {
     extend: 'Enlight.app.SubApplication',
     name: 'Shopware.apps.MollieSupport',

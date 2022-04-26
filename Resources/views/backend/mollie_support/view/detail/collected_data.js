@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie/support/view/detail/collected_data"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
     extend: 'Ext.Component',
     ui: 'shopware-ui',
@@ -6,10 +6,10 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.CollectedData', {
     alias: 'widget.mollieSupportCollectedData',
 
     snippets: {
-        labelAttachments: '{s name=labelAttachments}Attachments{/s}',
-        labelPluginLogs: '{s name=labelPluginLogs}Mollie Shopware log files{/s}',
-        labelPluginConfiguration: '{s name=labelPluginConfiguration}Mollie Shopware configuration{/s}',
-        configurationHelpText: '{s name=configurationHelpText}The API keys are blanked out because these are your private keys.{/s}',
+        labelAttachments: '{s name=support_form_label_attachments}Attachments{/s}',
+        labelPluginLogs: '{s name=support_form_label_plugin_logs}Mollie Shopware log files{/s}',
+        labelPluginConfiguration: '{s name=support_form_label_plugin_configuration}Mollie Shopware configuration{/s}',
+        configurationHelpText: '{s name=support_form_help_text_configuration}The API keys are blanked out because these are your private keys.{/s}',
     },
 
     style: {

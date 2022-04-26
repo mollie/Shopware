@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie/support/view/detail/form"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
     extend: 'Ext.Container',
     ui: 'shopware-ui',
@@ -6,12 +6,12 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
     alias: 'widget.mollieSupportForm',
 
     snippets: {
-        fieldName: '{s name=fieldName}Your name{/s}',
-        fieldEmail: '{s name=fieldEmail}Your email{/s}',
-        fieldTo: '{s name=fieldTo}Send request to{/s}',
-        fieldMessage: '{s name=fieldMessage}Message{/s}',
-        buttonClear: '{s name=buttonClear}Clear{/s}',
-        buttonRequestSupport: '{s name=buttonRequestSupport}Request support{/s}',
+        fieldName: '{s name=support_form_field_name}Your name{/s}',
+        fieldEmail: '{s name=support_form_field_email}Your email{/s}',
+        fieldTo: '{s name=support_form_field_to}Send request to{/s}',
+        fieldMessage: '{s name=support_form_field_message}Message{/s}',
+        buttonClear: '{s name=support_form_button_clear}Clear{/s}',
+        buttonRequestSupport: '{s name=support_form_button_request_support}Request support{/s}',
     },
 
     /**
@@ -55,7 +55,6 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                     fieldLabel: me.snippets.fieldName,
                     name: 'name',
                     itemId: 'fieldName',
-                    emptyText: 'John Doe',
                     value: '',
                 },
                 {
@@ -63,7 +62,6 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                     fieldLabel: me.snippets.fieldEmail,
                     name: 'email',
                     itemId: 'fieldEmail',
-                    emptyText: 'john.doe@example.org',
                     vtype: 'email',
                     value: '',
                 },

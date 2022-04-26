@@ -1,4 +1,4 @@
-//{namespace name="backend/mollie/support/controller/main"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     extend: 'Ext.app.Controller',
     views: ['main.Window'],
@@ -7,12 +7,12 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
 
     snippets: {
         closeWindow: {
-            confirmTitle: '{s name=confirmCloseWindowTitle}Close window?{/s}',
-            confirmContent: '{s name=confirmCloseWindowTitle}Are you sure you want to close this window?{/s}',
+            confirmTitle: '{s name=support_form_confirmation_close_window_title}Close window?{/s}',
+            confirmContent: '{s name=support_form_confirmation_close_window_content}Are you sure you want to close this window?{/s}',
         },
         notices: {
-            emailSent: '{s name=noticeEmailSent}The email is sent to Mollie\'s support. Do you wish to close this window?{/s}',
-            emailNotSent: '{s name=noticeEmailNotSent}The email could not be sent. Did you fill out all the fields?{/s}',
+            emailSent: '{s name=support_form_notice_email_sent}The email is sent to Mollie\'s support. Do you wish to close this window?{/s}',
+            emailNotSent: '{s name=support_form_notice_email_not_sent}The email could not be sent. Did you fill out all the fields?{/s}',
         },
     },
 

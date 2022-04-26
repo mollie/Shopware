@@ -1,7 +1,7 @@
-//{namespace name="backend/mollie/support/view/main"}
+//{namespace name="backend/mollie/general"}
 Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
     extend: 'Enlight.app.Window',
-    title: '{s name=title}Mollie support{/s}',
+    title: '{s name=support_form_title_main_window}Mollie support{/s}',
     cls: Ext.baseCSSPrefix + 'mollie-support-main-window',
     alias: 'widget.mollieSupportMainWindow',
     autoShow: true,
@@ -10,9 +10,9 @@ Ext.define('Shopware.apps.MollieSupport.view.main.Window', {
     width: 880,
 
     snippets: {
-        titleForm: '{s name=titleForm}Support form{/s}',
-        titleCollectedData: '{s name=titleCollectedData}Collected data{/s}',
-        titleInformation: '{s name=titleInformation}Information{/s}',
+        titleForm: '{s name=support_form_title_panel_form}Support form{/s}',
+        titleCollectedData: '{s name=support_form_title_panel_collected_data}Collected data{/s}',
+        support_form_title_panel_information: '{s name=titleInformation}Information{/s}',
     },
 
     /**
