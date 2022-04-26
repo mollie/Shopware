@@ -12,6 +12,8 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
         fieldMessage: '{s name=support_form_field_message}Message{/s}',
         buttonClear: '{s name=support_form_button_clear}Clear{/s}',
         buttonRequestSupport: '{s name=support_form_button_request_support}Request support{/s}',
+        labelInternationalSupport: '{s name=support_form_label_international_support}International support{/s}',
+        labelGermanSupport: '{s name=support_form_label_german_support}German support{/s}',
     },
 
     /**
@@ -75,8 +77,8 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                         type: 'array',
                         fields: ['name', 'email'],
                         data: [
-                            ['International Support', 'support@mollie.com'],
-                            ['German Support', 'support@mollie.de'],
+                            [me.snippets.labelInternationalSupport, 'support@mollie.com'],
+                            [me.snippets.labelGermanSupport, 'support@mollie.de'],
                         ],
                     },
                     displayField: 'name',
