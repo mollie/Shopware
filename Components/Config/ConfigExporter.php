@@ -144,7 +144,9 @@ class ConfigExporter
      */
     public function getHumanReadableShopConfig($shop)
     {
-        $config = $this->validateApiKeys($this->getShopConfigArray($shop), $shop);
+        $config = $this->getShopConfigArray($shop);
+
+        $this->validateApiKeys($config, $shop);
 
         if (isset($config['paymentMethodsType'])) {
             $config['paymentMethodsType'] = $this->getApiMethodName($config['paymentMethodsType']);
