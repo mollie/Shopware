@@ -175,7 +175,7 @@ class ConfigExporter
                 $config[$key] = $value === true ? 'Yes' : 'No';
             }
 
-            if (stripos($key, 'status') !== false) {
+            if (stripos($key, 'status') !== false && is_numeric($value)) {
                 $config[$key] = $this->getStatusName($value);
             }
 
