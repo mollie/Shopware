@@ -2,14 +2,23 @@
 
 namespace MollieShopware\Tests\Components\Support;
 
+use MollieShopware\Components\Config\ConfigExporter;
 use MollieShopware\Components\Support\EmailBuilder;
 use MollieShopware\Components\Support\Services\LogArchiver;
 use MollieShopware\Components\Support\Services\LogCollector;
+use MollieShopware\MollieShopware;
 use PHPUnit\Framework\TestCase;
 use Zend_Mail_Exception;
 
 class EmailBuilderTest extends TestCase
 {
+    const TEST_VALUE_SHOPWARE_VERSION = '5.7.8';
+
+    /**
+     * @var ConfigExporter
+     */
+    private $configExporter;
+
     /**
      * @var LogArchiver
      */
@@ -27,6 +36,10 @@ class EmailBuilderTest extends TestCase
 
     public function setUp(): void
     {
+        $this->configExporter = $this->createConfiguredMock(ConfigExporter::class, [
+            'getHumanReadableConfig' => '',
+        ]);
+
         $this->logArchiver = $this->createConfiguredMock(LogArchiver::class, [
             'archive' => false,
         ]);
@@ -35,7 +48,12 @@ class EmailBuilderTest extends TestCase
             'collect' => [],
         ]);
 
-        $this->emailBuilder = new EmailBuilder($this->logArchiver, $this->logCollector);
+        $this->emailBuilder = new EmailBuilder(
+            $this->configExporter,
+            $this->logArchiver,
+            $this->logCollector,
+            self::TEST_VALUE_SHOPWARE_VERSION
+        );
     }
 
     /**
@@ -57,16 +75,41 @@ class EmailBuilderTest extends TestCase
 
         $expectedFrom = 'john.doe@test.local';
         $expectedTo = 'support@test.local';
-        $expectedBodyText = 'Help wanted.';
+
+        $expectedBodyText = sprintf(
+            "Help wanted.\n\n-----\n\nShopware version: %s\nMollie plugin version: %s\n\n",
+            self::TEST_VALUE_SHOPWARE_VERSION,
+            MollieShopware::PLUGIN_VERSION
+        );
 
         self::assertSame($expectedFrom, $result->getFrom());
         self::assertSame($expectedTo, $result->getRecipients()[0]);
-        self::assertSame($expectedBodyText, $result->getBodyText()->getContent());
+        self::assertSame($expectedBodyText, $result->getBodyText()->getRawContent());
     }
 
     /**
      * @test
-     * @testdox Method getEmail() does call methods on log archiver and log collector when validated.
+     * @testdox Method getEmail() does call expected method on config exporter when validated.
+     *
+     * @return void
+     *
+     * @throws Zend_Mail_Exception
+     */
+    public function getEmailDoesCallConfigExporterMethodWhenValidated()
+    {
+        $this->configExporter->expects(self::once())->method('getHumanReadableConfig');
+
+        $this->emailBuilder
+            ->setFullName('John Doe')
+            ->setEmailAddress('john.doe@test.local')
+            ->setRecipientEmailAddress('support@test.local')
+            ->setMessage('Help wanted.')
+            ->getEmail();
+    }
+
+    /**
+     * @test
+     * @testdox Method getEmail() does call expected methods on log archiver and log collector when validated.
      *
      * @return void
      *
@@ -90,15 +133,21 @@ class EmailBuilderTest extends TestCase
      * @test
      * @testdox Method validate() does throw expected exception
      *
+     * @param string $fullName
+     * @param string $emailAddress
+     * @param string $recipientEmailAddress
+     * @param string $message
+     * @param string $expectedExceptions
+     *
      * @return void
      * @throws Zend_Mail_Exception
      */
     public function validateDoesThrowExpectedException(
-        string $fullName,
-        string $emailAddress,
-        string $recipientEmailAddress,
-        string $message,
-        string  $expectedExceptions
+        $fullName,
+        $emailAddress,
+        $recipientEmailAddress,
+        $message,
+        $expectedExceptions
     ) {
         $this->expectExceptionMessage(
             sprintf('Could not create support email, because %s.', $expectedExceptions)
@@ -118,7 +167,7 @@ class EmailBuilderTest extends TestCase
      *
      * @return array<string, array>
      */
-    public function provideValidationData(): array
+    public function provideValidationData()
     {
         return [
             'no full name' => ['', 'john.doe@test.local', 'support@test.local', 'Help wanted', 'no name was provided'],
