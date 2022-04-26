@@ -54,7 +54,7 @@ class MollieApiFactory
     }
 
     /**
-     * @param null $shopId
+     * @param int|null $shopId
      * @return MollieApiClient
      * @throws ApiException
      */
@@ -69,7 +69,7 @@ class MollieApiFactory
     }
 
     /**
-     * @param null $shopId
+     * @param int|null $shopId
      * @return MollieApiClient
      * @throws ApiException
      */

@@ -59,7 +59,7 @@ class ConfigExporter
      * Returns an array of configuration
      * values for all shops.
      *
-     * @return array<string, array>
+     * @return array<int, array<string, array>>
      */
     public function getConfigArray()
     {
@@ -194,7 +194,7 @@ class ConfigExporter
      * Returns a label for a specific key
      * that is more humanly readable.
      *
-     * @param $key
+     * @param string $key
      * @return string
      */
     private function getHumanReadableLabel($key)
@@ -233,7 +233,7 @@ class ConfigExporter
     /**
      * Returns the name of the API method, based on its key.
      *
-     * @param $key
+     * @param string $key
      * @return string
      */
     private function getApiMethodName($key)
@@ -244,7 +244,7 @@ class ConfigExporter
     /**
      * Returns the name of a log level, based on its level.
      *
-     * @param $level
+     * @param int $level
      * @return string
      */
     private function getLogLevelName($level)
@@ -260,11 +260,15 @@ class ConfigExporter
     /**
      * Returns the name of a status, based on its id.
      *
-     * @param int|null $statusId
-     * @return int|string
+     * @param mixed $statusId
+     * @return mixed
      */
     private function getStatusName($statusId)
     {
+        if (!is_numeric($statusId)) {
+            return $statusId;
+        }
+
         try {
             /** @var Status|null $status */
             $status = $this->entityManager->getRepository(Status::class)->find($statusId);
