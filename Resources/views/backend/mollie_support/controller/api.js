@@ -7,10 +7,21 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
         sendEmail: '{url module=backend controller=MollieSupport action=sendEmail}',
     },
 
+    /**
+     * Initializes this component.
+     *
+     * @return void
+     */
     init: function () {
         this.callParent(arguments);
     },
 
+    /**
+     * Fetches the plugin version from
+     * the backend API end-point.
+     *
+     * @return void
+     */
     getPluginVersion: function (callback) {
         var me = this;
 
@@ -22,6 +33,12 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
         });
     },
 
+    /**
+     * Fetches the logged in backend user
+     * from the backend API end-point.
+     *
+     * @param callback
+     */
     getLoggedInUser: function (callback) {
         var me = this;
 
@@ -33,6 +50,13 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
         });
     },
 
+    /**
+     * Posts form data to a backend API end-point
+     * which creates an e-mail and sends it.
+     *
+     * @param formData
+     * @param callback
+     */
     sendEmail: function (formData, callback) {
         var me = this;
 
@@ -46,6 +70,12 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
         });
     },
 
+    /**
+     * Decodes the response text into a JSON object.
+     *
+     * @param response
+     * @returns {Promise<void>|string|null}
+     */
     getResponseObject(response) {
         if (response.responseText) {
             return Ext.JSON.decode(response.responseText);
