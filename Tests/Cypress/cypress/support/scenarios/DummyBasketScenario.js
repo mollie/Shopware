@@ -1,4 +1,5 @@
 import Session from "Actions/utils/Session";
+import Shopware from "Services/Shopware";
 import TopMenuAction from "Actions/storefront/navigation/TopMenuAction";
 import RegisterAction from "Actions/storefront/account/RegisterAction";
 import LoginAction from "Actions/storefront/account/LoginAction";
@@ -7,6 +8,7 @@ import PDPAction from "Actions/storefront/products/PDPAction";
 import CheckoutAction from "Actions/storefront/checkout/CheckoutAction";
 
 
+const shopware = new Shopware();
 const session = new Session();
 
 const topMenu = new TopMenuAction();
@@ -51,7 +53,16 @@ export default class DummyBasketScenario {
         cy.visit('/');
 
         topMenu.clickOnFirstCategory();
-        listing.clickOnFirstProduct();
+
+        if (shopware.isVersionGreaterEqual('5.3')) {
+            listing.clickOnFirstProduct();
+        } else {
+            // in Shopware 5.3 we have multiple products
+            // lets just click on the easy product without variants
+            // or special things
+            listing.clickOnProduct('SW10153');
+        }
+
 
         pdp.addToCart(this.quantity);
 
