@@ -83,6 +83,13 @@ class Transaction
     private $ordermailVariables;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="confirmation_mail_sent", type="boolean", nullable=true)
+     */
+    private $confirmationMailSent = false;
+
+    /**
      * INVERSE SIDE
      *
      * @var \Doctrine\Common\Collections\ArrayCollection<\MollieShopware\Models\TransactionItem>
@@ -273,6 +280,22 @@ class Transaction
     public function getOrdermailVariables()
     {
         return $this->ordermailVariables;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getConfirmationMailSent()
+    {
+        return $this->confirmationMailSent;
+    }
+
+    /**
+     * @param bool $confirmationMailSent
+     */
+    public function setConfirmationMailSent($confirmationMailSent)
+    {
+        $this->confirmationMailSent = $confirmationMailSent;
     }
 
     /**
