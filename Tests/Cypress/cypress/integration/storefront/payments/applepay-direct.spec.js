@@ -1,4 +1,5 @@
 import Devices from "Services/Devices";
+import Shopware from "Services/Shopware";
 // ------------------------------------------------------
 import {ApplePaySessionMockFactory} from "Services/ApplePay/applepay.stub";
 import TopMenuAction from "Actions/storefront/navigation/TopMenuAction";
@@ -14,6 +15,7 @@ import DummyUserScenario from "Scenarios/DummyUserScenario";
 import BasketRepository from "Repositories/storefront/checkout/BasketRepository";
 
 const devices = new Devices();
+const shopware = new Shopware();
 const applePayFactory = new ApplePaySessionMockFactory();
 
 const repoPDP = new PDPRepository();
@@ -61,9 +63,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             applePayFactory.registerApplePay(true);
 
-            cy.visit('/');
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
 
             repoPDP.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
         })
@@ -72,9 +72,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             applePayFactory.registerApplePay(false);
 
-            cy.visit('/');
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
 
             repoPDP.getApplePayDirectContainer().should('have.css', 'display', 'none');
         })
@@ -86,9 +84,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             applePayFactory.registerApplePay(true);
 
-            cy.visit('/');
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
             pdpAction.addToCart(1);
 
             repoOffCanvas.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
@@ -98,9 +94,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             applePayFactory.registerApplePay(false);
 
-            cy.visit('/');
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
             pdpAction.addToCart(1);
 
             repoOffCanvas.getApplePayDirectContainer().should('have.css', 'display', 'none');
@@ -115,8 +109,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             scenarioDummyUser.execute();
 
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
             pdpAction.addToCart(1);
             checkoutAction.goToBasketInOffCanvas();
 
@@ -130,8 +123,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
             scenarioDummyUser.execute();
 
-            topMenuAction.clickOnFirstCategory();
-            listingAction.clickOnFirstProduct();
+            visitPDP();
             pdpAction.addToCart(1);
             checkoutAction.goToBasketInOffCanvas();
 
@@ -142,3 +134,23 @@ describe('Apple Pay Direct - UI Tests', () => {
     });
 
 })
+
+
+function visitPDP() {
+
+    cy.visit('/');
+
+    topMenuAction.clickOnFirstCategory();
+
+    if (shopware.isVersionGreaterEqual('5.3')) {
+
+        listingAction.clickOnFirstProduct();
+
+    } else {
+        // in Shopware 5.3 we have multiple products
+        // lets just click on the easy product without variants
+        // or special things
+        listingAction.clickOnProduct('SW10153');
+    }
+
+}

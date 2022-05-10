@@ -1,17 +1,25 @@
 import ListingRepository from 'Repositories/storefront/products/ListingRepository';
 
-class ListingAction {
+
+const repo = new ListingRepository();
+
+
+export default class ListingAction {
 
     /**
      *
      */
     clickOnFirstProduct() {
-
-        const repo = new ListingRepository();
-
         repo.getFirstProduct().click();
+    }
+
+    /**
+     *
+     * @param orderNumber
+     */
+    clickOnProduct(orderNumber) {
+        repo.getProduct(orderNumber).click();
     }
 
 }
 
-export default ListingAction;
