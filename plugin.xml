@@ -14,7 +14,7 @@
     <license>MIT</license>
     <author>Mollie B.V.</author>
     <link>https://www.mollie.com</link>
-    <compatibility minVersion="5.3.0"/>
+    <compatibility minVersion="5.2.21"/>
 
     <description lang="en">
         We do our best to get you started as fast as possible.
