@@ -101,7 +101,7 @@ export default class ConfigSetupAction {
 
             cy.log('Configure Payment: ' + payment);
 
-            cy.contains(payment).click({force: true});
+            cy.get('.x-tree-panel').contains(payment).click({force: true});
             cy.wait(500);
 
 
