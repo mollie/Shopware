@@ -5,10 +5,6 @@
             <name>MollieSupport</name>
             <label lang="en">Mollie support</label>
             <label lang="de">Mollie Unterstützung</label>
-            <label lang="es-ES">Apoyo de Mollie</label>
-            <label lang="fr-FR">Soutien Mollie</label>
-            <label lang="nl-NL">Mollie ondersteuning</label>
-            <label lang="it-IT">Supporto Mollie</label>
             <controller>MollieSupport</controller>
             <action>index</action>
             <class>sprite--mollie</class>

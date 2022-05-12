@@ -2,11 +2,13 @@
 
 namespace MollieShopware\Components\Support;
 
+use Exception;
 use MollieShopware\Components\Config\ConfigExporter;
 use MollieShopware\Components\Support\Services\LogArchiver;
 use MollieShopware\Components\Support\Services\LogCollector;
 use MollieShopware\MollieShopware;
 use RuntimeException;
+use Shopware\Components\ShopwareReleaseStruct;
 use Zend_Mail;
 use Zend_Mail_Exception;
 use Zend_Mime;
@@ -28,11 +30,6 @@ class EmailBuilder
      * @var LogCollector
      */
     private $logCollector;
-
-    /**
-     * @var string
-     */
-    private $shopwareVersion;
 
     /**
      * @var string
@@ -60,14 +57,12 @@ class EmailBuilder
      * @param ConfigExporter $configExporter
      * @param LogArchiver $logArchiver
      * @param LogCollector $logCollector
-     * @param string $shopwareVersion
      */
-    public function __construct(ConfigExporter $configExporter, LogArchiver $logArchiver, LogCollector $logCollector, $shopwareVersion)
+    public function __construct(ConfigExporter $configExporter, LogArchiver $logArchiver, LogCollector $logCollector)
     {
         $this->configExporter = $configExporter;
         $this->logArchiver = $logArchiver;
         $this->logCollector = $logCollector;
-        $this->shopwareVersion = $shopwareVersion;
     }
 
     /**
@@ -223,7 +218,7 @@ class EmailBuilder
                 <strong>Mollie plugin version:</strong> %s
             </div>
         ',
-            $this->shopwareVersion,
+            $this->getShopwareVersion(),
             MollieShopware::PLUGIN_VERSION
         );
 
@@ -239,11 +234,36 @@ class EmailBuilder
     {
         $information = sprintf(
             "-----\n\nShopware version: %s\nMollie plugin version: %s",
-            $this->shopwareVersion,
+            $this->getShopwareVersion(),
             MollieShopware::PLUGIN_VERSION
         );
 
         return sprintf("%s\n\n%s\n\n", strip_tags($this->message), $information);
+    }
+
+    /**
+     * Returns the version of Shopware.
+     *
+     * @return string
+     */
+    private function getShopwareVersion()
+    {
+        try {
+            $shopwareVersion = Shopware()->Config()->get('Version');
+
+            # this parameter has been deprecated
+            # we need a new version access for shopware 5.5 and up.
+            # deprecated to be removed in 5.6
+            if ($shopwareVersion === '___VERSION___') {
+                /** @var ShopwareReleaseStruct $release */
+                $release = Shopware()->Container()->get('shopware.release');
+                $shopwareVersion = $release->getVersion();
+            }
+        } catch (Exception $exception) {
+            $shopwareVersion = '5.x.x';
+        }
+
+        return $shopwareVersion;
     }
 
     /**

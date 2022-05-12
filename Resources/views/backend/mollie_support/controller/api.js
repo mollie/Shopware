@@ -3,6 +3,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
 
     urls: {
         pluginVersion: '{url module=backend controller=MollieSupport action=pluginVersion}',
+        shopwareVersion: '{url module=backend controller=MollieSupport action=shopwareVersion}',
         loggedInUser: '{url module=backend controller=MollieSupport action=loggedInUser}',
         sendEmail: '{url module=backend controller=MollieSupport action=sendEmail}',
     },
@@ -27,6 +28,23 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
 
         Ext.Ajax.request({
             url: this.urls.pluginVersion,
+            callback: function (options, success, response) {
+                callback(options, success, me.getResponseObject(response));
+            },
+        });
+    },
+
+    /**
+     * Fetches the shopware version from
+     * the backend API end-point.
+     *
+     * @return void
+     */
+    getShopwareVersion: function (callback) {
+        var me = this;
+
+        Ext.Ajax.request({
+            url: this.urls.shopwareVersion,
             callback: function (options, success, response) {
                 callback(options, success, me.getResponseObject(response));
             },
@@ -74,7 +92,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Api', {
      * Decodes the response text into a JSON object.
      *
      * @param response
-     * @returns {Promise<void>|string|null}
+     * @returns Promise<void>|string|null
      */
     getResponseObject(response) {
         if (response.responseText) {

@@ -4,6 +4,7 @@ use MollieShopware\Components\Support\EmailBuilder;
 use MollieShopware\MollieShopware;
 use MollieShopware\Traits\Controllers\BackendControllerTrait;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\ShopwareReleaseStruct;
 use Shopware\Models\Payment\Payment;
 
 class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Backend_Application
@@ -39,6 +40,33 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
     {
         $this->view->assign('data', [
             'version' => MollieShopware::PLUGIN_VERSION,
+        ]);
+    }
+
+    /**
+     * Returns the version of Shopware.
+     *
+     * @return void
+     */
+    public function shopwareVersionAction()
+    {
+        try {
+            $shopwareVersion = Shopware()->Config()->get('Version');
+
+            # this parameter has been deprecated
+            # we need a new version access for shopware 5.5 and up.
+            # deprecated to be removed in 5.6
+            if ($shopwareVersion === '___VERSION___') {
+                /** @var ShopwareReleaseStruct $release */
+                $release = Shopware()->Container()->get('shopware.release');
+                $shopwareVersion = $release->getVersion();
+            }
+        } catch (Exception $exception) {
+            $shopwareVersion = '5.x.x';
+        }
+
+        $this->view->assign('data', [
+            'version' => $shopwareVersion,
         ]);
     }
 

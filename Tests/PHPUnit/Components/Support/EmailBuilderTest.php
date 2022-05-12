@@ -12,7 +12,7 @@ use Zend_Mail_Exception;
 
 class EmailBuilderTest extends TestCase
 {
-    const TEST_VALUE_SHOPWARE_VERSION = '5.7.8';
+    const TEST_VALUE_SHOPWARE_VERSION = '5.x.x';
 
     /**
      * @var ConfigExporter
@@ -51,8 +51,7 @@ class EmailBuilderTest extends TestCase
         $this->emailBuilder = new EmailBuilder(
             $this->configExporter,
             $this->logArchiver,
-            $this->logCollector,
-            self::TEST_VALUE_SHOPWARE_VERSION
+            $this->logCollector
         );
     }
 
