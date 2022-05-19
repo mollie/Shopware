@@ -2,12 +2,10 @@
 
 namespace MollieShopware\Facades\FinishCheckout\Services;
 
-use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Resources\PaymentCollection;
-use MollieShopware\Exceptions\MolliePaymentFailedException;
-use MollieShopware\Models\Transaction;
+use MollieShopware\Components\Constants\PaymentMethod;
 
 class MollieStatusValidator
 {
@@ -39,6 +37,14 @@ class MollieStatusValidator
      */
     public function didPaymentCheckoutSucceed(Payment $payment)
     {
+        # some payment methods have certain states that can happen
+        # which would be "valid" for Mollie, but not for an eCommerce shop that has either a SUCCESS or a FAILED page.
+        if ($payment->method === PaymentMethod::CREDITCARD && $payment->isOpen()) {
+            # we don't know why, but it can happen.
+            # if a credit card is OPEN then it's not valid. it will fail after 15 minutes...so show an error
+            return false;
+        }
+
         if ($payment->isCanceled()) {
             return false;
         }
@@ -70,12 +76,15 @@ class MollieStatusValidator
 
             /** @var \Mollie\Api\Resources\Payment $payment */
             foreach ($payments as $payment) {
+                # we don't know why, but it can happen.
+                # if a credit card is OPEN then it's not valid. it will fail after 15 minutes...so mark as failed.
+                $isCreditCardPaymentFailed = $payment->method === PaymentMethod::CREDITCARD && $payment->isOpen();
 
                 if ($payment->isCanceled() === true) {
                     $canceledPayments++;
                 }
 
-                if ($payment->isFailed() === true) {
+                if ($payment->isFailed() === true || $isCreditCardPaymentFailed) {
                     $failedPayments++;
                 }
 
