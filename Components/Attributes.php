@@ -10,7 +10,7 @@ class Attributes
     protected $modelManager;
 
     /**
-     * @var  \Shopware\Bundle\AttributeBundle\Service\CrudService
+     * @var  \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface
      */
     protected $crudService;
 
@@ -18,11 +18,11 @@ class Attributes
      * Attributes constructor
      *
      * @param \Shopware\Components\Model\ModelManager $modelManager
-     * @param \Shopware\Bundle\AttributeBundle\Service\CrudService $crudService
+     * @param \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface $crudService
      */
     public function __construct(
         \Shopware\Components\Model\ModelManager $modelManager,
-        \Shopware\Bundle\AttributeBundle\Service\CrudService $crudService
+        \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface $crudService
     ) {
         $this->modelManager = $modelManager;
         $this->crudService = $crudService;
