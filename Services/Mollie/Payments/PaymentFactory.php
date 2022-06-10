@@ -13,6 +13,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\EPS;
 use MollieShopware\Services\Mollie\Payments\Requests\Giftcard;
 use MollieShopware\Services\Mollie\Payments\Requests\Giropay;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
+use MollieShopware\Services\Mollie\Payments\Requests\In3;
 use MollieShopware\Services\Mollie\Payments\Requests\KBC;
 use MollieShopware\Services\Mollie\Payments\Requests\PayLater;
 use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
@@ -95,6 +96,9 @@ class PaymentFactory
 
             case PaymentMethod::VOUCHERS:
                 return new Voucher();
+
+            case PaymentMethod::IN3;
+                return new In3();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);
