@@ -594,6 +594,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $paymentConfigResolver = Shopware()->Container()->get('mollie_shopware.components.config.payments');
 
+            $eventManager = Shopware()->Container()->get('events');
+
             $confirmationMail = new ConfirmationMail($sOrder, $repoTransactions);
 
             $tokeAnonymizer = new TokenAnonymizer(
@@ -678,7 +680,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $sessionManager,
                 $paymentStatusResolver,
                 $paymentConfigResolver,
-                $entityManager
+                $entityManager,
+                $eventManager
             );
 
             $this->restoreSessionFacade = new RestoreSessionFacade(

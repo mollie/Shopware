@@ -10,12 +10,14 @@ use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Components\SessionManager\SessionManager;
 use MollieShopware\Components\Transaction\PaymentStatusResolver;
+use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
+use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
@@ -73,6 +75,10 @@ class Notifications
      */
     private $entityManager;
 
+    /**
+     * @var ContainerAwareEventManager
+     */
+    private $eventManager;
 
     /**
      * @param LoggerInterface $logger
@@ -85,8 +91,9 @@ class Notifications
      * @param PaymentStatusResolver $paymentStatusResolver
      * @param Config\PaymentConfigResolver $paymentConfig
      * @param ModelManager $entityManager
+     * @param ContainerAwareEventManager $eventManager
      */
-    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig, ModelManager $entityManager)
+    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig, ModelManager $entityManager, $eventManager)
     {
         $this->logger = $logger;
         $this->config = $config;
@@ -98,6 +105,7 @@ class Notifications
         $this->paymentStatusResolver = $paymentStatusResolver;
         $this->paymentConfig = $paymentConfig;
         $this->entityManager = $entityManager;
+        $this->eventManager = $eventManager;
     }
 
 
@@ -197,6 +205,13 @@ class Notifications
             $this->sessionManager->deleteSessionToken($transaction);
         }
 
+        $this->eventManager->notify(Events::WEBHOOK_RECEIVED, [
+            'orderId' => $order->getId(),
+            'orderNumber' => $order->getNumber(),
+            'paymentMethod' => $transaction->getPaymentMethod(),
+            'molliePaymentId' => $paymentID,
+            'molliePaymentStatus' => $molliePaymentStatus,
+        ]);
 
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
