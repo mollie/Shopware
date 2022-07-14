@@ -120,6 +120,7 @@ class PaymentMethodsInstaller
             PaymentMethod::DIRECTDEBIT,
             PaymentMethod::SOFORT,
             PaymentMethod::VOUCHERS,
+            PaymentMethod::IN3,
         ];
     }
 
