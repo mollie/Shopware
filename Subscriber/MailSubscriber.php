@@ -234,7 +234,7 @@ class MailSubscriber implements SubscriberInterface
         # we might not have an order ID linked to our transaction
         # so we have to retrieve the transaction either by the Mollie ord_xyz or tr_xyz
         /** @var Transaction $transaction */
-        $transaction = $this->transactionRepo->getTransactionByMollieIdentifier($order->getTransactionId());
+        $transaction = $this->transactionRepo->getTransactionByOrder($order->getId());
 
         if (!$transaction instanceof Transaction) {
             return new BankTransferMailData(false, '', '', '', '');
