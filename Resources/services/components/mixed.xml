@@ -98,7 +98,7 @@
             <argument type="service" id="models"/>
         </service>
 
-        <service id="mollie_shopware.shop_service" class="MollieShopware\Components\Services\ShopService">
+        <service id="mollie_shopware.shop_service" class="MollieShopware\Components\Services\ShopService" public="true">
             <argument type="service" id="models"/>
         </service>
 
