@@ -108,11 +108,6 @@ class Account
     public function createGuestAccount($email, $firstname, $lastname, $street, $zip, $city, $countryID, $phone)
     {
         try {
-            # If the logged-in account is a guest account, the session is cleared.
-            if ($this->session->offsetGet('sOneTimeAccount') === true) {
-                $this->session->clear();
-            }
-
             $data['auth']['accountmode'] = '1';
 
             $data['auth']['email'] = $email;
@@ -142,9 +137,11 @@ class Account
 
             $data['shipping'] = $data['billing'];
 
-            # If a customer is logged in with a non-guest account, we update the shipping details
-            # and payment method. If a customer is not logged in, or logged in with a guest
-            # account, we create a new guest account with the new details.
+            // First try login / Reuse apple pay account
+            $this->tryLogin($data['auth']);
+
+
+            // Check login status
             if ($this->admin->sCheckUser()) {
                 $this->gwGuestCustomer->updateShipping($this->session->offsetGet('sUserId'), $data['shipping']);
 

@@ -478,20 +478,25 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             $article = array_shift($articles);
 
-            # If a customer is logged-in with a non-guest account, the method below will
-            # update the customer's shipping info and payment method on the existing
-            # customer account. If the user is not logged-in, or logged-in with a
-            # guest account, a new guest account is created with these details.
-            $this->account->createGuestAccount(
-                $email,
-                $firstname,
-                $lastname,
-                $street,
-                $zipcode,
-                $city,
-                $country['id'],
-                $phone
-            );
+            # now check if we are already signed in
+            # if so, then we can just continue, because sessions are already set.
+            # if we are not signed in, then we need to
+            # create a new guest account and login as that one
+            if (!$this->account->isLoggedIn()) {
+                $this->account->createGuestAccount(
+                    $email,
+                    $firstname,
+                    $lastname,
+                    $street,
+                    $zipcode,
+                    $city,
+                    $country['id'],
+                    $phone
+                );
+
+                $this->account->loginAccount($email);
+            }
+
 
             # create our user data object
             # that we need later to set our custom data
