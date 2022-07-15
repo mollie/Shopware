@@ -119,9 +119,7 @@ class ShopwareOrderUpdater
             }
         }
 
-
         if (!$swOrder->getDetails()->isEmpty() && !$transaction->getItems()->isEmpty()) {
-
             /** @var Detail $detail */
             foreach ($swOrder->getDetails() as $detail) {
                 foreach ($transaction->getItems() as $transactionItem) {
@@ -130,10 +128,9 @@ class ShopwareOrderUpdater
                     }
 
                     if (
-                        method_exists($detail->getAttribute(), 'getBasketItemId')
-                        && method_exists($detail->getAttribute(), 'setMollieTransactionId')
+                        method_exists($detail->getAttribute(), 'setMollieTransactionId')
                         && method_exists($detail->getAttribute(), 'setMollieOrderLineId')
-                        && (int)$detail->getAttribute()->getBasketItemId() === $transactionItem->getBasketItemId()
+                        && $detail->getArticleNumber() === $transactionItem->getSku()
                     ) {
                         $detail->getAttribute()->setMollieTransactionId($transaction->getMollieId());
                         $detail->getAttribute()->setMollieOrderLineId($transactionItem->getOrderLineId());
