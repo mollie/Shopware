@@ -21,6 +21,11 @@ class MollieShipping
      */
     private $smarty;
 
+    /**
+     * Mollie throws an error with length >= 100
+     */
+    const MAX_TRACKING_CODE_LENGTH = 99;
+
 
     /**
      * MollieShipping constructor.
@@ -114,7 +119,26 @@ class MollieShipping
      */
     private function getTrackingCode(Order $shopwareOrder)
     {
-        return (string)trim($shopwareOrder->getTrackingCode());
+        $code = trim($shopwareOrder->getTrackingCode());
+
+        # Mollie does not allow codes >= 100
+        # we just have to completely remove those codes, so that no tracking happens, but a shipping works.
+        # still, if we find multiple codes (because separators exist), then we use the first one only
+        if (strlen($code) > self::MAX_TRACKING_CODE_LENGTH) {
+
+            if ($this->stringContains(',', $code)) {
+                $code = trim(explode(',', $code)[0]);
+            } else if ($this->stringContains(';', $code)) {
+                $code = trim(explode(';', $code)[0]);
+            }
+
+            # if we are still too long, then simply remove the code
+            if (strlen($code) > self::MAX_TRACKING_CODE_LENGTH) {
+                $code = '';
+            }
+        }
+
+        return $code;
     }
 
     /**
