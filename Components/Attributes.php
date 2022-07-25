@@ -20,10 +20,8 @@ class Attributes
      * @param \Shopware\Components\Model\ModelManager $modelManager
      * @param \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface $crudService
      */
-    public function __construct(
-        \Shopware\Components\Model\ModelManager $modelManager,
-        \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface $crudService
-    ) {
+    public function __construct(\Shopware\Components\Model\ModelManager $modelManager, $crudService)
+    {
         $this->modelManager = $modelManager;
         $this->crudService = $crudService;
     }
