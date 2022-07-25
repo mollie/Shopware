@@ -265,7 +265,7 @@ jobs:
           - shopware: '5.3.0'
             php: '5.6'
           - shopware: '5.2.21'
-            php: '7.2'
+            php: '5.6'
     steps:
 
       - name: Clone Code
