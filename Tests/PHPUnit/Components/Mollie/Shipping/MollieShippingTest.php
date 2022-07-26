@@ -237,6 +237,56 @@ class MollieShippingTest extends TestCase
     }
 
     /**
+     * If we have a shipping code with length >= 100
+     * then we must NOT use tracking because Mollie doesn't allow such
+     * a length and would throw an exception.
+     */
+    public function testSkipTooLongCodes()
+    {
+        # build a long code that is also too long if split by our separator '.'
+        $longCode = str_repeat('1', 100) . '.bbb';
+        $this->assertEquals(104, strlen($longCode));
+
+        $shopwareOrder = new Order();
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'https://tracking.test'));
+        $shopwareOrder->setTrackingCode($longCode);
+
+        $this->shipping->shipOrder($shopwareOrder, $this->getMollieOrder());
+
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('MyCarrier', $this->fakeGateway->getShippedCarrier());
+        $this->assertEquals('', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
+    /**
+     * If we have a shipping code with length >= 100 we also
+     * check for a special separator. If we can split by that separator and
+     * have a valid length again, then we use the first fragment which is
+     * very likely the first tracking code of multiple ones.
+     *
+     * @testWith    [","]
+     *              [";"]
+     * @param string $separator
+     * @return void
+     */
+    public function testTooLongCodeUsesFirstFragment($separator)
+    {
+        $longCode = 'a' . $separator;
+        $longCode .= str_repeat('1', 98);
+        $this->assertEquals(100, strlen($longCode));
+
+        $shopwareOrder = new Order();
+        $shopwareOrder->setDispatch($this->getDispatch(4, 'MyCarrier', 'https://tracking.test'));
+        $shopwareOrder->setTrackingCode($longCode);
+
+        $this->shipping->shipOrder($shopwareOrder, $this->getMollieOrder());
+
+        $this->assertEquals('a', $this->fakeGateway->getShippedTrackingNumber());
+        $this->assertEquals('MyCarrier', $this->fakeGateway->getShippedCarrier());
+        $this->assertEquals('https://tracking.test', $this->fakeGateway->getShippedTrackingUrl());
+    }
+
+    /**
      * This test verifies that we successfully ship our order
      * with a tracking information but without an existing dispatch object.
      * In this case, we try to provide the tracking code in Mollie but just use
