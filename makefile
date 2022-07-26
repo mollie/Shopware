@@ -22,8 +22,8 @@ dev: ## Installs all dev dependencies
 	@npm install
 
 clean: ## Cleans all dependencies
-	@rm -rf vendor
-	@rm -rf node_modules
+	@rm -rf vendor/*
+	@rm -rf node_modules/*
 	@rm -rf .reports | true
 
 # ------------------------------------------------------------------------------------------------------------
