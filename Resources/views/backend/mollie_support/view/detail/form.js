@@ -9,6 +9,7 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
         fieldName: '{s name=support_form_field_name}Your name{/s}',
         fieldEmail: '{s name=support_form_field_email}Your email{/s}',
         fieldTo: '{s name=support_form_field_to}Send request to{/s}',
+        fieldSubject: '{s name=support_form_field_subject}Subject{/s}',
         fieldMessage: '{s name=support_form_field_message}Message{/s}',
         buttonClear: '{s name=support_form_button_clear}Clear{/s}',
         buttonRequestSupport: '{s name=support_form_button_request_support}Request support{/s}',
@@ -86,6 +87,14 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                     value: 'support@mollie.com',
                     typeAhead: true,
                     queryMode: 'local',
+                },
+                {
+                    allowBlank: false,
+                    fieldLabel: me.snippets.fieldSubject,
+                    name: 'subject',
+                    itemId: 'fieldSubject',
+                    vtype: 'subject',
+                    value: '',
                 },
                 {
                     xtype: 'tinymce',
