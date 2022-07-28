@@ -93,7 +93,6 @@ Ext.define('Shopware.apps.MollieSupport.view.detail.Form', {
                     fieldLabel: me.snippets.fieldSubject,
                     name: 'subject',
                     itemId: 'fieldSubject',
-                    vtype: 'subject',
                     value: '',
                 },
                 {

@@ -8,6 +8,7 @@ use MollieShopware\Components\Support\Services\LogArchiver;
 use MollieShopware\Components\Support\Services\LogCollector;
 use MollieShopware\MollieShopware;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Zend_Mail_Exception;
 
 class EmailBuilderTest extends TestCase
@@ -51,7 +52,8 @@ class EmailBuilderTest extends TestCase
         $this->emailBuilder = new EmailBuilder(
             $this->configExporter,
             $this->logArchiver,
-            $this->logCollector
+            $this->logCollector,
+            $this->createMock(LoggerInterface::class)
         );
     }
 
@@ -69,11 +71,13 @@ class EmailBuilderTest extends TestCase
             ->setFullName('John Doe')
             ->setEmailAddress('john.doe@test.local')
             ->setRecipientEmailAddress('support@test.local')
+            ->setSubject('Help!')
             ->setMessage('Help wanted.')
             ->getEmail();
 
         $expectedFrom = 'john.doe@test.local';
         $expectedTo = 'support@test.local';
+        $expectedSubject = 'Help!';
 
         $expectedBodyText = sprintf(
             "Help wanted.\n\n-----\n\nShopware version: %s\nMollie plugin version: %s\n\n",
@@ -83,6 +87,7 @@ class EmailBuilderTest extends TestCase
 
         self::assertSame($expectedFrom, $result->getFrom());
         self::assertSame($expectedTo, $result->getRecipients()[0]);
+        self::assertSame($expectedSubject, $result->getSubject());
         self::assertSame($expectedBodyText, $result->getBodyText()->getRawContent());
     }
 
@@ -102,6 +107,7 @@ class EmailBuilderTest extends TestCase
             ->setFullName('John Doe')
             ->setEmailAddress('john.doe@test.local')
             ->setRecipientEmailAddress('support@test.local')
+            ->setSubject('Help!')
             ->setMessage('Help wanted.')
             ->getEmail();
     }
@@ -123,6 +129,7 @@ class EmailBuilderTest extends TestCase
             ->setFullName('John Doe')
             ->setEmailAddress('john.doe@test.local')
             ->setRecipientEmailAddress('support@test.local')
+            ->setSubject('Help')
             ->setMessage('Help wanted.')
             ->getEmail();
     }
@@ -135,6 +142,7 @@ class EmailBuilderTest extends TestCase
      * @param string $fullName
      * @param string $emailAddress
      * @param string $recipientEmailAddress
+     * @param string $subject
      * @param string $message
      * @param string $expectedExceptions
      *
@@ -145,6 +153,7 @@ class EmailBuilderTest extends TestCase
         $fullName,
         $emailAddress,
         $recipientEmailAddress,
+        $subject,
         $message,
         $expectedExceptions
     ) {
@@ -156,6 +165,7 @@ class EmailBuilderTest extends TestCase
             ->setFullName($fullName)
             ->setEmailAddress($emailAddress)
             ->setRecipientEmailAddress($recipientEmailAddress)
+            ->setSubject($subject)
             ->setMessage($message)
             ->getEmail();
     }
@@ -169,13 +179,15 @@ class EmailBuilderTest extends TestCase
     public function provideValidationData()
     {
         return [
-            'no full name' => ['', 'john.doe@test.local', 'support@test.local', 'Help wanted', 'no name was provided'],
-            'no email' => ['John Doe', '', 'support@test.local', 'Help wanted', 'no valid email address was provided'],
-            'no recipient email' => ['John Doe', 'john.doe@test.local', '', 'Help wanted', 'no valid recipient email address was provided'],
-            'no message' => ['John Doe', 'john.doe@test.local', 'support@test.local', '', 'no message was provided'],
-            'no valid email' => ['John Doe', 'test.local', 'support@test.local', 'Help wanted', 'no valid email address was provided'],
-            'no name, no recipient email' => ['', 'john.doe@test.local', '', 'Help wanted', 'no name was provided, no valid recipient email address was provided'],
-            'no email, no message' => ['John Doe', '', 'support@test.local', '', 'no valid email address was provided, no message was provided'],
+            'no full name' => ['', 'john.doe@test.local', 'support@test.local', 'Help!', 'Help wanted', 'no name was provided'],
+            'no email' => ['John Doe', '', 'support@test.local', 'Help!', 'Help wanted', 'no valid email address was provided'],
+            'no recipient email' => ['John Doe', 'john.doe@test.local', '', 'Help!', 'Help wanted', 'no valid recipient email address was provided'],
+            'no subject' => ['John Doe', 'john.doe@test.local', 'support@test.local', '', 'Help wanted', 'no subject was provided'],
+            'no message' => ['John Doe', 'john.doe@test.local', 'support@test.local', 'Help!', '', 'no message was provided'],
+            'no valid email' => ['John Doe', 'test.local', 'support@test.local', 'Help!', 'Help wanted', 'no valid email address was provided'],
+            'no name, no recipient email' => ['', 'john.doe@test.local', '', 'Help!', 'Help wanted', 'no name was provided, no valid recipient email address was provided'],
+            'no email, no message' => ['John Doe', '', 'support@test.local', 'Help!', '', 'no valid email address was provided, no message was provided'],
+            'no subject, no message' => ['John Doe', 'john.doe@test.local', 'support@test.local', '', '', 'no subject was provided, no message was provided'],
         ];
     }
 }

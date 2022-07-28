@@ -17,18 +17,22 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     selectors: {
+        'supportForm': '#mollieSupportForm',
         'fieldName': '#mollieSupportForm #fieldName',
         'fieldEmail': '#mollieSupportForm #fieldEmail',
         'fieldTo': '#mollieSupportForm #fieldTo',
+        'fieldSubject': '#mollieSupportForm #fieldSubject',
         'fieldMessage': '#mollieSupportForm #fieldMessage',
         'buttonClear': '#mollieSupportForm #buttonClear',
         'buttonRequestSupport': '#mollieSupportForm #buttonRequestSupport',
     },
 
     refs: [
+        { ref: 'supportForm', selector: '#mollieSupportForm' },
         { ref: 'fieldName', selector: '#mollieSupportForm #fieldName' },
         { ref: 'fieldEmail', selector: '#mollieSupportForm #fieldEmail' },
         { ref: 'fieldTo', selector: '#mollieSupportForm #fieldTo' },
+        { ref: 'fieldSubject', selector: '#mollieSupportForm #fieldSubject' },
         { ref: 'fieldMessage', selector: '#mollieSupportForm #fieldMessage' },
         { ref: 'buttonClear', selector: '#mollieSupportForm #buttonClear' },
         { ref: 'buttonRequestSupport', selector: '#mollieSupportForm #buttonRequestSupport' },
@@ -114,7 +118,11 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     onButtonRequestSupportClicked: function () {
         var me = this;
 
+        me.disableForm(true);
+
         me.apiController.sendEmail(this.getFormData(), function (options, success, response) {
+            me.disableForm(false);
+
             if (!response.success) {
                 Shopware.Notification.createGrowlMessage(
                     response.error ? response.error : me.snippets.notices.emailNotSent
@@ -161,6 +169,22 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     },
 
     /**
+     * Disables or enables the form buttons
+     *
+     * @param disabled
+     * @returns void
+     */
+    disableForm: function (disabled) {
+        var me = this;
+
+        if (!me.getSupportForm()) {
+            return;
+        }
+
+        me.getSupportForm().setDisabled(disabled);
+    },
+
+    /**
      * Returns an object with the form's data.
      *
      * @returns object
@@ -168,7 +192,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
     getFormData: function () {
         var me = this;
 
-        if (!me.getFieldName() || !me.getFieldEmail() || !me.getFieldTo() || !me.getFieldMessage()) {
+        if (!me.getFieldName() || !me.getFieldEmail() || !me.getFieldTo() || !me.getFieldSubject() || !me.getFieldMessage()) {
             return {};
         }
 
@@ -176,6 +200,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
             'name': me.getFieldName().getValue(),
             'email': me.getFieldEmail().getValue(),
             'to': me.getFieldTo().getValue(),
+            'subject': me.getFieldSubject().getValue(),
             'message': me.getFieldMessage().getValue(),
         };
     },
@@ -190,6 +215,7 @@ Ext.define('Shopware.apps.MollieSupport.controller.Main', {
 
         me.getFieldName().setValue('');
         me.getFieldTo().setValue('support@mollie.com');
+        me.getFieldSubject().setValue('');
         me.getFieldMessage().setValue('');
     },
 });
