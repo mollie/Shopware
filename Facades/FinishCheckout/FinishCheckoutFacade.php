@@ -214,6 +214,9 @@ class FinishCheckoutFacade
             # update the order number in our transaction or the upcoming steps
             # and immediately save it in case of upcoming errors
             $transaction->setOrderNumber($orderNumber);
+            # also mark our confirmation mail to be sent, just to have it "complete" and accurate
+            $transaction->setConfirmationMailSent(true);
+
             $this->repoTransactions->save($transaction);
         }
 
