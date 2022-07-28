@@ -443,8 +443,9 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     public function startPaymentAction()
     {
-        /** @var Detail|null $article */
-        $article = null;
+        /** @var Detail|null $pdpArticle */
+        $pdpArticle = null;
+        $isPDPPurchase = false;
 
         try {
             $this->loadServices();
@@ -468,15 +469,23 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 throw new Exception('No Country found for code ' . $countryCode);
             }
 
-            # search for our product
-            # if that is not found, then we have a problem anyway
-            $articles = $this->repoArticles->findBy(['number' => $productNumber]);
+            # we have to verify if we purchase a single product
+            # from the PDP or a whole cart from the offcanvas or cart
+            # we need this later to either redirect to the cart page
+            # or back to the original product page
+            $isPDPPurchase = trim((string)$productNumber) !== '';
 
-            if (count($articles) <= 0) {
-                throw new Exception('Article with number: ' . $productNumber . ' not found!');
+            if ($isPDPPurchase) {
+                # search for our product
+                # if that is not found, then we have a problem anyway
+                $articles = $this->repoArticles->findBy(['number' => $productNumber]);
+
+                if (count($articles) <= 0) {
+                    throw new Exception('Article with number: ' . $productNumber . ' not found!');
+                }
+
+                $pdpArticle = array_shift($articles);
             }
-
-            $article = array_shift($articles);
 
             # now check if we are already signed in
             # if so, then we can just continue, because sessions are already set.
@@ -552,9 +561,13 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             # now get our snippet translation for our error
             $errorMessage = $this->translation->getWithPlaceholder(FrontendTranslation::REGISTRATION_MISSING_FIELD, $ex->getField());
 
-            # finally redirect the user to the PDP page
-            # we don't even have a user and a cart, so we cannot even continue
-            $this->redirectToPDPWithError($this, $article->getId(), $errorMessage);
+            if ($isPDPPurchase && $pdpArticle instanceof Detail) {
+                # redirect the user to the PDP page
+                # we don't even have a user and a cart, so we cannot even continue
+                $this->redirectToPDPWithError($this, $pdpArticle->getId(), $errorMessage);
+            } else {
+                $this->redirectToShopwareCheckoutFailedWithError($this, $errorMessage);
+            }
 
         } catch (RiskManagementBlockedException $ex) {
 
