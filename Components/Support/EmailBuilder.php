@@ -186,7 +186,7 @@ class EmailBuilder
     {
         // add an info message to the log telling the configuration
         // file is being added to the support e-mail object
-        $this->logger->info('Started adding the configuration file to the support e-mail.');
+        $this->logger->info('Started adding the configuration file to the support e-mail');
 
         // creates a mime part object
         $file = new Zend_Mime_Part($this->configExporter->getHumanReadableConfig());
@@ -223,7 +223,7 @@ class EmailBuilder
     {
         // add an info message to the log telling the zip-archive with
         // log files is being added to the support e-mail object
-        $this->logger->info('Started adding the zip-archive with log files to the support e-mail.');
+        $this->logger->info('Started adding the zip-archive with log files to the support e-mail');
 
         // store the filename in a variable
         $name = sprintf('%slog_files-%s', MollieShopware::PAYMENT_PREFIX, date('Y-m-d'));

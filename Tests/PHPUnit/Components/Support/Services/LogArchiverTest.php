@@ -40,14 +40,14 @@ class LogArchiverTest extends TestCase
 
     /**
      * @test
-     * @testdox Method archive() does return files when no files are provided.
+     * @testdox Method archive() does throw an exception when no files are provided.
      *
      * @return void
      */
-    public function archiveDoesReturnFalseWhenNoFilesProvided()
+    public function archiveDoesThrowExceptionWhenNoFilesProvided()
     {
-        $result = $this->logArchiver->archive('name', []);
+        self::expectExceptionMessage('Could not create zip-archive of log files for the support e-mail, no log files are present');
 
-        self::assertFalse($result);
+        $this->logArchiver->archive('name', []);
     }
 }

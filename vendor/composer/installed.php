@@ -3,7 +3,7 @@
         'name' => 'mollie/shopware',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '9efd91ffde37b8c525ac97e4fbcd85a17b408121',
+        'reference' => '60563e1647223ac0ba6bb78d61eb83a74e6b8aa8',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'mollie/shopware' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '9efd91ffde37b8c525ac97e4fbcd85a17b408121',
+            'reference' => '60563e1647223ac0ba6bb78d61eb83a74e6b8aa8',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

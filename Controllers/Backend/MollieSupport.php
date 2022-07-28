@@ -100,7 +100,7 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
     {
         $this->loadServices();
 
-        $this->logger->info('Started building the support e-mail.');
+        $this->logger->info('Started building the support e-mail');
 
         try {
             $email = $this->emailBuilder
@@ -119,8 +119,8 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
             return;
         }
 
-        $this->logger->info('Successfully built the support e-mail.');
-        $this->logger->info('Started sending the support e-mail.');
+        $this->logger->info('Successfully built the support e-mail');
+        $this->logger->info('Started sending the support e-mail');
 
         try {
             $this->mailTransport->send($email);
@@ -133,7 +133,7 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
             return;
         }
 
-        $this->logger->info('Successfully sent the support e-mail.');
+        $this->logger->info('Successfully sent the support e-mail');
         $this->view->assign('success', true);
     }
 
