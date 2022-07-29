@@ -100,25 +100,40 @@ class Shopware_Controllers_Backend_MollieSupport extends Shopware_Controllers_Ba
     {
         $this->loadServices();
 
+        $this->logger->info('Started building the support e-mail');
+
         try {
             $email = $this->emailBuilder
                 ->setFullName($this->request->get('name'))
                 ->setEmailAddress($this->request->get('email'))
                 ->setRecipientEmailAddress($this->request->get('to'))
+                ->setSubject($this->request->get('subject'))
                 ->setMessage($this->request->get('message'))
                 ->getEmail();
         } catch (Exception $exception) {
+            $this->logger->error('Exception occurred while building an e-mail object for the support form.', [
+                'error' => $exception->getMessage(),
+            ]);
+
             $this->returnException($exception);
             return;
         }
+
+        $this->logger->info('Successfully built the support e-mail');
+        $this->logger->info('Started sending the support e-mail');
 
         try {
             $this->mailTransport->send($email);
         } catch (Exception $exception) {
+            $this->logger->error('Exception occurred while sending the support e-mail', [
+                'error' => $exception->getMessage(),
+            ]);
+
             $this->returnException($exception);
             return;
         }
 
+        $this->logger->info('Successfully sent the support e-mail');
         $this->view->assign('success', true);
     }
 

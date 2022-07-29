@@ -25,6 +25,7 @@
             <argument type="service" id="mollie_shopware.components.config.exporter" />
             <argument type="service" id="mollie_shopware.components.support.services.log_archiver" />
             <argument type="service" id="mollie_shopware.components.support.services.log_collector" />
+            <argument type="service" id="mollie_shopware.components.logger" />
         </service>
 
     </services>

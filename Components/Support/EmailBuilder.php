@@ -7,6 +7,7 @@ use MollieShopware\Components\Config\ConfigExporter;
 use MollieShopware\Components\Support\Services\LogArchiver;
 use MollieShopware\Components\Support\Services\LogCollector;
 use MollieShopware\MollieShopware;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Shopware\Components\ShopwareReleaseStruct;
 use Zend_Mail;
@@ -32,6 +33,11 @@ class EmailBuilder
     private $logCollector;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var string
      */
     private $fullName = '';
@@ -49,6 +55,11 @@ class EmailBuilder
     /**
      * @var string
      */
+    private $subject = '';
+
+    /**
+     * @var string
+     */
     private $message = '';
 
     /**
@@ -57,12 +68,14 @@ class EmailBuilder
      * @param ConfigExporter $configExporter
      * @param LogArchiver $logArchiver
      * @param LogCollector $logCollector
+     * @param LoggerInterface $logger
      */
-    public function __construct(ConfigExporter $configExporter, LogArchiver $logArchiver, LogCollector $logCollector)
+    public function __construct($configExporter, $logArchiver, $logCollector, $logger)
     {
         $this->configExporter = $configExporter;
         $this->logArchiver = $logArchiver;
         $this->logCollector = $logCollector;
+        $this->logger = $logger;
     }
 
     /**
@@ -105,6 +118,19 @@ class EmailBuilder
     }
 
     /**
+     * Sets the value of the subject property
+     * and returns the current class object.
+     *
+     * @param string $subject
+     * @return $this
+     */
+    public function setSubject($subject)
+    {
+        $this->subject = $subject;
+        return $this;
+    }
+
+    /**
      * Sets the value of the message property
      * and returns the current class object.
      *
@@ -134,9 +160,11 @@ class EmailBuilder
         // creates a mail object
         $email = (new Zend_Mail())
             ->addTo($this->recipientEmailAddress)
+            ->setSubject($this->subject)
             ->setBodyText($this->getBodyText())
             ->setBodyHtml($this->getBodyHtml())
-            ->setFrom($this->emailAddress, $this->fullName);
+            ->setFrom($this->emailAddress, $this->fullName)
+            ->setType(Zend_Mime::MULTIPART_MIXED);
 
         // adds a text file of the configuration as attachment
         $this->addConfigurationFile($email);
@@ -156,6 +184,10 @@ class EmailBuilder
      */
     private function addConfigurationFile(Zend_Mail $email)
     {
+        // add an info message to the log telling the configuration
+        // file is being added to the support e-mail object
+        $this->logger->info('Started adding the configuration file to the support e-mail');
+
         // creates a mime part object
         $file = new Zend_Mime_Part($this->configExporter->getHumanReadableConfig());
 
@@ -170,6 +202,14 @@ class EmailBuilder
 
         // adds the attachment to the mail object
         $email->addAttachment($file);
+
+        // add an info message to the log telling the configuration
+        // file is successfully added to the support e-mail object
+        $this->logger->info('Successfully added the configuration file to the support e-mail.', [
+            'filename' => $file->filename,
+            'content-type' => $file->type,
+            'content-disposition' => $file->disposition,
+        ]);
     }
 
     /**
@@ -181,6 +221,11 @@ class EmailBuilder
      */
     private function addLogFileArchive(Zend_Mail $email)
     {
+        // add an info message to the log telling the zip-archive with
+        // log files is being added to the support e-mail object
+        $this->logger->info('Started adding the zip-archive with log files to the support e-mail');
+
+        // store the filename in a variable
         $name = sprintf('%slog_files-%s', MollieShopware::PAYMENT_PREFIX, date('Y-m-d'));
 
         // creates an archive for the log files
@@ -198,6 +243,14 @@ class EmailBuilder
 
         // adds the attachment to the mail object
         $email->addAttachment($file);
+
+        // add an info message to the log telling the zip-archive with log
+        // files is successfully added to the support e-mail object
+        $this->logger->info('Successfully added the zip-archive with log files to the support e-mail.', [
+            'filename' => $file->filename,
+            'content-type' => $file->type,
+            'content-disposition' => $file->disposition,
+        ]);
     }
 
     /**
@@ -289,6 +342,11 @@ class EmailBuilder
         // checks if the recipientEmailAddress property is a valid email address
         if (filter_var($this->recipientEmailAddress, FILTER_VALIDATE_EMAIL) === false) {
             $errors[] = 'no valid recipient email address was provided';
+        }
+
+        // checks if the subject property is not empty
+        if (empty($this->subject)) {
+            $errors[] = 'no subject was provided';
         }
 
         // checks if the message property is not empty

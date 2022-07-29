@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Support\Services;
 
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use ZipArchive;
 
 class LogArchiver
@@ -33,12 +34,23 @@ class LogArchiver
      */
     public function archive($name, array $files)
     {
+        // log an error if the ZipArchive class does not exist
+        if (!class_exists('ZipArchive')) {
+            throw new RuntimeException('Could not create zip-archive of log files for the support e-mail, the zip-extension for PHP might not be installed');
+        }
+
+        // log an error if no log files are present
+        if (empty($files)) {
+            throw new RuntimeException('Could not create zip-archive of log files for the support e-mail, no log files are present');
+        }
+
         // creates a temporary file where
         // the zip archive can be stored
         $filename = tempnam(sys_get_temp_dir(), sprintf('%s.zip', $name));
 
-        if (empty($files) || $filename === false) {
-            return false;
+        // log an error if the temporary file could not be created
+        if ($filename === false) {
+            throw new RuntimeException('Could not create zip-archive of log files for the support e-mail, a temporary file could not be created');
         }
 
         $archive = new ZipArchive();
@@ -51,7 +63,7 @@ class LogArchiver
         } else {
             $this->logger->error(
                 sprintf(
-                    'Could not create or overwrite zip archive %s when creating a support e-mail to Mollie.',
+                    'Could not create or overwrite zip-archive %s when creating a support e-mail to Mollie.',
                     $filename
                 )
             );
