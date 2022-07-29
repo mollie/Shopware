@@ -201,6 +201,16 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
             }
 
+            $logger->info(
+                sprintf(
+                    'Starting full Shipment by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ), [
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
+
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
             $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
@@ -260,6 +270,17 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
                 $this->modelManager->flush($transaction);
 
+                $logger->info(
+                    sprintf(
+                        'Full Shipment successful by %s in Backend for Order: %s',
+                        $this->getLoggedInBackendUser(),
+                        $order->getNumber()
+                    ), [
+                        'shipment' => $result->id,
+                        'username' => $this->getLoggedInBackendUser(),
+                    ]
+                );
+
                 $this->returnSuccess('Order status set to shipped at Mollie', true);
             } else {
                 $this->returnError('Order status could not be set to shipped at Mollie');
@@ -306,7 +327,15 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
             }
 
-            $logger->info('Starting full refund in Backend for Order: ' . $order->getNumber());
+            $logger->info(
+                sprintf(
+                    'Starting full refund by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ), [
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
 
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
@@ -317,7 +346,16 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $refund = $this->refundService->refundFullOrder($order, $transaction);
 
-            $logger->info('Full refund successful in Backend for Order: ' . $order->getNumber());
+            $logger->info(
+                sprintf(
+                    'Full refund successful by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ), [
+                    'refund' => $refund->id,
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
 
             $this->returnSuccess('Order successfully refunded', $refund);
         } catch (\Exception $ex) {
@@ -325,6 +363,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 'Error when executing a full refund order in Shopware Backend',
                 [
                     'error' => $ex->getMessage(),
+                    'username' => $this->getLoggedInBackendUser(),
                 ]
             );
 
@@ -371,7 +410,14 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
             }
 
-            $logger->info('Starting partial refund in Backend for Order: ' . $order->getNumber());
+            $logger->info(
+                sprintf('Starting a partial refund by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ), [
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
 
             # switch to the config and api key of the shop from the order
             $shopSwitcher = new MollieShopSwitcher($this->container);
@@ -390,7 +436,15 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $quantity
             );
 
-            $logger->info('Partial refund successful in Backend for Order: ' . $order->getNumber());
+            $logger->info(
+                sprintf('Partial refund successful by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ), [
+                    'refund' => $refund->id,
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
 
             $this->returnSuccess('Order line successfully refunded', $refund);
         } catch (\Exception $ex) {
@@ -398,6 +452,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 'Error when executing a partial refund order in Shopware Backend',
                 [
                     'error' => $ex->getMessage(),
+                    'username' => $this->getLoggedInBackendUser(),
                 ]
             );
 
@@ -452,11 +507,15 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $quantity
             );
 
-
             $this->logger->info(
-                'Partial Shipment successful in Backend for Order: ' . $order->getNumber(),
+                sprintf(
+                    'Partial Shipment successful by %s in Backend for Order: %s',
+                    $this->getLoggedInBackendUser(),
+                    $order->getNumber()
+                ),
                 [
-                    'shipment' => $shipment->id
+                    'shipment' => $shipment->id,
+                    'username' => $this->getLoggedInBackendUser(),
                 ]
             );
 
@@ -526,6 +585,16 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
         $this->config = $this->container->get('mollie_shopware.config');
         $this->orderService = $this->container->get('mollie_shopware.order_service');
         $this->smarty = $this->container->get('template');
+    }
+
+    /**
+     * @return string
+     */
+    private function getLoggedInBackendUser()
+    {
+        $identity = $this->container->get('auth')->getIdentity();
+
+        return isset($identity->username) ? $identity->username : 'an unknown backend user';
     }
 
 }
