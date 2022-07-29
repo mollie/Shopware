@@ -486,7 +486,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 throw new OrderNotFoundException('Order with ID ' . $orderId . ' has not been found!');
             }
 
-            $this->logger->info('Starting partial shipping in Backend for Order: ' . $order->getNumber() . ' and Item: ' . $articleNumber);
+            $this->logger->info(
+                'Starting partial shipping by ' . $this->getLoggedInBackendUser() . ' in Backend for Order: ' . $order->getNumber() . ' and Item: ' . $articleNumber,
+                [
+                    'username' => $this->getLoggedInBackendUser(),
+                ]
+            );
 
             # get the correct mollie gateway for the shop of our order
             $gwMollie = $this->gwMollieFactory->createForShop($order->getShop()->getId());
