@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -44,6 +44,35 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="2.1.0">
+        <changes lang="de">
+            - Neue Zahlart "in3" ist nun verfügbar.
+            - Wir haben das brandneue "Smart Kontaktformular" im Bereich der Hilfe im Backend hinzugefügt. Bei Verwendung dieses Formulars für den Support erhalten wir automatisch alle notwendigen Informationen, um noch besser zu unterstützen.
+            - Neues Event für Entwickler im Bereich der Webhooks ist nun verfügbar.
+            - Beim Erstellen von Versendungen und Rückerstattungen im Backend wird nun der Benutzername des Benutzers in den Logs hinzugefügt.
+            - Das Plugin unterstützt nun Shopware ab Version 5.2.21.
+            - Tracking Codes mit einer Länge von >= 100 werden nun nicht mehr an Mollie geschickt (Länge von Mollie nicht erlaubt). Bei Angabe von verschiedenen Codes, getrennt mittels "," wird der erste Code verwendet.
+            - Kreditkartenzahlungen mit Status "erstellt" führen nun wie erwartet zu einer fehlerhaften Bezahlung.
+            - Verhindern von mehreren Bestellbestätigungs E-Mails, wenn der Käufer in seltenen Fällen mehrfach zum Shop zurückgeleitet wird.
+            - Behebung von Problemen mit Apple Pay Direct im Off-Canvas sowie im Warenkorb.
+            - Behebung des Problems, dass Bankdaten nicht auf der E-Mail sichtbar waren, sofern in den Plugin Konfigurationen Transaktionsnummern der "Zahlart" verwendet werden.
+            - Behebung eines Fehlers, bei dem die "Mollie Aktionen" in den Positionen einer Bestellung im Backend nicht sichtbar waren.
+        </changes>
+        <changes lang="en">
+            - Add new payment method "in3".
+            - We've added the brand new "Smart Contact Form" as new support option in the help section of the backend. If you use this for support, we will automatically get all data that we need to help you as good as possible.
+            - Add new event for developers in the Webhooks of Mollie.
+            - Add user who creates shipment or refund in the backend to the log files.
+            - The plugin now supports Shopware starting with version 5.2.21.
+            - Avoid Tracking Codes with a length of >= 100 to be sent to Mollie (not allowed by Mollie). It will either send the first tracking code (separated by ",") or nothing in this case.
+            - Credit Card payments with status "created" do now fail as expected.
+            - Avoid multiple confirmation mails from being sent, if the buyer returns in rare scenarios multiple times to the shop.
+            - Fix broken Apple Pay Direct in off-canvas and in cart.
+            - Fix problem with bank data not appearing in e-mails, if transaction numbers are used from the "payment method" in the plugin configuration.
+            - Fix "Mollie Actions" that where sometimes missing in the details of an order in the backend
+        </changes>
+    </changelog>
 
     <changelog version="2.0.0">
         <changes lang="de">
