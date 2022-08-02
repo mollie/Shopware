@@ -9,7 +9,6 @@ use MollieShopware\Models\Transaction;
 use MollieShopware\Services\Refund\RefundInterface;
 use Shopware\Models\Order\Order;
 
-
 class RefundOrderFacade
 {
 
@@ -60,5 +59,4 @@ class RefundOrderFacade
             $this->refundService->refundPartialOrderAmount($order, $transaction, $customAmount);
         }
     }
-
 }

@@ -214,9 +214,9 @@ class Account
 
     /**
      * @param int $customerId
-     * @return mixed|null
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return null|mixed
      */
     public function getCustomerDefaultNonApplePayPaymentMethod($customerId)
     {

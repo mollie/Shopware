@@ -3,12 +3,10 @@
 
 namespace MollieShopware\Components\StatusConverter;
 
-
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\StatusConverter\DataStruct\StatusTransactionStruct;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use Shopware\Models\Order\Status;
-
 
 class PaymentStatusConverter
 {
@@ -31,8 +29,8 @@ class PaymentStatusConverter
 
     /**
      * @param $molliePaymentStatus
-     * @return StatusTransactionStruct
      * @throws PaymentStatusNotFoundException
+     * @return StatusTransactionStruct
      */
     public function getShopwarePaymentStatus($molliePaymentStatus)
     {
@@ -82,5 +80,4 @@ class PaymentStatusConverter
 
         return new StatusTransactionStruct($targetState, $ignoreState);
     }
-
 }

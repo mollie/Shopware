@@ -28,7 +28,6 @@ function runValidation(SnippetsValidator $validator, array $files)
     $allFiles = array_merge($files);
 
     foreach ($allFiles as $file) {
-
         if ($file === '.' || $file === '..') {
             continue;
         }
@@ -41,7 +40,6 @@ function runValidation(SnippetsValidator $validator, array $files)
 
         /** @var ValidationError $error */
         foreach ($errors as $error) {
-
             echo $errorIndex . " >> " . $error->getLang() . ' | ' . $error->getKey() . ' | ' . $error->getError() . ' | ' . $error->getValue() . PHP_EOL;
             $errorIndex++;
         }
@@ -50,7 +48,6 @@ function runValidation(SnippetsValidator $validator, array $files)
             exit(1);
         }
     }
-
 }
 
 

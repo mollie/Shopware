@@ -2,11 +2,10 @@
 
 namespace MollieShopware\Components\StatusConverter\DataStruct;
 
-
 class StatusTransactionStruct
 {
     /**
-     * @var int|null
+     * @var null|int
      */
     private $targetStatus;
 

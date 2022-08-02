@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Installer\PaymentMethods;
 
-
 use Enlight_Template_Manager;
 use Mollie\Api\Resources\Method;
 use MollieShopware\Components\Config;
@@ -22,7 +21,6 @@ use Psr\Log\LoggerInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\PaymentInstaller;
 use Shopware\Models\Payment\Payment;
-
 
 class PaymentMethodsInstaller
 {
@@ -129,9 +127,9 @@ class PaymentMethodsInstaller
      * that new methods are added and old ones are updated
      *
      * @param bool $forceActivate enables all payments methods except removed ones
-     * @return int total number of installed/updated payment methods
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return int total number of installed/updated payment methods
      */
     public function installPaymentMethods($forceActivate)
     {
@@ -238,7 +236,6 @@ class PaymentMethodsInstaller
 
         /** @var Payment $method */
         foreach ($installedMethods as $method) {
-
             try {
                 $paymentConfig = $this->repoConfiguration->getByPaymentId($method->getId());
             } catch (MolliePaymentConfigurationNotFound $ex) {
@@ -573,5 +570,4 @@ class PaymentMethodsInstaller
 
         return false;
     }
-
 }

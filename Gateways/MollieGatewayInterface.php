@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Gateways;
 
-
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
@@ -60,8 +59,8 @@ interface MollieGatewayInterface
     /**
      * @param $paymentId
      * @param $description
-     * @return void
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return void
      */
     public function updatePaymentDescription($paymentId, $description);
 
@@ -84,5 +83,4 @@ interface MollieGatewayInterface
      * @return Shipment
      */
     public function shipOrderPartially(Order $mollieOrder, $lineId, $quantity, $carrier, $trackingNumber, $trackingUrl);
-
 }

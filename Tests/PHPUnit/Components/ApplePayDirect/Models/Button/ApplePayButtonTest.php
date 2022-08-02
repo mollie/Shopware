@@ -67,5 +67,4 @@ class ApplePayButtonTest extends TestCase
 
         $this->assertEquals(true, $button->toArray()['requirements']['phone']);
     }
-
 }

@@ -9,10 +9,8 @@ use MollieShopware\Services\Mollie\Payments\Requests\Paysafecard;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class PaysafecardTest extends TestCase
 {
-
     use PaymentTestTrait;
 
 
@@ -135,5 +133,4 @@ class PaysafecardTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

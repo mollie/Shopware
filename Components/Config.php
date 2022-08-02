@@ -149,7 +149,7 @@ class Config implements ConfigInterface
      */
     public function getLiveApiKey()
     {
-        /** @var string|null $key */
+        /** @var null|string $key */
         $key = $this->get('api-key');
 
         if ($key === null) {
@@ -164,7 +164,7 @@ class Config implements ConfigInterface
      */
     public function getTestApiKey()
     {
-        /** @var string|null $key */
+        /** @var null|string $key */
         $key = $this->get('test-api-key');
 
         if ($key === null) {
@@ -179,7 +179,7 @@ class Config implements ConfigInterface
      */
     public function isTestmodeActive()
     {
-        /** @var string|null $isActive */
+        /** @var null|string $isActive */
         $isActive = $this->get('test_mode_active');
 
         if ($isActive === null) {
@@ -203,7 +203,7 @@ class Config implements ConfigInterface
      */
     public function getLogLevel()
     {
-        /** @var int|null $level */
+        /** @var null|int $level */
         $level = $this->get('log_level');
 
         if ($level === '2, INFO') {
@@ -226,7 +226,7 @@ class Config implements ConfigInterface
      */
     public function getBankTransferDueDateDays()
     {
-        /** @var int|null $level */
+        /** @var null|int $level */
         $dueDateDays = $this->get('banktransfer_duedate_days');
 
         if ($dueDateDays === null) {
@@ -407,7 +407,7 @@ class Config implements ConfigInterface
      */
     public function getApplePayDirectRestrictions()
     {
-        /** @var array|null $restrictions */
+        /** @var null|array $restrictions */
         $restrictions = $this->get('mollie_applepaydirect_restrictions');
 
         if ($restrictions === null) {

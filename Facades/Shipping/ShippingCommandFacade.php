@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Facades\Shipping;
 
-
 use Doctrine\ORM\EntityNotFoundException;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
@@ -147,7 +146,7 @@ class ShippingCommandFacade
         foreach ($transactions as $transaction) {
             try {
 
-                /** @var Order|null $swOrder */
+                /** @var null|Order $swOrder */
                 $swOrder = null;
 
                 $shopID = $transaction->getShopId();
@@ -262,7 +261,7 @@ class ShippingCommandFacade
                 }
 
 
-                /** @var Order|null $order */
+                /** @var null|Order $order */
                 $swOrder = $this->repoOrders->find($transaction->getOrderId());
 
 
@@ -369,11 +368,10 @@ class ShippingCommandFacade
 
         try {
 
-            /** @var Order|null $order */
+            /** @var null|Order $order */
             $order = $this->repoOrders->find($transaction->getOrderId());
 
             return $order->getShop()->getId();
-
         } catch (EntityNotFoundException $ex) {
             return 0;
         }
@@ -385,9 +383,9 @@ class ShippingCommandFacade
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @param Table $table
      * @param Shop $shop
-     * @return bool
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return bool
      */
     private function isAlreadyShipped(Transaction $transaction, \Mollie\Api\Resources\Order $mollieOrder, Table $table, Shop $shop)
     {
@@ -419,9 +417,9 @@ class ShippingCommandFacade
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @param Table $table
      * @param Shop $shop
-     * @return bool
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return bool
      */
     private function isOrderSuccessful(Transaction $transaction, \Mollie\Api\Resources\Order $mollieOrder, Table $table, Shop $shop)
     {
@@ -490,7 +488,7 @@ class ShippingCommandFacade
      */
     private function hasTransactionOrder(Transaction $transaction, \Mollie\Api\Resources\Order $mollieOrder, Table $table, Shop $shop)
     {
-        /** @var Order|null $order */
+        /** @var null|Order $order */
         $swOrder = $this->repoOrders->find($transaction->getOrderId());
 
         if ($swOrder !== null) {
@@ -649,5 +647,4 @@ class ShippingCommandFacade
             $message,
         ];
     }
-
 }

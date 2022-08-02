@@ -7,7 +7,6 @@ use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\MollieShopware;
 use PHPUnit\Framework\TestCase;
 
-
 class PaymentMethodTypeTest extends TestCase
 {
 
@@ -94,5 +93,4 @@ class PaymentMethodTypeTest extends TestCase
         # test with prefix
         $this->assertEquals($allowed, PaymentMethodType::isPaymentsApiAllowed(MollieShopware::PAYMENT_PREFIX . $paymentMethod));
     }
-
 }

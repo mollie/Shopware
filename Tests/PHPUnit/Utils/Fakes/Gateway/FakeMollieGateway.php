@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Utils\Fakes\Gateway;
 
-
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
@@ -200,5 +199,4 @@ class FakeMollieGateway implements MollieGatewayInterface
         $this->shippedTrackingNumber = $trackingNumber;
         $this->shippedTrackingUrl = $trackingUrl;
     }
-
 }

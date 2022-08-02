@@ -133,7 +133,6 @@ class FinishCheckoutFacade
 
     /**
      * @param $transactionId
-     * @return CheckoutFinish
      * @throws ApiException
      * @throws MollieOrderNotFound
      * @throws MolliePaymentFailedException
@@ -144,6 +143,7 @@ class FinishCheckoutFacade
      * @throws \Enlight_Event_Exception
      * @throws \MollieShopware\Exceptions\MolliePaymentNotFound
      * @throws \MollieShopware\Exceptions\PaymentStatusNotFoundException
+     * @return CheckoutFinish
      */
     public function finishTransaction($transactionId)
     {
@@ -274,7 +274,6 @@ class FinishCheckoutFacade
                     # update PAYMENT
                     $tmpPayment = $mollieOrder->_embedded->payments[0];
                     $this->gwMollie->updatePaymentDescription($tmpPayment->id, $newDescription);
-
                 } else {
                     $this->gwMollie->updatePaymentDescription($molliePayment->id, $newDescription);
                 }
@@ -335,9 +334,7 @@ class FinishCheckoutFacade
 
                 if ($isFirstRequest) {
                     try {
-
                         $this->confirmationMail->sendConfirmationEmail($transaction);
-
                     } catch (\Exception $ex) {
                         # never ever break if only an email cannot be sent
                         # lets just add a log here.
@@ -350,9 +347,7 @@ class FinishCheckoutFacade
                     }
                 }
             }
-
         } catch (\Exception $ex) {
-
             $this->logger->warning(
                 'Attention, something went wrong during payment of order: ' . $swOrder->getNumber(),
                 [
@@ -387,5 +382,4 @@ class FinishCheckoutFacade
             $this->repoTransactions->save($transaction);
         }
     }
-
 }

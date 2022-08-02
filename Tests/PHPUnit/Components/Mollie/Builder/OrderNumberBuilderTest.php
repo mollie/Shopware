@@ -6,7 +6,6 @@ use MollieShopware\Components\Mollie\Builder\Payment\OrderNumberBuilder;
 use MollieShopware\Models\Transaction;
 use PHPUnit\Framework\TestCase;
 
-
 class OrderNumberBuilderTest extends TestCase
 {
 
@@ -57,5 +56,4 @@ class OrderNumberBuilderTest extends TestCase
 
         $this->assertEquals('20004', $orderNumber);
     }
-
 }

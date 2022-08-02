@@ -85,8 +85,8 @@ class IdealIssuersSubscriber implements SubscriberInterface
      * For iDEAL an issuer should also be saved to the database.
      *
      * @param \Enlight_Event_EventArgs $args
-     * @return mixed
      * @throws \Exception
+     * @return mixed
      */
     public function onUpdatePaymentForUser(\Enlight_Event_EventArgs $args)
     {
@@ -111,7 +111,6 @@ class IdealIssuersSubscriber implements SubscriberInterface
         $view->addTemplateDir(__DIR__ . '/../Resources/views');
 
         try {
-
             $customer = $this->customers->getCurrent();
 
             if (!$customer instanceof Customer) {
@@ -127,9 +126,7 @@ class IdealIssuersSubscriber implements SubscriberInterface
 
             $view->assign('mollieIdealIssuers', $idealIssuers);
             $view->assign('mollieIssues', false);
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when loading iDEAL issuers for payment screen!',
                 [
@@ -160,7 +157,6 @@ class IdealIssuersSubscriber implements SubscriberInterface
                 $this->iDeal->updateCustomerIssuer($customer, $issuer);
             }
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error when updating selected iDeal issuer for customer!',
                 [
@@ -171,5 +167,4 @@ class IdealIssuersSubscriber implements SubscriberInterface
             throw $ex;
         }
     }
-
 }

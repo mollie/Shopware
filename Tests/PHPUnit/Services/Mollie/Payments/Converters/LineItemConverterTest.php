@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Services\Mollie\Payments\Builders;
 
-
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use PHPUnit\Framework\TestCase;
@@ -94,5 +93,4 @@ class LineItemConverterTest extends TestCase
         $this->assertEquals('', $data['productUrl']);
         $this->assertEquals('', $data['metadata']);
     }
-
 }

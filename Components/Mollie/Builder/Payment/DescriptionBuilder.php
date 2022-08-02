@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Builder\Payment;
 
-
 use MollieShopware\Models\Transaction;
 
 class DescriptionBuilder
@@ -23,5 +22,4 @@ class DescriptionBuilder
 
         return 'Transaction ' . $uniqueID;
     }
-
 }

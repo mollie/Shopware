@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Services\TransactionUUID;
 
-
 class UnixTimestampGenerator implements TimestampGeneratorInterface
 {
 
@@ -13,5 +12,4 @@ class UnixTimestampGenerator implements TimestampGeneratorInterface
     {
         return (string)time();
     }
-
 }

@@ -5,7 +5,6 @@ namespace MollieShopware\Tests\Subscriber;
 use MollieShopware\Subscriber\IdealIssuersSubscriber;
 use PHPUnit\Framework\TestCase;
 
-
 class iDealSubscriberTest extends TestCase
 {
 
@@ -23,5 +22,4 @@ class iDealSubscriberTest extends TestCase
 
         $this->assertEquals($expected, array_keys(IdealIssuersSubscriber::getSubscribedEvents()));
     }
-
 }

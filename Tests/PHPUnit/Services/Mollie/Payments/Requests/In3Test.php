@@ -10,7 +10,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\In3;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class In3Test extends TestCase
 {
     use PaymentTestTrait;
@@ -123,5 +122,4 @@ class In3Test extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

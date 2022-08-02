@@ -71,12 +71,12 @@ class RefundService implements RefundInterface
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return Refund
      */
     public function refundFullOrder(Order $order, Transaction $transaction)
     {
@@ -92,14 +92,12 @@ class RefundService implements RefundInterface
 
 
         if ($transaction->isTypeOrder()) {
-
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
             # if we have a VOUCHER payment method
             # then the Mollie API does not calculate the amount that can be refunded
             # in that case, we have to do this and create a refund with a custom amount
             if ($order->getPayment()->getName() === MollieShopware::PAYMENT_PREFIX . PaymentMethod::VOUCHERS) {
-
                 $molliePayment = $this->getPaidPaymentOfOrder($mollieOrder);
 
                 if (!$molliePayment instanceof Payment) {
@@ -111,12 +109,9 @@ class RefundService implements RefundInterface
                     $transaction,
                     $molliePayment->getAmountRemaining()
                 );
-
             } else {
-
                 $refund = $this->sendMollieOrderRefund($order, $mollieOrder, $mollie);
             }
-
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
@@ -135,12 +130,12 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param Transaction $transaction
      * @param float $amount
-     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return Refund
      */
     public function refundPartialOrderAmount(Order $order, Transaction $transaction, $amount)
     {
@@ -175,7 +170,6 @@ class RefundService implements RefundInterface
             $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
             $molliePayment = $this->getPaidPaymentOfOrder($mollieOrder);
-
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
         }
@@ -204,12 +198,12 @@ class RefundService implements RefundInterface
      * @param Transaction $transaction
      * @param string $orderLineID
      * @param int $quantity
-     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return Refund
      */
     public function refundPartialOrderItem(Order $order, Detail $detail, Transaction $transaction, $orderLineID, $quantity)
     {
@@ -244,7 +238,7 @@ class RefundService implements RefundInterface
             ]
         ];
 
-        /** @var Refund|null $refund */
+        /** @var null|Refund $refund */
         $refund = $mollie->orderRefunds->createFor($mollieOrder, $data);
 
         if ($refund === null) {
@@ -260,13 +254,13 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param MolliePayment $molliePayment
      * @param float $amountToRefund
-     * @return \Mollie\Api\Resources\BaseResource
      * @throws RefundFailedException
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return \Mollie\Api\Resources\BaseResource
      */
     private function sendMolliePaymentRefund(Order $order, MolliePayment $molliePayment, $amountToRefund)
     {
-        /** @var BaseResource|null $refund */
+        /** @var null|BaseResource $refund */
         $refund = $molliePayment->refund([
             'amount' => [
                 'currency' => $order->getCurrency(),
@@ -285,17 +279,17 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param MollieOrder $mollieOrder
      * @param MollieApiClient $mollie
-     * @return Refund
      * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return Refund
      */
     private function sendMollieOrderRefund(Order $order, MollieOrder $mollieOrder, MollieApiClient $mollie)
     {
         $mollieShipmentLines = $this->repoOrderLines->getShipmentLines($order);
 
-        /** @var Refund|null $refund */
+        /** @var null|Refund $refund */
         $refund = $mollie->orderRefunds->createFor(
             $mollieOrder,
             [
@@ -319,9 +313,9 @@ class RefundService implements RefundInterface
     /**
      * @param Detail $detail
      * @param int $quantity
-     * @return void
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return void
      */
     private function updateRefundedItemsOnOrderDetail($detail, $quantity)
     {
@@ -352,7 +346,7 @@ class RefundService implements RefundInterface
 
     /**
      * @param MollieOrder $mollieOrder
-     * @return MolliePayment|null
+     * @return null|MolliePayment
      */
     private function getPaidPaymentOfOrder(\Mollie\Api\Resources\Order $mollieOrder)
     {
@@ -367,5 +361,4 @@ class RefundService implements RefundInterface
 
         return null;
     }
-
 }

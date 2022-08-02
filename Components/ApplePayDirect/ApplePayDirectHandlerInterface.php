@@ -26,7 +26,7 @@ interface ApplePayDirectHandlerInterface
     public function setUserData(UserData $userData);
 
     /**
-     * @return UserData|null
+     * @return null|UserData
      */
     public function getUserData();
 

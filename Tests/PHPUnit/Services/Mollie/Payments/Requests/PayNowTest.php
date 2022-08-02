@@ -11,7 +11,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class PayNowTest extends TestCase
 {
     use PaymentTestTrait;
@@ -124,5 +123,4 @@ class PayNowTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

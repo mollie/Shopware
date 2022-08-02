@@ -27,5 +27,4 @@ class TaxMode
     {
         return $this->chargeTaxes;
     }
-
 }

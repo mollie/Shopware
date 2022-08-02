@@ -4,7 +4,6 @@ namespace MollieShopware\Tests\Utils\Fakes\Config;
 
 use MollieShopware\Components\ConfigInterface;
 
-
 class FakeConfig implements ConfigInterface
 {
 

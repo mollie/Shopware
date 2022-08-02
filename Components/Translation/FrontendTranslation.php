@@ -2,13 +2,10 @@
 
 namespace MollieShopware\Components\Translation;
 
-
 use Doctrine\DBAL\Connection;
-
 
 class FrontendTranslation
 {
-
     const REGISTRATION_MISSING_FIELD = "GuestAccountRegistrationMissingField";
 
 
@@ -49,5 +46,4 @@ class FrontendTranslation
 
         return (string)$text;
     }
-
 }

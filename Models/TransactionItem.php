@@ -461,5 +461,4 @@ class TransactionItem
     {
         $this->voucherType = $voucherType;
     }
-
 }

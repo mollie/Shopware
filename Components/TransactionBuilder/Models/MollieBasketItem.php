@@ -213,5 +213,4 @@ class MollieBasketItem
 
         return $this->voucherType;
     }
-
 }

@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class SofortTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class SofortTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

@@ -6,7 +6,6 @@ use MollieShopware\MollieShopware;
 
 class PaymentMethodType
 {
-
     const UNDEFINED = 0;
     const GLOBAL_SETTING = 1;
     const PAYMENTS_API = 2;
@@ -22,6 +21,7 @@ class PaymentMethodType
     /**
      * Gets if the payment method allows the payments api,
      * or requires the orders api.
+     * @param mixed $paymentMethod
      */
     public static function isPaymentsApiAllowed($paymentMethod)
     {
@@ -46,5 +46,4 @@ class PaymentMethodType
 
         return true;
     }
-
 }

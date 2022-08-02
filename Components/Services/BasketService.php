@@ -22,7 +22,6 @@ use Zend_Db_Adapter_Exception;
 
 class BasketService
 {
-
     const MODE_PREMIUM = 1;
     const MODE_VOUCHER = 2;
 
@@ -38,7 +37,7 @@ class BasketService
     /** @var OrderService $orderService */
     protected $orderService;
 
-    /** @var Enlight_Components_Db_Adapter_Pdo_Mysql|null */
+    /** @var null|Enlight_Components_Db_Adapter_Pdo_Mysql */
     protected $db;
 
     /**
@@ -74,7 +73,7 @@ class BasketService
     /**
      * Restore Basket
      *
-     * @param Order|int $orderId
+     * @param int|Order $orderId
      *
      * @throws Exception
      */
@@ -122,7 +121,6 @@ class BasketService
                             $order->setInvoiceAmount($order->getInvoiceAmount() - $orderDetail->getPrice());
                         }
                     } else {
-
                         $attributes = $orderDetail->getAttribute();
 
                         // if swagCustomProductsConfigurationHash exists for orderDetail restore it in request
@@ -139,7 +137,6 @@ class BasketService
                             # will make sure to add the free product if allowed.
                             Shopware()->Front()->Request()->setQuery('sAddPremium', $orderDetail->getArticleNumber());
                             $id = $this->basketModule->sInsertPremium();
-
                         } else {
 
                             # product is nothing special, ordinary one
@@ -239,7 +236,7 @@ class BasketService
 
     /**
      * @param int $id
-     * @return array|null
+     * @return null|array
      */
     private function getOrderBasketAttributes($id)
     {
@@ -261,7 +258,7 @@ class BasketService
 
     /**
      * @param int $id
-     * @return array|null
+     * @return null|array
      */
     private function getOrderDetailsAttributes($id)
     {
@@ -286,9 +283,9 @@ class BasketService
      *
      * @param int $voucherId
      *
+     * @throws Exception
      * @return Voucher $voucher
      *
-     * @throws Exception
      */
     public function getVoucherById($voucherId)
     {
@@ -321,9 +318,9 @@ class BasketService
      *
      * @param int $orderDetailId
      *
+     * @throws Exception
      * @return int $result
      *
-     * @throws Exception
      */
     public function removeOrderDetail($orderDetailId)
     {
@@ -361,9 +358,9 @@ class BasketService
      *
      * @param Detail $orderDetail
      *
+     * @throws Exception
      * @return Detail $orderDetail
      *
-     * @throws Exception
      */
     public function resetOrderDetailQuantity(Detail $orderDetail)
     {

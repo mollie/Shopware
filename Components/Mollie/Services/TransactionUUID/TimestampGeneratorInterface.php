@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Services\TransactionUUID;
 
-
 interface TimestampGeneratorInterface
 {
 
@@ -10,5 +9,4 @@ interface TimestampGeneratorInterface
      * @return string
      */
     public function generateTimestamp();
-
 }

@@ -2,13 +2,11 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Requests;
 
-
 use MollieShopware\Services\Mollie\Payments\AbstractPayment;
 use MollieShopware\Services\Mollie\Payments\Converters\AddressConverter;
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\Exceptions\ApiNotSupportedException;
 use MollieShopware\Services\Mollie\Payments\PaymentInterface;
-
 
 class PayLater extends AbstractPayment implements PaymentInterface
 {
@@ -25,12 +23,11 @@ class PayLater extends AbstractPayment implements PaymentInterface
     }
 
     /**
-     * @return mixed[]|void
      * @throws ApiNotSupportedException
+     * @return mixed[]|void
      */
     public function buildBodyPaymentsAPI()
     {
         throw new ApiNotSupportedException('Klarna Pay Later does not support the Payments API!');
     }
-
 }

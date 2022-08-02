@@ -43,8 +43,8 @@ class MollieGateway implements MollieGatewayInterface
     }
 
     /**
-     * @return string
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return string
      */
     public function getProfileId()
     {
@@ -58,8 +58,8 @@ class MollieGateway implements MollieGatewayInterface
     }
 
     /**
-     * @return string
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return string
      */
     public function getOrganizationId()
     {
@@ -87,8 +87,8 @@ class MollieGateway implements MollieGatewayInterface
 
     /**
      * @param $orderId
-     * @return \Mollie\Api\Resources\Order
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return \Mollie\Api\Resources\Order
      */
     public function getOrder($orderId)
     {
@@ -104,8 +104,8 @@ class MollieGateway implements MollieGatewayInterface
 
     /**
      * @param $paymentId
-     * @return \Mollie\Api\Resources\Payment
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return \Mollie\Api\Resources\Payment
      */
     public function getPayment($paymentId)
     {
@@ -115,8 +115,8 @@ class MollieGateway implements MollieGatewayInterface
     }
 
     /**
-     * @return Issuer[]
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return Issuer[]
      */
     public function getIdealIssuers()
     {
@@ -129,7 +129,6 @@ class MollieGateway implements MollieGatewayInterface
         $issuers = [];
 
         foreach ($paymentMethods as $paymentMethod) {
-
             if ($paymentMethod->id === PaymentMethod::IDEAL) {
                 foreach ($paymentMethod->issuers() as $key => $issuer) {
                     $issuers[] = $issuer;
@@ -143,16 +142,14 @@ class MollieGateway implements MollieGatewayInterface
 
     /**
      * @param array $requestData
-     * @return Order
      * @throws ApiException
      * @throws InvalidOrderAmountException
+     * @return Order
      */
     public function createOrder(array $requestData)
     {
         try {
-
             return $this->apiClient->orders->create($requestData);
-
         } catch (ApiException $ex) {
 
             # we need custom exceptions for some errors
@@ -168,8 +165,8 @@ class MollieGateway implements MollieGatewayInterface
     /**
      * @param $mollieId
      * @param $orderNumber
-     * @return void
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return void
      */
     public function updateOrderNumber($mollieId, $orderNumber)
     {
@@ -184,8 +181,8 @@ class MollieGateway implements MollieGatewayInterface
     /**
      * @param $paymentId
      * @param $description
-     * @return void
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return void
      */
     public function updatePaymentDescription($paymentId, $description)
     {
@@ -251,5 +248,4 @@ class MollieGateway implements MollieGatewayInterface
 
         return $mollieOrder->createShipment($data);
     }
-
 }

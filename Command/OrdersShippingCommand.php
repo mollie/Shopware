@@ -85,7 +85,6 @@ class OrdersShippingCommand extends ShopwareCommand
 
 
         try {
-
             $isPartial = ($articleNumber !== null);
 
             if ($isPartial) {
@@ -107,9 +106,7 @@ class OrdersShippingCommand extends ShopwareCommand
             }
 
             $io->success('Order ' . $orderNumber . ' was successfully shipped.');
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when processing shipment for Order ' . $orderNumber . ' on CLI',
                 [
@@ -120,5 +117,4 @@ class OrdersShippingCommand extends ShopwareCommand
             $io->error($e->getMessage());
         }
     }
-
 }

@@ -9,5 +9,4 @@ interface TokenGeneratorInterface
      * @return string
      */
     public function generateToken();
-
 }

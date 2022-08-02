@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Components\TransactionBuilder;
 
-
 use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
 use MollieShopware\Tests\Utils\Fakes\Basket\FakeBasket;
 use MollieShopware\Tests\Utils\Fakes\Session\FakeSessionManager;
@@ -11,7 +10,6 @@ use MollieShopware\Tests\Utils\Fakes\Transaction\FakeTransactionRepository;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
 use Shopware\Models\Customer\Customer;
-
 
 class TransactionBuilderTest extends TestCase
 {
@@ -258,5 +256,4 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals(null, $transaction->getCustomerId());
         $this->assertSame($customer, $transaction->getCustomer());
     }
-
 }

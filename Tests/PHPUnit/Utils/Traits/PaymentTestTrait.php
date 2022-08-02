@@ -8,7 +8,6 @@ use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use MollieShopware\Tests\Utils\Fixtures\PaymentAddressFixture;
 use MollieShopware\Tests\Utils\Fixtures\PaymentLineItemFixture;
 
-
 trait PaymentTestTrait
 {
 
@@ -86,6 +85,4 @@ trait PaymentTestTrait
             'metadata' => $item->getMetadata(),
         ];
     }
-
-
 }

@@ -43,8 +43,8 @@ class MollieShipping
      * @param \Mollie\Api\Resources\Order $mollieOrder
      * @param $detailId
      * @param $quantity
-     * @return \Mollie\Api\Resources\Shipment
      * @throws OrderNotFoundException
+     * @return \Mollie\Api\Resources\Shipment
      */
     public function shipOrderPartially(Order $shopwareOrder, \Mollie\Api\Resources\Order $mollieOrder, $detailId, $quantity)
     {
@@ -125,10 +125,9 @@ class MollieShipping
         # we just have to completely remove those codes, so that no tracking happens, but a shipping works.
         # still, if we find multiple codes (because separators exist), then we use the first one only
         if (strlen($code) > self::MAX_TRACKING_CODE_LENGTH) {
-
             if ($this->stringContains(',', $code)) {
                 $code = trim(explode(',', $code)[0]);
-            } else if ($this->stringContains(';', $code)) {
+            } elseif ($this->stringContains(';', $code)) {
                 $code = trim(explode(';', $code)[0]);
             }
 
@@ -169,7 +168,7 @@ class MollieShipping
 
 
         # now validate if the tracking URL is a valid URL if not, just remove it
-        if (filter_var($trackingUrl, FILTER_VALIDATE_URL) === FALSE) {
+        if (filter_var($trackingUrl, FILTER_VALIDATE_URL) === false) {
             $trackingUrl = '';
         }
 
@@ -199,11 +198,8 @@ class MollieShipping
         );
 
         try {
-
             $trackingUrl = $this->smarty->fetch('string:' . $smartyTrackingUrl);
-
         } catch (\Exception $ex) {
-
             $trackingUrl = '';
         }
 
@@ -246,5 +242,4 @@ class MollieShipping
 
         return false;
     }
-
 }

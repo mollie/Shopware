@@ -10,5 +10,4 @@ interface CookieRepositoryInterface
      * @return mixed
      */
     public function setSessionCookie($previousSessionId);
-
 }

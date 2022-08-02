@@ -6,6 +6,7 @@ class LocaleFinder
 {
 
     /**
+     * @param mixed $locale
      * @return string
      */
     public function getPaymentLocale($locale)

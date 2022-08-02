@@ -40,6 +40,8 @@ class ConfigurationTest extends TestCase
      * a value and get the expected output method.
      *
      * @dataProvider getPaymentMethodData
+     * @param mixed $expected
+     * @param mixed $value
      */
     public function testMethodType($expected, $value)
     {
@@ -79,6 +81,8 @@ class ConfigurationTest extends TestCase
      * a value and get the expected output value.
      *
      * @dataProvider getOrderCreationData
+     * @param mixed $expected
+     * @param mixed $value
      */
     public function testSetGlobalPaymentMethod($expected, $value)
     {
@@ -87,5 +91,4 @@ class ConfigurationTest extends TestCase
 
         $this->assertSame($expected, $config->getOrderCreation());
     }
-
 }

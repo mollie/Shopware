@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Belfius;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class BelfiusTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class BelfiusTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

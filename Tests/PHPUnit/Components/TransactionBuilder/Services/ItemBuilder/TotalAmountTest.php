@@ -117,5 +117,4 @@ class TotalAmountTest extends TestCase
         # this is the sum of round(11.9626) * 6 quantity = 71.76
         $this->assertEquals(71.76, $item->getTotalAmount());
     }
-
 }

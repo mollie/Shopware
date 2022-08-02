@@ -43,9 +43,7 @@ class SnippetsValidator
         $ini_array = parse_ini_file($filename, true);
 
         foreach ($ini_array as $language => $entries) {
-
             foreach ($entries as $key => $value) {
-
                 if (empty($value)) {
                     $errors[] = new ValidationError(
                         $language,
@@ -57,7 +55,6 @@ class SnippetsValidator
                 }
 
                 if ($this->isBackendValidator) {
-
                     if ($this->endsWith($value, '"')) {
                         $errors[] = new ValidationError(
                             $language,
@@ -74,7 +71,6 @@ class SnippetsValidator
                     $found = preg_match($pattern, $value);
 
                     if ($found) {
-
                         $errors[] = new ValidationError(
                             $language,
                             $key,
@@ -164,5 +160,4 @@ class ValidationError
     {
         return $this->error;
     }
-
 }

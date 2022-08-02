@@ -190,5 +190,4 @@ class TransactionItemTest extends TestCase
 
         $this->assertEquals(100, $item->getNetPrice());
     }
-
 }

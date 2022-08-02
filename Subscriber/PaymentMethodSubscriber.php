@@ -174,11 +174,10 @@ class PaymentMethodSubscriber implements SubscriberInterface
     /**
      * Returns the configuration for the current shop.
      *
-     * @return Config|null
+     * @return null|Config
      */
     private function getConfig(Shop $shop)
     {
-
         return $this->mollieShopSwitcher->getConfig($shop->getId());
     }
 }

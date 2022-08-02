@@ -30,6 +30,7 @@ class ApplePayPaymentMethodTest extends TestCase
      * method name is not name of Apple Pay method
      *
      * @dataProvider getNonApplePaymentMethods
+     * @param mixed $methodName
      */
     public function testNonApplePayMethods($methodName)
     {
@@ -41,6 +42,7 @@ class ApplePayPaymentMethodTest extends TestCase
      * method name is name of Apple Pay method
      *
      * @dataProvider getApplePaymentMethods
+     * @param mixed $methodName
      */
     public function testApplePayMethods($methodName)
     {
@@ -100,5 +102,4 @@ class ApplePayPaymentMethodTest extends TestCase
             ['mollie_applepaydirect'],
         ];
     }
-
 }

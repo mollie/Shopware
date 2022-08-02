@@ -9,10 +9,8 @@ use Psr\Log\LoggerInterface;
 use Shopware\Components\CSRFWhitelistAware;
 use Shopware\Models\Shop\Shop;
 
-
 class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controllers_Backend_Application implements CSRFWhitelistAware
 {
-
     protected $model = Transaction::class;
 
     const DASHBOARD_URL = 'https://www.mollie.com/dashboard';
@@ -82,7 +80,6 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
         $shops = $repoShops->findAll();
 
         foreach ($shops as $shop) {
-
             $isLiveValid = false;
             $isTestValid = false;
 
@@ -158,5 +155,4 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
         $this->apiFactory = $this->container->get('mollie_shopware.api_factory');
         $this->gwMollie = $this->container->get('mollie_shopware.gateways.mollie');
     }
-
 }

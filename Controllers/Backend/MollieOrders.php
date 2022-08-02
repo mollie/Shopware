@@ -121,7 +121,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
 
             if ($transaction->isTypeOrder()) {
-
                 $mollieOrder = $gwMollie->getOrder($transaction->getMollieOrderId());
 
                 $mollieId = $mollieOrder->id;
@@ -131,9 +130,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $checkoutUrl = $mollieOrder->getCheckoutUrl();
 
                 $url = self::DASHBOARD_URL . '/' . $gwMollie->getOrganizationId() . '/orders/' . $mollieId;
-
             } else {
-
                 $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
                 $mollieId = $molliePayment->id;
@@ -155,9 +152,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             ];
 
             $this->returnSuccess('', $data);
-
         } catch (Exception $ex) {
-
             $this->returnError($ex->getMessage());
         }
     }
@@ -206,7 +201,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     'Starting full Shipment by %s in Backend for Order: %s',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
-                ), [
+                ),
+                [
                     'username' => $this->getLoggedInBackendUser(),
                 ]
             );
@@ -256,7 +252,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $result = $mollieShipping->shipOrder($order, $mollieOrder);
 
             if ($result) {
-                /** @var Transaction|null $transaction */
+                /** @var null|Transaction $transaction */
                 $transaction = $this->modelManager->getRepository(Transaction::class)->findOneBy(
                     ['mollieId' => $mollieOrder->id]
                 );
@@ -275,7 +271,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                         'Full Shipment successful by %s in Backend for Order: %s',
                         $this->getLoggedInBackendUser(),
                         $order->getNumber()
-                    ), [
+                    ),
+                    [
                         'shipment' => $result->id,
                         'username' => $this->getLoggedInBackendUser(),
                     ]
@@ -286,7 +283,6 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order status could not be set to shipped at Mollie');
             }
         } catch (\Exception $ex) {
-
             $logger->error(
                 'Error when starting shipping in Shopware Backend',
                 [
@@ -332,7 +328,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     'Starting full refund by %s in Backend for Order: %s',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
-                ), [
+                ),
+                [
                     'username' => $this->getLoggedInBackendUser(),
                 ]
             );
@@ -351,7 +348,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                     'Full refund successful by %s in Backend for Order: %s',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
-                ), [
+                ),
+                [
                     'refund' => $refund->id,
                     'username' => $this->getLoggedInBackendUser(),
                 ]
@@ -411,10 +409,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             }
 
             $logger->info(
-                sprintf('Starting a partial refund by %s in Backend for Order: %s',
+                sprintf(
+                    'Starting a partial refund by %s in Backend for Order: %s',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
-                ), [
+                ),
+                [
                     'username' => $this->getLoggedInBackendUser(),
                 ]
             );
@@ -437,10 +437,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             );
 
             $logger->info(
-                sprintf('Partial refund successful by %s in Backend for Order: %s',
+                sprintf(
+                    'Partial refund successful by %s in Backend for Order: %s',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
-                ), [
+                ),
+                [
                     'refund' => $refund->id,
                     'username' => $this->getLoggedInBackendUser(),
                 ]
@@ -528,9 +530,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             ];
 
             $this->returnSuccess('', $data);
-
         } catch (Exception $ex) {
-
             $message = $ex->getMessage();
 
             if (strpos($ex->getMessage(), 'The quantity is higher than the maximum quantity') !== false) {
@@ -601,5 +601,4 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
         return isset($identity->username) ? $identity->username : 'an unknown backend user';
     }
-
 }

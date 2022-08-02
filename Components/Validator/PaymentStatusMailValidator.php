@@ -37,7 +37,6 @@ class PaymentStatusMailValidator
         # that the customer paid the amount to Klarna.
         # In this case we always skip payment status emails, because it would confuse the customer
         if ($order->getPayment()->getName() === MollieShopware::PAYMENT_PREFIX . PaymentMethod::KLARNA_PAY_LATER) {
-
             if ($mollieStatus === PaymentStatus::MOLLIE_PAYMENT_PAID) {
                 return false;
             }
@@ -49,5 +48,4 @@ class PaymentStatusMailValidator
 
         return $this->config->isPaymentStatusMailEnabled();
     }
-
 }

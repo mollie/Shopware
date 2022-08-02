@@ -270,7 +270,7 @@ class ConfigExporter
         }
 
         try {
-            /** @var Status|null $status */
+            /** @var null|Status $status */
             $status = $this->entityManager->getRepository(Status::class)->find($statusId);
         } catch (Exception $exception) {
         }

@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Bancontact;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class BancontactTest extends TestCase
 {
     use PaymentTestTrait;
@@ -134,5 +133,4 @@ class BancontactTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

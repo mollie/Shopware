@@ -170,8 +170,8 @@ class OrderBackendSubscriber implements SubscriberInterface
 
     /**
      * @param Enlight_Hook_HookArgs $args
-     * @return bool
      * @throws Exception
+     * @return bool
      */
     public function onOrderApiPut(Enlight_Hook_HookArgs $args)
     {
@@ -275,7 +275,6 @@ class OrderBackendSubscriber implements SubscriberInterface
             $paymentService->switchApiClient($subShopApiClient);
 
             $paymentService->sendOrder($mollieId, $order);
-
         } catch (Exception $e) {
             $this->logger->error(
                 'Error when shipping order to Mollie',

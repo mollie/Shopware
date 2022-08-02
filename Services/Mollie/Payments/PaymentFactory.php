@@ -25,15 +25,14 @@ use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
 use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
 
-
 class PaymentFactory
 {
 
 
     /**
      * @param string $paymentMethod
-     * @return PaymentInterface
      * @throws \Exception
+     * @return PaymentInterface
      */
     public function createByPaymentName($paymentMethod)
     {
@@ -97,11 +96,10 @@ class PaymentFactory
             case PaymentMethod::VOUCHERS:
                 return new Voucher();
 
-            case PaymentMethod::IN3;
+            case PaymentMethod::IN3:
                 return new In3();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);
     }
-
 }

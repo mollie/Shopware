@@ -36,7 +36,7 @@ class PaymentMethodSubscriberTest extends TestCase
     public function setUpActivePaymentMethodsProvider(array $methods)
     {
         return $this->createConfiguredMock(ActivePaymentMethodsProvider::class, [
-           'getActivePaymentMethodsForAmount' => $methods,
+            'getActivePaymentMethodsForAmount' => $methods,
         ]);
     }
 

@@ -29,5 +29,4 @@ class PaymentAddressBuilder
             $country ? (string)$country->getIso() : 'NL'
         );
     }
-
 }

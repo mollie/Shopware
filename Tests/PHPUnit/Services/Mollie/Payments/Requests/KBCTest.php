@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\KBC;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class KBCTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class KBCTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

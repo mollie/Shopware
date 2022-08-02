@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Order;
 
-
 use _PhpScoperd1ad3ba9842f\GuzzleHttp\TransferStats;
 use Doctrine\ORM\EntityManager;
 use MollieShopware\Components\Config;
@@ -153,5 +152,4 @@ class OrderCancellation
     {
         $this->basketService->restoreBasket($order);
     }
-
 }

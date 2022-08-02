@@ -13,7 +13,6 @@ use Shopware\Models\Payment\Payment;
 
 class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_Backend_Application
 {
-
     use BackendControllerTrait;
 
     /**
@@ -58,7 +57,6 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $message = sprintf('%d Payment Methods were imported/updated', $importCount);
 
             die($message);
-
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error when importing payment methods in Backend',
@@ -104,9 +102,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
 
             try {
-
                 $paymentConfig = $this->repoConfiguration->getByPaymentId($payment->getId());
-
             } catch (MolliePaymentConfigurationNotFound $ex) {
 
                 # if we do not have a config here
@@ -136,9 +132,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             ];
 
             $this->returnSuccess('', $data);
-
         } catch (Exception $ex) {
-
             $this->returnError($ex->getMessage());
         }
     }
@@ -188,9 +182,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $this->repoConfiguration->save($paymentConfig);
 
             $this->returnSuccess('', []);
-
         } catch (Exception $ex) {
-
             $this->returnError($ex->getMessage());
         }
     }
@@ -225,5 +217,4 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
         return $qb->getQuery()->getResult();
     }
-
 }

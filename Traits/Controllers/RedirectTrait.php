@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Traits\Controllers;
 
-
 trait RedirectTrait
 {
 
@@ -93,5 +92,4 @@ trait RedirectTrait
 
         $controller->redirect($url);
     }
-
 }

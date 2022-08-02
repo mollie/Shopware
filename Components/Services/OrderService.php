@@ -39,9 +39,9 @@ class OrderService
      *
      * @param int $orderId
      *
+     * @throws \Exception
      * @return Order $order
      *
-     * @throws \Exception
      */
     public function getOrderById($orderId)
     {
@@ -72,9 +72,9 @@ class OrderService
      *
      * @param int $orderDetailId
      *
+     * @throws \Exception
      * @return \Shopware\Models\Order\Detail $detail
      *
-     * @throws \Exception
      */
     public function getOrderDetailById($orderDetailId)
     {
@@ -103,9 +103,9 @@ class OrderService
     /**
      * @param string $orderNumber
      *
+     * @throws TransactionNotFoundException
      * @return Transaction
      *
-     * @throws TransactionNotFoundException
      */
     public function getOrderTransactionByNumber($orderNumber)
     {
@@ -145,8 +145,9 @@ class OrderService
      * The id is searched in the Mollie transaction database table.
      *
      * @param Order $orderId
-     * @return null|string
+     * @param mixed $order
      * @throws \Exception
+     * @return null|string
      */
     public function getMollieOrderId($order)
     {
@@ -181,9 +182,9 @@ class OrderService
 
     /**
      * @param int $orderId
-     * @param array|null $orderBy
-     * @param int|null $offset
-     * @param int|null $limit
+     * @param null|array $orderBy
+     * @param null|int $offset
+     * @param null|int $limit
      * @return array|int|string
      */
     public function getOrderStatusHistory($orderId, $orderBy, $offset, $limit)
@@ -221,9 +222,9 @@ class OrderService
      *
      * @param $orderId
      *
+     * @throws \Exception
      * @return null|string
      *
-     * @throws \Exception
      */
     public function getMolliePaymentId($orderId)
     {
@@ -259,9 +260,9 @@ class OrderService
     /**
      * @param $orderId
      *
+     * @throws \Exception
      * @return array
      *
-     * @throws \Exception
      */
     public function getOrderLines($orderId)
     {
@@ -359,7 +360,7 @@ class OrderService
 
     /**
      * @param $sessionId
-     * @return Order|null
+     * @return null|Order
      */
     public function getOrderBySessionId($sessionId)
     {
@@ -389,8 +390,8 @@ class OrderService
 
     /**
      * @param string $transactionId
-     * @return Order
      * @throws OrderNotFoundException
+     * @return Order
      */
     public function getOrderByTransactionId($transactionId)
     {

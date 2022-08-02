@@ -6,7 +6,6 @@ use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Installer\PaymentMethods\PaymentMethodsInstaller;
 use PHPUnit\Framework\TestCase;
 
-
 class PaymentMethodsInstallerTest extends TestCase
 {
 
@@ -56,5 +55,4 @@ class PaymentMethodsInstallerTest extends TestCase
 
         $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());
     }
-
 }

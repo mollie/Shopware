@@ -35,8 +35,8 @@ class MollieGatewayFactory
 
     /**
      * @param $shopId
-     * @return MollieGateway
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return MollieGateway
      */
     public function createForShop($shopId)
     {
@@ -47,5 +47,4 @@ class MollieGatewayFactory
 
         return $this->create($apiClient);
     }
-
 }

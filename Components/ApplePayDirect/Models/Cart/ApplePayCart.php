@@ -105,6 +105,7 @@ class ApplePayCart
 
     /**
      * @param $prices
+     * @param mixed $price
      */
     public function setTaxes($price)
     {

@@ -10,7 +10,6 @@ use MollieShopware\Services\Mollie\Payments\Exceptions\ApiNotSupportedException;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use MollieShopware\Services\Mollie\Payments\PaymentInterface;
 
-
 class Voucher extends AbstractPayment implements PaymentInterface
 {
 
@@ -26,8 +25,8 @@ class Voucher extends AbstractPayment implements PaymentInterface
     }
 
     /**
-     * @return mixed[]|void
      * @throws ApiNotSupportedException
+     * @return mixed[]|void
      */
     public function buildBodyPaymentsAPI()
     {
@@ -85,5 +84,4 @@ class Voucher extends AbstractPayment implements PaymentInterface
 
         return '';
     }
-
 }

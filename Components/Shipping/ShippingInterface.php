@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Shipping;
 
-
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 
 interface ShippingInterface
@@ -44,5 +43,4 @@ interface ShippingInterface
      * @return MollieBasketItem
      */
     public function getCartShippingCosts();
-
 }

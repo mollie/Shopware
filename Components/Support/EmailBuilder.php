@@ -147,10 +147,10 @@ class EmailBuilder
      * Returns a Zend_Mail object based on the
      * assigned properties in this class.
      *
-     * @return Zend_Mail
-     *
      * @throws RuntimeException
      * @throws Zend_Mail_Exception
+     * @return Zend_Mail
+     *
      */
     public function getEmail()
     {
@@ -263,7 +263,8 @@ class EmailBuilder
     {
         $message = sprintf('<div style="font-family: sans-serif; font-size: 12pt;">%s</div>', $this->message);
 
-        $information = sprintf('
+        $information = sprintf(
+            '
             <hr />
             <br>
             <div style="font-family: sans-serif; font-size: 12pt;">

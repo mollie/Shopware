@@ -49,5 +49,4 @@ class AnonymousWebProcessor
 
         return $record;
     }
-
 }

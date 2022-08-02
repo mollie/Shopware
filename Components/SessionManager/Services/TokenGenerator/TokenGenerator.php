@@ -4,7 +4,6 @@ namespace MollieShopware\Components\SessionManager\Services\TokenGenerator;
 
 use MollieShopware\Components\SessionManager\TokenGeneratorInterface;
 
-
 class TokenGenerator implements TokenGeneratorInterface
 {
 
@@ -44,5 +43,4 @@ class TokenGenerator implements TokenGeneratorInterface
 
         return $randomString;
     }
-
 }

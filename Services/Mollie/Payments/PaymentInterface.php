@@ -50,5 +50,4 @@ interface PaymentInterface
      * @return mixed[]
      */
     public function buildBodyOrdersAPI();
-
 }

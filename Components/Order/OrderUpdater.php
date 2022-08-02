@@ -199,7 +199,7 @@ class OrderUpdater
             'orderId' => $order->getId()
         ]);
 
-        /** @var History|false $lastEntry */
+        /** @var false|History $lastEntry */
         $lastEntry = null;
 
         /** @var History $entry */
@@ -228,9 +228,9 @@ class OrderUpdater
      * @param Order $order
      * @param $status
      * @param $sendMail
-     * @return bool
      * @throws PaymentStatusNotFoundException
      * @throws \Enlight_Event_Exception
+     * @return bool
      */
     private function updatePaymentStatus(Order $order, $status, $sendMail)
     {
@@ -289,13 +289,11 @@ class OrderUpdater
         }
 
         try {
-
             $this->sOrder->setPaymentStatus(
                 $order->getId(),
                 $newShopwareStatus,
                 $sendMail
             );
-
         } catch (\Zend_Mail_Transport_Exception $ex) {
             # never ever break if only an email cannot be sent
             # lets just add a log here.
@@ -323,9 +321,9 @@ class OrderUpdater
      * @param Order $order
      * @param $mollieStatus
      * @param $sendMail
-     * @return bool
      * @throws OrderStatusNotFoundException
      * @throws \Enlight_Event_Exception
+     * @return bool
      */
     private function updateOrderStatus(Order $order, $mollieStatus, $sendMail)
     {
@@ -385,13 +383,11 @@ class OrderUpdater
 
 
         try {
-
             $this->sOrder->setOrderStatus(
                 $order->getId(),
                 $newShopwareStatus,
                 $sendMail
             );
-
         } catch (\Zend_Mail_Transport_Exception $ex) {
             # never ever break if only an email cannot be sent
             # lets just add a log here.

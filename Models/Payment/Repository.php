@@ -21,8 +21,8 @@ class Repository extends ModelRepository
 
     /**
      * @param $paymentMeanId
-     * @return Configuration
      * @throws MolliePaymentConfigurationNotFound
+     * @return Configuration
      */
     public function getByPaymentId($paymentMeanId)
     {
@@ -39,8 +39,8 @@ class Repository extends ModelRepository
 
     /**
      * @param $paymentName
-     * @return Configuration
      * @throws MolliePaymentConfigurationNotFound
+     * @return Configuration
      */
     public function getByPaymentName($paymentName)
     {
@@ -82,5 +82,4 @@ class Repository extends ModelRepository
 
         $connection->executeQuery($sql);
     }
-
 }

@@ -2,10 +2,8 @@
 
 namespace MollieShopware\Tests\Services\TokenAMollieOrderRequestAnonymizernonymizer;
 
-
 use MollieShopware\Services\MollieOrderRequestAnonymizer\MollieOrderRequestAnonymizer;
 use PHPUnit\Framework\TestCase;
-
 
 class MollieOrderRequestAnonymizerTest extends TestCase
 {
@@ -96,5 +94,4 @@ class MollieOrderRequestAnonymizerTest extends TestCase
 
         $this->assertEquals($expected, $anonymized);
     }
-
 }

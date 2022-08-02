@@ -68,7 +68,6 @@ class TransactionItemBuilder
                     # unit prices with 2 decimals
                     $mollieItemPrice = round($mollieItemPrice, 2);
                 }
-
             } else {
 
                 # if we do not charge taxes
@@ -78,7 +77,6 @@ class TransactionItemBuilder
                 # we also have to round for higher quantities (tested in a merchant shop).
                 $mollieItemPrice = round($netPrice, 2);
             }
-
         } else {
 
             # if we have a gross price configuration

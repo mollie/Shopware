@@ -25,5 +25,4 @@ interface iDEALInterface
      * @return void
      */
     public function updateCustomerIssuer(Customer $customer, $issuer);
-
 }

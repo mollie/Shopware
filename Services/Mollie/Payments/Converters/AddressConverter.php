@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Converters;
 
-
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 
 class AddressConverter
@@ -26,5 +25,4 @@ class AddressConverter
             'country' => (string)$address->getCountryIso2(),
         ];
     }
-
 }

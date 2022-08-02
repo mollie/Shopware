@@ -2,14 +2,12 @@
 
 namespace MollieShopware\Services\Mollie\Payments;
 
-
 use MollieShopware\Services\Mollie\Payments\Converters\AddressConverter;
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\Formatters\NumberFormatter;
 use MollieShopware\Services\Mollie\Payments\Models\Payment;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
-
 
 abstract class AbstractPayment implements PaymentInterface
 {
@@ -90,7 +88,7 @@ abstract class AbstractPayment implements PaymentInterface
     private $lineItems;
 
     /**
-     * @var int|null
+     * @var null|int
      */
     private $expirationDays;
 
@@ -230,7 +228,6 @@ abstract class AbstractPayment implements PaymentInterface
         # then calculate the matching date and
         # set it in our request
         if ($this->expirationDays !== null) {
-
             $expiresAt = (string)date('Y-m-d', (int)strtotime(' + ' . $this->expirationDays . ' day'));
 
             $data['expiresAt'] = $expiresAt;
@@ -247,5 +244,4 @@ abstract class AbstractPayment implements PaymentInterface
     {
         return $this->lineItems;
     }
-
 }

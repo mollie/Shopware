@@ -10,7 +10,6 @@ use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Models\Transaction;
 use Shopware\Models\Order\Order;
 
-
 class PaymentStatusResolver
 {
 
@@ -56,9 +55,9 @@ class PaymentStatusResolver
      * order or payment of the provided transaction.
      *
      * @param Transaction $transaction
-     * @return string
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return string
      */
     public function fetchPaymentStatus(Transaction $transaction)
     {
@@ -105,9 +104,9 @@ class PaymentStatusResolver
 
     /**
      * @param $shopId
-     * @return \MollieShopware\Gateways\Mollie\MollieGateway
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return \MollieShopware\Gateways\Mollie\MollieGateway
      */
     private function buildMollieGateway($shopId)
     {
@@ -136,5 +135,4 @@ class PaymentStatusResolver
 
         return $order->getShop()->getId();
     }
-
 }

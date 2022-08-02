@@ -4,7 +4,6 @@ namespace MollieShopware\Tests\Utils\Fixtures;
 
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 
-
 class PaymentAddressFixture
 {
 
@@ -41,5 +40,4 @@ class PaymentAddressFixture
             'DE'
         );
     }
-
 }

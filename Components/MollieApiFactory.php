@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components;
 
-
 use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\HttpAdapter\CurlMollieHttpAdapter;
 use Mollie\Api\MollieApiClient;
@@ -36,8 +35,8 @@ class MollieApiFactory
 
     /**
      * @param null $shopId
-     * @return MollieApiClient
      * @throws ApiException
+     * @return MollieApiClient
      */
     public function create($shopId = null)
     {
@@ -54,9 +53,9 @@ class MollieApiFactory
     }
 
     /**
-     * @param int|null $shopId
-     * @return MollieApiClient
+     * @param null|int $shopId
      * @throws ApiException
+     * @return MollieApiClient
      */
     public function createLiveClient($shopId = null)
     {
@@ -69,9 +68,9 @@ class MollieApiFactory
     }
 
     /**
-     * @param int|null $shopId
-     * @return MollieApiClient
+     * @param null|int $shopId
      * @throws ApiException
+     * @return MollieApiClient
      */
     public function createTestClient($shopId = null)
     {
@@ -86,8 +85,8 @@ class MollieApiFactory
 
     /**
      * @param $apiKey
-     * @return MollieApiClient
      * @throws ApiException
+     * @return MollieApiClient
      */
     private function buildApiClient($apiKey)
     {
@@ -133,5 +132,4 @@ class MollieApiFactory
 
         return $client;
     }
-
 }

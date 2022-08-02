@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Utils\Fixtures;
 
-
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 
 class BasketLineItemFixture
@@ -63,5 +62,4 @@ class BasketLineItemFixture
 
         return $item;
     }
-
 }

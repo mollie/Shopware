@@ -5,7 +5,6 @@ namespace MollieShopware\Components\Mollie;
 use Exception;
 use Mollie\Api\MollieApiClient;
 
-
 class MollieApiTester
 {
 
@@ -22,7 +21,6 @@ class MollieApiTester
         $isValid = false;
 
         try {
-
             $profile = $client->profiles->getCurrent();
 
             # test if the profile exists
@@ -30,7 +28,6 @@ class MollieApiTester
             if (isset($profile->id)) {
                 $isValid = true;
             }
-
         } catch (Exception $e) {
             # no need to handle this in here
             # its just not valid
@@ -38,5 +35,4 @@ class MollieApiTester
 
         return $isValid;
     }
-
 }

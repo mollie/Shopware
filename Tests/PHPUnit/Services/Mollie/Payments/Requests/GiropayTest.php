@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Giropay;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class GiropayTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class GiropayTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

@@ -12,5 +12,4 @@ class InvalidOrderAmountException extends \Exception
     {
         parent::__construct($previous->getMessage(), $previous->getCode(), $previous);
     }
-
 }
