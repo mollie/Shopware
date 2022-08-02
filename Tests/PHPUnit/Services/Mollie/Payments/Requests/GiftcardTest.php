@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Giftcard;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class GiftcardTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class GiftcardTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

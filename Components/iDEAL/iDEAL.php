@@ -8,7 +8,6 @@ use MollieShopware\Gateways\MollieGatewayInterface;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Customer\Customer;
 
-
 class iDEAL implements iDEALInterface
 {
 
@@ -92,9 +91,9 @@ class iDEAL implements iDEALInterface
     /**
      * @param Customer $customer
      * @param string $issuer
-     * @return void
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Doctrine\ORM\ORMException
+     * @return void
      */
     public function updateCustomerIssuer(Customer $customer, $issuer)
     {
@@ -109,5 +108,4 @@ class iDEAL implements iDEALInterface
         $this->modelManager->persist($attributes);
         $this->modelManager->flush($attributes);
     }
-
 }

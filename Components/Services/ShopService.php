@@ -27,7 +27,7 @@ class ShopService
      * Returns a shop by it's id.
      *
      * @param int $id
-     * @return Shop|object|null
+     * @return null|object|Shop
      */
     public function shopById($id)
     {

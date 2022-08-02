@@ -7,7 +7,6 @@ use MollieShopware\Components\StatusConverter\PaymentStatusConverter;
 use PHPUnit\Framework\TestCase;
 use Shopware\Models\Order\Status;
 
-
 class PaymentStatusConverterTest extends TestCase
 {
 
@@ -67,5 +66,4 @@ class PaymentStatusConverterTest extends TestCase
             'mollie_partially_refunded' => [PaymentStatus::MOLLIE_PAYMENT_PARTIALLY_REFUNDED, Status::PAYMENT_STATE_RE_CREDITING],
         ];
     }
-
 }

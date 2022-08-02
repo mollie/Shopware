@@ -7,7 +7,6 @@ use MollieShopware\Services\Mollie\Payments\Converters\AddressConverter;
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\PaymentInterface;
 
-
 class Przelewy24 extends AbstractPayment implements PaymentInterface
 {
 
@@ -34,5 +33,4 @@ class Przelewy24 extends AbstractPayment implements PaymentInterface
 
         return $data;
     }
-
 }

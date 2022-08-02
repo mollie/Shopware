@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class BankTransferTest extends TestCase
 {
     use PaymentTestTrait;
@@ -178,5 +177,4 @@ class BankTransferTest extends TestCase
         # does NOT use the dueDate, but the expiresAt field for BankTransfer!
         $this->assertEquals($expectedDueDate, $ordersAPI['expiresAt']);
     }
-
 }

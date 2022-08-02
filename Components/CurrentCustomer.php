@@ -13,8 +13,7 @@ class CurrentCustomer
     public function __construct(
         \Enlight_Components_Session_Namespace $session,
         \Shopware\Components\Model\ModelManager $modelManager
-    )
-    {
+    ) {
         $this->session = $session;
         $this->modelManager = $modelManager;
     }
@@ -32,7 +31,7 @@ class CurrentCustomer
     /**
      * Get the current customer
      *
-     * @return \Shopware\Models\Customer\Customer|null
+     * @return null|\Shopware\Models\Customer\Customer
      */
     public function getCurrent()
     {

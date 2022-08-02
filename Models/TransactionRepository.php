@@ -16,9 +16,9 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
 
     /**
      * @param Transaction $transaction
-     * @return Transaction
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return Transaction
      */
     public function save(Transaction $transaction)
     {
@@ -44,7 +44,7 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
 
     /**
      * @param string $mollieID
-     * @return Transaction|null
+     * @return null|Transaction
      */
     public function getTransactionByMollieIdentifier($mollieID)
     {
@@ -109,8 +109,8 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
     /**
      * Get the last transaction id from the database
      *
-     * @return int|null
      * @throws \Exception
+     * @return null|int
      */
     public function getLastId()
     {

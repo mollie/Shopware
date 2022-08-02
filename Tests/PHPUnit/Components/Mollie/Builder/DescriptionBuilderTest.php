@@ -6,7 +6,6 @@ use MollieShopware\Components\Mollie\Builder\Payment\DescriptionBuilder;
 use MollieShopware\Models\Transaction;
 use PHPUnit\Framework\TestCase;
 
-
 class DescriptionBuilderTest extends TestCase
 {
 
@@ -53,5 +52,4 @@ class DescriptionBuilderTest extends TestCase
 
         $this->assertEquals('Order 20001', $description);
     }
-
 }

@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Models;
 
-
 class PaymentAddress
 {
 
@@ -146,5 +145,4 @@ class PaymentAddress
     {
         return $this->countryIso2;
     }
-
 }

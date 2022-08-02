@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class IDealTest extends TestCase
 {
     use PaymentTestTrait;
@@ -148,5 +147,4 @@ class IDealTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

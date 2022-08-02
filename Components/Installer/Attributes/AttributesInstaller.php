@@ -81,7 +81,6 @@ class AttributesInstaller
 
 
         try {
-
             $this->crudService->update('s_articles_attributes', 'mollie_voucher_type', 'combobox', [
                 'label' => 'Mollie Voucher Type - used from snippets',
                 'helpText' => 'used from snippets',
@@ -95,11 +94,9 @@ class AttributesInstaller
                     ['key' => '3', 'value' => 'Gift'],
                 ],
             ]);
-
         } catch (Exception $ex) {
             //
         }
-
     }
 
     /**
@@ -134,5 +131,4 @@ class AttributesInstaller
             $this->crudService
         );
     }
-
 }

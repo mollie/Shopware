@@ -20,7 +20,6 @@ class PaymentLineItemBuilder
 
         /** @var TransactionItem $item */
         foreach ($transaction->getItems() as $item) {
-
             $orderlines[] = new PaymentLineItem(
                 $item->getType(),
                 $item->getName(),
@@ -46,5 +45,4 @@ class PaymentLineItemBuilder
         # "amount of line items does not match provided total sum" of mollie
         return $cleaner->removeDuplicateDiscounts($orderlines);
     }
-
 }

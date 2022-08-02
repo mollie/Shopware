@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Models;
 
-
 class PaymentLineItem
 {
 
@@ -207,5 +206,4 @@ class PaymentLineItem
     {
         return $this->voucherType;
     }
-
 }

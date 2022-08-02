@@ -47,21 +47,21 @@ class Configuration
     private $expirationDays;
 
     /**
-     * @var int|null
+     * @var null|int
      *
      * @ORM\Column(name="method_type", type="integer", nullable=true)
      */
     private $methodType;
 
     /**
-     * @var int|null
+     * @var null|int
      *
      * @ORM\Column(name="order_creation", type="integer", nullable=true)
      */
     private $orderCreation;
 
     /**
-     * @var int|null
+     * @var null|int
      *
      * @ORM\Column(name="bank_transfer_flow", type="integer", nullable=true)
      */
@@ -205,7 +205,7 @@ class Configuration
     }
 
     /**
-     * @return int|null
+     * @return null|int
      */
     public function getBankTransferFlow()
     {
@@ -228,11 +228,10 @@ class Configuration
     }
 
     /**
-     * @param int|null $bankTransferFlow
+     * @param null|int $bankTransferFlow
      */
     public function setBankTransferFlow($bankTransferFlow)
     {
         $this->bankTransferFlow = $bankTransferFlow;
     }
-
 }

@@ -29,5 +29,4 @@ class FakeUnixTimestampGenerator implements TimestampGeneratorInterface
     {
         return $this->timestamp;
     }
-
 }

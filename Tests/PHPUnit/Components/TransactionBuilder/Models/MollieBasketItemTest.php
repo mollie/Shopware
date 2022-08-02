@@ -6,7 +6,6 @@ use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Models\Voucher\VoucherType;
 use PHPUnit\Framework\TestCase;
 
-
 class MollieBasketItemTest extends TestCase
 {
 
@@ -42,5 +41,4 @@ class MollieBasketItemTest extends TestCase
 
         $this->assertEquals(VoucherType::NONE, $item->getVoucherType());
     }
-
 }

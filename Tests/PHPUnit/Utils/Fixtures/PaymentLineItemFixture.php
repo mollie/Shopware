@@ -5,7 +5,6 @@ namespace MollieShopware\Tests\Utils\Fixtures;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 
-
 class PaymentLineItemFixture
 {
 
@@ -30,5 +29,4 @@ class PaymentLineItemFixture
             '3'
         );
     }
-
 }

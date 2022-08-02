@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Utils\Fakes\Basket;
 
-
 class FakeBasket implements \MollieShopware\Components\Basket\BasketInterface
 {
 
@@ -22,8 +21,6 @@ class FakeBasket implements \MollieShopware\Components\Basket\BasketInterface
 
     public function getMollieBasketLines($userData = [])
     {
-      return $this->items;
+        return $this->items;
     }
-
-
 }

@@ -11,7 +11,6 @@ use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
 use stdClass;
 
-
 class MollieShippingTest extends TestCase
 {
 
@@ -328,7 +327,7 @@ class MollieShippingTest extends TestCase
     {
         # we have to create a MOCK because theres no way
         # to set the ID for this type of entity!
-        /** @var \PHPUnit_Framework_MockObject_MockObject|Dispatch $dispatch */
+        /** @var Dispatch|\PHPUnit_Framework_MockObject_MockObject $dispatch */
         $dispatch = $this->getMockBuilder(Dispatch::class)->disableOriginalConstructor()->getMock();
 
         $dispatch->method('getId')->willReturn($id);
@@ -353,12 +352,11 @@ class MollieShippingTest extends TestCase
             ->getMock();
         $att->method('getMollieOrderLineId')->willReturn($mollieLineItemId);
 
-        /** @var \PHPUnit_Framework_MockObject_MockObject|Detail $detail */
+        /** @var Detail|\PHPUnit_Framework_MockObject_MockObject $detail */
         $detail = $this->getMockBuilder(Detail::class)->disableOriginalConstructor()->getMock();
         $detail->method('getId')->willReturn($id);
         $detail->method('getAttribute')->willReturn($att);
 
         return $detail;
     }
-
 }

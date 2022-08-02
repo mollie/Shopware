@@ -21,5 +21,4 @@ class TokenGeneratorTest extends TestCase
 
         $this->assertEquals(25, strlen($token));
     }
-
 }

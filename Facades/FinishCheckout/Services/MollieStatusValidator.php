@@ -105,5 +105,4 @@ class MollieStatusValidator
 
         return false;
     }
-
 }

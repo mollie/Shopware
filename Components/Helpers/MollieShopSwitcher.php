@@ -42,9 +42,9 @@ class MollieShopSwitcher
 
     /**
      * @param $shopId
-     * @return \Mollie\Api\MollieApiClient
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @return \Mollie\Api\MollieApiClient
      */
     public function getMollieApi($shopId)
     {

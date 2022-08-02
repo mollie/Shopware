@@ -64,9 +64,9 @@ class PaymentConfigResolver
      *
      * @param string $paymentMethod
      * @param int $shopId
-     * @return int
      * @throws MolliePaymentConfigurationNotFound
      * @throws \Doctrine\DBAL\Exception
+     * @return int
      */
     public function getFinalMethodType($paymentMethod, $shopId)
     {
@@ -125,9 +125,9 @@ class PaymentConfigResolver
      *
      * @param string $paymentMethod
      * @param int $shopId
-     * @return int
      * @throws MolliePaymentConfigurationNotFound
      * @throws \Doctrine\DBAL\Exception
+     * @return int
      */
     public function getFinalOrderCreation($paymentMethod, $shopId)
     {
@@ -172,9 +172,9 @@ class PaymentConfigResolver
      *
      * @param string $paymentMethod
      * @param int $shopId
-     * @return string
      * @throws MolliePaymentConfigurationNotFound
      * @throws \Doctrine\DBAL\Exception
+     * @return string
      */
     public function getFinalOrderExpiration($paymentMethod, $shopId)
     {
@@ -201,10 +201,10 @@ class PaymentConfigResolver
     /**
      * @param string $paymentMethod
      * @param int $shopId
-     * @return bool
      * @throws MolliePaymentConfigurationNotFound
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return bool
      */
     public function getFinalIsEasyBankTransfer($paymentMethod, $shopId)
     {
@@ -248,10 +248,10 @@ class PaymentConfigResolver
 
     /**
      * @param string $fullPaymentMethod
-     * @return Configuration
      * @throws MolliePaymentConfigurationNotFound
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return Configuration
      */
     private function getPaymentConfig($fullPaymentMethod)
     {
@@ -263,5 +263,4 @@ class PaymentConfigResolver
 
         return $this->repoPaymentConfig->getByPaymentName($fullPaymentMethod);
     }
-
 }

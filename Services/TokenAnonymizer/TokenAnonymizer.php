@@ -34,7 +34,7 @@ class TokenAnonymizer
 
 
     /**
-     * @param string|null $value
+     * @param null|string $value
      * @return string
      */
     public function anonymize($value)
@@ -66,5 +66,4 @@ class TokenAnonymizer
     {
         return str_repeat($this->placeholderSymbol, $this->placeholderCount);
     }
-
 }

@@ -169,7 +169,6 @@ class Notifications
 
         if (PaymentStatus::isFailedStatus($molliePaymentStatus)) {
             $this->orderCancellation->cancelPlacedOrder($order);
-
         } else {
 
             # update our payment status from our notification data
@@ -183,7 +182,6 @@ class Notifications
             # if we have a "paid" state, then make sure to set
             # our cleared-data too if not already set
             if ($molliePaymentStatus === PaymentStatus::MOLLIE_PAYMENT_PAID && empty($order->getClearedDate())) {
-
                 $order->setClearedDate(date('Y-m-d H:i:s'));
 
                 $this->entityManager->persist($order);
@@ -215,5 +213,4 @@ class Notifications
 
         $this->logger->debug('Webhook Notification successfully processed for transaction: ' . $transactionID . ' and payment: ' . $paymentID);
     }
-
 }

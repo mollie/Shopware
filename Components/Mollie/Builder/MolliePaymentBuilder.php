@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Builder;
 
-
 use Doctrine\ORM\EntityRepository;
 use MollieShopware\Components\Mollie\Builder\Payment\DescriptionBuilder;
 use MollieShopware\Components\Mollie\Builder\Payment\OrderNumberBuilder;
@@ -12,7 +11,6 @@ use MollieShopware\Components\Mollie\Builder\Payment\UrlBuilder;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Services\Mollie\Payments\Models\Payment;
-
 
 class MolliePaymentBuilder
 {
@@ -124,5 +122,4 @@ class MolliePaymentBuilder
             $urlWebhook
         );
     }
-
 }

@@ -61,9 +61,9 @@ class EmailBuilderTest extends TestCase
      * @test
      * @testdox Method getEmail() does return an email object with the expected properties when validated.
      *
+     * @throws Zend_Mail_Exception
      * @return void
      *
-     * @throws Zend_Mail_Exception
      */
     public function getEmailDoesReturnEmailWithExpectedPropertiesWhenValidated()
     {
@@ -95,9 +95,9 @@ class EmailBuilderTest extends TestCase
      * @test
      * @testdox Method getEmail() does call expected method on config exporter when validated.
      *
+     * @throws Zend_Mail_Exception
      * @return void
      *
-     * @throws Zend_Mail_Exception
      */
     public function getEmailDoesCallConfigExporterMethodWhenValidated()
     {
@@ -116,9 +116,9 @@ class EmailBuilderTest extends TestCase
      * @test
      * @testdox Method getEmail() does call expected methods on log archiver and log collector when validated.
      *
+     * @throws Zend_Mail_Exception
      * @return void
      *
-     * @throws Zend_Mail_Exception
      */
     public function getEmailDoesCallLogArchiverAndCollectorMethodsWhenValidated()
     {
@@ -146,8 +146,8 @@ class EmailBuilderTest extends TestCase
      * @param string $message
      * @param string $expectedExceptions
      *
-     * @return void
      * @throws Zend_Mail_Exception
+     * @return void
      */
     public function validateDoesThrowExpectedException(
         $fullName,

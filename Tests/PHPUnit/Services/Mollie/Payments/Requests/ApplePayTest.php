@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class ApplePayTest extends TestCase
 {
     use PaymentTestTrait;
@@ -147,5 +146,4 @@ class ApplePayTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

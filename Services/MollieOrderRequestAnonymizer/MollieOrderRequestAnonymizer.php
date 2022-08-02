@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\MollieOrderRequestAnonymizer;
 
-
 class MollieOrderRequestAnonymizer
 {
 
@@ -54,5 +53,4 @@ class MollieOrderRequestAnonymizer
 
         return $requestData;
     }
-
 }

@@ -9,5 +9,4 @@ interface ConfigInterface
      * @return boolean
      */
     public function isPaymentStatusMailEnabled();
-
 }

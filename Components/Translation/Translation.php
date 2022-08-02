@@ -2,12 +2,10 @@
 
 namespace MollieShopware\Components\Translation;
 
-
 use Doctrine\DBAL\Connection;
 
 class Translation
 {
-
     const PAYMENT_KEY = 'config_payment';
 
     /**
@@ -28,8 +26,8 @@ class Translation
      * @param $configKey
      * @param $paymentId
      * @param $shopId
-     * @return string
      * @throws \Doctrine\DBAL\Exception
+     * @return string
      */
     public function getPaymentConfigTranslation($configKey, $paymentId, $shopId)
     {
@@ -64,5 +62,4 @@ class Translation
 
         return (string)$paymentValue;
     }
-
 }

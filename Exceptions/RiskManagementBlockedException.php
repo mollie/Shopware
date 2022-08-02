@@ -12,5 +12,4 @@ class RiskManagementBlockedException extends \Exception
     {
         parent::__construct($message);
     }
-
 }

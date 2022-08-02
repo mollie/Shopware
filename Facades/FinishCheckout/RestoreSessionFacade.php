@@ -59,7 +59,6 @@ class RestoreSessionFacade
 
         # try to restore our session if our current session is empty
         if (!$this->isUserSessionExisting()) {
-
             $this->logger->notice('Missing Session! Restoring Session for Transaction: ' . $transaction->getId());
 
             $this->sessionManager->restoreFromToken($transaction, $requestPaymentToken);
@@ -85,5 +84,4 @@ class RestoreSessionFacade
 
         return false;
     }
-
 }

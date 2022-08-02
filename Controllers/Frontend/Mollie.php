@@ -33,7 +33,6 @@ use Shopware\Models\Order\Order;
 
 class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 {
-
     use RedirectTrait;
 
 
@@ -133,7 +132,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function directAction()
     {
         try {
-
             $this->loadServices();
 
             # we have to manually test for empty carts,
@@ -226,7 +224,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $transactionID = '';
 
         try {
-
             $this->loadServices();
 
             $transactionID = (string)$this->Request()->getParam('transactionNumber', '');
@@ -242,7 +239,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 (int)$transactionID,
                 $paymentToken
             );
-
         } catch (\Exception $ex) {
             $this->logger->warning(
                 'Error when verifying Session for Transaction: ' . $transactionID,
@@ -269,7 +265,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $hasSession = false;
 
         try {
-
             $this->loadServices();
 
             $transactionID = (string)$this->Request()->getParam('transactionNumber', '');
@@ -304,7 +299,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->redirectToShopwareCheckoutFinish($this, $checkoutData->getTemporaryId());
 
             return;
-
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Checkout failed when finishing Order for Transaction: ' . $transactionID,
@@ -320,13 +314,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         # if we had some errors make sure to
         # cancel our order and navigate back to the confirm page
         if ($hasSession && !empty($transactionID)) {
-
             try {
-
                 $this->checkoutReturn->cleanupTransaction($transactionID);
 
                 $this->orderCancellation->cancelAndRestoreByTransaction($transactionID);
-
             } catch (\Exception $ex) {
                 $this->logger->error(
                     'Error when restoring cart on errors!',
@@ -401,7 +392,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $orderNumber = $this->Request()->getParam('orderNumber');
 
-            /** @var Order|null $order */
+            /** @var null|Order $order */
             $order = $this->orderService->getShopwareOrderByNumber($orderNumber);
 
             if ($order instanceof Order) {
@@ -428,7 +419,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
         try {
-
             $this->loadServices();
 
             $customer = $this->customers->getCurrent();
@@ -444,9 +434,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'data' => $idealIssuers,
                 'success' => true,
             ]);
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error iDEAL issuer AJAX action.',
                 [
@@ -689,7 +677,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $sessionManager,
                 $this->logger
             );
-
         } catch (\Exception $ex) {
             $this->logger->emergency('Fatal Problem when preparing services! ' . $ex->getMessage());
 

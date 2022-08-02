@@ -46,5 +46,4 @@ class AddressConverterTest extends TestCase
 
         $this->assertSame($expected, $data);
     }
-
 }

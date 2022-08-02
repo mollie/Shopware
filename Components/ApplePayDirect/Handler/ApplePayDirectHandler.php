@@ -70,8 +70,8 @@ class ApplePayDirectHandler implements ApplePayDirectHandlerInterface
 
 
     /**
-     * @return mixed|ApplePayCart
      * @throws \Enlight_Exception
+     * @return ApplePayCart|mixed
      */
     public function buildApplePayCart()
     {

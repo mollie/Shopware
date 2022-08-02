@@ -4,7 +4,6 @@ use MollieShopware\Facades\Refund\RefundOrderFacade;
 use MollieShopware\Facades\Shipping\ShipOrderFacade;
 use Psr\Log\LoggerInterface;
 
-
 class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
 {
 
@@ -102,9 +101,7 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
             $this->View()->assign([
                 'success' => true
             ]);
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when processing full shipment for Order ' . $orderNumber . ' on API',
                 [
@@ -153,9 +150,7 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
             $this->View()->assign([
                 'success' => true
             ]);
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when processing partial shipment for Order ' . $orderNumber . ' on API',
                 [
@@ -197,9 +192,7 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
             $this->View()->assign([
                 'success' => true
             ]);
-
         } catch (\Exception $e) {
-
             $this->logger->error(
                 'Error when processing the refund for Order ' . $orderNumber . ' on API',
                 [
@@ -213,5 +206,4 @@ class Shopware_Controllers_Api_Mollie extends Shopware_Controllers_Api_Rest
             ]);
         }
     }
-
 }

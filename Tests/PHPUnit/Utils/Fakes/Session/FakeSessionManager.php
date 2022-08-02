@@ -2,10 +2,8 @@
 
 namespace MollieShopware\Tests\Utils\Fakes\Session;
 
-
 use MollieShopware\Components\SessionManager\SessionManagerInterface;
 use MollieShopware\Models\Transaction;
-
 
 class FakeSessionManager implements SessionManagerInterface
 {
@@ -62,5 +60,4 @@ class FakeSessionManager implements SessionManagerInterface
     public function restoreFromToken(Transaction $transaction, $requestSessionToken)
     {
     }
-
 }

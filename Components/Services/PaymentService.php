@@ -236,10 +236,10 @@ class PaymentService
      * @param $paymentToken
      * @param $billingAddressID
      * @param $shippingAddressID
-     * @return string|null
      * @throws ApiException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return null|string
      */
     public function startMollieSession($paymentMethodName, Transaction $transaction, $paymentToken, $billingAddressID, $shippingAddressID)
     {
@@ -268,7 +268,7 @@ class PaymentService
 
         # ------------------------------------------------------------------------------------------------------
 
-        /** @var PaymentInterface|null $paymentMethodObject */
+        /** @var null|PaymentInterface $paymentMethodObject */
         $paymentMethodObject = $this->paymentFactory->createByPaymentName($cleanPaymentMethod);
 
         if ($paymentMethodObject === null) {
@@ -307,7 +307,6 @@ class PaymentService
         $molliePayment = null;
 
         if ($paymentMethodObject->isOrdersApiEnabled()) {
-
             $requestBody = $paymentMethodObject->buildBodyOrdersAPI();
             
             try {
@@ -315,7 +314,6 @@ class PaymentService
                 # create a new ORDER in mollie
                 # using our orders api request body
                 $mollieOrder = $this->gwMollie->createOrder($requestBody);
-
             } catch (InvalidOrderAmountException $ex) {
                 # we have to log the request body in that case
                 # to have easier debugging options. but before, anonymize it
@@ -347,9 +345,7 @@ class PaymentService
 
             # grab our final checkout url for the user
             $checkoutUrl = $mollieOrder->getCheckoutUrl();
-
         } else {
-
             $requestBody = $paymentMethodObject->buildBodyPaymentsAPI();
 
             # create a new PAYMENT in mollie
@@ -417,9 +413,9 @@ class PaymentService
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @return \Mollie\Api\Resources\Order
      * @throws ApiException
      * @throws MollieOrderNotFound
+     * @return \Mollie\Api\Resources\Order
      */
     public function getMollieOrder(Order $order, Transaction $transaction)
     {
@@ -438,9 +434,9 @@ class PaymentService
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @return Payment
      * @throws ApiException
      * @throws MolliePaymentNotFound
+     * @return Payment
      */
     public function getMolliePayment(Order $order, Transaction $transaction)
     {
@@ -462,9 +458,9 @@ class PaymentService
      * @param string $mollieId
      * @param Order $shopwareOrder
      *
-     * @return bool|\Mollie\Api\Resources\Shipment|null
-     *
      * @throws \Exception
+     * @return null|bool|\Mollie\Api\Resources\Shipment
+     *
      */
     public function sendOrder($mollieId, $shopwareOrder)
     {
@@ -606,7 +602,7 @@ class PaymentService
         /** @var EntityManager $entityManager */
         $entityManager = Shopware()->Models();
 
-        /** @var Transaction|null $transaction */
+        /** @var null|Transaction $transaction */
         $transaction = $entityManager->getRepository(Transaction::class)->findOneBy(['orderNumber' => $orderId]);
 
         if ($transaction === null) {
@@ -625,8 +621,8 @@ class PaymentService
      * @param PaymentInterface $paymentMethodObject
      * @param string $cleanPaymentMethod
      * @param int $shopID
-     * @return PaymentInterface|ApplePay|BankTransfer|CreditCard|IDeal
      * @throws ApiException
+     * @return ApplePay|BankTransfer|CreditCard|IDeal|PaymentInterface
      */
     private function configurePaymentSettings(PaymentInterface $paymentMethodObject, $cleanPaymentMethod, $shopID)
     {
@@ -649,7 +645,6 @@ class PaymentService
 
         # CONFIGURE INDIVIDUAL PAYMENT SPECIFIC DATA
         if ($paymentMethodObject instanceof ApplePay) {
-
             $applePaymentToken = $this->applePayFactory->createHandler()->getPaymentToken();
 
             if (!empty($applePaymentToken)) {
@@ -680,7 +675,6 @@ class PaymentService
         }
 
         if ($paymentMethodObject instanceof CreditCard) {
-
             $ccToken = $this->creditCardService->getCardToken();
 
             if (!empty($ccToken)) {
@@ -690,7 +684,6 @@ class PaymentService
         }
 
         if ($paymentMethodObject instanceof BankTransfer) {
-
             $dueDateDays = $this->config->getBankTransferDueDateDays();
 
             if (!empty($dueDateDays)) {
@@ -706,5 +699,4 @@ class PaymentService
 
         return $paymentMethodObject;
     }
-
 }

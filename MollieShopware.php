@@ -34,7 +34,6 @@ use Shopware\Components\Plugin\Context\UninstallContext;
 use Shopware\Components\Plugin\Context\UpdateContext;
 use Shopware\Components\Routing\Context;
 
-
 require_once __DIR__ . '/vendor/autoload.php';
 
 class MollieShopware extends Plugin
@@ -122,7 +121,6 @@ class MollieShopware extends Plugin
         $view->addTemplateDir(__DIR__ . '/Resources/views');
 
         if ($request->getActionName() == 'load') {
-
             $view->extendsTemplate('backend/mollie_extend_order/controller/list.js');
 
             $view->extendsTemplate('backend/mollie_extend_order/model/order_history.js');
@@ -159,9 +157,7 @@ class MollieShopware extends Plugin
         $view->addTemplateDir(__DIR__ . '/Resources/views');
 
         if ($request->getActionName() == 'load') {
-
             $view->extendsTemplate('backend/mollie_extend_payment/controller/payment.js');
-
         }
     }
 
@@ -430,6 +426,7 @@ class MollieShopware extends Plugin
     /**
      * Returns an instance of the payment method service.
      *
+     * @param mixed $context
      * @return PaymentMethodsInstaller
      */
     protected function getPaymentMethodInstaller($context)
@@ -447,7 +444,6 @@ class MollieShopware extends Plugin
         $templateManager = $this->container->get('template');
 
         if ($modelManager !== null && $paymentInstaller !== null && $templateManager !== null) {
-
             $config = new Config(
                 $this->container->get('shopware.plugin.cached_config_reader'),
                 new ShopService(Shopware()->Models())
@@ -527,6 +523,4 @@ class MollieShopware extends Plugin
             $this->container->get('shopware_attribute.crud_service')
         );
     }
-
-
 }

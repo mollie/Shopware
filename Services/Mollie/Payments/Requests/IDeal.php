@@ -2,12 +2,10 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Requests;
 
-
 use MollieShopware\Services\Mollie\Payments\AbstractPayment;
 use MollieShopware\Services\Mollie\Payments\Converters\AddressConverter;
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\PaymentInterface;
-
 
 class IDeal extends AbstractPayment implements PaymentInterface
 {
@@ -68,5 +66,4 @@ class IDeal extends AbstractPayment implements PaymentInterface
 
         return $data;
     }
-
 }

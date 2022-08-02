@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Formatters;
 
-
 class NumberFormatter
 {
 
@@ -14,5 +13,4 @@ class NumberFormatter
     {
         return number_format($value, 2, '.', '');
     }
-
 }

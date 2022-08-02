@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Builder\Payment;
 
-
 use MollieShopware\Components\CustomConfig\CustomConfig;
 
 class UrlBuilder
@@ -80,5 +79,4 @@ class UrlBuilder
 
         return $url;
     }
-
 }

@@ -122,7 +122,7 @@ class MollieStatusValidatorTest extends TestCase
      *
      * @param string $method
      * @param string $status
-     * @return Payment|MockObject
+     * @return MockObject|Payment
      */
     private function createMockPayment(string $method, string $status): Payment
     {

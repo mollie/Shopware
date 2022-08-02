@@ -48,7 +48,7 @@ class PaymentImportCommand extends ShopwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|void|null
+     * @return null|int|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {

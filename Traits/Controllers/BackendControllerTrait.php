@@ -3,7 +3,6 @@
 
 namespace MollieShopware\Traits\Controllers;
 
-
 trait BackendControllerTrait
 {
 
@@ -52,5 +51,4 @@ trait BackendControllerTrait
 
         exit;
     }
-
 }

@@ -36,5 +36,4 @@ interface SessionManagerInterface
      * @return void
      */
     public function restoreFromToken(Transaction $transaction, $requestSessionToken);
-
 }

@@ -8,7 +8,6 @@ use MollieShopware\Models\Transaction;
 use MollieShopware\Tests\Utils\Fixtures\BasketLineItemFixture;
 use PHPUnit\Framework\TestCase;
 
-
 class VatAmountTest extends TestCase
 {
 
@@ -160,5 +159,4 @@ class VatAmountTest extends TestCase
 
         $this->assertEquals($expectedVatAmount, $item->getVatAmount());
     }
-
 }

@@ -82,8 +82,8 @@ class ShippingCommand extends ShopwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|void|null
      * @throws \Exception
+     * @return null|int|void
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -116,5 +116,4 @@ class ShippingCommand extends ShopwareCommand
             $this->container
         );
     }
-
 }

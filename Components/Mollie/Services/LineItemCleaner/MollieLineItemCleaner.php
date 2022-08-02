@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Services\LineItemCleaner;
 
-
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 
 class MollieLineItemCleaner
@@ -25,7 +24,6 @@ class MollieLineItemCleaner
         $cachedDiscountIDs = [];
 
         foreach ($orderlines as $line) {
-
             if ($line->getType() !== 'discount') {
                 $newLines[] = $line;
                 continue;
@@ -43,5 +41,4 @@ class MollieLineItemCleaner
 
         return $newLines;
     }
-
 }

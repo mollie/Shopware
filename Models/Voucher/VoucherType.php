@@ -4,7 +4,6 @@ namespace MollieShopware\Models\Voucher;
 
 class VoucherType
 {
-
     const NONE = '0';
     const ECO = '1';
     const MEAL = '2';
@@ -47,5 +46,4 @@ class VoucherType
 
         return in_array($value, $validList);
     }
-
 }

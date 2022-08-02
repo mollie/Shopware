@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Models\Mails;
 
-
 class BankTransferMailData
 {
 
@@ -65,5 +64,4 @@ class BankTransferMailData
             ]
         ];
     }
-
 }

@@ -91,8 +91,8 @@ class VoucherSubscriber implements SubscriberInterface
 
 
     /**
-     * @return bool
      * @throws \Exception
+     * @return bool
      */
     private function hasCartVoucherProducts()
     {
@@ -128,5 +128,4 @@ class VoucherSubscriber implements SubscriberInterface
 
         return $sPayments;
     }
-
 }

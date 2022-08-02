@@ -277,5 +277,4 @@ class MollieLogger implements LoggerInterface
 
         return array_merge_recursive($context, $additional);
     }
-
 }

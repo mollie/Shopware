@@ -60,7 +60,7 @@ class OrdersRefundCommand extends ShopwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|void|null
+     * @return null|int|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -77,7 +77,6 @@ class OrdersRefundCommand extends ShopwareCommand
         }
 
         try {
-
             $this->logger->info('Starting Refund on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
             $this->refundFacade->refundOrder($orderNumber, $customAmount);
@@ -85,7 +84,6 @@ class OrdersRefundCommand extends ShopwareCommand
             $this->logger->info('Refund Success on CLI for Order: ' . $orderNumber . ', Amount: ' . $customAmount);
 
             $io->success('Order ' . $orderNumber . ' was successfully refunded.');
-
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error when processing Refund for Order ' . $orderNumber . ' on CLI',
@@ -97,6 +95,4 @@ class OrdersRefundCommand extends ShopwareCommand
             $io->error($e->getMessage());
         }
     }
-
-
 }

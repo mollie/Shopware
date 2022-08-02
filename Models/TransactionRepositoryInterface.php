@@ -2,13 +2,12 @@
 
 namespace MollieShopware\Models;
 
-
 interface TransactionRepositoryInterface
 {
 
     /**
      * @param string $mollieID
-     * @return Transaction|null
+     * @return null|Transaction
      */
     public function getTransactionByMollieIdentifier($mollieID);
 
@@ -22,5 +21,4 @@ interface TransactionRepositoryInterface
      * @return mixed
      */
     public function save(Transaction $transaction);
-
 }

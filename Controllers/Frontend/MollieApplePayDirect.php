@@ -25,7 +25,6 @@ use Shopware\Models\Article\Detail;
 
 class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Controllers_Frontend_Checkout implements CSRFWhitelistAware
 {
-
     use RedirectTrait;
 
 
@@ -404,8 +403,8 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      * The resulting session data must then be output
      * exactly as it has been received.
      *
-     * @return mixed
      * @throws Exception
+     * @return mixed
      */
     public function createPaymentSessionAction()
     {
@@ -443,7 +442,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
      */
     public function startPaymentAction()
     {
-        /** @var Detail|null $pdpArticle */
+        /** @var null|Detail $pdpArticle */
         $pdpArticle = null;
         $isPDPPurchase = false;
 
@@ -549,7 +548,6 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 ]
             );
         } catch (RegistrationMissingFieldException $ex) {
-
             $this->logger->warning(
                 'Apple Pay Direct Guest Account registration failed',
                 [
@@ -568,9 +566,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             } else {
                 $this->redirectToShopwareCheckoutFailedWithError($this, $errorMessage);
             }
-
         } catch (RiskManagementBlockedException $ex) {
-
             $this->logger->notice(
                 'Apple Pay Direct checkout blocked due to Risk Management',
                 [
@@ -582,9 +578,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             # so redirect to the checkout page to increase the chance of
             # finishing the order ;)
             $this->redirectToShopwareCheckoutFailedWithError($this, $this->ERROR_PAYMENT_FAILED_RISKMANAGEMENT);
-
         } catch (\Exception $ex) {
-
             $this->logger->error(
                 'Error starting Mollie Apple Pay Direct payment',
                 [
@@ -606,7 +600,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
 
-            /** @var UserData|null $userData */
+            /** @var null|UserData $userData */
             $userData = $this->handlerApplePay->getUserData();
 
             # check if we have a valid user data object
@@ -675,7 +669,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
     /**
      * @param $countryCode
-     * @return array|null
+     * @return null|array
      */
     private function getCountry($countryCode)
     {

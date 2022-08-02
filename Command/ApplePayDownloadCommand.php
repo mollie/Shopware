@@ -42,7 +42,7 @@ class ApplePayDownloadCommand extends ShopwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|void|null
+     * @return null|int|void
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -56,5 +56,4 @@ class ApplePayDownloadCommand extends ShopwareCommand
 
         $io->success('New Apple Pay Domain Verification file has been downloaded into your ./.well-known folder');
     }
-
 }

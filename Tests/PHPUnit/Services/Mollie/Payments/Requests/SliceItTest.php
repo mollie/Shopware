@@ -10,7 +10,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class SliceItTest extends TestCase
 {
     use PaymentTestTrait;
@@ -124,5 +123,4 @@ class SliceItTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

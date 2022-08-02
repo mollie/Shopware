@@ -148,5 +148,4 @@ class Shipping implements ShippingInterface
             VoucherType::NONE
         );
     }
-
 }

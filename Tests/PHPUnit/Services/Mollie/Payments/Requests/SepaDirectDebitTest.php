@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class SepaDirectDebitTest extends TestCase
 {
     use PaymentTestTrait;
@@ -134,5 +133,4 @@ class SepaDirectDebitTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

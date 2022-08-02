@@ -2,10 +2,8 @@
 
 namespace MollieShopware\Tests\Utils\Fakes\Transaction;
 
-
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepositoryInterface;
-
 
 class FakeTransactionRepository implements TransactionRepositoryInterface
 {
@@ -29,8 +27,5 @@ class FakeTransactionRepository implements TransactionRepositoryInterface
 
     public function save(Transaction $transaction)
     {
-
     }
-
-
 }

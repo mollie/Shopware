@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Components\Validator;
 
-
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\Validator\PaymentStatusMailValidator;
@@ -123,5 +122,4 @@ class PaymentStatusMailValidatorTest extends TestCase
 
         $this->assertEquals(true, $sendMail);
     }
-
 }

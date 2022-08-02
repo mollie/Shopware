@@ -106,6 +106,7 @@ class OrderLines
      * Set the transaction ID for the order line
      *
      * @param $orderId
+     * @param mixed $transactionId
      */
     public function setTransactionId($transactionId)
     {

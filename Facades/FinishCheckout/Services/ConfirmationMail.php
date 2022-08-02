@@ -47,7 +47,6 @@ class ConfirmationMail
         $variables = @json_decode($transaction->getOrdermailVariables(), true);
 
         if (!is_array($variables)) {
-
             $errorCode = json_last_error();
 
             throw new \Exception('Required OrderMailVariables are NULL. Confirmation mail cannot be sent without data! JSON Decode Error Code: ' . $errorCode);
@@ -76,10 +75,10 @@ class ConfirmationMail
      *
      * @param Transaction $transaction
      *
-     * @return void
-     *
      * @throws ORMException
      * @throws OptimisticLockException
+     * @return void
+     *
      */
     private function setConfirmationMailSentFlag(Transaction $transaction)
     {

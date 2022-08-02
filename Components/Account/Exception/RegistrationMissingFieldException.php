@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Account\Exception;
 
-
 class RegistrationMissingFieldException extends \Exception
 {
 
@@ -28,5 +27,4 @@ class RegistrationMissingFieldException extends \Exception
     {
         return $this->field;
     }
-
 }

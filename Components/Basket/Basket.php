@@ -46,8 +46,8 @@ class Basket implements BasketInterface
      * Get positions from basket
      *
      * @param array $userData
-     * @return MollieBasketItem[]
      * @throws \Exception
+     * @return MollieBasketItem[]
      */
     public function getMollieBasketLines($userData = [])
     {
@@ -63,7 +63,6 @@ class Basket implements BasketInterface
 
             /** @var \Shopware\Models\Order\Basket $basketItem */
             foreach ($basketItems as $basketItem) {
-
                 $voucherType = '';
 
                 # if we do have an article number

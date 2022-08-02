@@ -6,7 +6,6 @@ use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Tests\Utils\Fakes\Transaction\FakeUnixTimestampGenerator;
 use PHPUnit\Framework\TestCase;
 
-
 class TransactionUUIDTest extends TestCase
 {
 
@@ -26,5 +25,4 @@ class TransactionUUIDTest extends TestCase
 
         $this->assertEquals('000000000000' . '2' . 'MNOP', $description);
     }
-
 }

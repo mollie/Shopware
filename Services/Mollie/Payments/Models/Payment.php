@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Models;
 
-
 class Payment
 {
 
@@ -177,5 +176,4 @@ class Payment
     {
         return $this->webhookUrl;
     }
-
 }

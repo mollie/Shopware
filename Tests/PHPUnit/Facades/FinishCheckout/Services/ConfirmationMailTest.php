@@ -32,8 +32,8 @@ class ConfirmationMailTest extends TestCase
      * @test
      * @testdox Method sendConfirmationEmail() sends only one mail for a transaction.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testSendConfirmationEmailSendsOnlyOneMailForTransaction()
     {

@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class Przelewy24Test extends TestCase
 {
     use PaymentTestTrait;
@@ -148,5 +147,4 @@ class Przelewy24Test extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

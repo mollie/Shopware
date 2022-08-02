@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\Utils\Fakes\Shipping;
 
-
 use MollieShopware\Components\Shipping\ShippingInterface;
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 
@@ -53,5 +52,4 @@ class FakeShipping implements ShippingInterface
     {
         return $this->item;
     }
-
 }

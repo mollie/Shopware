@@ -10,7 +10,6 @@ use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class NumberFormatterTest extends TestCase
 {
 
@@ -39,5 +38,4 @@ class NumberFormatterTest extends TestCase
 
         $this->assertEquals('24.00', $value);
     }
-
 }

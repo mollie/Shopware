@@ -9,7 +9,6 @@ use MollieShopware\Services\Mollie\Payments\Requests\EPS;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-
 class EPSTest extends TestCase
 {
     use PaymentTestTrait;
@@ -133,5 +132,4 @@ class EPSTest extends TestCase
 
         $this->assertEquals($expectedDueDate, $request['expiresAt']);
     }
-
 }

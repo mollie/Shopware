@@ -22,8 +22,8 @@ class CartShippingCostsProvider implements ShippingCostsProviderInterface
     }
 
     /**
-     * @return ShippingCosts
      * @throws OrderNotFoundBySessionIdException
+     * @return ShippingCosts
      */
     public function getShippingCosts()
     {
@@ -55,8 +55,8 @@ class CartShippingCostsProvider implements ShippingCostsProviderInterface
     }
 
     /**
-     * @return array|null
      * @throws OrderNotFoundBySessionIdException
+     * @return null|array
      */
     private function getInvoiceShippingCosts()
     {

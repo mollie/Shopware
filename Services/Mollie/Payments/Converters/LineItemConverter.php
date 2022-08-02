@@ -2,10 +2,8 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Converters;
 
-
 use MollieShopware\Services\Mollie\Payments\Formatters\NumberFormatter;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
-
 
 class LineItemConverter
 {
@@ -54,5 +52,4 @@ class LineItemConverter
 
         return $data;
     }
-
 }

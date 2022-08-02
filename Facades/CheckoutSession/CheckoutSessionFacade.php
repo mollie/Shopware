@@ -65,7 +65,7 @@ class CheckoutSessionFacade
     private $localeFinder;
 
     /**
-     * @var Order|null
+     * @var null|Order
      */
     private $restorableOrder;
 
@@ -154,7 +154,7 @@ class CheckoutSessionFacade
 
 
     /**
-     * @return Order|null
+     * @return null|Order
      */
     public function getRestorableOrder()
     {
@@ -170,12 +170,12 @@ class CheckoutSessionFacade
      * @param $shopId
      * @param $billingAddressID
      * @param $shippingAddressID
-     * @return CheckoutSession
      * @throws \Doctrine\DBAL\Exception
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \MollieShopware\Exceptions\MolliePaymentConfigurationNotFound
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @return CheckoutSession
      */
     public function startCheckoutSession($basketUserId, $paymentShortName, $basketSignature, $currencyShortName, $shopId, $billingAddressID, $shippingAddressID)
     {
@@ -293,9 +293,9 @@ class CheckoutSessionFacade
     /**
      * @param $basketSignature
      * @param $currency
-     * @return Transaction
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return Transaction
      */
     private function buildTransaction($basketSignature, $currency)
     {

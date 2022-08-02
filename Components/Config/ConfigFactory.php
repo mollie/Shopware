@@ -6,7 +6,6 @@ namespace MollieShopware\Components\Config;
 use MollieShopware\Components\Config;
 use Psr\Container\ContainerInterface;
 
-
 class ConfigFactory
 {
 
@@ -39,5 +38,4 @@ class ConfigFactory
 
         return $config;
     }
-
 }

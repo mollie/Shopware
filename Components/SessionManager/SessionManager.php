@@ -109,9 +109,9 @@ class SessionManager implements SessionManagerInterface
 
     /**
      * @param Transaction $transaction
-     * @return string
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return string
      */
     public function generateSessionToken(Transaction $transaction)
     {
@@ -160,5 +160,4 @@ class SessionManager implements SessionManagerInterface
 
         $this->repoCookies->setSessionCookie($transaction->getSessionId());
     }
-
 }

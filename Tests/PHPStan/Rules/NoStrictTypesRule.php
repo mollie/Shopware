@@ -8,7 +8,6 @@ use PHPStan\Node\FileNode;
 use PHPStan\Rules\Rule;
 use PHPStan\ShouldNotHappenException;
 
-
 final class NoStrictTypesRule implements Rule
 {
 
@@ -67,5 +66,4 @@ final class NoStrictTypesRule implements Rule
 
         return [];
     }
-
 }

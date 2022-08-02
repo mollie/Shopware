@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\TransactionBuilder;
 
-
 use MollieShopware\Components\Basket\BasketInterface;
 use MollieShopware\Components\SessionManager\SessionManagerInterface;
 use MollieShopware\Components\Shipping\ShippingInterface;
@@ -12,7 +11,6 @@ use MollieShopware\Components\TransactionBuilder\Services\ItemBuilder\Transactio
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepositoryInterface;
 use Shopware\Models\Customer\Customer;
-
 
 class TransactionBuilder
 {
@@ -66,6 +64,10 @@ class TransactionBuilder
      * @param $shopwareTotalAmount
      * @param $shopId
      * @param array $userData
+     * @param mixed $locale
+     * @param mixed $customer
+     * @param mixed $isTaxFree
+     * @param mixed $isNetShop
      * @return Transaction
      */
     public function buildTransaction($basketSignature, $currency, $shopwareTotalAmount, $shopId, array $userData, $locale, $customer, $isTaxFree, $isNetShop)
@@ -148,6 +150,4 @@ class TransactionBuilder
 
         return $transaction;
     }
-
-
 }

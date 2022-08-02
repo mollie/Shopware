@@ -252,5 +252,4 @@ abstract class AbstractPaymentController extends Shopware_Controllers_Frontend_P
         }
         return $randomString;
     }
-
 }

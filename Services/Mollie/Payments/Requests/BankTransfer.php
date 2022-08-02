@@ -2,18 +2,16 @@
 
 namespace MollieShopware\Services\Mollie\Payments\Requests;
 
-
 use MollieShopware\Services\Mollie\Payments\AbstractPayment;
 use MollieShopware\Services\Mollie\Payments\Converters\AddressConverter;
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\PaymentInterface;
 
-
 class BankTransfer extends AbstractPayment implements PaymentInterface
 {
 
     /**
-     * @var int|null
+     * @var null|int
      */
     private $dueDateDays;
 
@@ -81,5 +79,4 @@ class BankTransfer extends AbstractPayment implements PaymentInterface
     {
         return (string)date('Y-m-d', (int)strtotime(' + ' . $this->dueDateDays . ' day'));
     }
-
 }

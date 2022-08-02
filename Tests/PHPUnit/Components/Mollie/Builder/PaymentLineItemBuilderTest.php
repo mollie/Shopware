@@ -9,7 +9,6 @@ use MollieShopware\Models\TransactionItem;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
 use PHPUnit\Framework\TestCase;
 
-
 class PaymentLineItemBuilderTest extends TestCase
 {
 
@@ -138,5 +137,4 @@ class PaymentLineItemBuilderTest extends TestCase
         $this->assertEquals('Super Discount', $lineItems[1]->getName());
         $this->assertEquals('Super Discount', $lineItems[2]->getName());
     }
-
 }

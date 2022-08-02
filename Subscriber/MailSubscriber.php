@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Subscriber;
 
-
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
 use Mollie\Api\Resources\Payment;
@@ -17,7 +16,6 @@ use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
 use Shopware\Models\Order\Status;
-
 
 class MailSubscriber implements SubscriberInterface
 {
@@ -79,7 +77,6 @@ class MailSubscriber implements SubscriberInterface
         $variables = $args->getReturn();
 
         try {
-
             $orderNumber = (string)$variables['sOrderNumber'];
             $paymentName = (string)$variables['additional']['payment']['name'];
 
@@ -88,7 +85,6 @@ class MailSubscriber implements SubscriberInterface
             $variables['Mollie'] = [
                 'bank' => $bankData->toArray(),
             ];
-
         } catch (\Exception $e) {
 
             # we catch exceptions here to avoid that orders fail,
@@ -109,9 +105,9 @@ class MailSubscriber implements SubscriberInterface
      * them in the database to use them when the order is fully processed.
      *
      * @param Enlight_Event_EventArgs $args
-     * @return false|void
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @return false|void
      */
     public function onSendMail(Enlight_Event_EventArgs $args)
     {
@@ -182,7 +178,6 @@ class MailSubscriber implements SubscriberInterface
             # JSON_PARTIAL_OUTPUT_ON_ERROR
             $transaction->setOrdermailVariables($repairedJSON);
             $this->transactionRepo->save($transaction);
-
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error in onSendMail event',

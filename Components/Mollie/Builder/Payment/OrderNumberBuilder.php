@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\Mollie\Builder\Payment;
 
-
 use MollieShopware\Models\Transaction;
 
 class OrderNumberBuilder
@@ -21,5 +20,4 @@ class OrderNumberBuilder
 
         return $fallback;
     }
-
 }

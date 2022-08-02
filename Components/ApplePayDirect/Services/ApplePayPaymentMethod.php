@@ -28,8 +28,8 @@ class ApplePayPaymentMethod
     }
 
     /**
-     * @return Payment
      * @throws EntityNotFoundException
+     * @return Payment
      */
     public function getPaymentMethod()
     {
@@ -48,11 +48,9 @@ class ApplePayPaymentMethod
     public function isApplePayDirectEnabled()
     {
         try {
-
             $method = $this->getPaymentMethod();
 
             return $method->getActive();
-
         } catch (\Exception $ex) {
             return false;
         }
@@ -82,8 +80,8 @@ class ApplePayPaymentMethod
      * to risk management settings in Shopware.
      *
      * @param \sAdmin $sAdmin
-     * @return bool
      * @throws EntityNotFoundException
+     * @return bool
      */
     public function isRiskManagementBlocked(\sAdmin $sAdmin)
     {
@@ -99,5 +97,4 @@ class ApplePayPaymentMethod
             $sAdmin->sGetUserData()
         );
     }
-
 }

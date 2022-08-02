@@ -7,7 +7,6 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Payment\Payment;
 use Shopware\Models\Payment\Repository as PaymentRepository;
 
-
 class PaymentMethodService
 {
 
@@ -30,7 +29,7 @@ class PaymentMethodService
      * Gets the apple pay direct payment method
      * if existing and active
      *
-     * @return object|Payment|null
+     * @return null|object|Payment
      */
     public function getActiveApplePayDirectMethod()
     {
@@ -42,5 +41,4 @@ class PaymentMethodService
             'active' => true,
         ]);
     }
-
 }

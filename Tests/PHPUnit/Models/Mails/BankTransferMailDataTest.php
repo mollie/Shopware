@@ -31,5 +31,4 @@ class BankTransferMailDataTest extends TestCase
 
         $this->assertSame($expected, $mailData->toArray());
     }
-
 }

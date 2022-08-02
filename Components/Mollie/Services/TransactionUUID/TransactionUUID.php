@@ -37,5 +37,4 @@ class TransactionUUID
 
         return $timestamp . $transactionId . $signatureEnding;
     }
-
 }

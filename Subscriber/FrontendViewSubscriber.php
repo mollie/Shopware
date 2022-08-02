@@ -34,7 +34,7 @@ class FrontendViewSubscriber implements SubscriberInterface
         /** @var Enlight_Controller_Action $controller */
         $controller = null;
 
-        /** @var string|null $controllerName */
+        /** @var null|string $controllerName */
         $controllerName = null;
 
         /** @var Enlight_View $view */
@@ -122,7 +122,6 @@ class FrontendViewSubscriber implements SubscriberInterface
             // unset error, so it won't show up on next page view
             $session->mollieErrorMessage = null;
         }
-
     }
 
     /**

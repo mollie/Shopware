@@ -37,8 +37,8 @@ class ShopwareOrderUpdater
 
     /**
      * @param \Mollie\Api\Resources\Order $mollieOrder
-     * @return mixed
      * @throws \Exception
+     * @return mixed
      */
     public function getFinalTransactionIdFromOrder(\Mollie\Api\Resources\Order $mollieOrder)
     {

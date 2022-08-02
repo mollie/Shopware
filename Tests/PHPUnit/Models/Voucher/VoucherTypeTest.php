@@ -5,7 +5,6 @@ namespace MollieShopware\Tests\Models\Payment;
 use MollieShopware\Models\Voucher\VoucherType;
 use PHPUnit\Framework\TestCase;
 
-
 class VoucherTypeTest extends TestCase
 {
 
@@ -81,5 +80,4 @@ class VoucherTypeTest extends TestCase
     {
         $this->assertEquals($expected, VoucherType::isValidVoucher($value));
     }
-
 }

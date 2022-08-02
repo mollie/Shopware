@@ -29,8 +29,8 @@ class OrderStatusConverter
 
     /**
      * @param string $molliePaymentStatus
-     * @return StatusTransactionStruct
      * @throws PaymentStatusNotFoundException
+     * @return StatusTransactionStruct
      */
     public function getShopwareOrderStatus($molliePaymentStatus)
     {

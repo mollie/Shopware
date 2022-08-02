@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Facades\Shipping;
 
-
 use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Exceptions\OrderNotFoundException;
@@ -46,8 +45,8 @@ class ShipOrderFacade
 
     /**
      * @param string $orderNumber
-     * @param string|null $articleNumber
-     * @param int|null $shipQuantity
+     * @param null|string $articleNumber
+     * @param null|int $shipQuantity
      * @throws OrderNotFoundException
      * @throws \Mollie\Api\Exceptions\ApiException
      */
@@ -79,11 +78,8 @@ class ShipOrderFacade
         $isPartial = ($articleNumber !== null);
 
         if (!$isPartial) {
-
             $shipping->shipOrder($order, $mollieOrder);
-
         } else {
-
             $detail = $this->searchArticleItem($order, $articleNumber);
 
             # if we did not provide a quantity
@@ -104,14 +100,13 @@ class ShipOrderFacade
     /**
      * @param Order $order
      * @param string $articleNumber
-     * @return Detail
      * @throws \Exception
+     * @return Detail
      */
     private function searchArticleItem(Order $order, $articleNumber)
     {
         /** @var Detail $detail */
         foreach ($order->getDetails() as $detail) {
-
             if ($detail->getArticleNumber() === $articleNumber) {
                 return $detail;
             }
@@ -119,5 +114,4 @@ class ShipOrderFacade
 
         throw new \Exception('Line Item with article number: ' . $articleNumber . ' not found in this order!');
     }
-
 }

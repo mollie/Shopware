@@ -65,8 +65,8 @@ class ApplePayDirectFactory
     }
 
     /**
-     * @return ApplePayDirectHandler
      * @throws ApiException
+     * @return ApplePayDirectHandler
      */
     public function createHandler()
     {
