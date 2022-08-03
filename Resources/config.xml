@@ -928,5 +928,60 @@
             </options>
         </element>
 
+        <element type="button" required="false">
+            <name>separator_detailed_errors</name>
+            <label lang="en">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
+            <label lang="de">--------------------------------------------------------------------------------------- API Fehler ---------------------------------------------------------------------------------------</label>
+            <label lang="es-ES">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
+            <label lang="nl-NL">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
+            <label lang="fr-FR">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
+            <label lang="it-IT">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
+            <options>
+                <position>30</position>
+            </options>
+        </element>
+
+        <element type="select" scope="shop" required="false">
+            <name>show_error_details</name>
+            <label lang="en">Show error details in checkout and payment</label>
+            <label lang="de">Detaillierte Fehler im checkout und payment anzeigen </label>
+            <label lang="nl-NL">TODO</label>
+            <label lang="es-ES">TODO</label>
+            <label lang="fr-FR">TODO</label>
+            <label lang="it-IT">TODO</label>
+            <value>inherited</value>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="en">Inherited</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="en">Yes</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="en">No</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
+                </option>
+            </store>
+            <options>
+                <position>31</position>
+            </options>
+        </element>
     </elements>
 </config>

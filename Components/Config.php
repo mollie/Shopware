@@ -416,4 +416,14 @@ class Config implements ConfigInterface
 
         return $restrictions;
     }
+
+    /**
+     * Display more detailed error messages in checkout and after payment
+     *
+     * @return bool
+     */
+    public function showDetailedErrorMessages()
+    {
+        return (bool)($this->get('show_error_details', 'no') === 'yes');
+    }
 }
