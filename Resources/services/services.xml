@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+
+
+    <services>
+        <service class="MollieShopware\Services\MollieOrderRequestAnonymizer\MollieOrderRequestAnonymizer" id="mollie_shopware.services.mollie_order_request_anonymizer.mollie_order_request_anonymizer">
+            <argument type="string">***</argument>
+        </service>
+
+        <service class="MollieShopware\Services\Mollie\Payments\Extractor\PaymentFailedDetailExtractor" id="mollie_shopware.services.mollie.payments.extractor.payment_failed_detail_extractor"/>
+        <service class="MollieShopware\Services\Mollie\Payments\Extractor\ApiExceptionDetailsExtractor" id="mollie_shopware.services.mollie.payments.extractor.api_exception_details_extractor"/>
+
+    </services>
+
+</container>
