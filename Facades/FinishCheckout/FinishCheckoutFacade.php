@@ -25,6 +25,7 @@ use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
+use MollieShopware\Services\Mollie\Payments\Extractor\PaymentFailedDetailExtractor;
 use Psr\Log\LoggerInterface;
 use Shopware\Models\Order\Order;
 
@@ -95,6 +96,10 @@ class FinishCheckoutFacade
      * @var Config\PaymentConfigResolver
      */
     private $paymentConfig;
+    /**
+     * @var PaymentFailedDetailExtractor
+     */
+    private $paymentFailedDetailExtractor;
 
 
     /**
@@ -113,7 +118,7 @@ class FinishCheckoutFacade
      * @param ConfirmationMail $confirmationMail
      * @param Config\PaymentConfigResolver $paymentConfig
      */
-    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail, Config\PaymentConfigResolver $paymentConfig)
+    public function __construct(Config $config, OrderService $orderService, PaymentService $paymentService, TransactionRepository $repoTransactions, LoggerInterface $logger, MollieGatewayInterface $gwMollie, MollieStatusValidator $statusValidator, ShopwareOrderUpdater $swOrderUpdater, ShopwareOrderBuilder $swOrderBuilder, MollieStatusConverter $statusConverter, OrderUpdater $orderUpdater, ConfirmationMail $confirmationMail, Config\PaymentConfigResolver $paymentConfig, PaymentFailedDetailExtractor $paymentFailedDetailExtractor)
     {
         $this->config = $config;
         $this->orderService = $orderService;
@@ -128,6 +133,7 @@ class FinishCheckoutFacade
         $this->orderUpdater = $orderUpdater;
         $this->confirmationMail = $confirmationMail;
         $this->paymentConfig = $paymentConfig;
+        $this->paymentFailedDetailExtractor = $paymentFailedDetailExtractor;
     }
 
 
@@ -173,9 +179,13 @@ class FinishCheckoutFacade
             }
         } else {
             $molliePayment = $this->gwMollie->getPayment($transaction->getMolliePaymentId());
-
             if (!$this->statusValidator->didPaymentCheckoutSucceed($molliePayment)) {
-                throw new MolliePaymentFailedException($molliePayment->id, 'The payment failed. Please see the Mollie Dashboard for more!');
+                $details = $this->paymentFailedDetailExtractor->extractDetails($molliePayment);
+                $exception = new MolliePaymentFailedException($molliePayment->id, 'The payment failed. Please see the Mollie Dashboard for more!');
+                if($details){
+                    $exception->setFailedDetails($details);
+                }
+                throw $exception;
             }
         }
 

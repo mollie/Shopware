@@ -10,6 +10,8 @@ trait RedirectTrait
      */
     private $ERROR_PAYMENT_FAILED = 'Payment failed';
 
+    private $ERROR_PAYMENT_FAILED_REASON_CODE = '';
+    private $ERROR_PAYMENT_FAILED_REASON_MESSAGE = '';
     /**
      *
      */
@@ -48,6 +50,11 @@ trait RedirectTrait
      */
     protected function redirectToShopwareCheckoutFailedWithError(\Enlight_Controller_Action $controller, $errorSnippetKey)
     {
+        if($this->ERROR_PAYMENT_FAILED_REASON_CODE !== ''){
+            Shopware()->Session()->offsetSet('mollieDetailErrorReasonCode', $this->ERROR_PAYMENT_FAILED_REASON_CODE);
+            Shopware()->Session()->offsetSet('mollieDetailErrorReasonMessage', $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE);
+        }
+
         Shopware()->Session()->offsetSet('mollieError', $errorSnippetKey);
 
         $url = Shopware()->Front()->Router()->assemble([
