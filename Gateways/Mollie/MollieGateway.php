@@ -6,6 +6,7 @@ use Mollie\Api\Exceptions\ApiException;
 use Mollie\Api\MollieApiClient;
 use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
+use Mollie\Api\Resources\Payment;
 use Mollie\Api\Resources\Profile;
 use Mollie\Api\Resources\Shipment;
 use MollieShopware\Components\Constants\PaymentMethod;
@@ -13,6 +14,8 @@ use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Gateways\Mollie\Exceptions\InvalidOrderAmountException;
 use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
+use MollieShopware\Services\MollieOrderRequestAnonymizer\MollieOrderRequestAnonymizer;
+use Psr\Log\LoggerInterface;
 
 class MollieGateway implements MollieGatewayInterface
 {
@@ -22,14 +25,25 @@ class MollieGateway implements MollieGatewayInterface
      */
     private $apiClient;
 
+    /**
+     * @var MollieOrderRequestAnonymizer
+     */
+    private $mollieOrderAnonymizer;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
 
     /**
      * Cancellation constructor.
      * @param MollieApiClient $mollie
      */
-    public function __construct(MollieApiClient $mollie)
+    public function __construct(MollieApiClient $mollie, MollieOrderRequestAnonymizer $mollieOrderAnonymizer, LoggerInterface $logger)
     {
         $this->apiClient = $mollie;
+        $this->mollieOrderAnonymizer = $mollieOrderAnonymizer;
+        $this->logger = $logger;
     }
 
 
@@ -152,11 +166,22 @@ class MollieGateway implements MollieGatewayInterface
             return $this->apiClient->orders->create($requestData);
         } catch (ApiException $ex) {
 
-            # we need custom exceptions for some errors
-            # because they need a custom handling
-            if (strpos($ex->getMessage(), 'The amount contains an invalid value') !== false) {
-                throw new InvalidOrderAmountException($ex);
-            }
+            $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestData);
+            $this->logger->critical($ex->getMessage(), $anonymizedRequest);
+
+            throw $ex;
+        }
+    }
+
+    public function createPayment(array $requestData)
+    {
+        try {
+
+            return $this->apiClient->payments->create($requestData);
+        } catch (ApiException $ex) {
+
+            $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestData);
+            $this->logger->critical($ex->getMessage(), $anonymizedRequest);
 
             throw $ex;
         }
