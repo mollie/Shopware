@@ -16,7 +16,7 @@ class ApiExceptionDetailsExtractor
         if ($exception->getField() === null) {
             return null;
         }
-        $field = $this->prepareField($exception->getField());
+        $field = $this->prepareField('error.'.$exception->getField());
 
         $messageDetails = $this->parseMessage($exception);
         if ($messageDetails === null) {
