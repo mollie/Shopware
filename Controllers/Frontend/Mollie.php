@@ -220,7 +220,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     private function handleOnException(){
         # in theory this is not catched,
         # but for a better code understanding, we keep it here
-        if ($this->checkout->getRestorableOrder() instanceof Order) {
+        if ($this->checkout && $this->checkout->getRestorableOrder() instanceof Order) {
             $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
         }
         $this->redirectToShopwareCheckoutFailed($this);

@@ -16,13 +16,24 @@ class ApiExceptionDetailsExtractor
         if ($exception->getField() === null) {
             return null;
         }
+        $field = $this->prepareField($exception->getField());
 
         $messageDetails = $this->parseMessage($exception);
         if ($messageDetails === null) {
             return null;
         }
-        return new PaymentFailedDetails($exception->getField(), $messageDetails);
 
+        return new PaymentFailedDetails($field, $messageDetails);
+
+    }
+
+    private function prepareField(string $field): string
+    {
+        $fieldParts = explode('.', $field);
+        array_walk($fieldParts, function (&$fieldPart) {
+            $fieldPart = ucfirst($fieldPart);
+        });
+        return implode('', $fieldParts);
     }
 
     /**
@@ -32,12 +43,12 @@ class ApiExceptionDetailsExtractor
     private function parseMessage(ApiException $exception)
     {
         $documentationSuffix = '';
-        if ($exception->getDocumentationUrl() !== null) {
+        if (stripos($exception->getMessage(), 'Documentation:') !== false) {
             $documentationSuffix = '. Documentation:';
         }
-        $regEx = sprintf('/Error executing API call \((?<status>.*):(?<title>.*)\): (?<details>.*)%s/mi', $documentationSuffix);
+        $regEx = sprintf('/.*Error executing API call \((?<status>.*):(?<title>.*)\): (?<details>.*)%s/mi', $documentationSuffix);
 
-        if (preg_match($regEx, $exception->getMessage(), $matches, PREG_OFFSET_CAPTURE, 0)) {
+        if (preg_match($regEx, $exception->getMessage(), $matches)) {
             return $matches['details'];
         }
         return null;

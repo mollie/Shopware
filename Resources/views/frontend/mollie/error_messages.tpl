@@ -1,6 +1,7 @@
 {if $sMollieDetailErrorReasonMessage != ''}
-    {s name="PaymentFailed" namespace="frontend/mollie/plugins"}Payment failed{/s}
-    {s name="$sMollieDetailErrorReasonCode" namespace="frontend/mollie/plugins"}{$sMollieDetailErrorReasonMessage}{/s}<br />
+    {s name="PaymentFailed" namespace="frontend/mollie/plugins"}Payment failed{/s}:<br/>
+    {$namespace="frontend/mollie/plugins"}
+    {$sMollieDetailErrorReasonMessage|snippet:$sMollieDetailErrorReasonCode:$namespace}
 {elseif $sMollieError == 'Payment failed'}
     {s name="YourPaymentHasFailed" namespace="frontend/mollie/plugins"}Your payment has failed. Please try again.{/s}
 {elseif $sMollieError == 'Payment canceled'}
