@@ -1,5 +1,15 @@
 {extends file="parent:frontend/checkout/change_payment.tpl"}
 
+{* Hidden input for retrieving the id of Mollie's Apple Pay payment mean *}
+{block name='frontend_checkout_payment_content'}
+    {foreach $sPayments as $payment_mean}
+        {if $payment_mean.name|lower == 'mollie_applepay'}
+            <input type="hidden" value="{$payment_mean.id}" name="mollie_applepay_payment_mean_id" />
+        {/if}
+    {/foreach}
+    {$smarty.block.parent}
+{/block}
+
 {* Radio Button *}
 {block name='frontend_checkout_payment_fieldset_input_radio'}
     {if $payment_mean.name|lower == 'mollie_applepay'}

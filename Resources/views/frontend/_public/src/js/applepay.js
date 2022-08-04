@@ -16,8 +16,17 @@
      */
     function hideApplePayIfNotAllowed() {
         // Find the hidden Apple Pay element
-        var applePayInput = document.getElementsByClassName('payment-mean-mollie-applepay');
-        var applePayLabel = document.getElementsByClassName('payment-mean-mollie-applepay-label');
+        var applePayInput = document.querySelector('input.payment-mean-mollie-applepay');
+        var applePayLabel = document.querySelector('label.payment-mean-mollie-applepay-label');
+
+        if (typeof applePayInput === 'undefined' || !applePayLabel) {
+            var applePayPaymentMeanIdInput = document.querySelector('input[type="hidden"][name="mollie_applepay_payment_mean_id"]');
+
+            if (applePayPaymentMeanIdInput) {
+                applePayInput = document.querySelector('input[type="radio"]#payment_mean' + applePayPaymentMeanIdInput.value);
+                applePayLabel = document.querySelector('label[for="payment_mean' + applePayPaymentMeanIdInput.value + ']');
+            }
+        }
 
         // Create a disabled attribute
         var disabledItem = document.createAttribute('disabled');
@@ -26,24 +35,24 @@
         // eslint-disable-next-line no-undef
         if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
             // Apple Pay is not available
-            if (typeof applePayInput !== 'undefined' && applePayInput.length) {
-                applePayInput[0].checked = false;
-                applePayInput[0].attributes.setNamedItem(disabledItem);
-                applePayInput[0].parentNode.parentNode.classList.add('is--hidden');
+            if (typeof applePayInput !== 'undefined' && applePayInput) {
+                applePayInput.checked = false;
+                applePayInput.attributes.setNamedItem(disabledItem);
+                applePayInput.parentNode.parentNode.classList.add('is--hidden');
             }
         } else {
             // Show Apple Pay option
-            if (typeof applePayInput !== 'undefined' && applePayInput.length) {
-                if (applePayInput[0].attributes.getNamedItem('disabled') !== null) {
-                    applePayInput[0].attributes.removeNamedItem('disabled');
+            if (typeof applePayInput !== 'undefined' && applePayInput) {
+                if (applePayInput.attributes.getNamedItem('disabled') !== null) {
+                    applePayInput.attributes.removeNamedItem('disabled');
                 }
 
-                applePayInput[0].parentNode.parentNode.classList.remove('is--hidden');
+                applePayInput.parentNode.parentNode.classList.remove('is--hidden');
             }
 
-            if (typeof applePayLabel !== 'undefined' && applePayLabel.length) {
-                applePayLabel[0].classList.remove('is--soft');
-                applePayLabel[0].classList.remove('is--hidden');
+            if (typeof applePayLabel !== 'undefined' && applePayLabel) {
+                applePayLabel.classList.remove('is--soft');
+                applePayLabel.classList.remove('is--hidden');
             }
         }
     }
