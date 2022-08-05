@@ -165,7 +165,6 @@ class MollieGateway implements MollieGatewayInterface
         try {
             return $this->apiClient->orders->create($requestData);
         } catch (ApiException $ex) {
-
             $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestData);
             $this->logger->critical($ex->getMessage(), $anonymizedRequest);
 
@@ -176,10 +175,8 @@ class MollieGateway implements MollieGatewayInterface
     public function createPayment(array $requestData)
     {
         try {
-
             return $this->apiClient->payments->create($requestData);
         } catch (ApiException $ex) {
-
             $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestData);
             $this->logger->critical($ex->getMessage(), $anonymizedRequest);
 

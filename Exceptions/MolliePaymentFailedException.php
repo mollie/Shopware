@@ -38,10 +38,10 @@ class MolliePaymentFailedException extends \Exception
 
     /**
      * @param PaymentFailedDetails $failedDetails
+     * @return void
      */
-    public function setFailedDetails(PaymentFailedDetails $failedDetails): void
+    public function setFailedDetails(PaymentFailedDetails $failedDetails)
     {
         $this->failedDetails = $failedDetails;
     }
-
 }

@@ -50,7 +50,7 @@ trait RedirectTrait
      */
     protected function redirectToShopwareCheckoutFailedWithError(\Enlight_Controller_Action $controller, $errorSnippetKey)
     {
-        if($this->ERROR_PAYMENT_FAILED_REASON_CODE !== ''){
+        if ($this->ERROR_PAYMENT_FAILED_REASON_CODE !== '') {
             Shopware()->Session()->offsetSet('mollieDetailErrorReasonCode', $this->ERROR_PAYMENT_FAILED_REASON_CODE);
             Shopware()->Session()->offsetSet('mollieDetailErrorReasonMessage', $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE);
         }

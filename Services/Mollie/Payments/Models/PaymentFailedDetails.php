@@ -17,7 +17,7 @@ class PaymentFailedDetails
      * @param string $reasonCode
      * @param string $reasonMessage
      */
-    public function __construct(string $reasonCode, string $reasonMessage)
+    public function __construct($reasonCode, $reasonMessage)
     {
         $this->reasonCode = $reasonCode;
         $this->reasonMessage = $reasonMessage;
@@ -26,7 +26,7 @@ class PaymentFailedDetails
     /**
      * @return string
      */
-    public function getReasonCode(): string
+    public function getReasonCode()
     {
         return $this->reasonCode;
     }
@@ -34,7 +34,7 @@ class PaymentFailedDetails
     /**
      * @return string
      */
-    public function getReasonMessage(): string
+    public function getReasonMessage()
     {
         return $this->reasonMessage;
     }

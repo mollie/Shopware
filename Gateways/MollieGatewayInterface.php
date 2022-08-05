@@ -89,5 +89,4 @@ interface MollieGatewayInterface
      * @return Payment
      */
     public function createPayment(array $requestData);
-
 }

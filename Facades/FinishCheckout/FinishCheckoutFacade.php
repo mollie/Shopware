@@ -182,7 +182,7 @@ class FinishCheckoutFacade
             if (!$this->statusValidator->didPaymentCheckoutSucceed($molliePayment)) {
                 $details = $this->paymentFailedDetailExtractor->extractDetails($molliePayment);
                 $exception = new MolliePaymentFailedException($molliePayment->id, 'The payment failed. Please see the Mollie Dashboard for more!');
-                if($details){
+                if ($details) {
                     $exception->setFailedDetails($details);
                 }
                 throw $exception;

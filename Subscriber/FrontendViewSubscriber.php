@@ -134,7 +134,6 @@ class FrontendViewSubscriber implements SubscriberInterface
             $session->mollieDetailErrorReasonCode = null;
             $session->mollieDetailErrorReasonMessage = null;
         }
-
     }
 
     /**

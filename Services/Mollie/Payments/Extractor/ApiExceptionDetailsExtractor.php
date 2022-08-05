@@ -9,14 +9,14 @@ class ApiExceptionDetailsExtractor
 {
     /**
      * @param ApiException $exception
-     * @return PaymentFailedDetails|null
+     * @return null|PaymentFailedDetails
      */
     public function extractDetails(ApiException $exception)
     {
         if ($exception->getField() === null) {
             return null;
         }
-        $field = $this->prepareField('error.'.$exception->getField());
+        $field = $this->prepareField('error.' . $exception->getField());
 
         $messageDetails = $this->parseMessage($exception);
         if ($messageDetails === null) {
@@ -24,10 +24,13 @@ class ApiExceptionDetailsExtractor
         }
 
         return new PaymentFailedDetails($field, $messageDetails);
-
     }
 
-    private function prepareField(string $field): string
+    /**
+     * @param string $field
+     * @return string
+     */
+    private function prepareField($field)
     {
         $fieldParts = explode('.', $field);
         array_walk($fieldParts, function (&$fieldPart) {
@@ -37,16 +40,20 @@ class ApiExceptionDetailsExtractor
     }
 
     /**
-     * @param ApiException $message
-     * @return string|null
+     * @param ApiException $exception
+     * @return null|string
      */
     private function parseMessage(ApiException $exception)
     {
         $documentationSuffix = '';
         if (stripos($exception->getMessage(), 'Documentation:') !== false) {
-            $documentationSuffix = '. Documentation:';
+            $documentationSuffix = '. Documentation:.*';
         }
-        $regEx = sprintf('/.*Error executing API call \((?<status>.*):(?<title>.*)\): (?<details>.*)%s/mi', $documentationSuffix);
+        $fieldSuffix = '';
+        if (stripos($exception->getMessage(), 'Field:') !== false) {
+            $fieldSuffix = '. Field:.*';
+        }
+        $regEx = sprintf('/.*Error executing API call \((?<status>.*):(?<title>.*)\): (?<details>.*)%s%s/mi', $documentationSuffix, $fieldSuffix);
 
         if (preg_match($regEx, $exception->getMessage(), $matches)) {
             return $matches['details'];

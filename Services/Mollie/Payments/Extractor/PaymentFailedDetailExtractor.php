@@ -9,7 +9,7 @@ class PaymentFailedDetailExtractor
 {
     /**
      * @param Payment $payment
-     * @return PaymentFailedDetails|null
+     * @return null|PaymentFailedDetails
      */
     public function extractDetails(Payment $payment)
     {

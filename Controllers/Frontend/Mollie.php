@@ -193,9 +193,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirect($session->getCheckoutUrl());
-        } catch(ApiException $ex){
+        } catch (ApiException $ex) {
             $paymentFailedDetails = $this->apiExceptionDetailsExtractor->extractDetails($ex);
-            if($this->config->showDetailedErrorMessages() && $paymentFailedDetails !== null){
+            if ($this->config->showDetailedErrorMessages() && $paymentFailedDetails !== null) {
                 $this->ERROR_PAYMENT_FAILED_REASON_CODE = $paymentFailedDetails->getReasonCode();
                 $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE = $paymentFailedDetails->getReasonMessage();
             }
@@ -208,7 +208,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 ]
             );
             $this->handleOnException();
-
         } finally {
 
 
@@ -217,7 +216,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         }
     }
 
-    private function handleOnException(){
+    private function handleOnException()
+    {
         # in theory this is not catched,
         # but for a better code understanding, we keep it here
         if ($this->checkout && $this->checkout->getRestorableOrder() instanceof Order) {
@@ -333,7 +333,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->logger->error('Checkout failed because of failed payment status', $logData);
-
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Checkout failed when finishing Order for Transaction: ' . $transactionID,
