@@ -21,6 +21,7 @@
 
         // Fallback for finding the Apple Pay payment mean element. It looks for
         // a hidden input with the ID of the Apple Pay payment mean as value.
+        // With that ID, we can find the radio button of the payment mean.
         //
         // This hidden input is provided by a template in this plugin as fallback
         // for other plugins, like the OnePageCheckout, that overrule certain
