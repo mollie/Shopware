@@ -19,6 +19,13 @@
         var applePayInput = document.querySelector('input.payment-mean-mollie-applepay');
         var applePayLabel = document.querySelector('label.payment-mean-mollie-applepay-label');
 
+        // Fallback for finding the Apple Pay payment mean element. It looks for
+        // a hidden input with the ID of the Apple Pay payment mean as value.
+        //
+        // This hidden input is provided by a template in this plugin as fallback
+        // for other plugins, like the OnePageCheckout, that overrule certain
+        // template blocks. The input is provided through change_payment.tpl
+        // in the block "frontend_checkout_payment_content".
         if (typeof applePayInput === 'undefined' || !applePayLabel) {
             var applePayPaymentMeanIdInput = document.querySelector('input[type="hidden"][name="mollie_applepay_payment_mean_id"]');
 
