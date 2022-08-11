@@ -5,6 +5,7 @@ use Mollie\Api\Resources\OrderLine;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Exceptions\OrderNotFoundException;
+use MollieShopware\Facades\Refund\RefundOrderFacade;
 use MollieShopware\Gateways\Mollie\MollieGatewayFactory;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
@@ -42,6 +43,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
     /** @var RefundService */
     protected $refundService;
 
+    /** @var RefundOrderFacade */
+    protected $refundOrderFacade;
+
     /**
      * @var Smarty
      */
@@ -76,6 +80,9 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
         $this->refundService = $this->container->get('mollie_shopware.services.refund_service');
         $this->orderService = $this->container->get('mollie_shopware.order_service');
+
+        $this->refundOrderFacade = new RefundOrderFacade($this->refundService, $this->orderService);
+
         $this->gwMollieFactory = $this->container->get('mollie_shopware.gateways.mollie.factory');
 
         /** @var \Shopware\Components\Model\ModelManager $modelManager */
@@ -307,17 +314,11 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \Enlight_Controller_Request_Request $request */
             $request = $this->Request();
 
-            /** @var \Shopware\Components\Model\ModelManager $modelManager */
-            $this->modelManager = $this->container->get('models');
-
-            /** @var \MollieShopware\Components\Config $config */
-            $this->config = $this->container->get('mollie_shopware.config');
-
-            /** @var \MollieShopware\Components\Services\OrderService $orderService */
-            $this->orderService = $this->container->get('mollie_shopware.order_service');
-
             /** @var \Shopware\Models\Order\Order $order */
-            $order = $this->orderService->getOrderById($request->getParam('orderId'));
+            $order = $this->orderService->getShopwareOrderByNumber($request->getParam('orderNumber'));
+
+            /** @var float|null $customAmount */
+            $customAmount = !empty($request->getParam('customAmount')) ? floatval($request->getParam('customAmount')) : null;
 
             if ($order === null) {
                 $this->returnError('Order not found');
@@ -334,14 +335,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 ]
             );
 
-            # switch to the config and api key of the shop from the order
-            $shopSwitcher = new MollieShopSwitcher($this->container);
-            $this->config = $shopSwitcher->getConfig($order->getShop()->getId());
-            $this->apiClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
-
-            $transaction = $this->orderService->getOrderTransactionByNumber($order->getNumber());
-
-            $refund = $this->refundService->refundFullOrder($order, $transaction);
+            $refund = $this->refundOrderFacade->refundOrder($order->getNumber(), $customAmount);
 
             $logger->info(
                 sprintf(
