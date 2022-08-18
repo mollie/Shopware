@@ -50,6 +50,7 @@ class OrderBackendSubscriber implements SubscriberInterface
     /**
      * @param OrderService $orderService
      * @param LoggerInterface $logger
+     * @param mixed $pluginDirectory
      */
     public function __construct(OrderService $orderService, LoggerInterface $logger, $pluginDirectory)
     {

@@ -37,9 +37,9 @@ class RefundOrderFacade
     /**
      * @param string $orderNumber
      * @param float $customAmount
-     * @return Refund
      * @throws OrderNotFoundException
      * @throws TransactionNotFoundException
+     * @return Refund
      */
     public function refundOrder($orderNumber, $customAmount)
     {

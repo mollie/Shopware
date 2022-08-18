@@ -317,7 +317,7 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             /** @var \Shopware\Models\Order\Order $order */
             $order = $this->orderService->getShopwareOrderByNumber($request->getParam('orderNumber'));
 
-            /** @var float|null $customAmount */
+            /** @var null|float $customAmount */
             $customAmount = !empty($request->getParam('customAmount')) ? floatval($request->getParam('customAmount')) : null;
 
             if ($order === null) {
