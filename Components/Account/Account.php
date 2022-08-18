@@ -10,6 +10,7 @@ use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Password\Manager;
 use Shopware\Models\Customer\Customer;
 use Shopware\Models\Order\Order;
+use Shopware\Models\User\User;
 use Shopware_Components_Config;
 use Symfony\Component\Validator\ConstraintViolation;
 use Throwable;
@@ -90,6 +91,29 @@ class Account
         $userId = $this->session->offsetGet('sUserId');
 
         return !empty($userId);
+    }
+
+    /**
+     * Gets if the user is signed in with a guest account.
+     *
+     * @return bool
+     */
+    public function isLoggedInAsGuest()
+    {
+        $userId = $this->session->offsetGet('sUserId');
+
+        if (empty($userId)) {
+            return false;
+        }
+
+        /** @var Customer|null $customer */
+        $customer = $this->modelManager->getRepository(Customer::class)->find($userId);
+
+        if (is_null($customer)) {
+            return false;
+        }
+
+        return $customer->getActive() && $customer->getAccountMode() === 1;
     }
 
     /**
