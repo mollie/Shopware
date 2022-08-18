@@ -100,20 +100,7 @@ class Account
      */
     public function isLoggedInAsGuest()
     {
-        $userId = $this->session->offsetGet('sUserId');
-
-        if (empty($userId)) {
-            return false;
-        }
-
-        /** @var Customer|null $customer */
-        $customer = $this->modelManager->getRepository(Customer::class)->find($userId);
-
-        if (is_null($customer)) {
-            return false;
-        }
-
-        return $customer->getActive() && $customer->getAccountMode() === 1;
+        return boolval($this->session->offsetGet('sOneTimeAccount'));
     }
 
     /**
