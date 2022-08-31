@@ -14,11 +14,11 @@ use MollieShopware\Components\Config;
 use MollieShopware\Tests\PHPUnit\Utils\Fakes\View\FakeView;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use sAdmin;
-use sBasket;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
+use sAdmin;
+use sBasket;
 
 class ApplePayButtonBuilderTest extends TestCase
 {
@@ -92,7 +92,7 @@ class ApplePayButtonBuilderTest extends TestCase
 
     /**
      * @test
-     * @testdox Apple Pay direct button is active when restricted by risk management.
+     * @testdox Apple Pay direct button is not active when restricted by risk management.
      *
      * @return void
      * @throws Exception
@@ -110,7 +110,7 @@ class ApplePayButtonBuilderTest extends TestCase
 
     /**
      * @test
-     * @testdox Apple Pay direct button is active when customer not logged in and there is an ESD product in the basket.
+     * @testdox Apple Pay direct button is not active when customer not logged in and an ESD product in the basket.
      *
      * @return void
      * @throws Exception
@@ -129,7 +129,7 @@ class ApplePayButtonBuilderTest extends TestCase
 
     /**
      * @test
-     * @testdox Apple Pay direct button is inactive when customer logged in with guest account and there is an ESD product in the basket.
+     * @testdox Apple Pay direct button is not active when customer logged in with guest account and an ESD product in the basket.
      *
      * @return void
      * @throws Exception
@@ -149,12 +149,12 @@ class ApplePayButtonBuilderTest extends TestCase
 
     /**
      * @test
-     * @testdox Apple Pay direct button is active when customer logged in with full account and there is an ESD product in the basket.
+     * @testdox Apple Pay direct button is active when customer logged in with full account and an ESD product in the basket.
      *
      * @return void
      * @throws Exception
      */
-    public function testIfApplePayButtonActiveWhenUserLoggedInFullAccountAndBasketHasEsdProduct(): void
+    public function testIfApplePayButtonActiveWhenUserLoggedWithInFullAccountAndBasketHasEsdProduct(): void
     {
         $this->setUserLoggedIn();
         $this->setUserLoggedInAsGuest(false);
@@ -169,13 +169,110 @@ class ApplePayButtonBuilderTest extends TestCase
 
     /**
      * @test
-     * @testdox Apple Pay direct button is active when customer not logged in and there is no ESD product in the basket.
+     * @testdox Apple Pay direct button is active when customer not logged in and no ESD product in the basket.
      *
      * @return void
      * @throws Exception
      */
     public function testIfApplePayButtonActiveWhenUserNotLoggedInAndBasketHasNoEsdProduct(): void
     {
+        $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
+
+        $result = $this->view->getAssign('sMollieApplePayDirectButton');
+
+        self::assertTrue($result['active']);
+    }
+
+    /**
+     * @test
+     * @testdox Apple Pay direct button is not active when customer not logged in and PDP is an ESD product.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIfApplePayButtonNotActiveWhenUserNotLoggedInAndPdpIsEsdProduct(): void
+    {
+        $this->setUserLoggedIn(false);
+        $this->setUserLoggedInAsGuest(false);
+        $this->setUpPdp(true);
+
+        $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
+
+        $result = $this->view->getAssign('sMollieApplePayDirectButton');
+
+        self::assertFalse($result['active']);
+    }
+
+    /**
+     * @test
+     * @testdox Apple Pay direct button is not active when customer logged in with guest account and PDP is an ESD product.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIfApplePayButtonNotActiveWhenUserLoggedInGuestAndPdpIsEsdProduct(): void
+    {
+        $this->setUserLoggedIn();
+        $this->setUserLoggedInAsGuest();
+        $this->setUpPdp(true);
+
+        $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
+
+        $result = $this->view->getAssign('sMollieApplePayDirectButton');
+
+        self::assertFalse($result['active']);
+    }
+
+    /**
+     * @test
+     * @testdox Apple Pay direct button is active when customer logged in with full account and PDP is an ESD product.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIfApplePayButtonActiveWhenUserLoggedWithInFullAccountAndPdpIsEsdProduct(): void
+    {
+        $this->setUserLoggedIn();
+        $this->setUserLoggedInAsGuest(false);
+        $this->setUpPdp(true);
+
+        $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
+
+        $result = $this->view->getAssign('sMollieApplePayDirectButton');
+
+        self::assertTrue($result['active']);
+    }
+
+    /**
+     * @test
+     * @testdox Apple Pay direct button is not active when customer not logged in and PDP is an ESD product.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIfApplePayButtonNotActiveWhenUserNotLoggedInPdpIsEsdProduct(): void
+    {
+        $this->setUserLoggedIn(false);
+        $this->setUpPdp(true);
+
+        $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
+
+        $result = $this->view->getAssign('sMollieApplePayDirectButton');
+
+        self::assertFalse($result['active']);
+    }
+
+    /**
+     * @test
+     * @testdox Apple Pay direct button is active when customer not logged in and PDP is no ESD product.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function testIfApplePayButtonActiveWhenUserNotLoggedInPdpIsNoEsdProduct(): void
+    {
+        $this->setUpPdp();
+
         $this->buttonBuilder->addButtonStatus($this->request, $this->view, $this->shop);
 
         $result = $this->view->getAssign('sMollieApplePayDirectButton');
@@ -259,6 +356,25 @@ class ApplePayButtonBuilderTest extends TestCase
     }
 
     /**
+     * Creates the test scenario for a PDP for an ESD product.
+     *
+     * @param bool $isESD
+     * @return void
+     */
+    private function setUpPdp(bool $isESD = false): void
+    {
+        $this->request
+            ->expects(self::once())
+            ->method('getControllerName')
+            ->willReturn('detail');
+
+        $this->view->assign('sArticle', [
+            'ordernumber' => '12345',
+            'esd' => $isESD,
+        ]);
+    }
+
+    /**
      * Creates a test scenario where the user is logged in.
      *
      * @param bool $loggedIn
@@ -267,7 +383,7 @@ class ApplePayButtonBuilderTest extends TestCase
     private function setUserLoggedIn(bool $loggedIn = true): void
     {
         $this->accountService
-            ->expects(self::once())
+            ->expects(self::any())
             ->method('isLoggedIn')
             ->willReturn($loggedIn);
     }
@@ -281,7 +397,7 @@ class ApplePayButtonBuilderTest extends TestCase
     private function setUserLoggedInAsGuest(bool $loggedIn = true): void
     {
         $this->accountService
-            ->expects(self::once())
+            ->expects(self::any())
             ->method('isLoggedInAsGuest')
             ->willReturn($loggedIn);
     }
@@ -289,6 +405,7 @@ class ApplePayButtonBuilderTest extends TestCase
     /**
      * Returns a preconfigured mock for the sAdmin module.
      *
+     * @param string $countryIso
      * @return sAdmin
      */
     private function getAdminModuleMock(string $countryIso = 'nl'): sAdmin

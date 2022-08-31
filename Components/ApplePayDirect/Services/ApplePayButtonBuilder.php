@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Services;
 
-use Doctrine\ORM\EntityNotFoundException;
 use Enlight_Controller_Request_Request;
 use Enlight_View;
 use MollieShopware\Components\Account\Account;
@@ -10,11 +9,7 @@ use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
 use MollieShopware\Components\ApplePayDirect\Models\Button\DisplayOption;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Country\CountryIsoParser;
-use MollieShopware\Components\Services\BasketService;
-use sAdmin;
-use sBasket;
 use Shopware\Models\Shop\Shop;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ApplePayButtonBuilder
 {
@@ -30,7 +25,7 @@ class ApplePayButtonBuilder
     private $accountService;
 
     /**
-     * @var sBasket
+     * @var \Shopware_Proxies_sBasketProxy
      */
     private $sBasket;
 
@@ -45,7 +40,7 @@ class ApplePayButtonBuilder
     private $configShopware;
 
     /**
-     * @var sAdmin
+     * @var \Shopware_Proxies_sAdminProxy
      */
     private $sAdmin;
 
@@ -66,10 +61,10 @@ class ApplePayButtonBuilder
      * @param \Shopware_Components_Config $configShopware
      * @param ApplePayPaymentMethod $applePayPaymentMethod
      * @param ApplePayDirectDisplayOptions $restrictionService
-     * @param sAdmin $sAdmin
-     * @param sBasket $sBasket
+     * @param \sAdmin|\Shopware_Proxies_sAdminProxy $sAdmin
+     * @param \sBasket|\Shopware_Proxies_sBasketProxy $sBasket
      */
-    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService, sAdmin $sAdmin, sBasket $sBasket)
+    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService, $sAdmin, $sBasket)
     {
         $this->accountService = $accountService;
         $this->configMollie = $configMollie;
@@ -109,9 +104,10 @@ class ApplePayButtonBuilder
             # if a customer has esd products in the basket, check if
             # the customer is logged in with a full customer account
             $hasEsdProductsInBasket = $controller === 'checkout' && $this->basketHasEsdProducts();
+            $isEsdProductDetailPage = $controller === 'detail' && boolval($view->getAssign('sArticle')['esd']) === true;
             $isUserLoggedIn = $this->accountService->isLoggedIn() && !$this->accountService->isLoggedInAsGuest();
 
-            if ($hasEsdProductsInBasket && !$isUserLoggedIn) {
+            if (($hasEsdProductsInBasket || $isEsdProductDetailPage) && !$isUserLoggedIn) {
                 $isActive = false;
             }
         }
