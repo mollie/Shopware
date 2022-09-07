@@ -14,11 +14,11 @@ use MollieShopware\Components\Config;
 use MollieShopware\Tests\PHPUnit\Utils\Fakes\View\FakeView;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use sAdmin;
+use sBasket;
 use Shopware\Models\Shop\Currency;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
-use sAdmin;
-use sBasket;
 
 class ApplePayButtonBuilderTest extends TestCase
 {
@@ -43,7 +43,7 @@ class ApplePayButtonBuilderTest extends TestCase
     private $restrictionService;
 
     /**
-     * @var sBasket|MockObject
+     * @var MockObject|sBasket
      */
     private $sBasket;
 
@@ -58,7 +58,7 @@ class ApplePayButtonBuilderTest extends TestCase
     private $request;
 
     /**
-     * @var Shop|MockObject
+     * @var MockObject|Shop
      */
     private $shop;
 
@@ -94,8 +94,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when restricted by risk management.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenRestrictedByRiskManagement()
     {
@@ -112,8 +112,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when customer not logged in and an ESD product in the basket.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenUserNotLoggedInAndBasketHasEsdProduct(): void
     {
@@ -131,8 +131,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when customer logged in with guest account and an ESD product in the basket.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenUserLoggedInGuestAndBasketHasEsdProduct(): void
     {
@@ -151,8 +151,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is active when customer logged in with full account and an ESD product in the basket.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonActiveWhenUserLoggedWithInFullAccountAndBasketHasEsdProduct(): void
     {
@@ -171,8 +171,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is active when customer not logged in and no ESD product in the basket.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonActiveWhenUserNotLoggedInAndBasketHasNoEsdProduct(): void
     {
@@ -187,8 +187,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when customer not logged in and PDP is an ESD product.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenUserNotLoggedInAndPdpIsEsdProduct(): void
     {
@@ -207,8 +207,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when customer logged in with guest account and PDP is an ESD product.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenUserLoggedInGuestAndPdpIsEsdProduct(): void
     {
@@ -227,8 +227,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is active when customer logged in with full account and PDP is an ESD product.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonActiveWhenUserLoggedWithInFullAccountAndPdpIsEsdProduct(): void
     {
@@ -247,8 +247,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is not active when customer not logged in and PDP is an ESD product.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonNotActiveWhenUserNotLoggedInPdpIsEsdProduct(): void
     {
@@ -266,8 +266,8 @@ class ApplePayButtonBuilderTest extends TestCase
      * @test
      * @testdox Apple Pay direct button is active when customer not logged in and PDP is no ESD product.
      *
-     * @return void
      * @throws Exception
+     * @return void
      */
     public function testIfApplePayButtonActiveWhenUserNotLoggedInPdpIsNoEsdProduct(): void
     {
