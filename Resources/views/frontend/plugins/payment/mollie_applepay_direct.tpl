@@ -1,5 +1,5 @@
 <a class="applepay-button"
-   lang="{$smarty.server.HTTP_ACCEPT_LANGUAGE}"
+   lang="{$Locale}"
    style="-webkit-appearance: -apple-pay-button; -apple-pay-button-type: check-out; display: none;"
    data-getshippingsurl="{url module=frontend controller="MollieApplePayDirect" action="getShippings" forceSecure}"
    data-setshippingurl="{url module=frontend controller="MollieApplePayDirect" action="setShipping" forceSecure}"
