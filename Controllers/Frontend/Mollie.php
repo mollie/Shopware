@@ -199,7 +199,12 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->ERROR_PAYMENT_FAILED_REASON_CODE = $paymentFailedDetails->getReasonCode();
                 $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE = $paymentFailedDetails->getReasonMessage();
             }
-            $this->logger->critical('Error from Mollie API', ['error' => $ex->getMessage()]);
+            $this->logger->error(
+                'Error from Mollie API',
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
             $this->handleOnException();
         } catch (\Exception $ex) {
             $this->logger->error(
