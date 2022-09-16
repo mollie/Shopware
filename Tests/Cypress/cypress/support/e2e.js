@@ -15,6 +15,12 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+import axios from "axios";
+
+
+const CypressFilters = require('cypress-filters');
+new CypressFilters().register();
+
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
