@@ -744,7 +744,54 @@
             </options>
         </element>
 
-
+        <element type="select" scope="shop" required="false">
+            <name>show_error_details</name>
+            <label lang="en">Display detailed errors</label>
+            <label lang="de">Detaillierte Fehler anzeigen</label>
+            <label lang="nl-NL">Gedetailleerde fouten weergeven</label>
+            <label lang="es-ES">Mostrar errores detallados</label>
+            <label lang="fr-FR">Afficher les erreurs détaillées</label>
+            <label lang="it-IT">Visualizza errori dettagliati</label>
+            <value>no</value>
+            <description lang="de">Detaillierte Fehlermeldungen werden bei einer Bestellung oder Zahlung angezeigt.</description>
+            <description lang="en">Detailed error messages are displayed when placing an order or making a payment.</description>
+            <description lang="nl-NL">Gedetailleerde foutmeldingen worden weergegeven bij het plaatsen van een bestelling of het doen van een betaling.</description>
+            <description lang="es-ES">Se muestran mensajes de error detallados al realizar un pedido o realizar un pago.</description>
+            <description lang="fr-FR">Des messages d'erreur détaillés s'affichent lors de la passation d'une commande ou d'un paiement.</description>
+            <description lang="it-IT">Messaggi di errore dettagliati vengono visualizzati quando si effettua un ordine o si effettua un pagamento.</description>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="en">Inherited</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="en">Yes</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="en">No</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
+                </option>
+            </store>
+            <options>
+                <position>21</position>
+            </options>
+        </element>
         <element type="button" required="false">
             <name>separator_mails</name>
             <label lang="en">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
@@ -754,7 +801,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
 
@@ -797,7 +844,7 @@
                 </option>
             </store>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -810,7 +857,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Carte de crédit ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Carta di credito ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>23</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -824,7 +871,7 @@
             <label lang="it-IT">Abilita componenti</label>
             <value>true</value>
             <options>
-                <position>24</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -838,7 +885,7 @@
             <label lang="it-IT">Abilita lo stile per i componenti</label>
             <value>true</value>
             <options>
-                <position>25</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -851,7 +898,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>26</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -898,7 +945,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>27</position>
+                <position>28</position>
             </options>
         </element>
 
@@ -911,7 +958,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Bancaire ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Trasferimento bancario ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>28</position>
+                <position>29</position>
             </options>
         </element>
 
@@ -924,64 +971,10 @@
             <label lang="fr-FR">Délai de paiement (jours)</label>
             <label lang="it-IT">Termine di pagamento (Giorni)</label>
             <options>
-                <position>29</position>
-            </options>
-        </element>
-
-        <element type="button" required="false">
-            <name>separator_detailed_errors</name>
-            <label lang="en">--------------------------------------------------------------------------------------- API Errors ---------------------------------------------------------------------------------------</label>
-            <label lang="de">--------------------------------------------------------------------------------------- API-Fehler ---------------------------------------------------------------------------------------</label>
-            <label lang="es-ES">--------------------------------------------------------------------------------------- Errores de API ---------------------------------------------------------------------------------------</label>
-            <label lang="nl-NL">--------------------------------------------------------------------------------------- API-fouten ---------------------------------------------------------------------------------------</label>
-            <label lang="fr-FR">--------------------------------------------------------------------------------------- Erreurs d'API ---------------------------------------------------------------------------------------</label>
-            <label lang="it-IT">--------------------------------------------------------------------------------------- Errori API ---------------------------------------------------------------------------------------</label>
-            <options>
                 <position>30</position>
             </options>
         </element>
 
-        <element type="select" scope="shop" required="false">
-            <name>show_error_details</name>
-            <label lang="en">Show error details in checkout and payment</label>
-            <label lang="de">Fehlerdetails beim Checkout und bei der Zahlung anzeigen</label>
-            <label lang="nl-NL">Toon foutdetails bij afrekenen en betale</label>
-            <label lang="es-ES">Mostrar detalles del error en el proceso de compra y pago</label>
-            <label lang="fr-FR">Afficher les détails de l'erreur lors du paiement et du paiement</label>
-            <label lang="it-IT">Mostra i dettagli dell'errore in fase di pagamento e pagamento</label>
-            <value>inherited</value>
-            <store>
-                <option>
-                    <value>inherited</value>
-                    <label lang="en">Inherited</label>
-                    <label lang="de">Vererbt</label>
-                    <label lang="nl-NL">Geërfd</label>
-                    <label lang="es-ES">Heredada</label>
-                    <label lang="fr-FR">Hérité</label>
-                    <label lang="it-IT">Ereditato</label>
-                </option>
-                <option>
-                    <value>yes</value>
-                    <label lang="en">Yes</label>
-                    <label lang="de">Ja</label>
-                    <label lang="nl-NL">Ja</label>
-                    <label lang="es-ES">sí</label>
-                    <label lang="fr-FR">Oui</label>
-                    <label lang="it-IT">sì</label>
-                </option>
-                <option>
-                    <value>no</value>
-                    <label lang="en">No</label>
-                    <label lang="de">Nein</label>
-                    <label lang="nl-NL">Nee</label>
-                    <label lang="es-ES">no</label>
-                    <label lang="fr-FR">non</label>
-                    <label lang="it-IT">no</label>
-                </option>
-            </store>
-            <options>
-                <position>31</position>
-            </options>
-        </element>
+
     </elements>
 </config>

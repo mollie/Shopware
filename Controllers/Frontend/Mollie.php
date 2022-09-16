@@ -199,6 +199,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $this->ERROR_PAYMENT_FAILED_REASON_CODE = $paymentFailedDetails->getReasonCode();
                 $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE = $paymentFailedDetails->getReasonMessage();
             }
+            $this->logger->critical('Error from Mollie API', ['error' => $ex->getMessage()]);
             $this->handleOnException();
         } catch (\Exception $ex) {
             $this->logger->error(
@@ -220,7 +221,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     {
         # in theory this is not catched,
         # but for a better code understanding, we keep it here
-        if ($this->checkout && $this->checkout->getRestorableOrder() instanceof Order) {
+        if ($this->checkout->getRestorableOrder() instanceof Order) {
             $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
         }
         $this->redirectToShopwareCheckoutFailed($this);
@@ -627,8 +628,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             $this->orderCancellation = Shopware()->Container()->get('mollie_shopware.components.order.cancellation');
-            $paymentFailedDetailExtractor = Shopware()->Container()->get('mollie_shopware.services.mollie.payments.extractor.payment_failed_detail_extractor');
-            $this->apiExceptionDetailsExtractor = Shopware()->Container()->get('mollie_shopware.services.mollie.payments.extractor.api_exception_details_extractor');
+            $paymentFailedDetailExtractor = Shopware()->Container()->get('mollie_shopware.services.payments.extractor.payment_failed_detail_extractor');
+            $this->apiExceptionDetailsExtractor = Shopware()->Container()->get('mollie_shopware.services.payments.extractor.api_exception_details_extractor');
 
             $swOrderUpdater = new ShopwareOrderUpdater($this->config, $entityManager);
 
