@@ -212,7 +212,17 @@ class FinishCheckoutFacade
             $transaction->getShopId()
         );
 
+        # let's store our payment-REF id in the separate field.
+        # we need this for order lookups, e.g. in email subscribers.
+        # that's why it also needs to be BEFORE creating an order below!
+        if ($transaction->getMolliePaymentId() !== $finalTransactionNumber && $transaction->getMollieOrderId() !== $finalTransactionNumber) {
+            $transaction->setMolliePaymentRefId($finalTransactionNumber);
+            $this->repoTransactions->save($transaction);
+        }
+
+
         if ($orderCreation === OrderCreationType::AFTER_PAYMENT) {
+
             # create an order in shopware
             $orderNumber = $this->swOrderBuilder->createOrderAfterPayment(
                 $transactionNumber,
