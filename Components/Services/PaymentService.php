@@ -126,19 +126,9 @@ class PaymentService
     private $customer;
 
     /**
-     * @var Repository
-     */
-    private $repoPaymentConfig;
-
-    /**
      * @var EntityRepository
      */
     private $repoAddress;
-
-    /**
-     * @var Translation
-     */
-    private $translations;
 
     /**
      * @var \Enlight_Template_Manager
@@ -150,15 +140,6 @@ class PaymentService
      */
     private $orderLinesRepo;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var MollieOrderRequestAnonymizer
-     */
-    private $mollieOrderAnonymizer;
 
 
     /**
@@ -170,28 +151,24 @@ class PaymentService
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, LoggerInterface $logger, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->paymentConfig = $paymentConfig;
         $this->gwMollie = $gwMollie;
-        $this->logger = $logger;
+
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
         $this->orderLinesRepo = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\OrderLines');
         $this->repoTransactions = Shopware()->Container()->get('models')->getRepository('\MollieShopware\Models\Transaction');
         $this->orderRepo = Shopware()->Models()->getRepository(Order::class);
-        $this->repoPaymentConfig = Shopware()->Models()->getRepository(Configuration::class);
         $this->repoAddress = Shopware()->Models()->getRepository(Address::class);
-
-        $this->translations = Shopware()->Container()->get('mollie_shopware.components.translation');
 
         $this->smarty = Shopware()->Container()->get('template');
 
         $this->paymentFactory = new PaymentFactory();
-        $this->mollieOrderAnonymizer = new MollieOrderRequestAnonymizer('***');
     }
 
     /**
@@ -203,7 +180,7 @@ class PaymentService
      */
     public function switchApiClient(MollieApiClient $client)
     {
-        $this->apiClient = $client;
+        $this->gwMollie->switchClient($client);
     }
 
     /**
@@ -308,20 +285,10 @@ class PaymentService
 
         if ($paymentMethodObject->isOrdersApiEnabled()) {
             $requestBody = $paymentMethodObject->buildBodyOrdersAPI();
-            
-            try {
 
-                # create a new ORDER in mollie
-                # using our orders api request body
-                $mollieOrder = $this->gwMollie->createOrder($requestBody);
-            } catch (InvalidOrderAmountException $ex) {
-                # we have to log the request body in that case
-                # to have easier debugging options. but before, anonymize it
-                $anonymizedRequest = $this->mollieOrderAnonymizer->anonymize($requestBody);
-                $this->logger->critical('Invalid Order Amount Exception for Request: ' . json_encode($anonymizedRequest));
-                # now pass on the error for a correct exception handling
-                throw $ex;
-            }
+            # create a new ORDER in mollie
+            # using our orders api request body
+            $mollieOrder = $this->gwMollie->createOrder($requestBody);
 
             # update the orderId field of our transaction
             # this helps us to see the difference to a transaction
@@ -350,7 +317,7 @@ class PaymentService
 
             # create a new PAYMENT in mollie
             # using our payments api request body
-            $molliePayment = $this->apiClient->payments->create($requestBody);
+            $molliePayment = $this->gwMollie->createPayment($requestBody);
 
             # update the paymentID field of our transaction
             # this helps us to see the difference to an order
@@ -468,7 +435,7 @@ class PaymentService
 
         try {
             /** @var \Mollie\Api\Resources\Order $mollieOrder */
-            $mollieOrder = $this->apiClient->orders->get($mollieId);
+            $mollieOrder = $this->gwMollie->getOrder($mollieId);
 
             if ($mollieOrder->isShipping()) {
                 return (new ArrayCollection($mollieOrder->shipments()->getArrayCopy()))->last();

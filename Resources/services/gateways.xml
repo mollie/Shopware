@@ -12,6 +12,8 @@
 
         <service id="mollie_shopware.gateways.mollie" class="MollieShopware\Gateways\Mollie\MollieGateway" public="true">
             <argument type="service" id="mollie_shopware.api"/>
+            <argument type="service" id="mollie_shopware.services.order_request_anonymizer"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
     </services>
