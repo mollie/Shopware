@@ -12,8 +12,9 @@
             <argument type="string">***</argument>
         </service>
 
-        <service class="MollieShopware\Services\Mollie\Payments\Extractor\PaymentFailedDetailExtractor" id="mollie_shopware.services.payments.extractor.payment_failed_detail_extractor"/>
-        <service class="MollieShopware\Services\Mollie\Payments\Extractor\ApiExceptionDetailsExtractor" id="mollie_shopware.services.payments.extractor.api_exception_details_extractor"/>
+        <service class="MollieShopware\Services\Mollie\Payments\Extractor\PaymentFailedDetailExtractor" id="mollie_shopware.services.payments.extractor.payment_failed_detail_extractor" public="true"/>
+
+        <service class="MollieShopware\Services\Mollie\Payments\Extractor\ApiExceptionDetailsExtractor" id="mollie_shopware.services.payments.extractor.api_exception_details_extractor" public="true"/>
 
     </services>
 
