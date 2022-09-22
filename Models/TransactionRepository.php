@@ -16,8 +16,8 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
 
     /**
      * @param Transaction $transaction
-     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      * @return Transaction
      */
     public function save(Transaction $transaction)
@@ -59,6 +59,33 @@ class TransactionRepository extends ModelRepository implements TransactionReposi
                 )
             )
             ->setParameter(':mollieId', $mollieID);
+
+        /** @var array $result */
+        $result = $query->getQuery()->getResult();
+
+        if (count($result) >= 1) {
+            return $result[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $referenceId
+     * @return null|Transaction
+     */
+    public function getTransactionByMollieReferenceIdentifier($referenceId)
+    {
+        $query = $this->getEntityManager()->createQueryBuilder();
+
+        $query->select(['t'])
+            ->from(Transaction::class, 't')
+            ->where(
+                $query->expr()->orX(
+                    $query->expr()->eq('t.molliePaymentRefId', ':refId')
+                )
+            )
+            ->setParameter(':refId', $referenceId);
 
         /** @var array $result */
         $result = $query->getQuery()->getResult();

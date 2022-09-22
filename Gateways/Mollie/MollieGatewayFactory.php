@@ -30,7 +30,9 @@ class MollieGatewayFactory
      */
     public function create(MollieApiClient $client)
     {
-        return new MollieGateway($client);
+        $mollieOrderAnonymizer = $this->container->get('mollie_shopware.services.mollie_order_request_anonymizer.mollie_order_request_anonymizer');
+        $logger = $this->container->get('mollie_shopware.components.logger');
+        return new MollieGateway($client, $mollieOrderAnonymizer, $logger);
     }
 
     /**
