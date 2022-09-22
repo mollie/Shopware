@@ -66,7 +66,7 @@ Ext.define('Shopware.apps.Mollie.view.refund.Window', {
                         {
                             xtype: 'textfield',
                             fieldLabel: me.snippets.fieldOrderAmount + ' (' + me.record.get('currency') + ')',
-                            labelWidth: '140px',
+                            labelWidth: '200px',
                             value: me.record.get('invoiceAmount'),
                             readOnly: true,
                         },
@@ -74,7 +74,7 @@ Ext.define('Shopware.apps.Mollie.view.refund.Window', {
                             xtype: 'numberfield',
                             allowBlank: false,
                             fieldLabel: me.snippets.fieldRefundAmount + ' (' + me.record.get('currency') + ')',
-                            labelWidth: '140px',
+                            labelWidth: '200px',
                             name: 'amount',
                             itemId: 'fieldRefundAmount',
                             value: 0,
