@@ -2,8 +2,10 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Services;
 
+use Doctrine\ORM\EntityNotFoundException;
 use Enlight_Controller_Request_Request;
 use Enlight_View;
+use Exception;
 use MollieShopware\Components\Account\Account;
 use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
 use MollieShopware\Components\ApplePayDirect\Models\Button\DisplayOption;
@@ -25,7 +27,10 @@ class ApplePayButtonBuilder
     private $accountService;
 
     /**
-     * @var \Shopware_Proxies_sBasketProxy
+     * Don't use $this->sBasket directly,
+     * use $this->getBasket() instead.
+     *
+     * @var \sBasket
      */
     private $sBasket;
 
@@ -40,7 +45,10 @@ class ApplePayButtonBuilder
     private $configShopware;
 
     /**
-     * @var \Shopware_Proxies_sAdminProxy
+     * Don't use $this->sAdmin directly,
+     * use $this->getAdmin() instead.
+     *
+     * @var \sAdmin
      */
     private $sAdmin;
 
@@ -61,28 +69,45 @@ class ApplePayButtonBuilder
      * @param \Shopware_Components_Config $configShopware
      * @param ApplePayPaymentMethod $applePayPaymentMethod
      * @param ApplePayDirectDisplayOptions $restrictionService
-     * @param \sAdmin|\Shopware_Proxies_sAdminProxy $sAdmin
-     * @param \sBasket|\Shopware_Proxies_sBasketProxy $sBasket
      */
-    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService, $sAdmin, $sBasket)
+    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService)
     {
         $this->accountService = $accountService;
+        $this->applePayPaymentMethod = $applePayPaymentMethod;
         $this->configMollie = $configMollie;
         $this->configShopware = $configShopware;
         $this->restrictionService = $restrictionService;
-        $this->applePayPaymentMethod = $applePayPaymentMethod;
-
-        # attention, modules does not exist in CLI
-        $this->sAdmin = $sAdmin;
-        $this->sBasket = $sBasket;
     }
 
+    /**
+     * Sets the admin module in this class.
+     *
+     * @param \sAdmin $admin
+     * @return self
+     */
+    public function setAdmin(\sAdmin $admin)
+    {
+        $this->sAdmin = $admin;
+        return $this;
+    }
+
+    /**
+     * Sets the basket module in this class.
+     *
+     * @param \sBasket $basket
+     * @return self
+     */
+    public function setBasket(\sBasket $basket)
+    {
+        $this->sBasket = $basket;
+        return $this;
+    }
 
     /**
      * @param Enlight_Controller_Request_Request $request
      * @param Enlight_View $view
      * @param Shop $shop
-     * @throws \Exception
+     * @throws Exception
      */
     public function addButtonStatus(Enlight_Controller_Request_Request $request, Enlight_View $view, Shop $shop)
     {
@@ -95,7 +120,7 @@ class ApplePayButtonBuilder
             # now verify the risk management.
             # the merchant might have some settings for risk management.
             # if so, then block the buttons from being used
-            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->sAdmin);
+            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->getAdmin());
 
             if ($isRiskManagementBlocked) {
                 $isActive = false;
@@ -103,7 +128,7 @@ class ApplePayButtonBuilder
 
             # if a customer has esd products in the basket, check if
             # the customer is logged in with a full customer account
-            $hasEsdProductsInBasket = $controller === 'checkout' && $this->basketHasEsdProducts();
+            $hasEsdProductsInBasket = $controller === 'checkout' && $this->hasEsdProductsInBasket();
             $isEsdProductDetailPage = $controller === 'detail' && boolval($view->getAssign('sArticle')['esd']) === true;
             $isUserLoggedIn = $this->accountService->isLoggedIn() && !$this->accountService->isLoggedInAsGuest();
 
@@ -117,7 +142,7 @@ class ApplePayButtonBuilder
         # this list is already configured for the current shop.
         # we also just use the first one, because we don't know the
         # country of the anonymous user at that time
-        $activeCountries = $this->sAdmin->sGetCountryList();
+        $activeCountries = $this->getAdmin()->sGetCountryList();
         $firstCountry = array_shift($activeCountries);
         $isoParser = new CountryIsoParser();
         $country = $isoParser->getISO($firstCountry);
@@ -157,8 +182,45 @@ class ApplePayButtonBuilder
         $view->assign(self::KEY_MOLLIE_APPLEPAY_BUTTON, $button->toArray());
     }
 
-    private function basketHasEsdProducts()
+    /**
+     * Returns if the basket has ESD products.
+     *
+     * @return bool
+     */
+    private function hasEsdProductsInBasket()
     {
-        return $this->sBasket->sCheckForESD();
+        return $this->getBasket()->sCheckForESD();
+    }
+
+    /**
+     * Returns the admin module, loads it from
+     * the singleton if it's not set.
+     *
+     * @return \sAdmin
+     */
+    private function getAdmin()
+    {
+        # attention, modules does not exist in CLI
+        if (!isset($this->sAdmin)) {
+            $this->sAdmin = Shopware()->Modules()->Admin();
+        }
+
+        return $this->sAdmin;
+    }
+
+    /**
+     * Returns the basket module, loads it from
+     * the singleton if it's not set.
+     *
+     * @return \sBasket
+     */
+    private function getBasket()
+    {
+        # attention, modules does not exist in CLI
+        if (!isset($this->sBasket)) {
+            $this->sBasket = Shopware()->Modules()->Basket();
+        }
+
+        return $this->sBasket;
     }
 }
