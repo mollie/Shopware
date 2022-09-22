@@ -126,13 +126,8 @@ class ApplePayButtonBuilder
                 $isActive = false;
             }
 
-            # if a customer has esd products in the basket, check if
-            # the customer is logged in with a full customer account
-            $hasEsdProductsInBasket = $controller === 'checkout' && $this->hasEsdProductsInBasket();
-            $isEsdProductDetailPage = $controller === 'detail' && boolval($view->getAssign('sArticle')['esd']) === true;
-            $isUserLoggedIn = $this->accountService->isLoggedIn() && !$this->accountService->isLoggedInAsGuest();
-
-            if (($hasEsdProductsInBasket || $isEsdProductDetailPage) && !$isUserLoggedIn) {
+            # check if the customer can use Apple Pay direct for ESD products
+            if ($this->isBlockedForEsd($controller, $view)) {
                 $isActive = false;
             }
         }
@@ -183,16 +178,6 @@ class ApplePayButtonBuilder
     }
 
     /**
-     * Returns if the basket has ESD products.
-     *
-     * @return bool
-     */
-    private function hasEsdProductsInBasket()
-    {
-        return $this->getBasket()->sCheckForESD();
-    }
-
-    /**
      * Returns the admin module, loads it from
      * the singleton if it's not set.
      *
@@ -222,5 +207,46 @@ class ApplePayButtonBuilder
         }
 
         return $this->sBasket;
+    }
+
+    /**
+     * Returns if the basket has ESD products.
+     *
+     * @return bool
+     */
+    private function hasEsdProductsInBasket()
+    {
+        return $this->getBasket()->sCheckForESD();
+    }
+
+    /**
+     * Returns if the Apple Pay direct button
+     * is blocked for ESD products.
+     *
+     * @param string $controllerName
+     * @param Enlight_View $view
+     * @return bool
+     */
+    private function isBlockedForEsd($controllerName, Enlight_View $view)
+    {
+        # if a customer has esd products in the basket, the
+        # Apple Pay direct button is only available if the
+        # customer is fully logged in (not as guest)
+        $hasEsdProductsInBasket = $controllerName === 'checkout' && $this->hasEsdProductsInBasket();
+        $isEsdProductDetailPage = $controllerName === 'detail' && $this->isEsdProductPage($view);
+        $isUserLoggedIn = $this->accountService->isLoggedIn() && !$this->accountService->isLoggedInAsGuest();
+
+        return ($hasEsdProductsInBasket || $isEsdProductDetailPage) && !$isUserLoggedIn;
+    }
+
+    /**
+     * Returns if the product page is for an ESD product.
+     *
+     * @param Enlight_View $view
+     * @return bool
+     */
+    private function isEsdProductPage(Enlight_View $view)
+    {
+        return boolval($view->getAssign('sArticle')['esd']) === true;
     }
 }
