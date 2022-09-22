@@ -68,7 +68,7 @@ class CreditCardService
 
     public function getCardToken()
     {
-        /** @var Customer|null $customer */
+        /** @var null|Customer $customer */
         $customer = $this->customer->getCurrent();
 
         if ($customer === null) {
