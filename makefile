@@ -58,7 +58,7 @@ stylelint: ## Starts the Stylelinter
 
 snippetcheck: ## Validates the Snippets (requires Shopware)
 	cd ./Tests/Snippets && php validate.php
-	cd ../../.. && php bin/console sw:snippets:validate custom/plugins/MollieShopware
+	cd ../../.. && php bin/console sw:snippets:validate custom/plugins/MollieShopware/Resources
 
 # ------------------------------------------------------------------------------------------------------------
 

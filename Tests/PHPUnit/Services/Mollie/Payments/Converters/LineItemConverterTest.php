@@ -1,6 +1,6 @@
 <?php
 
-namespace MollieShopware\Tests\Services\Mollie\Payments\Builders;
+namespace MollieShopware\Tests\Services\Mollie\Payments\Converters;
 
 use MollieShopware\Services\Mollie\Payments\Converters\LineItemConverter;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;

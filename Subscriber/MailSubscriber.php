@@ -105,8 +105,8 @@ class MailSubscriber implements SubscriberInterface
      * them in the database to use them when the order is fully processed.
      *
      * @param Enlight_Event_EventArgs $args
-     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      * @return false|void
      */
     public function onSendMail(Enlight_Event_EventArgs $args)
@@ -225,16 +225,28 @@ class MailSubscriber implements SubscriberInterface
             return new BankTransferMailData(false, '', '', '', '');
         }
 
+        # ----------------------------------------------------------------------------------------------------------------------------------
 
-        # we might not have an order ID linked to our transaction
-        # so we have to retrieve the transaction either by the Mollie ord_xyz or tr_xyz
+        # we might not have an order ID linked to our transaction.
+        # therefore we have to retrieve the transaction either by the Mollie ord_xyz or tr_xyz, or even the PayPal or SEPA Ref-ID.
         /** @var Transaction $transaction */
         $transaction = $this->transactionRepo->getTransactionByOrder($order->getId());
+
+        if (!$transaction instanceof Transaction) {
+            $transaction = $this->transactionRepo->getTransactionByMollieIdentifier($order->getTransactionId());
+        }
+
+        if (!$transaction instanceof Transaction) {
+            # if we have the plugin config "use ref id as transaction id" then our
+            # transaction ID contains the PayPal or SEPA REF-ID.
+            $transaction = $this->transactionRepo->getTransactionByMollieReferenceIdentifier($order->getTransactionId());
+        }
 
         if (!$transaction instanceof Transaction) {
             return new BankTransferMailData(false, '', '', '', '');
         }
 
+        # ----------------------------------------------------------------------------------------------------------------------------------
 
         if ($transaction->isTypeOrder()) {
             $mollieOrder = $this->gwMollie->getOrder($transaction->getMollieOrderId());

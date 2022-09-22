@@ -122,6 +122,18 @@ class FrontendViewSubscriber implements SubscriberInterface
             // unset error, so it won't show up on next page view
             $session->mollieErrorMessage = null;
         }
+
+        # detailed errors
+        if ($session !== null && $view !== null && ($session->offsetGet('mollieDetailErrorReasonCode') || $session->offsetGet('mollieDetailErrorReasonMessage'))) {
+
+            // assign errors to view
+            $view->assign('sMollieDetailErrorReasonCode', $session->offsetGet('mollieDetailErrorReasonCode'));
+            $view->assign('sMollieDetailErrorReasonMessage', $session->offsetGet('mollieDetailErrorReasonMessage'));
+
+            // unset error, so it wont show up on next page view
+            $session->mollieDetailErrorReasonCode = null;
+            $session->mollieDetailErrorReasonMessage = null;
+        }
     }
 
     /**

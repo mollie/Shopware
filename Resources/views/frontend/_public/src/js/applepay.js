@@ -16,8 +16,25 @@
      */
     function hideApplePayIfNotAllowed() {
         // Find the hidden Apple Pay element
-        var applePayInput = document.getElementsByClassName('payment-mean-mollie-applepay');
-        var applePayLabel = document.getElementsByClassName('payment-mean-mollie-applepay-label');
+        var applePayInput = document.querySelector('input.payment-mean-mollie-applepay');
+        var applePayLabel = document.querySelector('label.payment-mean-mollie-applepay-label');
+
+        // Fallback for finding the Apple Pay payment mean element. It looks for
+        // a hidden input with the ID of the Apple Pay payment mean as value.
+        // With that ID, we can find the radio button of the payment mean.
+        //
+        // This hidden input is provided by a template in this plugin as fallback
+        // for other plugins, like the OnePageCheckout, that overrule certain
+        // template blocks. The input is provided through change_payment.tpl
+        // in the block "frontend_checkout_payment_content".
+        if (typeof applePayInput === 'undefined' || !applePayLabel) {
+            var applePayPaymentMeanIdInput = document.querySelector('input[type="hidden"][name="mollie_applepay_payment_mean_id"]');
+
+            if (applePayPaymentMeanIdInput) {
+                applePayInput = document.querySelector('input[type="radio"]#payment_mean' + applePayPaymentMeanIdInput.value);
+                applePayLabel = document.querySelector('label[for="payment_mean' + applePayPaymentMeanIdInput.value + ']');
+            }
+        }
 
         // Create a disabled attribute
         var disabledItem = document.createAttribute('disabled');
@@ -26,24 +43,24 @@
         // eslint-disable-next-line no-undef
         if (!window.ApplePaySession || !ApplePaySession.canMakePayments()) {
             // Apple Pay is not available
-            if (typeof applePayInput !== 'undefined' && applePayInput.length) {
-                applePayInput[0].checked = false;
-                applePayInput[0].attributes.setNamedItem(disabledItem);
-                applePayInput[0].parentNode.parentNode.classList.add('is--hidden');
+            if (typeof applePayInput !== 'undefined' && applePayInput) {
+                applePayInput.checked = false;
+                applePayInput.attributes.setNamedItem(disabledItem);
+                applePayInput.parentNode.parentNode.classList.add('is--hidden');
             }
         } else {
             // Show Apple Pay option
-            if (typeof applePayInput !== 'undefined' && applePayInput.length) {
-                if (applePayInput[0].attributes.getNamedItem('disabled') !== null) {
-                    applePayInput[0].attributes.removeNamedItem('disabled');
+            if (typeof applePayInput !== 'undefined' && applePayInput) {
+                if (applePayInput.attributes.getNamedItem('disabled') !== null) {
+                    applePayInput.attributes.removeNamedItem('disabled');
                 }
 
-                applePayInput[0].parentNode.parentNode.classList.remove('is--hidden');
+                applePayInput.parentNode.parentNode.classList.remove('is--hidden');
             }
 
-            if (typeof applePayLabel !== 'undefined' && applePayLabel.length) {
-                applePayLabel[0].classList.remove('is--soft');
-                applePayLabel[0].classList.remove('is--hidden');
+            if (typeof applePayLabel !== 'undefined' && applePayLabel) {
+                applePayLabel.classList.remove('is--soft');
+                applePayLabel.classList.remove('is--hidden');
             }
         }
     }

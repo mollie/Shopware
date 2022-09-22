@@ -71,6 +71,13 @@ class Transaction
     /**
      * @var string
      *
+     * @ORM\Column(name="mollie_payment_ref_id", type="string", nullable=true)
+     */
+    private $molliePaymentRefId;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="session_id", type="string", nullable=true)
      */
     private $sessionId;
@@ -261,6 +268,23 @@ class Transaction
     {
         $this->molliePaymentId = $molliePaymentId;
     }
+
+    /**
+     * @return string
+     */
+    public function getMolliePaymentRefId()
+    {
+        return $this->molliePaymentRefId;
+    }
+
+    /**
+     * @param string $molliePaymentRefId
+     */
+    public function setMolliePaymentRefId($molliePaymentRefId)
+    {
+        $this->molliePaymentRefId = $molliePaymentRefId;
+    }
+
 
     public function getSessionId()
     {

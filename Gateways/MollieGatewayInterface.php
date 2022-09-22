@@ -83,4 +83,10 @@ interface MollieGatewayInterface
      * @return Shipment
      */
     public function shipOrderPartially(Order $mollieOrder, $lineId, $quantity, $carrier, $trackingNumber, $trackingUrl);
+
+    /**
+     * @param array $requestData
+     * @return Payment
+     */
+    public function createPayment(array $requestData);
 }

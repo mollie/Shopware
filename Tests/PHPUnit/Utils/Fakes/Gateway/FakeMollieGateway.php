@@ -199,4 +199,12 @@ class FakeMollieGateway implements MollieGatewayInterface
         $this->shippedTrackingNumber = $trackingNumber;
         $this->shippedTrackingUrl = $trackingUrl;
     }
+
+    /**
+     * @param array $requestData
+     * @return Payment|void
+     */
+    public function createPayment(array $requestData)
+    {
+    }
 }

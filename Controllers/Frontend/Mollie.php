@@ -15,9 +15,9 @@ use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
 use MollieShopware\Components\Services\OrderService;
-use MollieShopware\Components\SessionManager\SessionManager;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
+use MollieShopware\Exceptions\MolliePaymentFailedException;
 use MollieShopware\Facades\CheckoutSession\CheckoutSessionFacade;
 use MollieShopware\Facades\FinishCheckout\FinishCheckoutFacade;
 use MollieShopware\Facades\FinishCheckout\RestoreSessionFacade;
@@ -26,6 +26,8 @@ use MollieShopware\Facades\FinishCheckout\Services\MollieStatusValidator;
 use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
 use MollieShopware\Facades\Notifications\Notifications;
 use MollieShopware\Gateways\MollieGatewayInterface;
+use MollieShopware\Services\Mollie\Payments\Extractor\ApiExceptionDetailsExtractor;
+use MollieShopware\Services\Mollie\Payments\Extractor\PaymentFailedDetailExtractor;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
 use MollieShopware\Traits\Controllers\RedirectTrait;
 use Shopware\Models\Customer\Customer;
@@ -102,6 +104,11 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      * @var CurrentCustomer
      */
     private $customers;
+
+    /**
+     * @var ApiExceptionDetailsExtractor
+     */
+    private $apiExceptionDetailsExtractor;
 
 
     /**
@@ -186,6 +193,19 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             }
 
             $this->redirect($session->getCheckoutUrl());
+        } catch (ApiException $ex) {
+            $paymentFailedDetails = $this->apiExceptionDetailsExtractor->extractDetails($ex);
+            if ($this->config->showDetailedErrorMessages() && $paymentFailedDetails !== null) {
+                $this->ERROR_PAYMENT_FAILED_REASON_CODE = $paymentFailedDetails->getReasonCode();
+                $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE = $paymentFailedDetails->getReasonMessage();
+            }
+            $this->logger->error(
+                'Error from Mollie API',
+                [
+                    'error' => $ex->getMessage()
+                ]
+            );
+            $this->handleOnException();
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error when starting Mollie checkout',
@@ -193,19 +213,23 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                     'error' => $ex->getMessage()
                 ]
             );
-
-            # in theory this is not catched,
-            # but for a better code understanding, we keep it here
-            if ($this->checkout->getRestorableOrder() instanceof Order) {
-                $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
-            }
-
-            $this->redirectToShopwareCheckoutFailed($this);
+            $this->handleOnException();
         } finally {
+
 
             # we always have to immediately clear the token in SUCCESS or FAILURE ways
             $this->applePay->setPaymentToken('');
         }
+    }
+
+    private function handleOnException()
+    {
+        # in theory this is not catched,
+        # but for a better code understanding, we keep it here
+        if ($this->checkout !== null && $this->checkout->getRestorableOrder() instanceof Order) {
+            $this->orderCancellation->cancelAndRestoreByOrder($this->checkout->getRestorableOrder());
+        }
+        $this->redirectToShopwareCheckoutFailed($this);
     }
 
     /**
@@ -299,6 +323,22 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $this->redirectToShopwareCheckoutFinish($this, $checkoutData->getTemporaryId());
 
             return;
+        } catch (MolliePaymentFailedException $ex) {
+            $logData = [
+                'error' => $ex->getMessage(),
+                'transactionID' => $transactionID,
+            ];
+
+            if ($this->config->showDetailedErrorMessages() && $ex->hasDetails()) {
+                $failureDetails = $ex->getFailedDetails();
+                $logData['failureReasonCode'] = $failureDetails->getReasonCode();
+                $logData['failureReasonMessage'] = $failureDetails->getReasonMessage();
+
+                $this->ERROR_PAYMENT_FAILED_REASON_CODE = $failureDetails->getReasonCode();
+                $this->ERROR_PAYMENT_FAILED_REASON_MESSAGE = $failureDetails->getReasonMessage();
+            }
+
+            $this->logger->error('Checkout failed because of failed payment status', $logData);
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Checkout failed when finishing Order for Transaction: ' . $transactionID,
@@ -593,7 +633,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             );
 
             $this->orderCancellation = Shopware()->Container()->get('mollie_shopware.components.order.cancellation');
-
+            $paymentFailedDetailExtractor = Shopware()->Container()->get('mollie_shopware.services.payments.extractor.payment_failed_detail_extractor');
+            $this->apiExceptionDetailsExtractor = Shopware()->Container()->get('mollie_shopware.services.payments.extractor.api_exception_details_extractor');
 
             $swOrderUpdater = new ShopwareOrderUpdater($this->config, $entityManager);
 
@@ -655,7 +696,8 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $statusConverter,
                 $orderUpdater,
                 $confirmationMail,
-                $paymentConfigResolver
+                $paymentConfigResolver,
+                $paymentFailedDetailExtractor
             );
 
             $this->notifications = new MollieShopware\Facades\Notifications\Notifications(
