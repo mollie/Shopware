@@ -655,7 +655,7 @@ class PaymentService
             try {
                 $ccToken = $this->creditCardService->getCardToken();
             } catch (CustomerNotFoundException $exception) {
-                $this->logger->error('Could not get the credit card token for the current customer.', [
+                $this->logger->warning('Could not get the credit card token for the current customer.', [
                     'exception' => $exception->getMessage(),
                 ]);
             }
