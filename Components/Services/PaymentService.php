@@ -22,6 +22,7 @@ use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\UnixTimestampGenerator;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Translation\Translation;
+use MollieShopware\Exceptions\CustomerNotFoundException;
 use MollieShopware\Exceptions\MollieOrderNotFound;
 use MollieShopware\Exceptions\MolliePaymentConfigurationNotFound;
 use MollieShopware\Exceptions\MolliePaymentNotFound;
@@ -91,6 +92,11 @@ class PaymentService
     private $gwMollie;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var PaymentFactory
      */
     private $paymentFactory;
@@ -151,13 +157,14 @@ class PaymentService
      * @param array $customEnvironmentVariables
      * @throws ApiException
      */
-    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, array $customEnvironmentVariables)
+    public function __construct(MollieApiFactory $apiFactory, Config $config, Config\PaymentConfigResolver $paymentConfig, MollieGatewayInterface $gwMollie, LoggerInterface $logger, array $customEnvironmentVariables)
     {
         $this->apiFactory = $apiFactory;
         $this->apiClient = $apiFactory->create();
         $this->config = $config;
         $this->paymentConfig = $paymentConfig;
         $this->gwMollie = $gwMollie;
+        $this->logger = $logger;
 
         $this->customEnvironmentVariables = $customEnvironmentVariables;
 
@@ -642,7 +649,16 @@ class PaymentService
         }
 
         if ($paymentMethodObject instanceof CreditCard) {
-            $ccToken = $this->creditCardService->getCardToken();
+            # prevent this method from failing, because at this
+            # point we're not sure if the credit card token
+            # is needed to finish the payment at Mollie
+            try {
+                $ccToken = $this->creditCardService->getCardToken();
+            } catch (CustomerNotFoundException $exception) {
+                $this->logger->error('Could not get the credit card token for the current customer.', [
+                    'exception' => $exception->getMessage(),
+                ]);
+            }
 
             if (!empty($ccToken)) {
                 /** @var CreditCard $paymentMethodObject */

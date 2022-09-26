@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Services;
 
 use Mollie\Api\MollieApiClient;
 use MollieShopware\Components\CurrentCustomer;
+use MollieShopware\Exceptions\CustomerNotFoundException;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\Customer as CustomerAttribute;
 use Shopware\Models\Customer\Customer;
@@ -67,18 +68,20 @@ class CreditCardService
 
     public function getCardToken()
     {
-        $customerAttributes = null;
-
-        /** @var Customer $customer */
+        /** @var null|Customer $customer */
         $customer = $this->customer->getCurrent();
 
-        if ($customer !== null) {
-            $customerAttributes = $customer->getAttribute();
+        if ($customer === null) {
+            throw new CustomerNotFoundException(
+                'The current customer could not be found.'
+            );
         }
 
-        if ($customerAttributes !== null &&
-            method_exists($customerAttributes, 'getMollieShopwareCreditCardToken')) {
-            return $customerAttributes->getMollieShopwareCreditCardToken();
+        if (
+            $customer->getAttribute() !== null &&
+            method_exists($customer->getAttribute(), 'getMollieShopwareCreditCardToken')
+        ) {
+            return $customer->getAttribute()->getMollieShopwareCreditCardToken();
         }
 
         /**
