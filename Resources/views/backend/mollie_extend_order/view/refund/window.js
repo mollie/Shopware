@@ -48,7 +48,7 @@ Ext.define('Shopware.apps.Mollie.view.refund.Window', {
             },
 
             border: false,
-            bodyPadding: 15,
+            bodyPadding: 10,
 
             items: [
                 {
