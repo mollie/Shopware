@@ -30,6 +30,7 @@
         <service id="mollie_shopware.subscriber.order_backend" class="MollieShopware\Subscriber\OrderBackendSubscriber">
             <argument type="service" id="mollie_shopware.order_service"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument>%mollie_shopware.plugin_dir%</argument>
             <tag name="shopware.event_subscriber"/>
         </service>
 

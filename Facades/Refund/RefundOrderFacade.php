@@ -2,6 +2,7 @@
 
 namespace MollieShopware\Facades\Refund;
 
+use Mollie\Api\Resources\Refund;
 use MollieShopware\Components\Services\OrderService;
 use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
@@ -38,6 +39,7 @@ class RefundOrderFacade
      * @param float $customAmount
      * @throws OrderNotFoundException
      * @throws TransactionNotFoundException
+     * @return Refund
      */
     public function refundOrder($orderNumber, $customAmount)
     {
@@ -54,9 +56,9 @@ class RefundOrderFacade
         }
         
         if (empty($customAmount)) {
-            $this->refundService->refundFullOrder($order, $transaction);
+            return $this->refundService->refundFullOrder($order, $transaction);
         } else {
-            $this->refundService->refundPartialOrderAmount($order, $transaction, $customAmount);
+            return $this->refundService->refundPartialOrderAmount($order, $transaction, $customAmount);
         }
     }
 }
