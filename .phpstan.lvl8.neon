@@ -10,6 +10,7 @@ parameters:
         - node_modules/*
         - Resources/*
         - vendor/*
+        - Services/Mollie/Client/MollieHttpClient.php
     ignoreErrors:
         # -----------------------------------------------------------------------------------------------------------
         # ignore Shopware attributes with magic getters and setters
