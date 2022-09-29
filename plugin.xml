@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.1.0</version>
+    <version>2.2.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -44,6 +44,27 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+
+    <changelog version="2.2.0">
+        <changes lang="de">
+            - Neue Funktion in der Plugin-Konfiguration, um optional die Fehlergründe von Mollie bei Zahlungsproblemen direkt im Frontend anzuzeigen.
+            - Neue Option zum Erstellen von Teilrückerstattungen im Shopware Backend. Sie können jetzt einen benutzerdefinierten Wert eingeben, bevor Sie die Rückerstattung ausführen.
+            - Apple Pay Direct verwendet jetzt die Sprache des Subshops anstelle des Browsers.
+            - Verbesserung des Layouts der Kreditkarten Komponenten im Plugin OnePageCheckout.
+            - Kompatibilitätsproblem mit Apple Pay in OnePageCheckout behoben. Die Zahlungsmethode wird wird nun korrekt auf Geräten ausgeblendet, auf denen Apple Pay nicht verfügbar ist.
+            - Problem mit fehlenden Bankdaten in Bestellbestätigungsmails in Kombination mit "Bestellung nach Zahlung erstellen" behoben.
+            - Behebung des Problems "Fatal Error in CreditCardService", dass in seltenen Szenarien auftritt.
+        </changes>
+        <changes lang="en">
+            - Add new feature in plugin configuration to optionally show Mollie payment failure reasons directly in the frontend.
+            - Add new option to create partial refunds in the Shopware Backend. You can now enter a custom value before executing the refund.
+            - Apple Pay Direct now uses the locale of the sub shop instead of the one from the browser.
+            - Improve broken layout of Credit Card Components in OnePageCheckout.
+            - Fix compatibility problem with Apple Pay in OnePageCheckout. It will now be hidden on devices where Apple Pay is not available.
+            - Fix problem with missing bank data in order confirmation mails in combination with "Create Order After Payment".
+            - Fix problem of fatal error in CreditCard service that happens in rare scenarios.
+        </changes>
+    </changelog>
 
     <changelog version="2.1.0">
         <changes lang="de">
