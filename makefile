@@ -76,5 +76,7 @@ pr: ## Prepares everything for a Pull Request
 
 release: ## Creates a new ZIP package
 	cd .. && mkdir -p ./.release
-	cd .. && cd ./.release && rm -rf MollieShopware.zip
+	cd .. && rm -rf ./.release/MollieShopware*.zip
+	make clean -B
+	make install -B
 	cd .. && zip -qq -r -0 ./.release/MollieShopware.zip MollieShopware/* -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpstan.neon' 'MollieShopware/makefile' '*.DS_Store' '*node_modules'
