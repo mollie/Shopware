@@ -7,8 +7,10 @@ use Enlight_Controller_Request_Request;
 use Enlight_View;
 use Exception;
 use MollieShopware\Components\Account\Account;
+use MollieShopware\Components\Admin\AdminFactoryInterface;
 use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
 use MollieShopware\Components\ApplePayDirect\Models\Button\DisplayOption;
+use MollieShopware\Components\Basket\BasketFactoryInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Country\CountryIsoParser;
 use Shopware\Models\Shop\Shop;
@@ -27,9 +29,6 @@ class ApplePayButtonBuilder
     private $accountService;
 
     /**
-     * Don't use $this->sBasket directly,
-     * use $this->getBasket() instead.
-     *
      * @var \sBasket
      */
     private $sBasket;
@@ -45,9 +44,6 @@ class ApplePayButtonBuilder
     private $configShopware;
 
     /**
-     * Don't use $this->sAdmin directly,
-     * use $this->getAdmin() instead.
-     *
      * @var \sAdmin
      */
     private $sAdmin;
@@ -70,37 +66,15 @@ class ApplePayButtonBuilder
      * @param ApplePayPaymentMethod $applePayPaymentMethod
      * @param ApplePayDirectDisplayOptions $restrictionService
      */
-    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService)
+    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService, AdminFactoryInterface $adminFactory, BasketFactoryInterface $basketFactory)
     {
         $this->accountService = $accountService;
         $this->applePayPaymentMethod = $applePayPaymentMethod;
         $this->configMollie = $configMollie;
         $this->configShopware = $configShopware;
         $this->restrictionService = $restrictionService;
-    }
-
-    /**
-     * Sets the admin module in this class.
-     *
-     * @param \sAdmin $admin
-     * @return self
-     */
-    public function setAdmin(\sAdmin $admin)
-    {
-        $this->sAdmin = $admin;
-        return $this;
-    }
-
-    /**
-     * Sets the basket module in this class.
-     *
-     * @param \sBasket $basket
-     * @return self
-     */
-    public function setBasket(\sBasket $basket)
-    {
-        $this->sBasket = $basket;
-        return $this;
+        $this->sAdmin = $adminFactory->create();
+        $this->sBasket = $basketFactory->create();
     }
 
     /**
@@ -120,7 +94,7 @@ class ApplePayButtonBuilder
             # now verify the risk management.
             # the merchant might have some settings for risk management.
             # if so, then block the buttons from being used
-            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->getAdmin());
+            $isRiskManagementBlocked = $this->applePayPaymentMethod->isRiskManagementBlocked($this->sAdmin);
 
             if ($isRiskManagementBlocked) {
                 $isActive = false;
@@ -137,7 +111,7 @@ class ApplePayButtonBuilder
         # this list is already configured for the current shop.
         # we also just use the first one, because we don't know the
         # country of the anonymous user at that time
-        $activeCountries = $this->getAdmin()->sGetCountryList();
+        $activeCountries = $this->sAdmin->sGetCountryList();
         $firstCountry = array_shift($activeCountries);
         $isoParser = new CountryIsoParser();
         $country = $isoParser->getISO($firstCountry);
@@ -178,45 +152,13 @@ class ApplePayButtonBuilder
     }
 
     /**
-     * Returns the admin module, loads it from
-     * the singleton if it's not set.
-     *
-     * @return \sAdmin
-     */
-    private function getAdmin()
-    {
-        # attention, modules does not exist in CLI
-        if (!isset($this->sAdmin)) {
-            $this->sAdmin = Shopware()->Modules()->Admin();
-        }
-
-        return $this->sAdmin;
-    }
-
-    /**
-     * Returns the basket module, loads it from
-     * the singleton if it's not set.
-     *
-     * @return \sBasket
-     */
-    private function getBasket()
-    {
-        # attention, modules does not exist in CLI
-        if (!isset($this->sBasket)) {
-            $this->sBasket = Shopware()->Modules()->Basket();
-        }
-
-        return $this->sBasket;
-    }
-
-    /**
      * Returns if the basket has ESD products.
      *
      * @return bool
      */
     private function hasEsdProductsInBasket()
     {
-        return $this->getBasket()->sCheckForESD();
+        return $this->sBasket->sCheckForESD();
     }
 
     /**

@@ -7,9 +7,11 @@ use Enlight_Template_Manager;
 use Enlight_View_Default;
 use Exception;
 use MollieShopware\Components\Account\Account;
+use MollieShopware\Components\Admin\AdminFactoryInterface;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayButtonBuilder;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayDirectDisplayOptions;
 use MollieShopware\Components\ApplePayDirect\Services\ApplePayPaymentMethod;
+use MollieShopware\Components\Basket\BasketFactoryInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Tests\PHPUnit\Utils\Fakes\View\FakeView;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -85,11 +87,13 @@ class ApplePayButtonBuilderTest extends TestCase
             $this->createMock(Shopware_Components_Config::class),
             $this->applePayPaymentMethod,
             $this->restrictionService,
+            $this->createConfiguredMock(AdminFactoryInterface::class, [
+                'create' => $this->getAdminModuleMock(),
+            ]),
+            $this->createConfiguredMock(BasketFactoryInterface::class, [
+                'create' => $this->sBasket,
+            ])
         );
-
-        $this->buttonBuilder
-            ->setAdmin($this->getAdminModuleMock())
-            ->setBasket($this->sBasket);
     }
 
     /**
