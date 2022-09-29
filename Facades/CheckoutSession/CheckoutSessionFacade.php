@@ -17,6 +17,7 @@ use MollieShopware\Components\SessionManager\SessionManager;
 use MollieShopware\Components\Shipping\Shipping;
 use MollieShopware\Components\Shipping\ShippingInterface;
 use MollieShopware\Components\TransactionBuilder\TransactionBuilder;
+use MollieShopware\Exceptions\CustomerNotFoundException;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use MollieShopware\Services\TokenAnonymizer\TokenAnonymizer;
@@ -199,7 +200,15 @@ class CheckoutSessionFacade
 
         # we want to log anonymized tokens
         # to see if they are used correctly.
-        $tokenCreditCard = $this->creditCardService->getCardToken();
+        try {
+            $tokenCreditCard = $this->creditCardService->getCardToken();
+        } catch (\Exception $exception) {
+            # prevent the checkout from failing, because at this
+            # point it's not sure if we need the credit card
+            # token to finish the payment at Mollie
+            $tokenCreditCard = '';
+        }
+
         $tokenApplePay = $this->applePay->getPaymentToken();
 
 

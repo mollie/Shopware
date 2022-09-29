@@ -3,11 +3,13 @@
 namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Enlight_Components_Snippet_Namespace;
 use Enlight_Controller_Action;
 use Enlight_Controller_ActionEventArgs;
 use Enlight_Controller_Request_Request;
 use Enlight_Event_EventArgs;
 use Enlight_Hook_HookArgs;
+use Enlight_View_Default;
 use Exception;
 use MollieShopware\Components\Helpers\LogHelper;
 use MollieShopware\Components\Helpers\MollieShopSwitcher;
@@ -27,6 +29,11 @@ class OrderBackendSubscriber implements SubscriberInterface
      */
     private $logger;
 
+    /**
+     * @var string
+     */
+    private $pluginDirectory;
+
 
     /**
      * @return array|string[]
@@ -43,11 +50,13 @@ class OrderBackendSubscriber implements SubscriberInterface
     /**
      * @param OrderService $orderService
      * @param LoggerInterface $logger
+     * @param mixed $pluginDirectory
      */
-    public function __construct(OrderService $orderService, LoggerInterface $logger)
+    public function __construct(OrderService $orderService, LoggerInterface $logger, $pluginDirectory)
     {
         $this->orderService = $orderService;
         $this->logger = $logger;
+        $this->pluginDirectory = $pluginDirectory;
     }
 
     public function onUpdate(Enlight_Event_EventArgs $args)
@@ -74,10 +83,18 @@ class OrderBackendSubscriber implements SubscriberInterface
      */
     public function onOrderPostDispatch(Enlight_Controller_ActionEventArgs $args)
     {
+        /** @var Enlight_View_Default $view */
+        $view = $args->getSubject()->View();
+        $view->addTemplateDir($this->pluginDirectory . '/Resources/views/');
+
         $request = $args->getRequest();
 
         if ($request === null) {
             return true;
+        }
+
+        if ($request->getActionName() === 'index') {
+            $view->extendsTemplate('backend/mollie_extend_order/app.js');
         }
 
         if ($request->getActionName() === 'batchProcess') {
