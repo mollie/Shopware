@@ -128,12 +128,13 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
         $this->config = Shopware()->Container()->get('mollie_shopware.config');
 
-        $this->applePayPaymentMethod = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.services.payment_method');
-        $this->applePayFormatter = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.services.formatter');
-
         /** @var ApplePayDirectFactory $applePayFactory */
         $applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
+
+        $this->applePayFormatter = $applePayFactory->createFormatter();
         $this->handlerApplePay = $applePayFactory->createHandler();
+
+        $this->applePayPaymentMethod = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.services.payment_method');
 
         $this->repoArticles = Shopware()->Models()->getRepository(Detail::class);
     }

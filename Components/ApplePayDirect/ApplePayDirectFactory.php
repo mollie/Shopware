@@ -2,14 +2,22 @@
 
 namespace MollieShopware\Components\ApplePayDirect;
 
+use Enlight_Components_Snippet_Namespace;
 use Mollie\Api\Exceptions\ApiException;
 use MollieShopware\Components\ApplePayDirect\Handler\ApplePayDirectHandler;
+use MollieShopware\Components\ApplePayDirect\Services\ApplePayFormatter;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Shipping\Shipping;
+use MollieShopware\Components\Snippets\SnippetAdapter;
 
 class ApplePayDirectFactory
 {
+    /**
+     * this is the default snippet namespace for our
+     * mollie Apple Pay direct translation.
+     */
+    const SNIPPET_NS = 'frontend/MollieShopware/ApplePayDirect';
 
     /**
      * @var Config $mollieConfig
@@ -41,17 +49,20 @@ class ApplePayDirectFactory
      */
     private $session;
 
+    /**
+     * @var Enlight_Components_Snippet_Namespace
+     */
+    private $snippets;
+
 
     /**
-     * ApplePayDirectFactory constructor.
-     *
      * @param Config $config
      * @param MollieApiFactory $apiFactory
-     * @param $modules
      * @param Shipping $cmpShipping
      * @param \Enlight_Components_Session_Namespace $session
+     * @param Enlight_Components_Snippet_Namespace $snippets
      */
-    public function __construct(Config $config, MollieApiFactory $apiFactory, Shipping $cmpShipping, \Enlight_Components_Session_Namespace $session)
+    public function __construct(Config $config, MollieApiFactory $apiFactory, Shipping $cmpShipping, \Enlight_Components_Session_Namespace $session, $snippets)
     {
         # attention, modules does not exist in CLI
         $this->admin = Shopware()->Modules()->Admin();
@@ -62,6 +73,7 @@ class ApplePayDirectFactory
 
         $this->apiFactory = $apiFactory;
         $this->mollieConfig = $config;
+        $this->snippets = $snippets;
     }
 
     /**
@@ -77,5 +89,18 @@ class ApplePayDirectFactory
             $this->shipping,
             $this->session
         );
+    }
+
+    /**
+     * @return ApplePayFormatter
+     */
+    public function createFormatter()
+    {
+        $snippetAdapter = new SnippetAdapter(
+            $this->snippets,
+            self::SNIPPET_NS
+        );
+
+        return new ApplePayFormatter($snippetAdapter);
     }
 }
