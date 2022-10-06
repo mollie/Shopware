@@ -64,7 +64,6 @@ class PaymentMethodTypeTest extends TestCase
             [true, PaymentMethod::P24],
             [true, PaymentMethod::IDEAL],
             [true, PaymentMethod::GIROPAY],
-            [true, PaymentMethod::DIRECTDEBIT],
             [true, PaymentMethod::CREDITCARD],
             [true, PaymentMethod::BELFIUS],
             [true, PaymentMethod::BANKTRANSFER],
