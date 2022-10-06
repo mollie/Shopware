@@ -17,6 +17,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const webpack = require('@cypress/webpack-preprocessor')
+const TestRailReporter = require('cypress-testrail');
 
 
 function getConfigurationByFile(file) {
@@ -26,6 +27,9 @@ function getConfigurationByFile(file) {
 
 
 module.exports = (on, config) => {
+
+    const customCommand = 'Shopware: ' + config.env.SHOPWARE;
+    new TestRailReporter(on, config, customCommand).register();
 
     on('file:preprocessor', webpack({
         webpackOptions: require('../../webpack.config'),
