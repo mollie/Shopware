@@ -37,20 +37,20 @@ const configs = [
 ];
 
 const payments = [
-    {key: 'paypal', name: 'PayPal'},
-    {key: 'klarnapaynow', name: 'Pay now'},
-    {key: 'klarnapaylater', name: 'Pay later'},
-    {key: 'klarnasliceit', name: 'Slice it'},
-    {key: 'ideal', name: 'iDEAL'},
-    {key: 'sofort', name: 'SOFORT'},
-    {key: 'eps', name: 'eps'},
-    {key: 'giropay', name: 'giropay'},
-    {key: 'mistercash', name: 'Bancontact'},
-    {key: 'przelewy24', name: 'Przelewy24'},
-    {key: 'kbc', name: 'KBC'},
-    {key: 'belfius', name: 'Belfius'},
-    {key: 'banktransfer', name: 'Bank transfer'},
-    {key: 'giftcard', name: 'Gift cards'},
+    {caseId: 'C4242', key: 'paypal', name: 'PayPal'},
+    {caseId: 'C4245', key: 'klarnapaynow', name: 'Pay now'},
+    {caseId: 'C4243', key: 'klarnapaylater', name: 'Pay later'},
+    {caseId: 'C4247', key: 'klarnasliceit', name: 'Slice it'},
+    {caseId: 'C4235', key: 'ideal', name: 'iDEAL'},
+    {caseId: 'C4248', key: 'sofort', name: 'SOFORT'},
+    {caseId: 'C4250', key: 'eps', name: 'eps'},
+    {caseId: 'C4252', key: 'giropay', name: 'giropay'},
+    {caseId: 'C4249', key: 'mistercash', name: 'Bancontact'},
+    {caseId: 'C4254', key: 'przelewy24', name: 'Przelewy24'},
+    {caseId: 'C4255', key: 'kbc', name: 'KBC'},
+    {caseId: 'C4256', key: 'belfius', name: 'Belfius'},
+    {caseId: 'C4238', key: 'banktransfer', name: 'Bank transfer'},
+    {caseId: 'C4251', key: 'giftcard', name: 'Gift cards'},
     // now working without preparing articles: {key: 'voucher', name: 'Voucher'},
     // now working with our account: {key: 'paysafecard', name: 'Paysafecard'},
 ];
@@ -89,7 +89,7 @@ configs.forEach(config => {
 
             payments.forEach(payment => {
 
-                it('Pay with ' + payment.name, () => {
+                it(payment.caseId + ': Pay with ' + payment.name, () => {
 
                     scenarioDummyBasket.execute();
 

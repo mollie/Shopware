@@ -9,3 +9,4 @@ releases
 .reports
 .DS_Store
 /node_modules
+/Tests/Cypress/cypress.env.json

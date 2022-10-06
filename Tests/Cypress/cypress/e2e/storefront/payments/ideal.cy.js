@@ -26,7 +26,7 @@ describe('iDEAL Issuers', () => {
         session.resetSession();
     });
 
-    it('Issuer List on payment selection page', () => {
+    it('C14404: Issuer List on payment selection page', () => {
 
         scenarioDummyBasket.execute();
 
@@ -39,10 +39,19 @@ describe('iDEAL Issuers', () => {
         payments.selectIDealIssuer('bunq');
     })
 
-    it('Ajax Route working for signed in users', () => {
+    it('C4237: iDEAL (XHR) Issuer List can only be retrieved for signed in users', () => {
+
+        // we start the request and make sure
+        // that we get a 500 error
+        cy.request({
+            url: '/Mollie/idealIssuers',
+            failOnStatusCode: false,
+        }).then((resp) => {
+            expect(resp.status).to.eq(500);
+        })
+
 
         register.doRegister("dev@localhost.de", "MollieMollie111", 'Mollie', 'Mollie');
-
         login.doLogin("dev@localhost.de", "MollieMollie111");
 
         // we start the request
@@ -56,19 +65,6 @@ describe('iDEAL Issuers', () => {
             expect(resp.body.data.length).to.be.at.least(1);
 
         })
-    })
-
-    it('Ajax Route blocked for anonymous users', () => {
-
-        // we start the request and make sure
-        // that we get a 500 error
-        cy.request({
-            url: '/Mollie/idealIssuers',
-            failOnStatusCode: false,
-        }).then((resp) => {
-            expect(resp.status).to.eq(500);
-        })
-
     })
 
 })

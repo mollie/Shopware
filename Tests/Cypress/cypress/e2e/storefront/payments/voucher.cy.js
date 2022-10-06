@@ -28,7 +28,7 @@ context("Voucher", () => {
 
     context("Account", () => {
 
-        it('Voucher hidden in Account', () => {
+        it('C14154: Voucher is hidden in Account', () => {
 
             scenarioUser.execute();
             accountAction.openPaymentMethods();
