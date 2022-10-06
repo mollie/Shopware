@@ -21,7 +21,7 @@ describe('Payment Methods', () => {
         session.resetSession();
     });
 
-    it('C4157: Payment Methods show Test-Mode if active', () => {
+    it('C4157: Payment Methods show Test-Mode if active @core', () => {
 
         scenarioDummyBasket.execute();
 

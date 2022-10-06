@@ -42,3 +42,29 @@ the URL of your shop.
 make run shopware=5.6.9 url=http://localhost
 ```
 
+
+
+### Tags
+You can run a subsegment of tests by providing tags when running Cypress.
+These tags need to exist in the title of a test.
+We recommend the prefix @, su like '@core'.
+
+```ruby 
+make run shopware=5.x url=https://my-local-or-remote-domain tags='@core @smoke'
+```
+
+Here is a list of currently allowed tags.
+Please use them if appropriate.
+
+
+| Tag   | Description |
+|-------| --- |
+| @core | Indicates that the test does not require a Mollie API key. These tests will also run in the PR pipeline before something is merged. |
+
+
+### TestRail Integration
+This Cypress project integrates with our TestRail project.
+TestRail is a software to manage test cases keep track on their statuses.
+
+You could, in theory, configure your own TestRail credentials (cypress.env.json), but unfortunately the mapped test cases
+will not match your IDs, so it will probably not work. This is only for our QA team at the moment.

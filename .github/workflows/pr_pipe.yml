@@ -164,37 +164,8 @@ jobs:
 
   # ------------------------------------------------------------------------------------------------------------------------
 
-  integration:
-    name: Integration Tests | Shopware ${{ matrix.shopware }}
-    needs: phpcsfixer
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shopware: [ '5.7.0', '5.6.10', '5.6.9', '5.3.0' ]
-    steps:
-
-      - name: Clone Code
-        uses: actions/checkout@v2
-
-      - name: Start Docker
-        run: |
-          docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
-          sleep 30
-          docker logs shop
-
-      - name: Upload into Docker
-        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
-
-      - name: Install Plugin
-        run: |
-          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
-          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
-          docker exec shop bash -c 'php bin/console sw:cache:clear'
-
   snippets:
     name: Validate Snippet Files
-    needs: integration
     runs-on: ubuntu-latest
     steps:
 
@@ -219,3 +190,99 @@ jobs:
       - name: Validate Snippets
         run: |
           docker exec shop bash -c 'cd /var/www/html/custom/plugins/MollieShopware && make snippetcheck -B'
+  
+
+  integration:
+    name: Integration Tests | Shopware ${{ matrix.shopware }}
+    runs-on: ubuntu-latest
+    needs: snippets
+    strategy:
+      fail-fast: false
+      matrix:
+        shopware: [ '5.7.0', '5.6.10', '5.6.9', '5.3.0' ]
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+
+  e2e:
+    name: E2E Core Tests | Shopware ${{ matrix.shopware }}, PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    needs: integration
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shopware: '5.7.15'
+            php: '8.1'
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
+          # now change the domain of our shop, mollie doesn't work with localhost
+          sudo echo "127.0.0.1 local.mollie.shop" | sudo tee -a /etc/hosts
+          docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = 'local.mollie.shop', hosts = '';\""
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+          docker exec shop bash -c 'php bin/console mollie:payments:import'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+      - name: Install Cypress
+        run: cd Tests/Cypress && make install -B
+
+      - name: Start Cypress
+        run: cd Tests/Cypress && make run shopware=$SW_VERSION url=http://local.mollie.shop filters='@core'
+        env:
+          SW_VERSION: ${{ matrix.shopware }}
+
+      - name: Download Logs
+        if: ${{ always() }}
+        run: |
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/shopware
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/apache
+          docker cp shop:/var/www/html/var/log/. $(pwd)/Tests/Cypress/cypress/logs/shopware
+          docker cp shop:/var/log/php/. $(pwd)/Tests/Cypress/cypress/logs/apache
+
+      - name: Store Cypress Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress_results_sw_v${{ matrix.shopware }}
+          retention-days: 1
+          path: |
+            Tests/Cypress/cypress/logs
+            Tests/Cypress/cypress/videos
+            Tests/Cypress/cypress/screenshots
+
