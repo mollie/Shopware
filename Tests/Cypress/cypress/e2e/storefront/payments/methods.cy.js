@@ -21,7 +21,7 @@ describe('Payment Methods', () => {
         session.resetSession();
     });
 
-    it('Mollie Payment Methods are available', () => {
+    it('C4157: Payment Methods show Test-Mode if active', () => {
 
         scenarioDummyBasket.execute();
 
