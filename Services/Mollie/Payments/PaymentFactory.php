@@ -63,9 +63,6 @@ class PaymentFactory
             case PaymentMethod::CREDITCARD:
                 return new CreditCard();
 
-            case PaymentMethod::DIRECTDEBIT:
-                return new SepaDirectDebit();
-
             case PaymentMethod::GIFTCARD:
                 return new Giftcard();
 

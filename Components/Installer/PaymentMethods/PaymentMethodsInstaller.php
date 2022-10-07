@@ -115,7 +115,6 @@ class PaymentMethodsInstaller
             PaymentMethod::PAYPAL,
             PaymentMethod::PAYSAFECARD,
             PaymentMethod::P24,
-            PaymentMethod::DIRECTDEBIT,
             PaymentMethod::SOFORT,
             PaymentMethod::VOUCHERS,
             PaymentMethod::IN3,
