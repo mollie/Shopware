@@ -2,10 +2,9 @@
 
 namespace MollieShopware\Components\ApplePayDirect\Services;
 
-use Enlight_Components_Snippet_Namespace;
-use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
 use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayCart;
 use MollieShopware\Components\ApplePayDirect\Models\Cart\ApplePayLineItem;
+use MollieShopware\Components\Snippets\SnippetAdapterInterface;
 use Shopware\Models\Shop\Shop;
 
 class ApplePayFormatter
@@ -13,24 +12,17 @@ class ApplePayFormatter
     const TEST_SUFFIX = "(Test Mode)";
 
     /**
-     * this is the default snippet namespace for our
-     * mollie apple pay direct translation.
-     */
-    const SNIPPET_NS = 'frontend/MollieShopware/ApplePayDirect';
-
-    /**
-     * @var Enlight_Components_Snippet_Namespace
+     * @var SnippetAdapterInterface
      */
     private $snippets;
 
 
     /**
-     * ApplePayFormatter constructor.
-     * @param $snippets
+     * @param SnippetAdapterInterface $snippets
      */
-    public function __construct($snippets)
+    public function __construct(SnippetAdapterInterface $snippets)
     {
-        $this->snippets = $snippets->getNamespace(self::SNIPPET_NS);
+        $this->snippets = $snippets;
     }
 
     /**
@@ -40,10 +32,12 @@ class ApplePayFormatter
      */
     public function formatShippingMethod(array $method, $shippingCosts)
     {
+        $shippingDescription = (string)$method['description'];
+
         return [
             'identifier' => $method['id'],
             'label' => $method['name'],
-            'detail' => $method['description'],
+            'detail' => (!$this->isHTML($shippingDescription)) ? $shippingDescription : '',
             'amount' => $shippingCosts,
         ];
     }
@@ -131,5 +125,18 @@ class ApplePayFormatter
         $countDecimals = strlen(substr(strrchr($value, "."), 1));
 
         return round($value, $countDecimals);
+    }
+
+    /**
+     * @param string $string
+     * @return bool
+     */
+    private function isHTML($string)
+    {
+        if ($string != strip_tags($string)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
