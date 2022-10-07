@@ -15,13 +15,19 @@ Ext.define('Shopware.apps.Mollie.controller.List', {
     },
 
     selectors: {
-        'buttonConfirmRefund': '#mollieRefundForm #buttonConfirmRefund',
+        buttonConfirmRefund: '#mollieRefundForm #buttonConfirmRefund',
     },
 
-    refs: [
-        { ref: 'refundForm', selector: '#mollieRefundForm' },
-        { ref: 'fieldRefundAmount', selector: '#mollieRefundForm #fieldRefundAmount' },
-    ],
+    constructor: function() {
+        var me = this;
+
+        me.refs = (me.refs || []).concat([
+            { ref: 'refundForm', selector: '#mollieRefundForm' },
+            { ref: 'fieldRefundAmount', selector: '#mollieRefundForm #fieldRefundAmount' },
+        ]);
+
+        me.callParent(arguments);
+    },
 
     init: function() {
         var me = this;
