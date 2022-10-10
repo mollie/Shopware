@@ -36,7 +36,7 @@ context("Bank Transfer Flow: Normal", () => {
         session.resetSession();
     });
 
-    it('Bank Transfer Flow via Mollie Page', () => {
+    it('C26153: Standard Bank Transfer Flow via Mollie Page', () => {
 
         scenarioDummyBasket.execute();
         checkout.switchPaymentMethod(paymentName);
@@ -65,7 +65,7 @@ context("Bank Transfer Flow: Easy", () => {
         session.resetSession();
     })
 
-    it('Bank Transfer Flow via Shopware Page', () => {
+    it('C4241: Simple Bank Transfer Flow via Shopware Page', () => {
 
         scenarioDummyBasket.execute();
         checkout.switchPaymentMethod(paymentName);
