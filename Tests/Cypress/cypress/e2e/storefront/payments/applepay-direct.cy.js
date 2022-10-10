@@ -35,7 +35,7 @@ const device = devices.getFirstDevice();
 
 describe('Apple Pay Direct - Functional', () => {
 
-    it('Domain Verification file has been downloaded', () => {
+    it('C26156: Domain Verification file has been downloaded', () => {
         cy.request('/.well-known/apple-developer-merchantid-domain-association');
     })
 })
@@ -59,7 +59,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
     describe('PDP', () => {
 
-        it('Apple Pay Direct available (PDP)', () => {
+        it('C26157: Apple Pay Direct visible (PDP)', () => {
 
             applePayFactory.registerApplePay(true);
 
@@ -68,7 +68,7 @@ describe('Apple Pay Direct - UI Tests', () => {
             repoPDP.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
         })
 
-        it('Apple Pay Direct not available (PDP)', () => {
+        it('C26158: Apple Pay Direct hidden (PDP)', () => {
 
             applePayFactory.registerApplePay(false);
 
@@ -80,7 +80,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
     describe('Off Canvas Cart', () => {
 
-        it('Apple Pay Direct available (Off-Canvas)', () => {
+        it('C26159: Apple Pay Direct visible (Off-Canvas)', () => {
 
             applePayFactory.registerApplePay(true);
 
@@ -90,7 +90,7 @@ describe('Apple Pay Direct - UI Tests', () => {
             repoOffCanvas.getApplePayDirectContainer().should('not.have.css', 'display', 'none');
         })
 
-        it('Apple Pay Direct not available (Off-Canvas)', () => {
+        it('C26160: Apple Pay Direct hidden (Off-Canvas)', () => {
 
             applePayFactory.registerApplePay(false);
 
@@ -103,7 +103,7 @@ describe('Apple Pay Direct - UI Tests', () => {
 
     describe('Cart', () => {
 
-        it('Apple Pay Direct available (Cart)', () => {
+        it('C26161: Apple Pay Direct visible (Cart)', () => {
 
             applePayFactory.registerApplePay(true);
 
@@ -117,7 +117,7 @@ describe('Apple Pay Direct - UI Tests', () => {
             repoBasket.getApplePayDirectContainerBottom().should('not.have.css', 'display', 'none');
         })
 
-        it('Apple Pay Direct not available (Cart)', () => {
+        it('C26162: Apple Pay Direct hidden (Cart)', () => {
 
             applePayFactory.registerApplePay(false);
 

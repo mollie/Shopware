@@ -35,7 +35,7 @@ context("Apple Pay", () => {
 
     context("Account", () => {
 
-        it('Apple Pay hidden if not available in browser (Account)', () => {
+        it('C4214: Apple Pay hidden if not available in browser (Account)', () => {
 
             applePayFactory.registerApplePay(false);
 
@@ -48,7 +48,7 @@ context("Apple Pay", () => {
         // Apple Pay is no persistent selection of a payment method, because it depends on the browser.
         // This means a pre-selection doesnt make any sense,
         // and that's the reason why it should also be removed if it would be available.
-        it('Apple Pay hidden if available in browser (Account)', () => {
+        it('C4215: Apple Pay hidden if available in browser (Account)', () => {
 
             applePayFactory.registerApplePay(false);
 
@@ -62,7 +62,7 @@ context("Apple Pay", () => {
 
     context("Checkout", () => {
 
-        it('Apple Pay hidden if not available in browser (Checkout)', () => {
+        it('C26154: Apple Pay hidden if not available in browser (Checkout)', () => {
 
             applePayFactory.registerApplePay(false);
 
@@ -72,7 +72,7 @@ context("Apple Pay", () => {
             cy.contains('Apple Pay').should('not.be.visible');
         })
 
-        it('Apple Pay visible if available in browser (Checkout)', () => {
+        it('C26155: Apple Pay visible if available in browser (Checkout)', () => {
 
             applePayFactory.registerApplePay(true);
 
