@@ -1,10 +1,9 @@
-import Devices from "Services/Devices";
-import Session from "Actions/utils/Session"
+import Devices from 'Services/Devices';
+import Session from 'Actions/utils/Session'
 // ------------------------------------------------------
-import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
 import CheckoutAction from 'Actions/storefront/checkout/CheckoutAction';
 import PaymentScreenAction from 'Actions/mollie/PaymentScreenAction';
-import DummyBasketScenario from "Scenarios/DummyBasketScenario";
+import DummyBasketScenario from 'Scenarios/DummyBasketScenario';
 
 
 const devices = new Devices();
@@ -17,17 +16,17 @@ const scenarioDummyBasket = new DummyBasketScenario(1, 'Max', 'Mustermann');
 
 
 const device = devices.getFirstDevice();
-const paymentMethod = "PayPal";
+const paymentMethod = 'PayPal';
 
 
-context("Lost Sessions", () => {
+context('Lost Sessions', () => {
 
     beforeEach(() => {
         devices.setDevice(device);
         session.resetSession();
     });
 
-    it('Pay with ' + paymentMethod, () => {
+    it('C4186: Paid Checkout with new browser session', () => {
 
         scenarioDummyBasket.execute();
 
@@ -51,7 +50,7 @@ context("Lost Sessions", () => {
         cy.get('.billing--panel').contains('Max Mustermann');
     })
 
-    it('Error with ' + paymentMethod, () => {
+    it('C4187: Failed Checkout with new browser session', () => {
 
         scenarioDummyBasket.execute();
 
