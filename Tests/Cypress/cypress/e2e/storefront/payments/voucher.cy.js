@@ -33,7 +33,7 @@ context("Voucher", () => {
             scenarioUser.execute();
             accountAction.openPaymentMethods();
 
-            cy.contains('Voucher').should('not.exist');
+            cy.get('Voucher').should('not.exist');
         })
 
     });
