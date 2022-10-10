@@ -29,28 +29,84 @@ const scenarioDummyBasket = new DummyBasketScenario(5, 'Max', 'Mustermann');
 const device = devices.getFirstDevice();
 
 const configs = [
-    {name: "Payments API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: true},
-    {name: "Payments API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: true},
+    {name: 'Payments API + Order Before Payment', createOrderBeforePayment: true, paymentsAPI: true},
+    {name: 'Payments API + Order After Payment', createOrderBeforePayment: false, paymentsAPI: true},
     // ------------------------------------------------------------------------------------------------------------------------------
-    {name: "Orders API + Order Before Payment", createOrderBeforePayment: true, paymentsAPI: false},
-    {name: "Orders API + Order After Payment", createOrderBeforePayment: false, paymentsAPI: false},
+    {name: 'Orders API + Order Before Payment', createOrderBeforePayment: true, paymentsAPI: false},
+    {name: 'Orders API + Order After Payment', createOrderBeforePayment: false, paymentsAPI: false},
 ];
 
 const payments = [
-    {caseId: 'C4242', key: 'paypal', name: 'PayPal'},
-    {caseId: 'C4245', key: 'klarnapaynow', name: 'Pay now'},
-    {caseId: 'C4243', key: 'klarnapaylater', name: 'Pay later'},
-    {caseId: 'C4247', key: 'klarnasliceit', name: 'Slice it'},
-    {caseId: 'C4235', key: 'ideal', name: 'iDEAL'},
-    {caseId: 'C4248', key: 'sofort', name: 'SOFORT'},
-    {caseId: 'C4250', key: 'eps', name: 'eps'},
-    {caseId: 'C4252', key: 'giropay', name: 'giropay'},
-    {caseId: 'C4249', key: 'mistercash', name: 'Bancontact'},
-    {caseId: 'C4254', key: 'przelewy24', name: 'Przelewy24'},
-    {caseId: 'C4255', key: 'kbc', name: 'KBC'},
-    {caseId: 'C4256', key: 'belfius', name: 'Belfius'},
-    {caseId: 'C4238', key: 'banktransfer', name: 'Bank transfer'},
-    {caseId: 'C4251', key: 'giftcard', name: 'Gift cards'},
+    {caseId: 'C4242', key: 'paypal', name: 'PayPal', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24784', key: 'paypal', name: 'PayPal', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24783', key: 'paypal', name: 'PayPal', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24785', key: 'paypal', name: 'PayPal', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C24786', key: 'klarnapaylater', name: 'Pay later', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24787', key: 'klarnapaylater', name: 'Pay later', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C4243', key: 'klarnapaylater', name: 'Pay later', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24789', key: 'klarnapaylater', name: 'Pay later', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C24794', key: 'klarnapaynow', name: 'Pay now', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24795', key: 'klarnapaynow', name: 'Pay now', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C4245', key: 'klarnapaynow', name: 'Pay now', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24790', key: 'klarnapaynow', name: 'Pay now', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4247', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24791', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: false, createOrderBeforePayment: false},
+    {caseId: 'C24793', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24792', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: true, createOrderBeforePayment: false},
+
+    {caseId: 'C4248', key: 'sofort', name: 'SOFORT', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24796', key: 'sofort', name: 'SOFORT', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24788', key: 'sofort', name: 'SOFORT', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24797', key: 'sofort', name: 'SOFORT', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4249', key: 'mistercash', name: 'Bancontact', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24798', key: 'mistercash', name: 'Bancontact', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24799', key: 'mistercash', name: 'Bancontact', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24800', key: 'mistercash', name: 'Bancontact', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4250', key: 'eps', name: 'eps', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24801', key: 'eps', name: 'eps', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24802', key: 'eps', name: 'eps', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24803', key: 'eps', name: 'eps', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4252', key: 'giropay', name: 'giropay', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24804', key: 'giropay', name: 'giropay', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24805', key: 'giropay', name: 'giropay', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24806', key: 'giropay', name: 'giropay', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4235', key: 'ideal', name: 'iDEAL', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24807', key: 'ideal', name: 'iDEAL', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24808', key: 'ideal', name: 'iDEAL', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24809', key: 'ideal', name: 'iDEAL', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4254', key: 'przelewy24', name: 'Przelewy24', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24810', key: 'przelewy24', name: 'Przelewy24', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24811', key: 'przelewy24', name: 'Przelewy24', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24812', key: 'przelewy24', name: 'Przelewy24', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4255', key: 'kbc', name: 'KBC', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24813', key: 'kbc', name: 'KBC', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24814', key: 'kbc', name: 'KBC', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24815', key: 'kbc', name: 'KBC', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4256', key: 'belfius', name: 'Belfius', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24816', key: 'belfius', name: 'Belfius', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24817', key: 'belfius', name: 'Belfius', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24818', key: 'belfius', name: 'Belfius', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4251', key: 'giftcard', name: 'Gift cards', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24819', key: 'giftcard', name: 'Gift cards', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24820', key: 'giftcard', name: 'Gift cards', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24821', key: 'giftcard', name: 'Gift cards', paymentsAPI: false, createOrderBeforePayment: false},
+
+    {caseId: 'C4238', key: 'banktransfer', name: 'Bank transfer', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C24822', key: 'banktransfer', name: 'Bank transfer', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C24823', key: 'banktransfer', name: 'Bank transfer', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C24824', key: 'banktransfer', name: 'Bank transfer', paymentsAPI: false, createOrderBeforePayment: false},
+
     // now working without preparing articles: {key: 'voucher', name: 'Voucher'},
     // now working with our account: {key: 'paysafecard', name: 'Paysafecard'},
 ];
@@ -88,6 +144,16 @@ configs.forEach(config => {
         describe('Successful Checkout', () => {
 
             payments.forEach(payment => {
+
+                // only allow the correct CASE IDs to be executed
+                // for our current configuration setup.
+                if (payment.createOrderBeforePayment !== config.createOrderBeforePayment) {
+                    return;
+                }
+
+                if (payment.paymentsAPI !== config.paymentsAPI) {
+                    return;
+                }
 
                 it(payment.caseId + ': Pay with ' + payment.name, () => {
 
