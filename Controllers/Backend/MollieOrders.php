@@ -324,9 +324,12 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
                 $this->returnError('Order not found');
             }
 
+            $isFullRefund = $order->getInvoiceAmount() === $customAmount;
+
             $logger->info(
                 sprintf(
-                    'Starting full refund by %s in Backend for Order: %s',
+                    'Starting %s refund by %s in Backend for Order: %s',
+                    $isFullRefund ? 'full' : 'partial',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
                 ),
@@ -339,7 +342,8 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
 
             $logger->info(
                 sprintf(
-                    'Full refund successful by %s in Backend for Order: %s',
+                    '%s refund successful by %s in Backend for Order: %s',
+                    $isFullRefund ? 'Full' : 'Partial',
                     $this->getLoggedInBackendUser(),
                     $order->getNumber()
                 ),
@@ -352,7 +356,10 @@ class Shopware_Controllers_Backend_MollieOrders extends Shopware_Controllers_Bac
             $this->returnSuccess('Order successfully refunded', $refund);
         } catch (\Exception $ex) {
             $logger->error(
-                'Error when executing a full refund order in Shopware Backend',
+                sprintf(
+                    'Error when executing a %s refund order in Shopware Backend',
+                    $isFullRefund ? 'full' : 'partial'
+                ),
                 [
                     'error' => $ex->getMessage(),
                     'username' => $this->getLoggedInBackendUser(),

@@ -179,7 +179,10 @@ class RefundService implements RefundInterface
         }
 
         if (!$molliePayment->canBePartiallyRefunded()) {
-            throw new RefundFailedException((string)$order->getNumber(), 'Payment cannot be partially refunded!');
+            throw new RefundFailedException(
+                (string)$order->getNumber(),
+                $amount === $order->getInvoiceAmount() ? 'Payment cannot be refunded!' : 'Payment cannot be partially refunded!'
+            );
         }
 
         if ($molliePayment->getAmountRemaining() < $amount) {
