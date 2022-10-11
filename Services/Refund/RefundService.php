@@ -71,11 +71,11 @@ class RefundService implements RefundInterface
     /**
      * @param Order $order
      * @param Transaction $transaction
-     * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @throws RefundFailedException
      * @return Refund
      */
     public function refundFullOrder(Order $order, Transaction $transaction)
@@ -115,10 +115,6 @@ class RefundService implements RefundInterface
         } else {
             $molliePayment = $gwMollie->getPayment($transaction->getMolliePaymentId());
 
-            if (!$molliePayment->canBeRefunded()) {
-                throw new RefundFailedException((string)$order->getNumber(), 'Payment cannot be refunded');
-            }
-
             $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $order->getInvoiceAmount());
         }
 
@@ -130,11 +126,11 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param Transaction $transaction
      * @param float $amount
-     * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
      * @throws \Mollie\Api\Exceptions\IncompatiblePlatform
+     * @throws RefundFailedException
      * @return Refund
      */
     public function refundPartialOrderAmount(Order $order, Transaction $transaction, $amount)
@@ -178,15 +174,15 @@ class RefundService implements RefundInterface
             throw new RefundFailedException((string)$order->getNumber(), 'Mollie Payment for this order has not been found');
         }
 
-        if (!$molliePayment->canBePartiallyRefunded()) {
+
+        # only show that specific error if we know, that it can already be refunded.
+        # if e.g. the money is not yet received from the bank, then this error doesnt make any sense.
+        # in that case we really trigger Mollie, because they show the correct error message.
+        if ($molliePayment->canBePartiallyRefunded() && $molliePayment->getAmountRemaining() < $amount) {
             throw new RefundFailedException(
                 (string)$order->getNumber(),
-                $amount === $order->getInvoiceAmount() ? 'Payment cannot be refunded!' : 'Payment cannot be partially refunded!'
+                'Provided refund amount not valid. Only ' . $molliePayment->getAmountRemaining() . ' is left for a refund in this payment.'
             );
-        }
-
-        if ($molliePayment->getAmountRemaining() < $amount) {
-            throw new RefundFailedException((string)$order->getNumber(), 'Provided refund amount not valid. Only ' . $molliePayment->getAmountRemaining() . ' is left for a refund in this payment.');
         }
 
         $refund = $this->sendMolliePaymentRefund($order, $molliePayment, $amount);
@@ -257,8 +253,8 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param MolliePayment $molliePayment
      * @param float $amountToRefund
-     * @throws RefundFailedException
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws RefundFailedException
      * @return \Mollie\Api\Resources\BaseResource
      */
     private function sendMolliePaymentRefund(Order $order, MolliePayment $molliePayment, $amountToRefund)
@@ -282,10 +278,10 @@ class RefundService implements RefundInterface
      * @param Order $order
      * @param MollieOrder $mollieOrder
      * @param MollieApiClient $mollie
-     * @throws RefundFailedException
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Mollie\Api\Exceptions\ApiException
+     * @throws RefundFailedException
      * @return Refund
      */
     private function sendMollieOrderRefund(Order $order, MollieOrder $mollieOrder, MollieApiClient $mollie)
@@ -316,8 +312,8 @@ class RefundService implements RefundInterface
     /**
      * @param Detail $detail
      * @param int $quantity
-     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      * @return void
      */
     private function updateRefundedItemsOnOrderDetail($detail, $quantity)

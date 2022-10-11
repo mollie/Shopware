@@ -37,8 +37,8 @@ class RefundOrderFacade
     /**
      * @param string $orderNumber
      * @param float $customAmount
-     * @throws OrderNotFoundException
      * @throws TransactionNotFoundException
+     * @throws OrderNotFoundException
      * @return Refund
      */
     public function refundOrder($orderNumber, $customAmount)
@@ -54,7 +54,16 @@ class RefundOrderFacade
         if (!$transaction instanceof Transaction) {
             throw new TransactionNotFoundException('Transaction for Order Number: ' . $orderNumber . ' not found!');
         }
-        
+
+        # if we have provided a custom amount
+        # and this amount is the same as the order amount, then we want to do a FULL refund.
+        # some payment methods have a check if partial refunds are allowed (SOFORT)....but this is NO partial refund
+        # and therefore we MUST NOT invoke a partial refund accidentally.
+        if (!empty($customAmount) && $order->getInvoiceAmount() === $customAmount) {
+            $customAmount = null;
+        }
+
+
         if (empty($customAmount)) {
             return $this->refundService->refundFullOrder($order, $transaction);
         } else {
