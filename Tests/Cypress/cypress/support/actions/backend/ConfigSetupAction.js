@@ -3,11 +3,13 @@ import TopMenuRepository from "Repositories/backend/TopMenuRepository";
 import PluginConfig from "Actions/backend/models/PluginConfig";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
 import PaymentMethodsRepository from "Repositories/backend/PaymentMethodsRepository";
+import CypressFilters from "cypress-filters";
 
 
 const repoLogin = new LoginRepository();
 const repoTopMenu = new TopMenuRepository();
 const repoPaymentMethods = new PaymentMethodsRepository();
+
 
 export default class ConfigSetupAction {
 
@@ -32,8 +34,11 @@ export default class ConfigSetupAction {
         this._loginToBackend();
 
         if (this.paymentsConfig != null) {
-            this.__configurePayments();
-            cy.reload();
+
+
+                this.__configurePayments();
+                cy.reload();
+
         }
 
         if (this.pluginConfig != null) {

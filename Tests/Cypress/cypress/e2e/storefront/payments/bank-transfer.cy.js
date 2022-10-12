@@ -6,6 +6,7 @@ import DummyBasketScenario from "Scenarios/DummyBasketScenario";
 import PaymentConfig from "Actions/backend/models/PaymentConfig";
 import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
 import PaymentScreenAction from "Actions/mollie/PaymentScreenAction";
+import CypressFilters from "cypress-filters";
 
 
 const devices = new Devices();
@@ -26,6 +27,13 @@ const paymentName = 'Bank transfer';
 context("Bank Transfer Flow: Normal", () => {
 
     before(function () {
+
+        // skip for @core tests
+        // because the payment methods do not exist in this case
+        if (new CypressFilters().hasFilter("@core")) {
+            return;
+        }
+
         devices.setDevice(device);
 
         const paymentConfig = new PaymentConfig();
@@ -55,6 +63,13 @@ context("Bank Transfer Flow: Normal", () => {
 context("Bank Transfer Flow: Easy", () => {
 
     before(function () {
+
+        // skip for @core tests
+        // because the payment methods do not exist in this case
+        if (new CypressFilters().hasFilter("@core")) {
+            return;
+        }
+
         devices.setDevice(device);
 
         const paymentConfig = new PaymentConfig();

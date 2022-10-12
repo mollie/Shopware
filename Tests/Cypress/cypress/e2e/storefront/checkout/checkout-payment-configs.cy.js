@@ -7,6 +7,7 @@ import ConfigSetupAction from "Actions/backend/ConfigSetupAction";
 import CheckoutAction from 'Actions/storefront/checkout/CheckoutAction';
 import PaymentScreenAction from 'Actions/mollie/PaymentScreenAction';
 import DummyBasketScenario from "Scenarios/DummyBasketScenario";
+import CypressFilters from "cypress-filters";
 
 
 const devices = new Devices();
@@ -34,6 +35,12 @@ configs.forEach(config => {
     context("Payment Config: " + config.name, () => {
 
         before(() => {
+
+            // skip for @core tests
+            // because the payment methods do not exist in this case
+            if (new CypressFilters().hasFilter("@core")) {
+                return;
+            }
 
             devices.setDevice(device);
 

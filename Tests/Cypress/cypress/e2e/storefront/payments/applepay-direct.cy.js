@@ -13,6 +13,7 @@ import OffCanvasRepository from "Repositories/storefront/checkout/OffCanvasRepos
 import CheckoutAction from "Actions/storefront/checkout/CheckoutAction";
 import DummyUserScenario from "Scenarios/DummyUserScenario";
 import BasketRepository from "Repositories/storefront/checkout/BasketRepository";
+import CypressFilters from "cypress-filters";
 
 const devices = new Devices();
 const shopware = new Shopware();
@@ -35,7 +36,7 @@ const device = devices.getFirstDevice();
 
 describe('Apple Pay Direct - Functional', () => {
 
-    it('C26156: Domain Verification file has been downloaded', () => {
+    it('C26156: Domain Verification file has been downloaded @core', () => {
         cy.request('/.well-known/apple-developer-merchantid-domain-association');
     })
 })
@@ -43,6 +44,12 @@ describe('Apple Pay Direct - Functional', () => {
 describe('Apple Pay Direct - UI Tests', () => {
 
     before(function () {
+
+        // skip for @core tests
+        // because the payment methods do not exist in this case
+        if (new CypressFilters().hasFilter("@core")) {
+            return;
+        }
 
         devices.setDevice(device);
 
