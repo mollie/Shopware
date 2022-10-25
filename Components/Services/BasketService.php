@@ -165,7 +165,10 @@ class BasketService
                 }
 
                 // recalculate order
-                $order->calculateInvoiceAmount();
+                if($this->config->resetInvoiceAndShipping()){
+                    $order->calculateInvoiceAmount();
+                }
+
 
                 /** @var Status $statusCanceled */
                 $statusCanceled = Shopware()->Container()->get('models')->getRepository(
@@ -370,8 +373,12 @@ class BasketService
         $orderDetail->setQuantity(0);
 
         try {
+            $classMetaData = $this->modelManager->getClassMetadata(get_class($orderDetail));
+            $events = $classMetaData->lifecycleCallbacks;
+            $classMetaData->setLifecycleCallbacks([]);
             $this->modelManager->persist($orderDetail);
             $this->modelManager->flush($orderDetail);
+            $classMetaData->setLifecycleCallbacks($events);
         } catch (Exception $e) {
             //
         }
