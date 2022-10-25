@@ -1,0 +1,57 @@
+name: 'Run Snippet Tests'
+description: "Runs Snippet validation tests"
+
+
+inputs:
+  # ------------------------------------------------------------------------------------
+  # ENVIRONMENT SETTINGS
+  SHOPWARE:
+    description: "The Shopware version that is used to run the Cypress tests."
+    required: true
+  PHP:
+    description: "The PHP Version that is used for the Shopware container."
+    required: true
+  # ------------------------------------------------------------------------------------
+  # ------------------------------------------------------------------------------------
+  # PRIVATE VARIABLES
+  _ZIP_FILE:
+    description: 'This is the defined filename of the ZIP file that we use for the installation of the plugin'
+    default: '~/.build/MollieShopware.zip'
+    required: false
+
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Download Docker
+      shell: bash
+      run: docker pull -q dockware/play:${{ inputs.SHOPWARE }}
+
+    - name: Start Docker
+      shell: bash
+      run: |
+        docker run -p 443:443 --name shop --env PHP_VERSION=${{ inputs.PHP }} -d dockware/play:${{ inputs.SHOPWARE }}
+        sleep 15
+
+    # --------------------------------------------------------------------------------------------------------------------------------------
+
+    - name: Upload ZIP File to Docker
+      shell: bash
+      run: |
+        docker cp ${{ inputs._ZIP_FILE }} shop:/var/www/html/custom/plugins/MollieShopware.zip
+        docker exec shop bash -c 'cd /var/www/html/custom/plugins && unzip -qq -o MollieShopware.zip'
+
+    - name: Install Plugin
+      shell: bash
+      run: |
+        docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+        docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+        docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+    # --------------------------------------------------------------------------------------------------------------------------------------
+
+    - name: Validate Snippets
+      shell: bash
+      run: |
+        docker exec shop bash -c 'cd /var/www/html/custom/plugins/MollieShopware && make snippetcheck -B'

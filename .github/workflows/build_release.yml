@@ -2,47 +2,30 @@ name: Build Release
 
 on:
   pull_request:
-    branches:
-      - master
   push:
-    branches:
-      - master
   workflow_dispatch:
-    branches:
-      - master
 
 jobs:
 
-  release:
-    name: Build Release
+  build:
+    name: Build Plugin
     runs-on: ubuntu-latest
     steps:
 
       - name: Clone Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Start Docker
+      - name: Create Cache Directories
         run: |
-          docker run --rm --name shop --env PHP_VERSION=7.4 -d dockware/dev:5.7.0
-          sleep 30
-          docker logs shop
+          mkdir -p ~/.build
 
-      - name: Upload into Docker
-        run: docker cp $(pwd)/. shop:/var/www/html/MollieShopware
-
-      - name: Create Release
-        run: |
-          docker exec shop bash -c 'cd /var/www/html/MollieShopware && sudo make release -B'
-          docker exec shop bash -c 'cd /var/www/html/.release && sudo unzip MollieShopware.zip'
-
-      - name: Download File
-        run: |
-          mkdir $(pwd)/release
-          docker cp shop:/var/www/html/.release/MollieShopware $(pwd)/release/MollieShopware
-
-      - name: Store File
-        uses: actions/upload-artifact@v2
+      - name: Mount Build Cache
+        uses: actions/cache@v3
         with:
-          name: MollieShopware
-          path: release
-          retention-days: 5
+          key: cache-plugin-${{ github.run_id }}
+          path: ~/.build
+
+      - name: Build Plugin
+        uses: ./.github/actions/build-plugin
+        with:
+          shopware: 5.7.15
