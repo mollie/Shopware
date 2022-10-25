@@ -30,6 +30,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Install Dependencies
         run: make dev -B
@@ -50,6 +51,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run Jest
         run: make jest -B
@@ -68,6 +70,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run ESLint
         run: make eslint -B
@@ -86,6 +89,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run Stylelint
         run: make stylelint -B
@@ -127,6 +131,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: PHP Checks
         run: make phpmin -B
@@ -152,6 +157,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run PHPUnit
         run: make phpunit -B
@@ -178,6 +184,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run PHPStan
         run: make stan -B
@@ -202,6 +209,7 @@ jobs:
           key: cache-dev-dependencies-${{ github.run_id }}
           path: |
             vendor
+            node_modules
 
       - name: Run PHP CS Fixer
         run: make csfix -B
