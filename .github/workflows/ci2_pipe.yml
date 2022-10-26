@@ -1,0 +1,325 @@
+name: CI Pipeline (old)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    branches:
+      - master
+
+jobs:
+
+  jest:
+    name: Jest Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run Jest
+        run: make jest -B
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    needs: jest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run ESLint
+        run: make eslint -B
+
+  stylelint:
+    name: Stylelint
+    runs-on: ubuntu-latest
+    needs: eslint
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run Stylelint
+        run: make stylelint -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  php_checks:
+    name: PHP Syntax Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: PHP Syntax Checks
+        run: make phpcheck -B
+
+  php_min:
+    name: PHP 5.6 Compatibility
+    needs: php_checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: PHP Checks
+        run: make phpmin -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  unit_tests:
+    name: Unit Tests
+    needs: php_min
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run PHPUnit
+        run: make phpunit -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  phpstan:
+    name: PHPStan Analyser
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run PHPStan
+        run: make stan -B
+
+  phpcsfixer:
+    name: PHP CS Fixer
+    needs: phpstan
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Install Dependencies
+        run: make dev -B
+
+      - name: Run PHP CS Fixer
+        run: make csfix -B
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  integration_tests:
+    name: Integration Tests | Shopware ${{ matrix.shopware }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shopware: [ '5.7.0' ]
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+          docker exec shop bash -c 'php bin/console mollie:payments:import'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+  snippets:
+    name: Validate Snippet Files
+    needs: integration_tests
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop -d dockware/play:5.7.3
+          sleep 30
+          docker logs shop
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+      - name: Validate Snippets
+        run: |
+          docker exec shop bash -c 'cd /var/www/html/custom/plugins/MollieShopware && make snippetcheck -B'
+
+  # ------------------------------------------------------------------------------------------------------------------------
+
+  e2e:
+    name: E2E Tests | Shopware ${{ matrix.shopware }}, PHP ${{ matrix.php }}
+    needs: snippets
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shopware: '5.7.15'
+            php: '8.1'
+          - shopware: '5.7.14'
+            php: '8.1'
+          - shopware: '5.7.13'
+            php: '8.1'
+          - shopware: '5.7.11'
+            php: '8.1'
+          - shopware: '5.7.8'
+            php: '8.1'
+          - shopware: '5.7.7'
+            php: '8.1'
+          - shopware: '5.7.3'
+            php: '7.4'
+          - shopware: '5.6.10'
+            php: '7.4'
+          - shopware: '5.6.10'
+            php: '7.3'
+          - shopware: '5.6.9'
+            php: '7.2'
+          - shopware: '5.6.6'
+            php: '7.2'
+          - shopware: '5.6.4'
+            php: '7.2'
+          - shopware: '5.5.10'
+            php: '7.1'
+          - shopware: '5.3.0'
+            php: '7.0'
+          - shopware: '5.3.0'
+            php: '5.6'
+          - shopware: '5.2.21'
+            php: '5.6'
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v2
+
+      - name: Start Docker
+        run: |
+          docker run --rm -p 80:80 --name shop --env PHP_VERSION=${{ matrix.php }} -d dockware/play:${{ matrix.shopware }}
+          sleep 30
+          docker logs shop
+          # now change the domain of our shop, mollie doesn't work with localhost
+          sudo echo "127.0.0.1 local.mollie.shop" | sudo tee -a /etc/hosts
+          docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = 'local.mollie.shop', hosts = '';\""
+
+      - name: Upload into Docker
+        run: docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+
+      - name: Install Plugin
+        run: |
+          docker exec shop bash -c 'php bin/console sw:plugin:refresh'
+          docker exec shop bash -c 'php bin/console sw:plugin:install --activate MollieShopware'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test-api-key "${{ secrets.MOLLIE_APIKEY_TEST }}"'
+          docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+          docker exec shop bash -c 'php bin/console mollie:payments:import'
+          docker exec shop bash -c 'php bin/console sw:cache:clear'
+
+      - name: Install Cypress
+        run: cd Tests/Cypress && make install -B
+
+      - name: Start Cypress
+        run: cd Tests/Cypress && make run shopware=$SW_VERSION url=http://local.mollie.shop
+        env:
+          SW_VERSION: ${{ matrix.shopware }}
+
+      - name: Download Logs
+        if: ${{ always() }}
+        run: |
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/shopware
+          mkdir -p $(pwd)/Tests/Cypress/cypress/logs/apache
+          docker cp shop:/var/www/html/var/log/. $(pwd)/Tests/Cypress/cypress/logs/shopware
+          docker cp shop:/var/log/php/. $(pwd)/Tests/Cypress/cypress/logs/apache
+
+      - name: Store Cypress Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: cypress_results_sw_v${{ matrix.shopware }}
+          retention-days: 1
+          path: |
+            Tests/Cypress/cypress/logs
+            Tests/Cypress/cypress/videos
+            Tests/Cypress/cypress/screenshots
+
