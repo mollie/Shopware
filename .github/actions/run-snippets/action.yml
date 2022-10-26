@@ -11,13 +11,6 @@ inputs:
   PHP:
     description: "The PHP Version that is used for the Shopware container."
     required: true
-  # ------------------------------------------------------------------------------------
-  # ------------------------------------------------------------------------------------
-  # PRIVATE VARIABLES
-  _ZIP_FILE:
-    description: 'This is the defined filename of the ZIP file that we use for the installation of the plugin'
-    default: '~/.build/MollieShopware.zip'
-    required: false
 
 
 runs:
@@ -36,11 +29,11 @@ runs:
 
     # --------------------------------------------------------------------------------------------------------------------------------------
 
-    - name: Upload ZIP File to Docker
+    - name: Upload into Docker
       shell: bash
       run: |
-        docker cp ${{ inputs._ZIP_FILE }} shop:/var/www/html/custom/plugins/MollieShopware.zip
-        docker exec shop bash -c 'cd /var/www/html/custom/plugins && unzip -qq -o MollieShopware.zip'
+        docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
+        docker exec shop bash -c 'sudo chown www-data:www-data /var/www/html/custom/plugins -R'
 
     - name: Install Plugin
       shell: bash

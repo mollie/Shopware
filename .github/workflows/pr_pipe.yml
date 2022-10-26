@@ -217,6 +217,29 @@ jobs:
       - name: Run PHP CS Fixer
         run: make csfix -B
 
+  snippets:
+    name: Validate Snippet Files
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Clone Code
+        uses: actions/checkout@v3
+
+      - name: Mount Dev Dependency Cache
+        uses: actions/cache@v3
+        with:
+          key: cache-dev-dependencies-${{ github.run_id }}
+          path: |
+            vendor
+            node_modules
+
+      - name: Snippet Tests
+        uses: ./.github/actions/run-snippets
+        with:
+          SHOPWARE: 5.7.15
+          PHP: 7.4
+          
   # ------------------------------------------------------------------------------------------------------------------------
 
   build:
@@ -241,27 +264,6 @@ jobs:
         uses: ./.github/actions/build-plugin
         with:
           shopware: 5.7.15
-
-  snippets:
-    name: Validate Snippet Files
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Clone Code
-        uses: actions/checkout@v3
-
-      - name: Mount Build Cache
-        uses: actions/cache@v3
-        with:
-          key: cache-plugin-${{ github.run_id }}
-          path: ~/.build
-
-      - name: Snippet Tests
-        uses: ./.github/actions/run-snippets
-        with:
-          SHOPWARE: 5.7.15
-          PHP: 7.4
 
   install_tests:
     name: Install | Shopware ${{ matrix.shopware }}

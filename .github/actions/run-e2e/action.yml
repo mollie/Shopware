@@ -102,7 +102,7 @@ runs:
         docker exec shop bash -c 'php bin/console sw:plugin:config:set MollieShopware test_mode_active "yes"'
         docker exec shop bash -c 'php bin/console sw:cache:clear'
         docker exec shop bash -c 'php bin/console mollie:payments:import'
-        docker exec shop bash -c 'php bin/console cache:clear'
+        docker exec shop bash -c 'php bin/console sw:cache:clear'
 
     # --------------------------------------------------------------------------------------------------------------------------------------
 
