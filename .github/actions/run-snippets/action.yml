@@ -34,6 +34,8 @@ runs:
       run: |
         docker cp $(pwd)/. shop:/var/www/html/custom/plugins/MollieShopware
         docker exec shop bash -c 'sudo chown www-data:www-data /var/www/html/custom/plugins -R'
+        docker exec shop bash -c 'ls -la /var/www/html/custom/plugins'
+        docker exec shop bash -c 'ls -la /var/www/html/custom/plugins/MollieShopware'
 
     - name: Install Plugin
       shell: bash
