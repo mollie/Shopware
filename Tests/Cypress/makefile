@@ -37,4 +37,4 @@ ifndef shopware
 	$(warning Please provide the Shopware Version as argument to Start Cypress!)
 	@exit 1
 endif
-	CYPRESS_BASE_URL=$(url) CYPRESS_SHOPWARE=$(shopware) ./node_modules/.bin/cypress run --env conf=dev --headless --env filters="$(filters)"
+	CYPRESS_BASE_URL=$(url) CYPRESS_SHOPWARE=$(shopware) ./node_modules/.bin/cypress run --headless --env filters="$(filters)"

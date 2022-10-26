@@ -14,16 +14,8 @@
 
 
 // promisified fs module
-const fs = require('fs-extra')
-const path = require('path')
 const webpack = require('@cypress/webpack-preprocessor')
 const TestRailReporter = require('cypress-testrail');
-
-
-function getConfigurationByFile(file) {
-    const pathToConfigFile = path.resolve('cypress', 'config', `${file}.json`)
-    return fs.readJson(pathToConfigFile)
-}
 
 
 module.exports = (on, config) => {
@@ -43,6 +35,5 @@ module.exports = (on, config) => {
         }
     })
 
-    // accept a configFile value or use development by default
-    return getConfigurationByFile(config.env.conf || 'dev')
+    return config;
 }
