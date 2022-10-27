@@ -271,7 +271,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shopware: [ '5.7.0', '5.6.10', '5.6.9', '5.3.0' ]
+        include:
+          - shopware: '5.7.0'
+            php: '8.0'
+          - shopware: '5.6.10'
+            php: '7.4'
+          - shopware: '5.6.9'
+            php: '7.4'
+          - shopware: '5.3.0'
+            php: '7.0'
+          - shopware: '5.2.21'
+            php: '7.0'
     steps:
 
       - name: Clone Code
@@ -288,7 +298,7 @@ jobs:
         with:
           # -------------------------------------------
           SHOPWARE: ${{ matrix.shopware }}
-          PHP: 7.4
+          PHP: ${{ matrix.php }}
           # -------------------------------------------
           MOLLIE_APIKEY_TEST: ""
           # -------------------------------------------
