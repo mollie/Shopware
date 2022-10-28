@@ -138,7 +138,7 @@ runs:
         CYPRESS_TESTRAIL_MILESTONE_ID=29 \
         CYPRESS_TESTRAIL_RUN_NAME="Github Workflow __datetime__, ${{ github.event.head_commit.message }}, Shopware ${{ inputs.SHOPWARE }}" \
         CYPRESS_TESTRAIL_RUN_CLOSE=true \
-        make run shopware=${{ inputs.SHOPWARE }} url=https://${{ inputs._SHOP_DOMAIN }} 
+        make run shopware=${{ inputs.SHOPWARE }} url=http://${{ inputs._SHOP_DOMAIN }} 
 
     # --------------------------------------------------------------------------------------------------------------------------------------
 
