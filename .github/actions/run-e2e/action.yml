@@ -72,7 +72,7 @@ runs:
     - name: Start Docker
       shell: bash
       run: |
-        docker run -p 443:443 --name shop --env PHP_VERSION=${{ inputs.PHP }} -d dockware/play:${{ inputs.SHOPWARE }}
+        docker run -p 80:80 --name shop --env PHP_VERSION=${{ inputs.PHP }} -d dockware/play:${{ inputs.SHOPWARE }}
         sleep 30
         # now change the domain of our shop, mollie doesn't work with localhost
         sudo echo "127.0.0.1 ${{ inputs._SHOP_DOMAIN }}" | sudo tee -a /etc/hosts
