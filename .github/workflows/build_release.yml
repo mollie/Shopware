@@ -28,4 +28,4 @@ jobs:
       - name: Build Plugin
         uses: ./.github/actions/build-plugin
         with:
-          shopware: 5.7.15
+          shopware: 5.7.16
