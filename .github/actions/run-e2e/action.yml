@@ -72,11 +72,11 @@ runs:
     - name: Start Docker
       shell: bash
       run: |
-        docker run -p 443:443 --name shop --env PHP_VERSION=${{ inputs.PHP }} -d dockware/play:${{ inputs.SHOPWARE }}
+        docker run -p 80:80 --name shop --env PHP_VERSION=${{ inputs.PHP }} -d dockware/play:${{ inputs.SHOPWARE }}
         sleep 30
         # now change the domain of our shop, mollie doesn't work with localhost
         sudo echo "127.0.0.1 ${{ inputs._SHOP_DOMAIN }}" | sudo tee -a /etc/hosts
-        docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = '${{ inputs._SHOP_DOMAIN }}', hosts = '', secure = 1;\""
+        docker exec shop bash -c "mysql -u root -proot shopware -e \"UPDATE s_core_shops SET host = '${{ inputs._SHOP_DOMAIN }}', hosts = '', secure = 0;\""
 
     # --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -124,7 +124,7 @@ runs:
       shell: bash
       run: |
         cd Tests/Cypress && \
-        make run shopware=${{ inputs.SHOPWARE }} url=https://${{ inputs._SHOP_DOMAIN }} filters="${{ inputs.FILTERS }}"
+        make run shopware=${{ inputs.SHOPWARE }} url=http://${{ inputs._SHOP_DOMAIN }} filters="${{ inputs.FILTERS }}"
 
     - name: Start Cypress with TestRail
       if: ${{ inputs.RUN_CYPRESS == 'true' && inputs.TESTRAIL == 'true' }}
@@ -138,7 +138,7 @@ runs:
         CYPRESS_TESTRAIL_MILESTONE_ID=29 \
         CYPRESS_TESTRAIL_RUN_NAME="Github Workflow __datetime__, ${{ github.event.head_commit.message }}, Shopware ${{ inputs.SHOPWARE }}" \
         CYPRESS_TESTRAIL_RUN_CLOSE=true \
-        make run shopware=${{ inputs.SHOPWARE }} url=https://${{ inputs._SHOP_DOMAIN }} 
+        make run shopware=${{ inputs.SHOPWARE }} url=http://${{ inputs._SHOP_DOMAIN }} 
 
     # --------------------------------------------------------------------------------------------------------------------------------------
 
