@@ -165,7 +165,7 @@ class BasketService
                 }
 
                 // recalculate order
-                if($this->config->resetInvoiceAndShipping()){
+                if ($this->config->resetInvoiceAndShipping()) {
                     $order->calculateInvoiceAmount();
                 }
 
