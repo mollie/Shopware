@@ -165,7 +165,9 @@ class BasketService
                 }
 
                 // recalculate order
-                $order->calculateInvoiceAmount();
+                /** @var CalculationServiceInterface $service */
+                $service = Shopware()->Container()->get(CalculationServiceInterface::class);
+                $service->recalculateOrderTotals($order);
 
                 /** @var Status $statusCanceled */
                 $statusCanceled = Shopware()->Container()->get('models')->getRepository(
