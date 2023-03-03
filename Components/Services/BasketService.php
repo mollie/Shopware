@@ -7,7 +7,10 @@ use Exception;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Logger;
 use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
+use MollieShopware\Services\VersionCompare\VersionCompare;
 use Psr\Log\LoggerInterface;
+use Shopware\Bundle\OrderBundle\Service\CalculationService;
+use Shopware\Bundle\OrderBundle\Service\CalculationServiceInterface;
 use Shopware\Components\DependencyInjection\Container as DIContainer;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Basket;
@@ -45,6 +48,11 @@ class BasketService
      */
     private $logger;
 
+    /**
+     * @var string
+     */
+    private $shopwareVersion;
+
     /** @var DIContainer */
     private $container;
 
@@ -66,6 +74,8 @@ class BasketService
         $this->orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
         $this->db = Shopware()->Container()->get('db');
+
+        $this->shopwareVersion = (string)$container->getParameter('shopware.release.version');
 
         $this->container = $container;
     }
@@ -164,8 +174,18 @@ class BasketService
                     $order = $this->appendInternalComment($order, $commentText);
                 }
 
+
+                $versionCompare = new VersionCompare($this->shopwareVersion);
+
                 // recalculate order
-                $order->calculateInvoiceAmount();
+                if ($versionCompare->gte('5.7.17')) {
+                    /** @var CalculationServiceInterface $service */
+                    $service = Shopware()->Container()->get(CalculationServiceInterface::class);
+                    $service->recalculateOrderTotals($order);
+                } else {
+                    $order->calculateInvoiceAmount();
+                }
+
 
                 /** @var Status $statusCanceled */
                 $statusCanceled = Shopware()->Container()->get('models')->getRepository(
