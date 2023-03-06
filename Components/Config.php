@@ -3,6 +3,7 @@
 namespace MollieShopware\Components;
 
 use Exception;
+use MollieShopware\Components\Config\ConfigDataTypes;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Services\ShopService;
 use Shopware\Components\Logger;
@@ -38,6 +39,11 @@ class Config implements ConfigInterface
      */
     private $shopService;
 
+    /**
+     * @var ConfigDataTypes
+     */
+    private $dataTypes;
+
 
     /**
      * @param ConfigReader $configReader
@@ -47,6 +53,8 @@ class Config implements ConfigInterface
     {
         $this->configReader = $configReader;
         $this->shopService = $shopService;
+
+        $this->dataTypes = new ConfigDataTypes();
     }
 
     /**
@@ -243,7 +251,9 @@ class Config implements ConfigInterface
      */
     public function isPaymentStatusMailEnabled()
     {
-        return $this->get('send_status_mail', 'no') === 'yes';
+        $valueStr = $this->get('send_status_mail', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -253,7 +263,9 @@ class Config implements ConfigInterface
      */
     public function autoResetStock()
     {
-        return $this->get('auto_reset_stock', 'no') === 'yes';
+        $valueStr = $this->get('auto_reset_stock', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -332,7 +344,9 @@ class Config implements ConfigInterface
      */
     public function updateOrderStatus()
     {
-        return ($this->get('orders_api_update_order_status', 'no') === 'yes');
+        $valueStr = $this->get('orders_api_update_order_status', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -340,7 +354,9 @@ class Config implements ConfigInterface
      */
     public function cancelFailedOrders()
     {
-        return ($this->get('auto_cancel_failed_orders', 'yes') === 'yes');
+        $valueStr = $this->get('auto_cancel_failed_orders', 'yes');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -364,7 +380,9 @@ class Config implements ConfigInterface
      */
     public function useMolliePaymentMethodLimits()
     {
-        return ($this->get('use_mollie_payment_method_limits', 'no') === 'yes');
+        $valueStr = $this->get('use_mollie_payment_method_limits', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -372,7 +390,9 @@ class Config implements ConfigInterface
      */
     public function resetInvoiceAndShipping()
     {
-        return ($this->get('reset_invoice_shipping', 'no') === 'yes');
+        $valueStr = $this->get('reset_invoice_shipping', 'yes');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -380,7 +400,9 @@ class Config implements ConfigInterface
      */
     public function createOrderBeforePayment()
     {
-        return ($this->get('create_order_before_payment', 'yes') === 'yes');
+        $valueStr = $this->get('create_order_before_payment', 'yes');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -388,7 +410,9 @@ class Config implements ConfigInterface
      */
     public function enableCreditCardComponent()
     {
-        return (bool)$this->get('enable_credit_card_component', true);
+        $valueStr = $this->get('enable_credit_card_component', 'true');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -396,7 +420,9 @@ class Config implements ConfigInterface
      */
     public function enableCreditCardComponentStyling()
     {
-        return (bool)$this->get('enable_credit_card_component_styling', true);
+        $valueStr = $this->get('enable_credit_card_component_styling', 'true');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 
     /**
@@ -424,6 +450,8 @@ class Config implements ConfigInterface
      */
     public function showDetailedErrorMessages()
     {
-        return (bool)($this->get('show_error_details', 'no') === 'yes');
+        $valueStr = $this->get('show_error_details', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
     }
 }
