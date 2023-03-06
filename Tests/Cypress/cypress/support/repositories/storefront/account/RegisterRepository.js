@@ -50,6 +50,14 @@ class RegisterRepository {
 
     /**
      *
+     * @returns {Cypress.Chainable<JQuery<HTMLElement>>}
+     */
+    getCompany() {
+        return cy.get('#register_billing_company');
+    }
+
+    /**
+     *
      * @returns {*}
      */
     getStreet() {

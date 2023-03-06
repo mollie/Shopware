@@ -23,6 +23,7 @@ class AddressConverterTest extends TestCase
             'The',
             'Mollie',
             'dev@mollie.local',
+            'Mollie B.V.',
             'Mollie Street',
             '-',
             '12345',
@@ -41,7 +42,8 @@ class AddressConverterTest extends TestCase
             'streetAdditional' => '-',
             'postalCode' => '12345',
             'city' => 'Mollie Town',
-            'country' => 'NL'
+            'country' => 'NL',
+            'organizationName' => 'Mollie B.V.',
         ];
 
         $this->assertSame($expected, $data);

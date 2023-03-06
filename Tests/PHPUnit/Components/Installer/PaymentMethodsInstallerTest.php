@@ -32,6 +32,7 @@ class PaymentMethodsInstallerTest extends TestCase
         $expected = [
             PaymentMethod::APPLEPAY_DIRECT,
             PaymentMethod::APPLE_PAY,
+            PaymentMethod::BILLIE,
             PaymentMethod::BANCONTACT,
             PaymentMethod::BANKTRANSFER,
             PaymentMethod::BELFIUS,

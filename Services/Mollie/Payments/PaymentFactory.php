@@ -8,6 +8,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
 use MollieShopware\Services\Mollie\Payments\Requests\Bancontact;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\Belfius;
+use MollieShopware\Services\Mollie\Payments\Requests\Billie;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\EPS;
 use MollieShopware\Services\Mollie\Payments\Requests\Giftcard;
@@ -41,6 +42,9 @@ class PaymentFactory
             case PaymentMethod::APPLE_PAY:
             case PaymentMethod::APPLEPAY_DIRECT:
                 return new ApplePay();
+
+            case PaymentMethod::BILLIE:
+                return new Billie();
 
             case PaymentMethod::PAYPAL:
                 return new PayPal();

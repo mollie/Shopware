@@ -28,6 +28,11 @@ class PaymentAddress
     /**
      * @var string
      */
+    private $company;
+
+    /**
+     * @var string
+     */
     private $street;
 
     /**
@@ -55,18 +60,20 @@ class PaymentAddress
      * @param string $givenName
      * @param string $familyName
      * @param string $email
+     * @param string $company
      * @param string $street
      * @param string $streetAdditional
      * @param string $postalCode
      * @param string $city
      * @param string $countryIso2
      */
-    public function __construct($title, $givenName, $familyName, $email, $street, $streetAdditional, $postalCode, $city, $countryIso2)
+    public function __construct($title, $givenName, $familyName, $email, $company, $street, $streetAdditional, $postalCode, $city, $countryIso2)
     {
         $this->title = $title;
         $this->givenName = $givenName;
         $this->familyName = $familyName;
         $this->email = $email;
+        $this->company = $company;
         $this->street = $street;
         $this->streetAdditional = $streetAdditional;
         $this->postalCode = $postalCode;
@@ -104,6 +111,14 @@ class PaymentAddress
     public function getEmail()
     {
         return $this->email;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompany()
+    {
+        return $this->company;
     }
 
     /**

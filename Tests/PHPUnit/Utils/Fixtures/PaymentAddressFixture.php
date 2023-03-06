@@ -33,6 +33,7 @@ class PaymentAddressFixture
             'Max',
             'Mustermann',
             'dev@mollie.local',
+            'Mollie B.V.',
             'Mollie Street',
             'Addon',
             '1000',
