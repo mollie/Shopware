@@ -4,6 +4,7 @@ namespace MollieShopware\Components\Constants;
 
 class PaymentMethod
 {
+    const BILLIE = "billie";
     const BANCONTACT = "bancontact";
     const BANKTRANSFER = "banktransfer";
     const BELFIUS = "belfius";

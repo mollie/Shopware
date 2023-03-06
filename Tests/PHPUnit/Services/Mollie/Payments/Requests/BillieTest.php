@@ -2,22 +2,21 @@
 
 namespace MollieShopware\Tests\Services\Mollie\Payments\Requests;
 
-use MollieShopware\Models\Voucher\VoucherType;
 use MollieShopware\Services\Mollie\Payments\Exceptions\ApiNotSupportedException;
 use MollieShopware\Services\Mollie\Payments\Models\Payment;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
-use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
+use MollieShopware\Services\Mollie\Payments\Requests\Billie;
 use MollieShopware\Tests\Utils\Traits\PaymentTestTrait;
 use PHPUnit\Framework\TestCase;
 
-class VoucherTest extends TestCase
+class BillieTest extends TestCase
 {
     use PaymentTestTrait;
 
 
     /**
-     * @var Voucher
+     * @var Billie
      */
     private $payment;
 
@@ -41,7 +40,7 @@ class VoucherTest extends TestCase
      */
     public function setUp(): void
     {
-        $this->payment = new Voucher();
+        $this->payment = new Billie();
 
         $this->addressInvoice = $this->getAddressFixture1();
         $this->addressShipping = $this->getAddressFixture2();
@@ -67,7 +66,7 @@ class VoucherTest extends TestCase
     /**
      * This test verifies that the Payments-API request
      * for our payment is correct.
-     * Please note, Meal Voucher does not work with the payments API
+     * Please note, Billie does not work with the payments API
      * so this is just an empty array
      */
     public function testPaymentsAPI()
@@ -83,11 +82,8 @@ class VoucherTest extends TestCase
      */
     public function testOrdersAPI()
     {
-        $expectedLineItem = $this->getExpectedLineItemStructure($this->lineItem);
-        $expectedLineItem['category'] = 'gift';
-
         $expected = [
-            'method' => 'voucher',
+            'method' => 'billie',
             'amount' => [
                 'currency' => 'USD',
                 'value' => '49.98',
@@ -102,7 +98,7 @@ class VoucherTest extends TestCase
             'billingAddress' => $this->getExpectedAddressStructure($this->addressInvoice),
             'shippingAddress' => $this->getExpectedAddressStructure($this->addressShipping),
             'lines' => [
-                $expectedLineItem
+                $this->getExpectedLineItemStructure($this->lineItem),
             ],
             'metadata' => [],
         ];

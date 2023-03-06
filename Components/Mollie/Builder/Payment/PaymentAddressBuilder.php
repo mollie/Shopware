@@ -3,13 +3,14 @@
 namespace MollieShopware\Components\Mollie\Builder\Payment;
 
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
+use Shopware\Models\Customer\Address;
 use Shopware\Models\Customer\Customer;
 
 class PaymentAddressBuilder
 {
 
     /**
-     * @param $address
+     * @param Address $address
      * @param Customer $customer
      * @return PaymentAddress
      */
@@ -22,6 +23,7 @@ class PaymentAddressBuilder
             (string)$address->getFirstName(),
             (string)$address->getLastName(),
             (string)$customer->getEmail(),
+            (string)$address->getCompany(),
             (string)$address->getStreet(),
             (string)$address->getAdditionalAddressLine1(),
             (string)$address->getZipCode(),

@@ -15,7 +15,8 @@ export default class RegisterAction {
 
         const repo = new RegisterRepository();
 
-        repo.getAccountType().select('Privatkunde');
+        repo.getAccountType().select('Firma'); // required for Billie B2B payments
+
         repo.getSalutation().select('Herr');
 
         repo.getFirstname().clear().type(firstname);
@@ -23,6 +24,8 @@ export default class RegisterAction {
 
         repo.getEmail().clear().type(email);
         repo.getPassword().clear().type(password);
+
+        repo.getCompany().clear().type('Mollie B.V.');
 
         repo.getStreet().clear().type('Mollie');
         repo.getZipcode().clear().type('Mollie');

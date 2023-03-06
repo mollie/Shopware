@@ -51,6 +51,7 @@ trait PaymentTestTrait
             'postalCode' => $address->getPostalCode(),
             'city' => $address->getCity(),
             'country' => $address->getCountryIso2(),
+            'organizationName' => 'Mollie B.V.'
         ];
     }
 

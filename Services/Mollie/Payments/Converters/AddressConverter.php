@@ -13,7 +13,7 @@ class AddressConverter
      */
     public function convertAddress(PaymentAddress $address)
     {
-        return [
+        $data = [
             'title' => (string)$address->getTitle(),
             'givenName' => (string)$address->getGivenName(),
             'familyName' => (string)$address->getFamilyName(),
@@ -24,5 +24,11 @@ class AddressConverter
             'city' => (string)$address->getCity(),
             'country' => (string)$address->getCountryIso2(),
         ];
+
+        if (!empty($address->getCompany())) {
+            $data['organizationName'] = $address->getCompany();
+        }
+
+        return $data;
     }
 }

@@ -100,6 +100,7 @@ class PaymentMethodsInstaller
         return [
             PaymentMethod::APPLEPAY_DIRECT,
             PaymentMethod::APPLE_PAY,
+            PaymentMethod::BILLIE,
             PaymentMethod::BANCONTACT,
             PaymentMethod::BANKTRANSFER,
             PaymentMethod::BELFIUS,

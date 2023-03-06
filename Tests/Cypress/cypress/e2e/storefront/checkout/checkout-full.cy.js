@@ -38,6 +38,11 @@ const configs = [
 ];
 
 const payments = [
+    {caseId: 'C532046', key: 'billie', name: 'Billie', paymentsAPI: true, createOrderBeforePayment: true},
+    {caseId: 'C532047', key: 'billie', name: 'Billie', paymentsAPI: true, createOrderBeforePayment: false},
+    {caseId: 'C532048', key: 'billie', name: 'Billie', paymentsAPI: false, createOrderBeforePayment: true},
+    {caseId: 'C532049', key: 'billie', name: 'Billie', paymentsAPI: false, createOrderBeforePayment: false},
+
     {caseId: 'C4242', key: 'paypal', name: 'PayPal', paymentsAPI: true, createOrderBeforePayment: true},
     {caseId: 'C24784', key: 'paypal', name: 'PayPal', paymentsAPI: true, createOrderBeforePayment: false},
     {caseId: 'C24783', key: 'paypal', name: 'PayPal', paymentsAPI: false, createOrderBeforePayment: true},
@@ -195,6 +200,10 @@ configs.forEach(config => {
                     molliePaymentScreen.initSandboxCookie();
 
                     if (payment.key === 'klarnapaylater' || payment.key === 'klarnapaynow' || payment.key === 'klarnasliceit') {
+
+                        molliePaymentScreen.selectAuthorized();
+
+                    } else if (payment.key === 'billie') {
 
                         molliePaymentScreen.selectAuthorized();
 
