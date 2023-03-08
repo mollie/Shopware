@@ -45,6 +45,11 @@ class ConfigDataTypesTest extends TestCase
                 [false, 'No'],
                 [false, 'Non'],
                 # ----------------------------------
+                [true, true],
+                [false, 1],
+                [false, "1"],
+                # ----------------------------------
+                [false, false],
                 [false, null],
                 [false, ''],
             ];

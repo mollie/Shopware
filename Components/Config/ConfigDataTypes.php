@@ -15,6 +15,10 @@ class ConfigDataTypes
             return false;
         }
 
+        if (is_bool($value)) {
+            return $value;
+        }
+
         $valuesYes = [
             'yes',
             'ja',
