@@ -67,6 +67,10 @@
         </service>
 
 
+        <service id="mollie_shopware.shopware.version" class="MollieShopware\Components\Services\ShopwareVersionService">
+            <argument type="service" id="service_container"/>
+        </service>
+
         <service id="mollie_shopware.order_service" class="MollieShopware\Components\Services\OrderService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
@@ -75,6 +79,7 @@
         <service id="mollie_shopware.basket_service" class="MollieShopware\Components\Services\BasketService" public="true">
             <argument type="service" id="models"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
+            <argument type="service" id="mollie_shopware.shopware.version"/>
             <argument type="service" id="service_container"/>
         </service>
 
@@ -192,7 +197,7 @@
         </service>
 
         <service id="mollie_shopware.components.active_payment_methods_provider" class="MollieShopware\Components\Payment\Provider\ActivePaymentMethodsProvider" public="true">
-            <argument type="service" id="mollie_shopware.api_factory" />
+            <argument type="service" id="mollie_shopware.api_factory"/>
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 

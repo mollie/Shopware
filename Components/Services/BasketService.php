@@ -5,22 +5,16 @@ namespace MollieShopware\Components\Services;
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use Exception;
 use MollieShopware\Components\Config;
-use MollieShopware\Components\Logger;
-use MollieShopware\Components\TransactionBuilder\Models\MollieBasketItem;
 use MollieShopware\Services\VersionCompare\VersionCompare;
 use Psr\Log\LoggerInterface;
-use Shopware\Bundle\OrderBundle\Service\CalculationService;
 use Shopware\Bundle\OrderBundle\Service\CalculationServiceInterface;
 use Shopware\Components\DependencyInjection\Container as DIContainer;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Detail;
 use Shopware\Models\Order\Order;
-use Shopware\Models\Order\Repository;
 use Shopware\Models\Order\Status;
 use Shopware\Models\Voucher\Voucher;
 use Shopware_Components_Modules;
-use Symfony\Component\HttpFoundation\Request;
 use Zend_Db_Adapter_Exception;
 
 class BasketService
@@ -28,19 +22,29 @@ class BasketService
     const MODE_PREMIUM = 1;
     const MODE_VOUCHER = 2;
 
-    /** @var Config $config */
+    /**
+     * @var Config $config
+     */
     protected $config;
 
-    /** @var ModelManager $modelManager */
+    /**
+     * @var ModelManager $modelManager
+     */
     protected $modelManager;
 
-    /** @var Shopware_Components_Modules $basketModule */
+    /**
+     * @var Shopware_Components_Modules $basketModule
+     */
     protected $basketModule;
 
-    /** @var OrderService $orderService */
+    /**
+     * @var OrderService $orderService
+     */
     protected $orderService;
 
-    /** @var null|Enlight_Components_Db_Adapter_Pdo_Mysql */
+    /**
+     * @var null|Enlight_Components_Db_Adapter_Pdo_Mysql
+     */
     protected $db;
 
     /**
@@ -53,19 +57,23 @@ class BasketService
      */
     private $shopwareVersion;
 
-    /** @var DIContainer */
+    /**
+     * @var DIContainer
+     */
     private $container;
+
 
     /**
      * @param ModelManager $modelManager
      * @param LoggerInterface $logger
-     * @param DIContainer $container
-     * @throws Exception
+     * @param ShopwareVersionService $shopwareVersionService
+     * @param $container
      */
-    public function __construct(ModelManager $modelManager, LoggerInterface $logger, $container)
+    public function __construct(ModelManager $modelManager, LoggerInterface $logger, ShopwareVersionService $shopwareVersionService, $container)
     {
         $this->modelManager = $modelManager;
         $this->logger = $logger;
+        $this->container = $container;
 
         $this->config = Shopware()->Container()->get('mollie_shopware.config');
 
@@ -75,9 +83,7 @@ class BasketService
 
         $this->db = Shopware()->Container()->get('db');
 
-        $this->shopwareVersion = (string)$container->getParameter('shopware.release.version');
-
-        $this->container = $container;
+        $this->shopwareVersion = $shopwareVersionService->getShopwareVersion();
     }
 
     /**
