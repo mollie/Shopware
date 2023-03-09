@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.3.0</version>
+    <version>2.4.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -45,19 +45,34 @@
     </description>
 
 
+    <changelog version="2.4.0">
+        <changes lang="de">
+            - Neue Zahlungsmethode "Billie" ist nun verfügbar.
+            - Support für das zukünftige Shopware 5.8
+            - Der Link zu den Mollie API-Keys in den Plugin Einstellungen funktioniert nun auch ohne, dass zuvor ein API Key eingetragen werden muss, um das Onboarding noch einfacher zu gestalten.
+            - Optimierung des Auslesens von Ja/Nein Einstellungen der Plugin Konfigurationen. In seltenen Fällen führte dies zu falschem Auslesen, sofern der Administrator manuell etwas in den Einstellungen eingetragen hat ohne einen richtigen Wert auszuwählen.
+        </changes>
+        <changes lang="en">
+            - New payment method "Billie" is now available.
+            - Support for future Shopware 5.8
+            - The link to the Mollie API keys in the plugin settings now works without having to enter an API key beforehand to make onboarding even easier.
+            - Optimization of reading yes/no settings of plugin configurations. In rare cases, this led to incorrect reading if the administrator manually entered something in the settings without selecting a correct value.
+        </changes>
+    </changelog>
+
     <changelog version="2.3.0">
         <changes lang="de">
             - SEPA Lastschrift wurde entfernt. Diese ist nicht mehr für normale und initiale Zahlungen möglich.
             - Apple Pay Direct entfernt nun für die Anzeige automatisch die Beschreibung einer Versandmethode, wenn diese HTML Inhalte enthält.
             - Behebung eines Problems bei der Auswahl von Bestellungen in der Bestellübersicht im Backend. Dies führte zum Fehler me.getOrderPositionGrid in der Konsole des Browsers.
             - HTTP Timeout wurde für die Mollie API erhöht, um Kommunikationen noch stabiler zu machen.
-            </changes>
+        </changes>
         <changes lang="en">
             - Remove SEPA Direct Debit. This is not available anymore for regular and initial payment attempts.
             - Apple Pay Direct does now remove shipping method descriptions when displaying it, if HTML content is found.
             - Fix broken Shopware Backend when selecting orders in the order overview. This led to the error me.getOrderPositionGrid in the console output
             - Increase HTTP timeout for the Mollie API to make it even more reliable.
-       </changes>
+        </changes>
     </changelog>
 
     <changelog version="2.2.0">
