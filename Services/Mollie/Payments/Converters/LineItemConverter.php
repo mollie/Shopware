@@ -27,22 +27,23 @@ class LineItemConverter
      */
     public function convertItem(PaymentLineItem $item)
     {
+        $currency = (string)$item->getCurrency();
         $data = [
             'type' => (string)$item->getType(),
             'name' => (string)$item->getName(),
             'quantity' => (int)$item->getQuantity(),
             'unitPrice' => [
-                'currency' => (string)$item->getCurrency(),
-                'value' => (string)$this->formatter->formatNumber($item->getUnitPrice()),
+                'currency' => $currency,
+                'value' => (string)$this->formatter->formatNumber($item->getUnitPrice(), $currency),
             ],
             'totalAmount' => [
-                'currency' => (string)$item->getCurrency(),
-                'value' => (string)$this->formatter->formatNumber($item->getTotalAmount()),
+                'currency' => $currency,
+                'value' => (string)$this->formatter->formatNumber($item->getTotalAmount(), $currency),
             ],
-            'vatRate' => (string)$this->formatter->formatNumber($item->getVatRate()),
+            'vatRate' => (string)$this->formatter->formatNumber($item->getVatRate(), $currency),
             'vatAmount' => [
-                'currency' => (string)$item->getCurrency(),
-                'value' => (string)$this->formatter->formatNumber($item->getVatAmount()),
+                'currency' => $currency,
+                'value' => (string)$this->formatter->formatNumber($item->getVatAmount(), $currency),
             ],
             'sku' => (string)$item->getSku(),
             'imageUrl' => (string)$item->getImageUrl(),

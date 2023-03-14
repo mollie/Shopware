@@ -95,7 +95,7 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
         # we return an array of payment methods available for a specified amount and currency
         return $this->getActivePaymentMethods([
             'amount' => [
-                'value' => $this->formatter->formatNumber($basketAmount->getAmount()),
+                'value' => $this->formatter->formatNumber($basketAmount->getAmount(), $basketAmount->getCurrency()),
                 'currency' => strtoupper($basketAmount->getCurrency()),
             ]
         ], $shops);
