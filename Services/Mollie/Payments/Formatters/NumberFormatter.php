@@ -5,6 +5,7 @@ namespace MollieShopware\Services\Mollie\Payments\Formatters;
 class NumberFormatter
 {
     const CURRENCY_JPY = 'JPY';
+
     /**
      * @param float $value
      * @param string $currencyIso
@@ -12,9 +13,10 @@ class NumberFormatter
      */
     public function formatNumber($value, $currencyIso)
     {
+        $decimals = 2;
         if (strtoupper($currencyIso) === self::CURRENCY_JPY) {
-            return number_format($value, 0, '.', '');
+            $decimals = 0;
         }
-        return number_format($value, 2, '.', '');
+        return number_format($value, $decimals, '.', '');
     }
 }

@@ -39,6 +39,12 @@ class NumberFormatterTest extends TestCase
         $this->assertEquals('24.00', $value);
     }
 
+    /**
+     * This test verifies that the Japan Yen Currency
+     * always cuts of the decimal values.
+     * Mollie accepts only full amount
+     * @return void
+     */
     public function testJPYRounding()
     {
         $formatter = new NumberFormatter();
