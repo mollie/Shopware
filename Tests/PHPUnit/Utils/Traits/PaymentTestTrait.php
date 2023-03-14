@@ -62,23 +62,23 @@ trait PaymentTestTrait
     public function getExpectedLineItemStructure(PaymentLineItem $item)
     {
         $formatter = new NumberFormatter();
-
+        $currency = $item->getCurrency();
         return [
             'type' => $item->getType(),
             'name' => $item->getName(),
             'quantity' => $item->getQuantity(),
             'unitPrice' => [
-                'currency' => $item->getCurrency(),
-                'value' => $formatter->formatNumber($item->getUnitPrice()),
+                'currency' => $currency,
+                'value' => $formatter->formatNumber($item->getUnitPrice(), $currency),
             ],
             'totalAmount' => [
-                'currency' => $item->getCurrency(),
-                'value' => $formatter->formatNumber($item->getTotalAmount()),
+                'currency' => $currency,
+                'value' => $formatter->formatNumber($item->getTotalAmount(), $currency),
             ],
-            'vatRate' => $formatter->formatNumber($item->getVatRate()),
+            'vatRate' => $formatter->formatNumber($item->getVatRate(), $currency),
             'vatAmount' => [
-                'currency' => $item->getCurrency(),
-                'value' => $formatter->formatNumber($item->getVatAmount()),
+                'currency' => $currency,
+                'value' => $formatter->formatNumber($item->getVatAmount(), $currency),
             ],
             'sku' => $item->getSku(),
             'imageUrl' => $item->getImageUrl(),

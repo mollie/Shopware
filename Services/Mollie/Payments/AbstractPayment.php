@@ -187,7 +187,7 @@ abstract class AbstractPayment implements PaymentInterface
             'method' => $this->paymentMethod,
             'amount' => [
                 'currency' => $this->currency,
-                'value' => $this->formatter->formatNumber($this->amount),
+                'value' => $this->formatter->formatNumber($this->amount, $this->currency),
             ],
             'redirectUrl' => $this->redirectUrl,
             'webhookUrl' => $this->webhookUrl,
@@ -205,7 +205,7 @@ abstract class AbstractPayment implements PaymentInterface
             'method' => $this->paymentMethod,
             'amount' => [
                 'currency' => $this->currency,
-                'value' => $this->formatter->formatNumber($this->amount),
+                'value' => $this->formatter->formatNumber($this->amount, $this->currency),
             ],
             'redirectUrl' => $this->redirectUrl,
             'webhookUrl' => $this->webhookUrl,
