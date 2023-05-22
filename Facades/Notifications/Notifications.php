@@ -5,6 +5,7 @@ namespace MollieShopware\Facades\Notifications;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Constants\OrderCreationType;
 use MollieShopware\Components\Constants\PaymentStatus;
+use MollieShopware\Components\Helpers\MollieShopSwitcher;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\OrderUpdater;
 use MollieShopware\Components\Services\OrderService;
@@ -14,12 +15,13 @@ use MollieShopware\Events\Events;
 use MollieShopware\Exceptions\OrderNotFoundException;
 use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use MollieShopware\Exceptions\TransactionNotFoundException;
+use MollieShopware\Facades\FinishCheckout\Services\ShopwareOrderUpdater;
+use MollieShopware\Gateways\MollieGatewayInterface;
 use MollieShopware\Models\Transaction;
 use MollieShopware\Models\TransactionRepository;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\Model\ModelManager;
-use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Order\Order;
 
 class Notifications
@@ -51,6 +53,11 @@ class Notifications
     private $orderUpdater;
 
     /**
+     * @var ShopwareOrderUpdater
+     */
+    private $swOrderUpdater;
+
+    /**
      * @var OrderCancellation
      */
     private $orderCancellation;
@@ -76,9 +83,20 @@ class Notifications
     private $entityManager;
 
     /**
+     * @var MollieGatewayInterface
+     */
+    private $mollieGateway;
+
+    /**
      * @var ContainerAwareEventManager
      */
     private $eventManager;
+
+    /**
+     * @var
+     */
+    private $container;
+
 
     /**
      * @param LoggerInterface $logger
@@ -91,9 +109,12 @@ class Notifications
      * @param PaymentStatusResolver $paymentStatusResolver
      * @param Config\PaymentConfigResolver $paymentConfig
      * @param ModelManager $entityManager
-     * @param ContainerAwareEventManager $eventManager
+     * @param ShopwareOrderUpdater $swOrderUpdater
+     * @param MollieGatewayInterface $mollieFactory
+     * @param $container
+     * @param $eventManager
      */
-    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig, ModelManager $entityManager, $eventManager)
+    public function __construct(LoggerInterface $logger, Config $config, TransactionRepository $repoTransactions, OrderService $orderService, OrderUpdater $orderUpdater, OrderCancellation $orderCancellation, SessionManager $sessionManager, PaymentStatusResolver $paymentStatusResolver, Config\PaymentConfigResolver $paymentConfig, ModelManager $entityManager, ShopwareOrderUpdater $swOrderUpdater, MollieGatewayInterface $mollieFactory, $container, $eventManager)
     {
         $this->logger = $logger;
         $this->config = $config;
@@ -105,6 +126,9 @@ class Notifications
         $this->paymentStatusResolver = $paymentStatusResolver;
         $this->paymentConfig = $paymentConfig;
         $this->entityManager = $entityManager;
+        $this->swOrderUpdater = $swOrderUpdater;
+        $this->mollieGateway = $mollieFactory;
+        $this->container = $container;
         $this->eventManager = $eventManager;
     }
 
@@ -163,6 +187,30 @@ class Notifications
         if (!$order instanceof Order) {
             throw new OrderNotFoundException('Order with number: ' . $transaction->getOrderNumber() . ' not found!');
         }
+
+
+        if (strpos($order->getTransactionId(), 'mollie_') === 0) {
+            # we still have the temp ID
+            # so let's figure out the correct final transaction ID and update it from our webhook
+
+            $shopSwitcher = new MollieShopSwitcher($this->container);
+            $newClient = $shopSwitcher->getMollieApi($order->getShop()->getId());
+
+            $this->mollieGateway->switchClient($newClient);
+
+            if ($transaction->isTypeOrder()) {
+                $mollieOrder = $this->mollieGateway->getOrder($transaction->getMollieId());
+                $finalTransactionNumber = $this->swOrderUpdater->getFinalTransactionIdFromOrder($mollieOrder);
+            } else {
+                $molliePayment = $this->mollieGateway->getPayment($transaction->getMolliePaymentId());
+                $finalTransactionNumber = $this->swOrderUpdater->getFinalTransactionIdFromPayment($molliePayment);
+            }
+
+            $order->setTransactionId($finalTransactionNumber);
+            $this->entityManager->persist($order);
+            $this->entityManager->flush($order);
+        }
+
 
         # -----------------------------------------------------------------------------------------------------
         # UPDATE PAYMENT STATUS + ORDER STATUS
