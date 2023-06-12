@@ -711,6 +711,9 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 $paymentStatusResolver,
                 $paymentConfigResolver,
                 $entityManager,
+                $swOrderUpdater,
+                $mollieGateway,
+                $this->container,
                 $eventManager
             );
 
