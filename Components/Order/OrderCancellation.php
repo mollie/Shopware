@@ -123,16 +123,19 @@ class OrderCancellation
      */
     public function cancelPlacedOrder($order)
     {
-        $this->orderUpdater->updateShopwarePaymentStatusWithoutMail(
-            $order,
-            PaymentStatus::MOLLIE_PAYMENT_CANCELED
-        );
+        $targetPaymentStatus = PaymentStatus::MOLLIE_PAYMENT_CANCELED;
+        $targetOrderStatus = PaymentStatus::MOLLIE_PAYMENT_CANCELED;
+
+        $this->orderUpdater->updateShopwarePaymentStatusWithoutMail($order, $targetPaymentStatus);
 
         if ($this->config->cancelFailedOrders()) {
-            $this->orderUpdater->updateShopwareOrderStatusWithoutMail(
-                $order,
-                PaymentStatus::MOLLIE_PAYMENT_CANCELED
-            );
+
+            # either cancel including the mail or without
+            if ($this->config->isPaymentStatusMailEnabled()) {
+                $this->orderUpdater->updateShopwareOrderStatus($order, $targetOrderStatus);
+            } else {
+                $this->orderUpdater->updateShopwareOrderStatusWithoutMail($order, $targetOrderStatus);
+            }
 
             if ($this->config->autoResetStock()) {
                 $this->paymentService->resetStock($order);
