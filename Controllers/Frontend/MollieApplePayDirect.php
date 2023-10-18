@@ -166,6 +166,9 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
 
             $this->basket->sAddArticle($productNumber, $productQuantity);
 
+            // set the correct payment ID in order to add additional costs
+            $this->front->Request()->setPost('sPayment', $this->applePayPaymentMethod->getPaymentMethod()->getId());
+
             // add potential discounts or surcharges to prevent an amount mismatch
             // on patching the new amount after the confirmation.
             // only necessary if the customer directly checks out from product detail page
