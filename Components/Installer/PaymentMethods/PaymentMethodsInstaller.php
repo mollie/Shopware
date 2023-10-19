@@ -119,6 +119,7 @@ class PaymentMethodsInstaller
             PaymentMethod::SOFORT,
             PaymentMethod::VOUCHERS,
             PaymentMethod::IN3,
+            PaymentMethod::TWINT,
         ];
     }
 

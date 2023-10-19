@@ -24,6 +24,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
+use MollieShopware\Services\Mollie\Payments\Requests\Twint;
 use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
 
 class PaymentFactory
@@ -99,6 +100,9 @@ class PaymentFactory
 
             case PaymentMethod::IN3:
                 return new In3();
+
+            case PaymentMethod::TWINT:
+                return new Twint();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);

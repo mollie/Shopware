@@ -28,4 +28,5 @@ class PaymentMethod
     const APPLEPAY_DIRECT = "applepaydirect";
     const VOUCHERS = "voucher";
     const IN3 = "in3";
+    const TWINT = "twint";
 }
