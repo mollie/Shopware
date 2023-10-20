@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8393f7270a2eeb4c67759ba5e941e206",
+    "content-hash": "5c645b1eca8289e8f1c025c2c65a15bc",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -6323,12 +6323,12 @@
             "version": "v5.7.7",
             "source": {
                 "type": "git",
-                "url": "https://github.com/shopware/shopware.git",
+                "url": "https://github.com/shopware5/shopware.git",
                 "reference": "7125ed7ef7f397e1976664af3c2c3cf233b88fc3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shopware/shopware/zipball/7125ed7ef7f397e1976664af3c2c3cf233b88fc3",
+                "url": "https://api.github.com/repos/shopware5/shopware/zipball/7125ed7ef7f397e1976664af3c2c3cf233b88fc3",
                 "reference": "7125ed7ef7f397e1976664af3c2c3cf233b88fc3",
                 "shasum": ""
             },
@@ -10034,5 +10034,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }
