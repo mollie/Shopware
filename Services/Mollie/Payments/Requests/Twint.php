@@ -21,13 +21,4 @@ class Twint extends AbstractPayment implements PaymentInterface
             'twint'
         );
     }
-
-    /**
-     * @throws ApiNotSupportedException
-     * @return mixed[]|void
-     */
-    public function buildBodyPaymentsAPI()
-    {
-        throw new ApiNotSupportedException('Twint does not support the Payments API!');
-    }
 }
