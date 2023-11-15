@@ -42,10 +42,7 @@ class PaymentMethodType
             $prefix . PaymentMethod::IN3,
             # ----------------------------------------------------------
             PaymentMethod::BILLIE,
-            $prefix . PaymentMethod::BILLIE,
-            # ----------------------------------------------------------
-            PaymentMethod::TWINT,
-            $prefix . PaymentMethod::TWINT,
+            $prefix . PaymentMethod::BILLIE
         ];
 
         if (in_array($paymentMethod, $onlyOrders, true)) {
