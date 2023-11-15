@@ -2,7 +2,6 @@
 
 namespace MollieShopware\Tests\PHPUnit\Services\Mollie\Payments\Requests;
 
-use MollieShopware\Services\Mollie\Payments\Exceptions\ApiNotSupportedException;
 use MollieShopware\Services\Mollie\Payments\Models\Payment;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentAddress;
 use MollieShopware\Services\Mollie\Payments\Models\PaymentLineItem;
@@ -71,9 +70,21 @@ class TwintTest extends TestCase
      */
     public function testPaymentsAPI()
     {
-        $this->expectException(ApiNotSupportedException::class);
+        $expected = [
+            'method' => 'twint',
+            'amount' => [
+                'currency' => 'CHF',
+                'value' => '49.98',
+            ],
+            'description' => 'Payment UUID-123',
+            'redirectUrl' => 'https://local/redirect',
+            'webhookUrl' => 'https://local/notify',
+            'locale' => 'de_DE',
+        ];
 
-        $this->payment->buildBodyPaymentsAPI();
+        $requestBody = $this->payment->buildBodyPaymentsAPI();
+
+        $this->assertEquals($expected, $requestBody);
     }
 
     /**
