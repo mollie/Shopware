@@ -115,18 +115,12 @@ class ActivePaymentMethodsProvider implements ActivePaymentMethodsProviderInterf
     {
         $mollieApiClient = $this->mollieApiFactory->create($shop->getId());
 
-        # adds resource to parameters if not in array
-        if (!in_array('resource', $parameters, true)) {
-            $parameters['resource'] = 'orders';
-        }
-
-        # adds wallets to parameters if not in array
-        if (!in_array('includeWallets', $parameters, true)) {
-            $parameters['includeWallets'] = 'applepay';
-        }
-
-        return $mollieApiClient->methods
-            ->allActive($parameters)
+        $methods = $mollieApiClient->methods
+            ->allAvailable($parameters)
             ->getArrayCopy();
+
+        return array_filter($methods, function ($method) {
+            return $method->status == 'activated';
+        });
     }
 }

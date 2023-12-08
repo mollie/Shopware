@@ -44,6 +44,14 @@
         https://github.com/mollie/Shopware/wiki
     </description>
 
+    <changelog version="2.5.0">
+        <changes lang="de">
+            - Neue Zahlungsmethode "Twint" ist nun verfügbar.
+        </changes>
+        <changes lang="en">
+            - New payment method "Twint" is now available.
+        </changes>
+    </changelog>
 
     <changelog version="2.4.0">
         <changes lang="de">
