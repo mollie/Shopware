@@ -59,7 +59,6 @@ class PaymentMethodTypeTest extends TestCase
             [false, PaymentMethod::KLARNA_PAY_LATER],
             [false, PaymentMethod::KLARNA_PAY_NOW],
             [false, PaymentMethod::KLARNA_SLICE_IT],
-            [false, PaymentMethod::TWINT],
             [false, PaymentMethod::VOUCHERS],
             # ----------------------------------------------
             [true, PaymentMethod::PAYPAL],
@@ -75,6 +74,7 @@ class PaymentMethodTypeTest extends TestCase
             [true, PaymentMethod::BANCONTACT],
             [true, PaymentMethod::EPS],
             [true, PaymentMethod::KBC],
+            [true, PaymentMethod::TWINT],
         ];
     }
 

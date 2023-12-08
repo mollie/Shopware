@@ -38,10 +38,6 @@ const configs = [
 ];
 
 const payments = [
-    {caseId: 'C532050', key: 'twint', name: 'Twint', paymentsAPI: true, createOrderBeforePayment: true},
-    {caseId: 'C532051', key: 'twint', name: 'Twint', paymentsAPI: true, createOrderBeforePayment: false},
-    {caseId: 'C532052', key: 'twint', name: 'Twint', paymentsAPI: false, createOrderBeforePayment: true},
-    {caseId: 'C532053', key: 'twint', name: 'Twint', paymentsAPI: false, createOrderBeforePayment: false},
 
     {caseId: 'C532046', key: 'billie', name: 'Billie', paymentsAPI: true, createOrderBeforePayment: true},
     {caseId: 'C532047', key: 'billie', name: 'Billie', paymentsAPI: true, createOrderBeforePayment: false},

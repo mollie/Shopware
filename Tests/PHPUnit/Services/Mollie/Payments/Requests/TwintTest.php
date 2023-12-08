@@ -48,7 +48,7 @@ class TwintTest extends TestCase
         $this->payment->setPayment(
             new Payment(
                 'UUID-123',
-                'Order UUID-123',
+                'Payment UUID-123',
                 '20004',
                 $this->addressInvoice,
                 $this->addressShipping,
