@@ -60,7 +60,7 @@ export default class ConfigSetupAction {
         repoLogin.getEmail().clear().type('demo');
         repoLogin.getPassword().clear().type('demo');
         repoLogin.getLocale().click();
-        cy.contains('German (Germany)').click();
+        cy.get('.x-boundlist-item:first').click();
         repoLogin.getSubmitButton().click();
 
         cy.log('Successfully logged in');
