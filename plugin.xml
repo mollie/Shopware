@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.4.0</version>
+    <version>2.5.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -47,9 +47,15 @@
     <changelog version="2.5.0">
         <changes lang="de">
             - Neue Zahlungsmethode "Twint" ist nun verfügbar.
+            - Zahlungsaufschlag funktioniert nun mit apple pay direct
+            - Die Währung YEN wird auf volle Zahl aufgerundet, nachkommastellen sind nicht erlaubt.
+            - Apple Pay Direct Datei für die Verifizierung wird nun auch heruntergeladen obwohl file_get_contents auf dem Server deaktiviert ist.
         </changes>
         <changes lang="en">
             - New payment method "Twint" is now available.
+            - Payment surcharge now works with Apple Pay Direct.
+            - The currency YEN is rounded up to the nearest whole number; decimal places are not allowed.
+            - The Apple Pay Direct file for verification is now also downloaded even if file_get_contents is disabled on the server.
         </changes>
     </changelog>
 

@@ -108,7 +108,7 @@ class TransactionBuilderTest extends TestCase
             true
         );
 
-        $mollieItemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+        $mollieItemSum = round($transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount(), 2);
 
         # ---------------------------------------------------------------------------
 
@@ -118,9 +118,9 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
         $this->assertEquals($shopwareTotalAmount, $mollieItemSum, 'Mollie Validation: Sum of line items does not match total sum');
 
-        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
-        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
-        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
+        $this->assertEquals(round($product1[2], 2), $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
+        $this->assertEquals(round($product2[2], 2), $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
+        $this->assertEquals(round($product3[2], 2), $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
     }
 
 
@@ -179,7 +179,7 @@ class TransactionBuilderTest extends TestCase
             false
         );
 
-        $mollieItemSum = $transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount();
+        $mollieItemSum = round($transaction->getItems()[0]->getTotalAmount() + $transaction->getItems()[1]->getTotalAmount() + $transaction->getItems()[2]->getTotalAmount(), 2);
 
         # ---------------------------------------------------------------------------
 
@@ -189,9 +189,9 @@ class TransactionBuilderTest extends TestCase
         $this->assertEquals($shopwareTotalAmount, $transaction->getTotalAmount(), 'Total sum is not the defined sum of Shopware!');
         $this->assertEquals($shopwareTotalAmount, $mollieItemSum, 'Mollie Validation: Sum of line items does not match total sum');
 
-        $this->assertEquals($product1[2], $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
-        $this->assertEquals($product2[2], $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
-        $this->assertEquals($product3[2], $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
+        $this->assertEquals(round($product1[2], 2), $transaction->getItems()[0]->getTotalAmount(), 'Total Amount of Item 1 not correct!');
+        $this->assertEquals(round($product2[2], 2), $transaction->getItems()[1]->getTotalAmount(), 'Total Amount of Item 2 not correct!');
+        $this->assertEquals(round($product3[2], 2), $transaction->getItems()[2]->getTotalAmount(), 'Total Amount of Item 3 not correct!');
     }
 
 
