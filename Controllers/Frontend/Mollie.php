@@ -417,7 +417,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             echo json_encode($data);
         }
 
-        die();
+        ob_clean();
     }
 
     /**
@@ -524,7 +524,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $script = str_replace('[mollie_testmode]', ($mollieTestMode === true) ? 'true' : 'false', $script);
             echo $script;
 
-            die();
+            ob_clean();
         } catch (\Exception $ex) {
             $this->logger->error('Error when showing Credit Card Components: ' . $ex->getMessage());
 
