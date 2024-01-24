@@ -304,6 +304,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - shopware: '5.7.19'
+            php: '8.2'
           - shopware: '5.7.18'
             php: '8.2'
           - shopware: '5.7.17'

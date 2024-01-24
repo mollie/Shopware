@@ -51,7 +51,7 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
         $url = 'https://www.mollie.com/dashboard/developers/api-keys';
 
         header('Location: ' . $url);
-        exit();
+        ob_clean();
     }
 
     /**
