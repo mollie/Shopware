@@ -108,8 +108,8 @@ class Shopware_Controllers_Backend_MollieConfiguration extends Shopware_Controll
                 'data' => $logData,
             ]
         );
-
-        die($backendOutput);
+        echo $backendOutput;
+        ob_clean();
     }
 
     /**
