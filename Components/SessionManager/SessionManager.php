@@ -77,34 +77,6 @@ class SessionManager implements SessionManagerInterface
         # it causes the finish-page to have missing data, like missing address.
         # it does not make any sense, but its a deep logic of shopware or the session handling
         # and we have to remove it for now and stick with the default server and system configuration.
-        return;
-
-        $session = $this->container->get('session');
-
-        # write session data and commit database transaction to avoid locks
-        # @see Shopware\Components\Session\PdoSessionHandler::close()
-        if (method_exists($session, 'save')) {
-            $session->save();
-        }
-
-        session_write_close();
-
-
-        $sessionId = $this->getSessionId();
-        $lifetimeSeconds = $days * 24 * 60 * 60;
-
-        ini_set('session.gc_maxlifetime', $lifetimeSeconds);
-
-        /** @var QueryBuilder $qb */
-        $qb = $this->connection->createQueryBuilder();
-
-        $qb->update('s_core_sessions')
-            ->set('expiry', ':expiry')
-            ->where($qb->expr()->eq('id', ':id'))
-            ->setParameter(':expiry', time() + $lifetimeSeconds)
-            ->setParameter(':id', $sessionId);
-
-        $qb->execute();
     }
 
     /**
