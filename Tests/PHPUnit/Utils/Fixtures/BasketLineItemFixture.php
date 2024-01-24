@@ -22,8 +22,8 @@ class BasketLineItemFixture
             0,
             0,
             'Sample Product',
-            $unitPriceNet,
-            $unitPriceNet,
+            round($unitPriceNet, 2),
+            round($unitPriceNet, 2),
             $quantity,
             $taxRate,
             ''
@@ -51,8 +51,8 @@ class BasketLineItemFixture
             0,
             0,
             'Sample Product',
-            $unitPriceGross,
-            $netPrice,
+            round($unitPriceGross, 2),
+            round($netPrice, 2),
             $quantity,
             $taxRate,
             ''
