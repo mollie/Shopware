@@ -49,6 +49,6 @@ trait BackendControllerTrait
         header('Content-Type: application/json');
         echo json_encode($data);
 
-        ob_clean();
+        ob_end_flush();
     }
 }

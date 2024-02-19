@@ -61,7 +61,7 @@ class Notifier
             'message' => $message
         ], JSON_PRETTY_PRINT);
 
-        ob_clean();
+        ob_end_flush();
     }
 
     /**
