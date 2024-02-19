@@ -176,7 +176,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $this->admin->sGetPremiumShippingcosts(reset($countries));
 
             echo "";
-            ob_clean();
+            ob_end_flush();
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error when adding product to apple pay cart',
@@ -186,7 +186,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
 
             http_response_code(500);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
@@ -274,7 +274,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             ];
 
             echo json_encode($data);
-            ob_clean();
+            ob_end_flush();
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error loading shippings for Mollie Apple Pay Direct',
@@ -288,7 +288,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             ];
 
             echo json_encode($data);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
@@ -347,7 +347,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             ];
 
             echo json_encode($data);
-            ob_clean();
+            ob_end_flush();
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error setting shipping for Mollie Apple Pay Direct',
@@ -361,7 +361,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             ];
 
             echo json_encode($data);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
@@ -386,7 +386,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             $this->admin->sGetPremiumShippingcosts(reset($countries));
 
             echo "";
-            ob_clean();
+            ob_end_flush();
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error restoring cart after Mollie Apple Pay Direct',
@@ -396,7 +396,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
 
             http_response_code(500);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
@@ -433,7 +433,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
 
             http_response_code(500);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
@@ -667,7 +667,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
             );
 
             http_response_code(500);
-            ob_clean();
+            ob_end_flush();
         }
     }
 
