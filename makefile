@@ -79,4 +79,4 @@ release: ## Creates a new ZIP package
 	cd .. && rm -rf ./.build/MollieShopware*.zip
 	make clean -B
 	make install -B
-	cd .. && zip -qq -r -0 ./.build/MollieShopware.zip MollieShopware/ -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpunit.xml' 'MollieShopware/phpstan.neon' 'MollieShopware/package.json' 'MollieShopware/package-lock.json' 'MollieShopware/makefile' '*.DS_Store' 'MollieShopware/node_modules*'
+	cd .. && zip -qq -r -0 ./.build/MollieShopware.zip MollieShopware/* -x 'MollieShopware/.*' 'MollieShopware/Tests*' 'MollieShopware/phpunit.xml' 'MollieShopware/phpstan.neon' 'MollieShopware/package.json' 'MollieShopware/package-lock.json' 'MollieShopware/makefile' '*.DS_Store' 'MollieShopware/node_modules*'
