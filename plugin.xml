@@ -46,10 +46,10 @@
 
     <changelog version="2.5.1">
         <changes lang="de">
-            - Hotfix von Kredikartenkomponent und weiteren API routen
+            - Hotfix: Eingabefelder der Kreditkarten funktionieren nun wieder
         </changes>
         <changes lang="en">
-            - Hotfix for Creditcard component and other API routes
+            - Hotfix: The input fields of the credit cards are working again now.
         </changes>
     </changelog>
 
