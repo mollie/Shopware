@@ -4,7 +4,7 @@ namespace MollieShopware\Components\Installer\Attributes;
 
 use Exception;
 use MollieShopware\Components\Attributes;
-use Shopware\Bundle\AttributeBundle\Service\CrudService;
+use Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface;
 use Shopware\Components\Model\ModelManager;
 
 class AttributesInstaller
@@ -25,7 +25,7 @@ class AttributesInstaller
      * @param ModelManager $models
      * @param CrudService $crudService
      */
-    public function __construct(ModelManager $models, CrudService $crudService)
+    public function __construct(ModelManager $models, CrudServiceInterface $crudService)
     {
         $this->models = $models;
         $this->crudService = $crudService;
