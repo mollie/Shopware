@@ -43,12 +43,8 @@ trait BackendControllerTrait
     protected function returnJson($data, $httpCode = 200)
     {
         if ($httpCode !== 200) {
-            http_response_code(intval($httpCode));
+            $this->Response()->setHttpResponseCode((int)$httpCode);
         }
-
-        header('Content-Type: application/json');
-        echo json_encode($data);
-
-        ob_end_flush();
+        $this->View()->assign($data);
     }
 }

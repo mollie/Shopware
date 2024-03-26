@@ -398,8 +398,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'success' => true,
                 'message' => 'The payment status for the order has been processed.'
             ];
-
-            echo json_encode($data, JSON_PRETTY_PRINT);
+            $this->View()->assign($data);
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error in Mollie Notification',
@@ -413,11 +412,10 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
                 'message' => 'There was a problem. Please see the logs for more.'
             ];
 
-            http_response_code(500);
-            echo json_encode($data);
-        }
 
-        ob_end_flush();
+            $this->Response()->setHttpResponseCode(500);
+            $this->View()->assign($data);
+        }
     }
 
     /**
