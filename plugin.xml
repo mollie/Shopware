@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.5.1</version>
+    <version>2.5.2</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -43,6 +43,15 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+    <changelog version="2.5.2">
+        <changes lang="de">
+            - Hotfix: Mollie Details in der Bestellung funktionieren nun wieder
+        </changes>
+        <changes lang="en">
+            - Hotfix: Mollie Details in the order are working again now.
+        </changes>
+    </changelog>
 
     <changelog version="2.5.1">
         <changes lang="de">
