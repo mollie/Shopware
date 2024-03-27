@@ -272,9 +272,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 'cart' => $formattedCart,
                 'shippingmethods' => $shippingMethods,
             ];
-
-            echo json_encode($data);
-            ob_end_flush();
+            $this->View()->assign($data);
         } catch (\Exception $ex) {
             $this->logger->error(
                 'Error loading shippings for Mollie Apple Pay Direct',
@@ -287,8 +285,7 @@ class Shopware_Controllers_Frontend_MollieApplePayDirect extends Shopware_Contro
                 'success' => false,
             ];
 
-            echo json_encode($data);
-            ob_end_flush();
+            $this->View()->assign($data);
         }
     }
 
