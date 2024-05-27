@@ -515,7 +515,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $mollieTestMode = $this->config->isTestmodeActive();
 
-            $response->setHeader('Content-Type','text/javascript');
+            $response->setHeader('Content-Type', 'text/javascript');
 
 
             $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
