@@ -496,6 +496,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
     public function componentsAction()
     {
         Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
+        $response = Shopware()->Front()->Response();
         try {
             $this->loadServices();
 
@@ -514,16 +515,14 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
 
             $mollieTestMode = $this->config->isTestmodeActive();
 
+            $response->setHeader('Content-Type','text/javascript');
 
-            header('Content-Type: text/javascript');
 
             $script = file_get_contents(__DIR__ . '/../../Resources/views/frontend/_public/src/js/components.js');
             $script = str_replace('[mollie_profile_id]', $mollieProfileId, $script);
             $script = str_replace('[mollie_locale]', $this->localeFinder->getPaymentLocale(Shopware()->Shop()->getLocale()->getLocale()), $script);
             $script = str_replace('[mollie_testmode]', ($mollieTestMode === true) ? 'true' : 'false', $script);
-            echo $script;
-
-            ob_end_flush();
+            $response->setBody($script);
         } catch (\Exception $ex) {
             $this->logger->error('Error when showing Credit Card Components: ' . $ex->getMessage());
 
