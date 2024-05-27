@@ -15,7 +15,7 @@ use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Components\Constants\PaymentMethodType;
 use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\CurrentCustomer;
-use MollieShopware\Components\iDEAL\iDEALInterface;
+
 use MollieShopware\Components\Mollie\Builder\MolliePaymentBuilder;
 use MollieShopware\Components\Mollie\MollieShipping;
 use MollieShopware\Components\Mollie\Services\TransactionUUID\TransactionUUID;
@@ -121,10 +121,7 @@ class PaymentService
      */
     private $applePayFactory;
 
-    /**
-     * @var iDEALInterface $idealService
-     */
-    private $idealService;
+
 
     /**
      * @var CurrentCustomer
@@ -233,7 +230,7 @@ class PaymentService
         # a shop service is somewhere used in there...
         $this->creditCardService = Shopware()->Container()->get('mollie_shopware.credit_card_service');
         $this->applePayFactory = Shopware()->Container()->get('mollie_shopware.components.apple_pay_direct.factory');
-        $this->idealService = Shopware()->Container()->get('mollie_shopware.ideal_service');
+
         $this->customer = Shopware()->Container()->get('mollie_shopware.customer');
         $shopID = Shopware()->Shop()->getId();
 
@@ -631,22 +628,6 @@ class PaymentService
             }
         }
 
-
-        if ($paymentMethodObject instanceof IDeal) {
-            # test if we have a current customer (we should have one)
-            # if so, get his selected iDeal issuer.
-            # if an issuer has been set, then also use it for our payment,
-            # otherwise just continue without a prefilled issuer.
-            $currentCustomer = $this->customer->getCurrent();
-
-            if ($currentCustomer instanceof Customer) {
-                $issuer = $this->idealService->getCustomerIssuer($currentCustomer);
-                if (!empty($issuer)) {
-                    /** @var IDeal $paymentMethodObject */
-                    $paymentMethodObject->setIssuer($issuer);
-                }
-            }
-        }
 
         if ($paymentMethodObject instanceof CreditCard) {
             # prevent this method from failing, because at this

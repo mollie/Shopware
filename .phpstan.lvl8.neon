@@ -2,7 +2,6 @@ parameters:
     level: 8
     paths:
         - ./Command/OrdersShippingCommand.php
-        - ./Components/iDEAL
         - ./Components/Config
         - ./Exceptions
         - ./Services
@@ -16,11 +15,6 @@ parameters:
         # ignore Shopware attributes with magic getters and setters
         - '#Call to method getMollieReturn\(\) on an unknown class Shopware\\Models\\Attribute\\OrderDetail#'
         - '#Call to method setMollieReturn\(\) on an unknown class Shopware\\Models\\Attribute\\OrderDetail#'
-        - '#Call to method getMollieShopwareIdealIssuer\(\) on an unknown class Shopware\\Models\\Attribute\\Customer#'
-        - '#Call to method setMollieShopwareIdealIssuer\(\) on an unknown class Shopware\\Models\\Attribute\\Customer#'
-        # -----------------------------------------------------------------------------------------------------------
-        # ignore magic getters and setters in Mollie API objects
-        - '#Access to an undefined property Mollie\\Api\\Resources\\Issuer::\$isSelected#'
         # -----------------------------------------------------------------------------------------------------------
 
 services:
