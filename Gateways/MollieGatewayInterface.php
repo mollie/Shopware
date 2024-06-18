@@ -3,7 +3,6 @@
 namespace MollieShopware\Gateways;
 
 use Mollie\Api\MollieApiClient;
-use Mollie\Api\Resources\Issuer;
 use Mollie\Api\Resources\Order;
 use Mollie\Api\Resources\Payment;
 use Mollie\Api\Resources\Shipment;
@@ -38,10 +37,7 @@ interface MollieGatewayInterface
      */
     public function getPayment($paymentId);
 
-    /**
-     * @return Issuer[]
-     */
-    public function getIdealIssuers();
+
 
     /**
      * @param array $requestData

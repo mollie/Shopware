@@ -132,13 +132,6 @@ class FakeMollieGateway implements MollieGatewayInterface
         return new Payment(null);
     }
 
-    /**
-     * @return array
-     */
-    public function getIdealIssuers(): array
-    {
-        return [];
-    }
 
     /**
      * @param $mollieId

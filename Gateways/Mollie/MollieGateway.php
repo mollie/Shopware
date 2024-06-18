@@ -128,31 +128,6 @@ class MollieGateway implements MollieGatewayInterface
         return $payment;
     }
 
-    /**
-     * @throws \Mollie\Api\Exceptions\ApiException
-     * @return Issuer[]
-     */
-    public function getIdealIssuers()
-    {
-        $paymentMethods = $this->apiClient->methods->allActive(
-            [
-                'include' => 'issuers'
-            ]
-        );
-
-        $issuers = [];
-
-        foreach ($paymentMethods as $paymentMethod) {
-            if ($paymentMethod->id === PaymentMethod::IDEAL) {
-                foreach ($paymentMethod->issuers() as $key => $issuer) {
-                    $issuers[] = $issuer;
-                }
-                break;
-            }
-        }
-
-        return $issuers;
-    }
 
     /**
      * @param array $requestData

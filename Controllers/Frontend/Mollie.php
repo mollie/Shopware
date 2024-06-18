@@ -10,7 +10,6 @@ use MollieShopware\Components\CurrentCustomer;
 use MollieShopware\Components\Helpers\LocaleFinder;
 use MollieShopware\Components\Helpers\MollieRefundStatus;
 use MollieShopware\Components\Helpers\MollieStatusConverter;
-use MollieShopware\Components\iDEAL\iDEALInterface;
 use MollieShopware\Components\MollieApiFactory;
 use MollieShopware\Components\Order\OrderCancellation;
 use MollieShopware\Components\Order\ShopwareOrderBuilder;
@@ -95,10 +94,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
      */
     private $localeFinder;
 
-    /**
-     * @var iDEALInterface
-     */
-    private $iDEAL;
+
 
     /**
      * @var CurrentCustomer
@@ -448,47 +444,6 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
         $this->redirectToShopwareCheckoutFailed($this);
     }
 
-    /**
-     * Get the issuers for the iDEAL payment method.
-     * Called in an ajax call on the frontend.
-     */
-    public function idealIssuersAction()
-    {
-        Shopware()->Plugins()->Controller()->ViewRenderer()->setNoRender();
-
-        try {
-            $this->loadServices();
-
-            $customer = $this->customers->getCurrent();
-
-            if (!$customer instanceof Customer) {
-                throw new \Exception('No active customer found for iDEAL AJAX list');
-            }
-
-            /** @var array $idealIssuers */
-            $idealIssuers = $this->iDEAL->getIssuers($customer);
-
-            $this->sendResponse([
-                'data' => $idealIssuers,
-                'success' => true,
-            ]);
-        } catch (\Exception $ex) {
-            $this->logger->error(
-                'Error iDEAL issuer AJAX action.',
-                [
-                    'error' => $ex->getMessage(),
-                ]
-            );
-
-            $this->sendResponse(
-                [
-                    'message' => $ex->getMessage(),
-                    'success' => false
-                ],
-                500
-            );
-        }
-    }
 
     /**
      *
@@ -588,7 +543,7 @@ class Shopware_Controllers_Frontend_Mollie extends AbstractPaymentController
             $paymentService = Shopware()->Container()->get('mollie_shopware.payment_service');
             $orderService = Shopware()->Container()->get('mollie_shopware.order_service');
 
-            $this->iDEAL = $this->container->get('mollie_shopware.components.ideal');
+
             $this->customers = $this->container->get('mollie_shopware.customer');
 
 
