@@ -44,7 +44,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
         $this->loadServices();
 
         $this->logger->info('Starting payment methods import in Backend');
-
+        $response = $this->Response();
         try {
 
             /** @var PaymentMethodsInstaller $paymentMethodService */
@@ -55,8 +55,6 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
             $this->logger->info($importCount . ' Payment Methods have been successfully imported in Backend');
 
             $message = sprintf('%d Payment Methods were imported/updated', $importCount);
-            echo $message;
-            ob_end_flush();
         } catch (\Exception $e) {
             $this->logger->error(
                 'Error when importing payment methods in Backend',
@@ -64,11 +62,11 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
                     'error' => $e->getMessage(),
                 ]
             );
-
-            http_response_code(500);
-            echo $e->getMessage();
-            ob_end_flush();
+            $response->setStatusCode(500);
+            $message = $e->getMessage();
         }
+        $this->View()->assign(['message' => $message]);
+        return $response;
     }
 
     /**
@@ -120,7 +118,7 @@ class Shopware_Controllers_Backend_MolliePayments extends Shopware_Controllers_B
 
             # if its not working with payments API
             # always switch to orders api
-            if ($paymentMethodType === PaymentMethodType::PAYMENTS_API && !$worksWithPaymentsApi) {
+            if ($paymentMethodType === PaymentMethodType::PAYMENTS_API && ! $worksWithPaymentsApi) {
                 $paymentMethodType = PaymentMethodType::ORDERS_API;
             }
 
