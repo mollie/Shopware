@@ -5,6 +5,7 @@ namespace MollieShopware\Services\Mollie\Payments;
 use MollieShopware\Components\Constants\PaymentMethod;
 use MollieShopware\Services\Mollie\Payments\Models\Payment;
 use MollieShopware\Services\Mollie\Payments\Requests\ApplePay;
+use MollieShopware\Services\Mollie\Payments\Requests\BancomatPay;
 use MollieShopware\Services\Mollie\Payments\Requests\Bancontact;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\Belfius;
@@ -104,6 +105,9 @@ class PaymentFactory
 
             case PaymentMethod::TWINT:
                 return new Twint();
+
+            case PaymentMethod::BANCOMAT_PAY:
+                return new BancomatPay();
 
             case PaymentMethod::BLIK:
                 return new Blik();

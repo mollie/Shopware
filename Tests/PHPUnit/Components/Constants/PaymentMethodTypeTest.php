@@ -75,6 +75,7 @@ class PaymentMethodTypeTest extends TestCase
             [true, PaymentMethod::EPS],
             [true, PaymentMethod::KBC],
             [true, PaymentMethod::TWINT],
+            [true, PaymentMethod::BANCOMAT_PAY],
             [true, PaymentMethod::BLIK],
         ];
     }
