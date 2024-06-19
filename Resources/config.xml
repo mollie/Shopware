@@ -219,13 +219,15 @@
                             Ext.Ajax.request({
                                 url: 'molliePayments/update',
                                 success: function (response) {
-                                    Shopware.Msg.createGrowlMessage(response.statusText, response.responseText)
+                                    const json = JSON.parse(response.responseText);
+                                    Shopware.Msg.createGrowlMessage(response.statusText, json.message)
                                 },
                                 failure: function (response) {
                                     if (response.status === 404) {
                                         Shopware.Msg.createGrowlMessage('Mollie Plugin', 'Please enable the plugin and clear your caches to use this feature!');
                                       } else {
-                                        Shopware.Msg.createGrowlMessage(response.statusText, response.responseText)
+                                         const json = JSON.parse(response.responseText);
+                                        Shopware.Msg.createGrowlMessage(response.statusText, json.message)
                                     }
                                 }
                             });
