@@ -9,6 +9,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Bancontact;
 use MollieShopware\Services\Mollie\Payments\Requests\BankTransfer;
 use MollieShopware\Services\Mollie\Payments\Requests\Belfius;
 use MollieShopware\Services\Mollie\Payments\Requests\Billie;
+use MollieShopware\Services\Mollie\Payments\Requests\Blik;
 use MollieShopware\Services\Mollie\Payments\Requests\CreditCard;
 use MollieShopware\Services\Mollie\Payments\Requests\EPS;
 use MollieShopware\Services\Mollie\Payments\Requests\Giftcard;
@@ -103,6 +104,9 @@ class PaymentFactory
 
             case PaymentMethod::TWINT:
                 return new Twint();
+
+            case PaymentMethod::BLIK:
+                return new Blik();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);

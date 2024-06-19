@@ -52,6 +52,7 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::VOUCHERS,
             PaymentMethod::IN3,
             PaymentMethod::TWINT,
+            PaymentMethod::BLIK
         ];
 
         $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());

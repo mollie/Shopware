@@ -240,7 +240,7 @@ configs.forEach(config => {
                     cy.contains('Vielen Dank für Ihre Bestellung');
 
                     // also verify that our address is correctly visible
-                    cy.get('.billing--panel').contains('Max Mustermann');
+                    cy.get('.billing--panel').should('be.visible').contains('Max Mustermann');
                 })
 
             })

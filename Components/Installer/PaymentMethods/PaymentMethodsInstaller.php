@@ -120,6 +120,7 @@ class PaymentMethodsInstaller
             PaymentMethod::VOUCHERS,
             PaymentMethod::IN3,
             PaymentMethod::TWINT,
+            PaymentMethod::BLIK,
         ];
     }
 
