@@ -30,4 +30,5 @@ class PaymentMethod
     const IN3 = "in3";
     const TWINT = "twint";
     const BANCOMAT_PAY = "bancomatpay";
+    const BLIK = "blik";
 }
