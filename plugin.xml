@@ -50,12 +50,14 @@
             - Neue Zahlungsmethode "Bancomatpay" ist nun verfügbar.
             - In Vorbereitung auf die vollständige Kompatibitlität für iDeal 2.0 haben wir die Bank-/Ausstellerauswahl im Checkout entfernt. Dies geschieht, um dem Käufer ein möglichst angenehmes Erlebnis zu gewährleisten.
             - Kompatibilitätsprobleme mit dem Plugin „Virtual Variants“ behoben. Bei Verwendung des Plugins funktionierten die Eingabefelder für Kreditkarten nicht.
+            - Meldung behoben beim aktualisieren der Zahlarten in den Plugin Einstellungen.
         </changes>
         <changes lang="en">
             - New payment method "Blik" is now available.
             - New payment method "Bancomatpay" is now available.
             - In preparation of full iDeal 2.0 readiness we have removed the bank/issuer selection in the checkout. This is done to guarantee the most convenient experience possible for the shopper.
             - Fixed compatibility issues with the plugin "Virtual Variants". When the Plugin was used, the input fields for credit cards didn't work.
+            - Fixed the message after updating the payment methods in plugin settings.
         </changes>
     </changelog>
 
