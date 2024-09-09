@@ -53,7 +53,8 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::IN3,
             PaymentMethod::TWINT,
             PaymentMethod::BANCOMAT_PAY,
-            PaymentMethod::BLIK
+            PaymentMethod::BLIK,
+            PaymentMethod::KLARNA_ONE,
         ];
 
         $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());

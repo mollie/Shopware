@@ -18,6 +18,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Giropay;
 use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use MollieShopware\Services\Mollie\Payments\Requests\In3;
 use MollieShopware\Services\Mollie\Payments\Requests\KBC;
+use MollieShopware\Services\Mollie\Payments\Requests\Klarna;
 use MollieShopware\Services\Mollie\Payments\Requests\PayLater;
 use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
@@ -111,6 +112,9 @@ class PaymentFactory
 
             case PaymentMethod::BLIK:
                 return new Blik();
+
+            case PaymentMethod::KLARNA_ONE:
+                return new Klarna();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);

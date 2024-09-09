@@ -23,6 +23,8 @@ class PaymentMethod
     const KLARNA_PAY_LATER = "klarnapaylater";
     const KLARNA_PAY_NOW = "klarnapaynow";
     const KLARNA_SLICE_IT = "klarnasliceit";
+
+    const KLARNA_ONE = "klarna";
     const P24 = "przelewy24";
     const APPLE_PAY = "applepay";
     const APPLEPAY_DIRECT = "applepaydirect";
