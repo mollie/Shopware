@@ -85,7 +85,7 @@ jobs:
 
       - name: Store Cypress Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cypress_results_v${{ matrix.plugin }}
           retention-days: 1
