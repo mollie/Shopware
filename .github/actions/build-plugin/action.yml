@@ -38,7 +38,7 @@ runs:
         docker cp shop:/var/www/html/custom/plugins/.build/MollieShopware.zip ~/.build/MollieShopware.zip
 
     - name: Store ZIP file in Github
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: MollieShopware-Shopware-${{ inputs.shopware }}
         retention-days: 4
