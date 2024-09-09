@@ -35,4 +35,5 @@ class PaymentMethod
     const BLIK = "blik";
     const RIVERTY = "riverty";
     const PAYCONIQ = "payconiq";
+    const SATISPAY = "satispay";
 }

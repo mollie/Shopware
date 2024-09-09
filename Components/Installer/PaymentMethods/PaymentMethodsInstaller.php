@@ -125,6 +125,7 @@ class PaymentMethodsInstaller
             PaymentMethod::KLARNA_ONE,
             PaymentMethod::RIVERTY,
             PaymentMethod::PAYCONIQ,
+            PaymentMethod::SATISPAY,
         ];
     }
 
