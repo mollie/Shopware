@@ -29,6 +29,6 @@ class Riverty extends AbstractPayment implements PaymentInterface
      */
     public function buildBodyPaymentsAPI()
     {
-        throw new ApiNotSupportedException('Klarna One does not support the Payments API!');
+        throw new ApiNotSupportedException('Riverty does not support the Payments API!');
     }
 }
