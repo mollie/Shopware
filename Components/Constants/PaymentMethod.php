@@ -36,4 +36,5 @@ class PaymentMethod
     const RIVERTY = "riverty";
     const PAYCONIQ = "payconiq";
     const SATISPAY = "satispay";
+    const TRUSTLY = "trustly";
 }

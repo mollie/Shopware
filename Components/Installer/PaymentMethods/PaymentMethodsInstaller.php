@@ -126,6 +126,7 @@ class PaymentMethodsInstaller
             PaymentMethod::RIVERTY,
             PaymentMethod::PAYCONIQ,
             PaymentMethod::SATISPAY,
+            PaymentMethod::TRUSTLY,
         ];
     }
 
