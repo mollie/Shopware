@@ -122,6 +122,7 @@ class PaymentMethodsInstaller
             PaymentMethod::TWINT,
             PaymentMethod::BANCOMAT_PAY,
             PaymentMethod::BLIK,
+            PaymentMethod::KLARNA_ONE
         ];
     }
 
