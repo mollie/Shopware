@@ -26,6 +26,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
 use MollieShopware\Services\Mollie\Payments\Requests\Paysafecard;
 use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
 use MollieShopware\Services\Mollie\Payments\Requests\Riverty;
+use MollieShopware\Services\Mollie\Payments\Requests\Satispay;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
@@ -123,6 +124,8 @@ class PaymentFactory
 
             case PaymentMethod::PAYCONIQ:
                 return new PayConiq();
+            case PaymentMethod::SATISPAY:
+                return new Satispay();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);

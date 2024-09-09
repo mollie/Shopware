@@ -57,6 +57,7 @@ class PaymentMethodsInstallerTest extends TestCase
             PaymentMethod::KLARNA_ONE,
             PaymentMethod::RIVERTY,
             PaymentMethod::PAYCONIQ,
+            PaymentMethod::SATISPAY,
         ];
 
         $this->assertEquals($expected, PaymentMethodsInstaller::getSupportedPaymentMethods());
