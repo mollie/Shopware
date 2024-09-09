@@ -123,7 +123,8 @@ class PaymentMethodsInstaller
             PaymentMethod::BANCOMAT_PAY,
             PaymentMethod::BLIK,
             PaymentMethod::KLARNA_ONE,
-            PaymentMethod::RIVERTY
+            PaymentMethod::RIVERTY,
+            PaymentMethod::PAYCONIQ,
         ];
     }
 

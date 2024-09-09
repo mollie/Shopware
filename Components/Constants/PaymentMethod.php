@@ -34,4 +34,5 @@ class PaymentMethod
     const BANCOMAT_PAY = "bancomatpay";
     const BLIK = "blik";
     const RIVERTY = "riverty";
+    const PAYCONIQ = "payconiq";
 }

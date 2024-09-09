@@ -19,6 +19,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\IDeal;
 use MollieShopware\Services\Mollie\Payments\Requests\In3;
 use MollieShopware\Services\Mollie\Payments\Requests\KBC;
 use MollieShopware\Services\Mollie\Payments\Requests\Klarna;
+use MollieShopware\Services\Mollie\Payments\Requests\Payconiq;
 use MollieShopware\Services\Mollie\Payments\Requests\PayLater;
 use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
@@ -119,6 +120,9 @@ class PaymentFactory
 
             case PaymentMethod::RIVERTY:
                 return new Riverty();
+
+            case PaymentMethod::PAYCONIQ:
+                return new PayConiq();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);
