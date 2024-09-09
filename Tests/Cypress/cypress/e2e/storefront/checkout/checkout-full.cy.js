@@ -79,11 +79,6 @@ const payments = [
     {caseId: 'C24802', key: 'eps', name: 'eps', paymentsAPI: false, createOrderBeforePayment: true},
     {caseId: 'C24803', key: 'eps', name: 'eps', paymentsAPI: false, createOrderBeforePayment: false},
 
-    {caseId: 'C4252', key: 'giropay', name: 'giropay', paymentsAPI: true, createOrderBeforePayment: true},
-    {caseId: 'C24804', key: 'giropay', name: 'giropay', paymentsAPI: true, createOrderBeforePayment: false},
-    {caseId: 'C24805', key: 'giropay', name: 'giropay', paymentsAPI: false, createOrderBeforePayment: true},
-    {caseId: 'C24806', key: 'giropay', name: 'giropay', paymentsAPI: false, createOrderBeforePayment: false},
-
     {caseId: 'C4235', key: 'ideal', name: 'iDEAL', paymentsAPI: true, createOrderBeforePayment: true},
     {caseId: 'C24807', key: 'ideal', name: 'iDEAL', paymentsAPI: true, createOrderBeforePayment: false},
     {caseId: 'C24808', key: 'ideal', name: 'iDEAL', paymentsAPI: false, createOrderBeforePayment: true},
