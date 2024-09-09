@@ -30,6 +30,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\Satispay;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
+use MollieShopware\Services\Mollie\Payments\Requests\Trustly;
 use MollieShopware\Services\Mollie\Payments\Requests\Twint;
 use MollieShopware\Services\Mollie\Payments\Requests\Voucher;
 
@@ -124,8 +125,12 @@ class PaymentFactory
 
             case PaymentMethod::PAYCONIQ:
                 return new PayConiq();
+
             case PaymentMethod::SATISPAY:
                 return new Satispay();
+
+            case PaymentMethod::TRUSTLY:
+                return new Trustly();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);
