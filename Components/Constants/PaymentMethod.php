@@ -33,4 +33,5 @@ class PaymentMethod
     const TWINT = "twint";
     const BANCOMAT_PAY = "bancomatpay";
     const BLIK = "blik";
+    const RIVERTY = "riverty";
 }

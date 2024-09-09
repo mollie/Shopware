@@ -24,6 +24,7 @@ use MollieShopware\Services\Mollie\Payments\Requests\PayNow;
 use MollieShopware\Services\Mollie\Payments\Requests\PayPal;
 use MollieShopware\Services\Mollie\Payments\Requests\Paysafecard;
 use MollieShopware\Services\Mollie\Payments\Requests\Przelewy24;
+use MollieShopware\Services\Mollie\Payments\Requests\Riverty;
 use MollieShopware\Services\Mollie\Payments\Requests\SepaDirectDebit;
 use MollieShopware\Services\Mollie\Payments\Requests\SliceIt;
 use MollieShopware\Services\Mollie\Payments\Requests\Sofort;
@@ -115,6 +116,9 @@ class PaymentFactory
 
             case PaymentMethod::KLARNA_ONE:
                 return new Klarna();
+
+            case PaymentMethod::RIVERTY:
+                return new Riverty();
         }
 
         throw new \Exception('Payment handler not found for: ' . $paymentMethod);
