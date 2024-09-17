@@ -9,7 +9,7 @@
     <label lang="fr">Mollie</label>
     <label lang="it">Mollie</label>
 
-    <version>2.6.0</version>
+    <version>2.7.0</version>
     <copyright>(c) Mollie B.V.</copyright>
     <license>MIT</license>
     <author>Mollie B.V.</author>
@@ -43,6 +43,23 @@
         <br/>
         https://github.com/mollie/Shopware/wiki
     </description>
+
+    <changelog version="2.7.0">
+        <changes lang="de">
+            - Neue Zahlungsmethode "Trustly" ist nun verfügbar.
+            - Neue Zahlungsmethode "Satispay" ist nun verfügbar.
+            - Neue Zahlungsmethode "Payconiq" ist nun verfügbar.
+            - Neue Zahlungsmethode "Riverty" ist nun verfügbar.
+            - Neue Zahlungsmethode "Klarna One" ist nun verfügbar.
+        </changes>
+        <changes lang="en">
+            - New payment method "Trustly" is now available.
+            - New payment method "Satispay" is now available.
+            - New payment method "Payconiq" is now available.
+            - New payment method "Riverty" is now available.
+            - New payment method "Klarna One" is now available.
+        </changes>
+    </changelog>
 
     <changelog version="2.6.0">
         <changes lang="de">
