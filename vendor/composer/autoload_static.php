@@ -4,32 +4,28 @@
 
 namespace Composer\Autoload;
 
-<<<<<<< HEAD
-class ComposerStaticInit0e545bd79f2c55e11f645381af268f35
-=======
-class ComposerStaticInit048a628bc63e0bdd9ef175499008e74a
->>>>>>> parent of d57337a (NTR: Update dependencies)
+class ComposerStaticInite833291eee48a309ec3057562bb8d92f
 {
     public static $prefixLengthsPsr4 = array (
-        'M' => 
-        array (
-            'Mollie\\Api\\' => 11,
-        ),
-        'C' => 
-        array (
-            'Composer\\CaBundle\\' => 18,
-        ),
+        'M' =>
+            array (
+                'Mollie\\Api\\' => 11,
+            ),
+        'C' =>
+            array (
+                'Composer\\CaBundle\\' => 18,
+            ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Mollie\\Api\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mollie/mollie-api-php/src',
-        ),
-        'Composer\\CaBundle\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
-        ),
+        'Mollie\\Api\\' =>
+            array (
+                0 => __DIR__ . '/..' . '/mollie/mollie-api-php/src',
+            ),
+        'Composer\\CaBundle\\' =>
+            array (
+                0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
+            ),
     );
 
     public static $classMap = array (
@@ -39,15 +35,9 @@ class ComposerStaticInit048a628bc63e0bdd9ef175499008e74a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-<<<<<<< HEAD
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$classMap;
-=======
-            $loader->prefixLengthsPsr4 = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$classMap;
->>>>>>> parent of d57337a (NTR: Update dependencies)
+            $loader->prefixLengthsPsr4 = ComposerStaticInite833291eee48a309ec3057562bb8d92f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite833291eee48a309ec3057562bb8d92f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite833291eee48a309ec3057562bb8d92f::$classMap;
 
         }, null, ClassLoader::class);
     }
