@@ -37,9 +37,19 @@ runs:
       run: |
         docker cp shop:/var/www/html/custom/plugins/.build/MollieShopware.zip ~/.build/MollieShopware.zip
 
+    - name: Extract ZIP file for artifact
+      shell: bash
+      run: |
+        unzip ~/.build/MollieShopware.zip -d ~/.build/MollieShopware
+
     - name: Store ZIP file in Github
       uses: actions/upload-artifact@v4
       with:
         name: MollieShopware-Shopware-${{ inputs.shopware }}
         retention-days: 4
-        path: ~/.build
+        path: ~/.build/MollieShopware
+
+    - name: Delete TMP files
+      shell: bash
+      run: |
+        rm -rf ~/.build/MollieShopware
