@@ -4,4 +4,8 @@
 
 require_once __DIR__ . '/composer/autoload_real.php';
 
+<<<<<<< HEAD
 return ComposerAutoloaderInit0e545bd79f2c55e11f645381af268f35::getLoader();
+=======
+return ComposerAutoloaderInit048a628bc63e0bdd9ef175499008e74a::getLoader();
+>>>>>>> parent of d57337a (NTR: Update dependencies)

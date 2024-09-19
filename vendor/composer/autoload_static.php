@@ -4,7 +4,11 @@
 
 namespace Composer\Autoload;
 
+<<<<<<< HEAD
 class ComposerStaticInit0e545bd79f2c55e11f645381af268f35
+=======
+class ComposerStaticInit048a628bc63e0bdd9ef175499008e74a
+>>>>>>> parent of d57337a (NTR: Update dependencies)
 {
     public static $prefixLengthsPsr4 = array (
         'M' => 
@@ -35,9 +39,15 @@ class ComposerStaticInit0e545bd79f2c55e11f645381af268f35
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+<<<<<<< HEAD
             $loader->prefixLengthsPsr4 = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$prefixDirsPsr4;
             $loader->classMap = ComposerStaticInit0e545bd79f2c55e11f645381af268f35::$classMap;
+=======
+            $loader->prefixLengthsPsr4 = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit048a628bc63e0bdd9ef175499008e74a::$classMap;
+>>>>>>> parent of d57337a (NTR: Update dependencies)
 
         }, null, ClassLoader::class);
     }
