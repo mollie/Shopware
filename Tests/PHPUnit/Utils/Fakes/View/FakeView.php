@@ -36,7 +36,7 @@ class FakeView extends Enlight_View_Default
      */
     public function getAssign($spec = null)
     {
-        if (!$spec === null) {
+        if ($spec === null) {
             return $this->items;
         }
 

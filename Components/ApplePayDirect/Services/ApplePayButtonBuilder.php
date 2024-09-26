@@ -5,12 +5,15 @@ namespace MollieShopware\Components\ApplePayDirect\Services;
 use Doctrine\ORM\EntityNotFoundException;
 use Enlight_Controller_Request_Request;
 use Enlight_View;
+use Exception;
+use MollieShopware\Components\Account\Account;
+use MollieShopware\Components\Admin\AdminFactoryInterface;
 use MollieShopware\Components\ApplePayDirect\Models\Button\ApplePayButton;
 use MollieShopware\Components\ApplePayDirect\Models\Button\DisplayOption;
+use MollieShopware\Components\Basket\BasketFactoryInterface;
 use MollieShopware\Components\Config;
 use MollieShopware\Components\Country\CountryIsoParser;
 use Shopware\Models\Shop\Shop;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ApplePayButtonBuilder
 {
@@ -22,6 +25,13 @@ class ApplePayButtonBuilder
      */
     const KEY_MOLLIE_APPLEPAY_BUTTON = 'sMollieApplePayDirectButton';
 
+    /** @var Account */
+    private $accountService;
+
+    /**
+     * @var \sBasket
+     */
+    private $sBasket;
 
     /**
      * @var Config
@@ -50,34 +60,33 @@ class ApplePayButtonBuilder
 
 
     /**
+     * @param Account $accountService
      * @param Config $configMollie
      * @param \Shopware_Components_Config $configShopware
      * @param ApplePayPaymentMethod $applePayPaymentMethod
      * @param ApplePayDirectDisplayOptions $restrictionService
      */
-    public function __construct(Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService)
+    public function __construct(Account $accountService, Config $configMollie, \Shopware_Components_Config $configShopware, ApplePayPaymentMethod $applePayPaymentMethod, ApplePayDirectDisplayOptions $restrictionService, AdminFactoryInterface $adminFactory, BasketFactoryInterface $basketFactory)
     {
+        $this->accountService = $accountService;
+        $this->applePayPaymentMethod = $applePayPaymentMethod;
         $this->configMollie = $configMollie;
         $this->configShopware = $configShopware;
         $this->restrictionService = $restrictionService;
-
-        # attention, modules does not exist in CLI
-        $this->sAdmin = Shopware()->Modules()->Admin();
-        $this->applePayPaymentMethod = $applePayPaymentMethod;
+        $this->sAdmin = $adminFactory->create();
+        $this->sBasket = $basketFactory->create();
     }
-
 
     /**
      * @param Enlight_Controller_Request_Request $request
      * @param Enlight_View $view
      * @param Shop $shop
-     * @throws \Exception
+     * @throws Exception
      */
     public function addButtonStatus(Enlight_Controller_Request_Request $request, Enlight_View $view, Shop $shop)
     {
         /** @var string $controller */
         $controller = strtolower($request->getControllerName());
-
 
         $isActive = $this->applePayPaymentMethod->isApplePayDirectEnabled();
 
@@ -90,8 +99,12 @@ class ApplePayButtonBuilder
             if ($isRiskManagementBlocked) {
                 $isActive = false;
             }
-        }
 
+            # check if the customer can use Apple Pay direct for ESD products
+            if ($this->isBlockedForEsd($controller, $view)) {
+                $isActive = false;
+            }
+        }
 
         # apple pay requires a country iso
         # we use the first one from our country list.
@@ -136,5 +149,46 @@ class ApplePayButtonBuilder
         }
 
         $view->assign(self::KEY_MOLLIE_APPLEPAY_BUTTON, $button->toArray());
+    }
+
+    /**
+     * Returns if the basket has ESD products.
+     *
+     * @return bool
+     */
+    private function hasEsdProductsInBasket()
+    {
+        return $this->sBasket->sCheckForESD();
+    }
+
+    /**
+     * Returns if the Apple Pay direct button
+     * is blocked for ESD products.
+     *
+     * @param string $controllerName
+     * @param Enlight_View $view
+     * @return bool
+     */
+    private function isBlockedForEsd($controllerName, Enlight_View $view)
+    {
+        # if a customer has esd products in the basket, the
+        # Apple Pay direct button is only available if the
+        # customer is fully logged in (not as guest)
+        $hasEsdProductsInBasket = $controllerName === 'checkout' && $this->hasEsdProductsInBasket();
+        $isEsdProductDetailPage = $controllerName === 'detail' && $this->isEsdProductPage($view);
+        $isUserLoggedIn = $this->accountService->isLoggedIn() && !$this->accountService->isLoggedInAsGuest();
+
+        return ($hasEsdProductsInBasket || $isEsdProductDetailPage) && !$isUserLoggedIn;
+    }
+
+    /**
+     * Returns if the product page is for an ESD product.
+     *
+     * @param Enlight_View $view
+     * @return bool
+     */
+    private function isEsdProductPage(Enlight_View $view)
+    {
+        return boolval($view->getAssign('sArticle')['esd']) === true;
     }
 }
