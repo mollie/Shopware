@@ -102,7 +102,6 @@ class ConfigExporter
             'ordersShipOnStatus' => $this->config->getOrdersShipOnStatus(),
             'cancelFailedOrders' => $this->config->cancelFailedOrders(),
             'resetInvoiceAndShipping' => $this->config->resetInvoiceAndShipping(),
-            'autoResetStock' => $this->config->autoResetStock(),
             'shippedStatus' => $this->config->getShippedStatus(),
             'molliePaymentMethodLimits' => $this->config->useMolliePaymentMethodLimits(),
             'paymentStatusMailEnabled' => $this->config->isPaymentStatusMailEnabled(),

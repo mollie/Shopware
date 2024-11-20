@@ -28,7 +28,6 @@ class ConfigExporterTest extends TestCase
     const TEST_VALUE_SHIPPED_STATUS = Status::ORDER_STATE_COMPLETELY_DELIVERED;
     const TEST_VALUE_CANCEL_FAILED_ORDERS = false;
     const TEST_VALUE_RESET_INVOICE_AND_SHIPPING = true;
-    const TEST_VALUE_AUTO_RESET_STOCK = true;
     const TEST_VALUE_ORDERS_SHIP_ON_STATUS = Status::ORDER_STATE_READY_FOR_DELIVERY;
     const TEST_VALUE_MOLLIE_PAYMENT_METHOD_LIMITS = true;
     const TEST_VALUE_PAYMENT_STATUS_MAIL_ENABLED = true;
@@ -75,7 +74,6 @@ class ConfigExporterTest extends TestCase
             'getOrdersShipOnStatus' => self::TEST_VALUE_ORDERS_SHIP_ON_STATUS,
             'cancelFailedOrders' => self::TEST_VALUE_CANCEL_FAILED_ORDERS,
             'resetInvoiceAndShipping' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING,
-            'autoResetStock' => self::TEST_VALUE_AUTO_RESET_STOCK,
             'getShippedStatus' => self::TEST_VALUE_SHIPPED_STATUS,
             'useMolliePaymentMethodLimits' => self::TEST_VALUE_MOLLIE_PAYMENT_METHOD_LIMITS,
             'isPaymentStatusMailEnabled' => self::TEST_VALUE_PAYMENT_STATUS_MAIL_ENABLED,
@@ -235,7 +233,6 @@ class ConfigExporterTest extends TestCase
             'ordersShipOnStatus' => self::TEST_VALUE_ORDERS_SHIP_ON_STATUS,
             'cancelFailedOrders' => self::TEST_VALUE_CANCEL_FAILED_ORDERS,
             'resetInvoiceAndShipping' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING,
-            'autoResetStock' => self::TEST_VALUE_AUTO_RESET_STOCK,
             'shippedStatus' => self::TEST_VALUE_SHIPPED_STATUS,
             'molliePaymentMethodLimits' => self::TEST_VALUE_MOLLIE_PAYMENT_METHOD_LIMITS,
             'paymentStatusMailEnabled' => self::TEST_VALUE_PAYMENT_STATUS_MAIL_ENABLED,
@@ -264,7 +261,6 @@ class ConfigExporterTest extends TestCase
             'Automatic Shipping Status' => self::TEST_VALUE_STATUS_NAME,
             'Cancel Failed Orders Enabled' => self::TEST_VALUE_CANCEL_FAILED_ORDERS ? 'Yes' : 'No',
             'Cancellation Of All Amounts Enabled' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING ? 'Yes' : 'No',
-            'Reset Stock On Failed Payment Enabled' => self::TEST_VALUE_AUTO_RESET_STOCK ? 'Yes' : 'No',
             'Order Status For Shipped Orders' => self::TEST_VALUE_STATUS_NAME,
             'Use Mollie Payment Method Limits Enabled' => self::TEST_VALUE_MOLLIE_PAYMENT_METHOD_LIMITS ? 'Yes' : 'No',
             'Send Payment Status Mail Enabled' => self::TEST_VALUE_PAYMENT_STATUS_MAIL_ENABLED ? 'Yes' : 'No',

@@ -201,5 +201,11 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
+        <service id="mollie_shopware.components.services.stock_service" class="MollieShopware\Components\Services\StockService" >
+            <argument id="mollie_shopware.order_service" type="service"/>
+            <argument type="service" id="db"/>
+            <argument type="service" id="mollie_shopware.logger"/>
+        </service>
+
     </services>
 </container>

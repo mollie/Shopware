@@ -524,26 +524,6 @@ class PaymentService
     }
 
     /**
-     * Reset stock on an order
-     *
-     * @param Order $order
-     * @throws \Exception
-     */
-    public function resetStock(Order $order)
-    {
-        /** @var \MollieShopware\Components\Services\BasketService $basketService */
-        $basketService = Shopware()->Container()->get('mollie_shopware.basket_service');
-        // Reset order quantity
-        foreach ($order->getDetails() as $orderDetail) {
-            $basketService->resetOrderDetailQuantity($orderDetail);
-        }
-
-        // Store order
-        Shopware()->Models()->persist($order);
-        Shopware()->Models()->flush($order);
-    }
-
-    /**
      * Reset invoice and shipping on an order
      *
      * @param Order $order
