@@ -168,6 +168,11 @@ class BasketService
                             $this->addAttributes($id, $orderDetail);
                         }
                     }
+
+                    // reset ordered quantity
+                    if ($this->config->autoResetStock()) {
+                        $this->resetOrderDetailQuantity($orderDetail);
+                    }
                 }
 
                 // append internal comment

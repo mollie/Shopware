@@ -256,6 +256,17 @@ class Config implements ConfigInterface
         return $this->dataTypes->getBoolValue($valueStr);
     }
 
+    /**
+     * Whether to automatically reset stock after a failed or canceled payment
+     *
+     * @return boolean
+     */
+    public function autoResetStock()
+    {
+        $valueStr = $this->get('auto_reset_stock', 'no');
+
+        return $this->dataTypes->getBoolValue($valueStr);
+    }
 
     /**
      * @return string

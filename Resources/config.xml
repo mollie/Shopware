@@ -627,6 +627,54 @@
         </element>
 
 
+        <element type="select" scope="shop">
+            <name>auto_reset_stock</name>
+            <label lang="en">Reset stock on failed payment</label>
+            <label lang="de">Lagerbestand bei Fehler zurücksetzen</label>
+            <label lang="nl-NL">Voorraad terugzetten bij mislukte betaling</label>
+            <label lang="es-ES">Restablecer stock en caso de pago fallido</label>
+            <label lang="fr-FR">Réinitialiser le stock en cas d'échec de paiement</label>
+            <label lang="it-IT">Ripristina lo stock in caso di pagamento non riuscito</label>
+            <value>yes</value>
+            <description lang="en">Sets the position quantities in cancelled orders to 0, to reset the stock of the products. This also resets the total amount accordingly.</description>
+            <description lang="de">Setzt die bestellten Mengen in abgebrochenen Bestellungen auf 0, um den Lagerbestand wieder zurückzusetzen. Dies setzt auch den Gesamtbetrag entsprechend zurück.</description>
+            <description lang="es-ES">Establece las cantidades de posición en pedidos cancelados a 0, para restablecer el stock de los productos. Esto también restablece la cantidad total en consecuencia.</description>
+            <description lang="nl-NL">Zet de bestelde hoeveelheden in geannuleerde bestellingen op 0 om de voorraad opnieuw in te kunnen stellen. Hiermee wordt ook het totale bedrag overeenkomstig gereset.</description>
+            <description lang="fr-FR">Définit les quantités de position dans les commandes annulées à 0, pour réinitialiser le stock des produits. Cela réinitialise également le montant total en conséquence.</description>
+            <description lang="it-IT">Imposta le quantità di posizione negli ordini annullati a 0, per azzerare lo stock dei prodotti. Questo azzera anche l'importo totale di conseguenza.</description>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="en">Inherited</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="en">Yes</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="en">No</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
+                </option>
+            </store>
+            <options>
+                <position>18</position>
+            </options>
+        </element>
 
         <element type="combo" scope="shop">
             <name>klarna_ship_on_status</name>
