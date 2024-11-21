@@ -3,6 +3,7 @@
 namespace MollieShopware\Components\Services;
 
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
+use MollieShopware\Components\Config;
 use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
 use Shopware\Bundle\CartBundle\CartPositionsMode;
@@ -24,15 +25,22 @@ class StockService
     private $db;
 
     /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @param OrderService $orderService
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param LoggerInterface $logger
+     * @param mixed $config
      */
-    public function __construct($orderService, $db, $logger)
+    public function __construct($orderService, $config, $db, $logger)
     {
         $this->orderService = $orderService;
         $this->db = $db;
         $this->logger = $logger;
+        $this->config = $config;
     }
 
 
@@ -43,15 +51,13 @@ class StockService
      */
     public function updateOrderStocks($orderId, $reset = true)
     {
-        $order = $this->orderService->getOrderById($orderId);
-        $paymentMethodName = $order->getPayment()->getName();
-
-        $isMolliePayment = strpos($paymentMethodName, MollieShopware::PAYMENT_PREFIX) !== false;
-
-        if (! $isMolliePayment) {
-            $this->logger->info('Order Payment does not belong to mollie', ['paymentMethodName' => $paymentMethodName]);
+        if (!$this->config->reduceStockOnPayment()) {
+            $this->logger->debug('Reduce stock on payment config is disabled');
             return;
         }
+        $order = $this->orderService->getOrderById($orderId);
+
+
         if ($order->getPaymentStatus()->getId() === Status::PAYMENT_STATE_COMPLETELY_PAID) {
             $this->logger->info('Order is already paid, stock updates not needed', ['orderId' => $orderId]);
             return;

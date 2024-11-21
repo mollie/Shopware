@@ -576,6 +576,55 @@
             </options>
         </element>
 
+        <element type="select" scope="shop">
+            <name>reduce_stock_on_paid</name>
+            <label lang="en">Reduce stock after successful payment</label>
+            <label lang="de">Lagerbestand nach erfolgreicher Zahlung reduzieren</label>
+            <label lang="nl-NL">Verminder de voorraad na succesvolle betaling</label>
+            <label lang="es-ES">Reducir el stock después del pago exitoso</label>
+            <label lang="fr-FR">Réduire le stock après un paiement réussi</label>
+            <label lang="it-IT">Ridurre le scorte dopo il pagamento andato a buon fine</label>
+            <value>yes</value>
+            <description lang="en">Reduce the stock after successfull pyment. This option make the option "reset stock on failed payment".</description>
+            <description lang="de">Reduzieren Sie den Lagerbestand nach erfolgreicher Zahlung. Diese Option macht die Option "Lagerbestand bei Fehler zurücksetzen" obsolet.</description>
+            <description lang="nl-NL">Verminder de voorraad na succesvolle betaling. Deze optie maakt de optie "voorraad terugzetten bij mislukte betaling" overbodig.</description>
+            <description lang="es-ES">Reduzca el stock después del pago exitoso. Esta opción hace que la opción "restablecer stock en caso de pago fallido" obsoleta.</description>
+            <description lang="fr-FR">Réduisez le stock après un paiement réussi. Cette option rend obsolète l'option "réinitialiser le stock en cas d'échec de paiement".</description>
+            <description lang="it-IT">Ridurre lo stock dopo aver effettuato con successo il pagamento. Questa opzione rende obsoleta l'opzione "ripristina lo stock in caso di pagamento non riuscito".</description>
+            <store>
+                <option>
+                    <value>inherited</value>
+                    <label lang="en">Inherited</label>
+                    <label lang="de">Vererbt</label>
+                    <label lang="nl-NL">Geërfd</label>
+                    <label lang="es-ES">Heredada</label>
+                    <label lang="fr-FR">Hérité</label>
+                    <label lang="it-IT">Ereditato</label>
+                </option>
+                <option>
+                    <value>yes</value>
+                    <label lang="en">Yes</label>
+                    <label lang="de">Ja</label>
+                    <label lang="nl-NL">Ja</label>
+                    <label lang="es-ES">sí</label>
+                    <label lang="fr-FR">Oui</label>
+                    <label lang="it-IT">sì</label>
+                </option>
+                <option>
+                    <value>no</value>
+                    <label lang="en">No</label>
+                    <label lang="de">Nein</label>
+                    <label lang="nl-NL">Nee</label>
+                    <label lang="es-ES">no</label>
+                    <label lang="fr-FR">non</label>
+                    <label lang="it-IT">no</label>
+                </option>
+            </store>
+            <options>
+                <position>17</position>
+            </options>
+        </element>
+
 
         <element type="select" scope="shop">
             <name>reset_invoice_shipping</name>
@@ -622,7 +671,7 @@
                 </option>
             </store>
             <options>
-                <position>17</position>
+                <position>18</position>
             </options>
         </element>
 
@@ -672,7 +721,7 @@
                 </option>
             </store>
             <options>
-                <position>18</position>
+                <position>19</position>
             </options>
         </element>
 
@@ -692,7 +741,7 @@
             <description lang="it-IT">L'ordine viene automaticamente contrassegnato come spedito in Mollie se viene effettuata una transizione a questo stato.</description>
             <store>Shopware.apps.Base.store.OrderStatus</store>
             <options>
-                <position>19</position>
+                <position>20</position>
             </options>
         </element>
 
@@ -742,7 +791,7 @@
                 </option>
             </store>
             <options>
-                <position>20</position>
+                <position>21</position>
             </options>
         </element>
 
@@ -791,7 +840,7 @@
                 </option>
             </store>
             <options>
-                <position>21</position>
+                <position>22</position>
             </options>
         </element>
         <element type="button" required="false">
@@ -803,7 +852,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- E-Mails ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>22</position>
+                <position>23</position>
             </options>
         </element>
 
@@ -846,7 +895,7 @@
                 </option>
             </store>
             <options>
-                <position>23</position>
+                <position>24</position>
             </options>
         </element>
 
@@ -859,7 +908,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Carte de crédit ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Carta di credito ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>24</position>
+                <position>25</position>
             </options>
         </element>
 
@@ -873,7 +922,7 @@
             <label lang="it-IT">Abilita componenti</label>
             <value>true</value>
             <options>
-                <position>25</position>
+                <position>26</position>
             </options>
         </element>
 
@@ -887,7 +936,7 @@
             <label lang="it-IT">Abilita lo stile per i componenti</label>
             <value>true</value>
             <options>
-                <position>26</position>
+                <position>27</position>
             </options>
         </element>
 
@@ -900,7 +949,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Apple Pay ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>27</position>
+                <position>28</position>
             </options>
         </element>
 
@@ -947,7 +996,7 @@
                 <valueField>id</valueField>
                 <displayField>name</displayField>
                 <isCustomStore>true</isCustomStore>
-                <position>28</position>
+                <position>29</position>
             </options>
         </element>
 
@@ -960,7 +1009,7 @@
             <label lang="fr-FR">--------------------------------------------------------------------------------------- Bancaire ---------------------------------------------------------------------------------------</label>
             <label lang="it-IT">--------------------------------------------------------------------------------------- Trasferimento bancario ---------------------------------------------------------------------------------------</label>
             <options>
-                <position>29</position>
+                <position>30</position>
             </options>
         </element>
 
@@ -973,7 +1022,7 @@
             <label lang="fr-FR">Délai de paiement (jours)</label>
             <label lang="it-IT">Termine di pagamento (Giorni)</label>
             <options>
-                <position>30</position>
+                <position>31</position>
             </options>
         </element>
 

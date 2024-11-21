@@ -4,10 +4,9 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
-use MollieShopware\Components\Constants\PaymentStatus;
+use Enlight_Hook_HookArgs;
 use MollieShopware\Components\Services\StockService;
-use MollieShopware\Events\Events;
-use Shopware\Models\Order\Order;
+use Shopware\Models\Order\Status;
 
 class StockSubscriber implements SubscriberInterface
 {
@@ -25,7 +24,7 @@ class StockSubscriber implements SubscriberInterface
     {
         return [
             'Shopware_Modules_Order_SaveOrder_ProcessDetails' => 'resetStocks',
-            Events::UPDATE_ORDER_PAYMENT_STATUS => 'increaseStocks'
+            'sOrder::setPaymentStatus::after' => 'increaseStocks'
         ];
     }
 
@@ -35,22 +34,14 @@ class StockSubscriber implements SubscriberInterface
         $this->stockService->updateOrderStocks($orderId);
     }
 
-    public function increaseStocks(Enlight_Event_EventArgs $eventArgs)
+    public function increaseStocks(Enlight_Hook_HookArgs $eventArgs)
     {
-        $paymentStatus = $eventArgs->get('molliePaymentStatus');
-        $successStatus = [
-            PaymentStatus::MOLLIE_PAYMENT_PAID,
-            PaymentStatus::MOLLIE_PAYMENT_COMPLETED
-        ];
-
-        if (!in_array($paymentStatus, $successStatus)) {
+        $orderId = (int)$eventArgs->get('orderId');
+        $paymentStatusId = (int)$eventArgs->get('paymentStatusId');
+        if ($paymentStatusId !== Status::PAYMENT_STATE_COMPLETELY_PAID) {
             return;
         }
-        /**
-         * @var Order $order
-         */
-        $order = $eventArgs->get('order');
 
-        $this->stockService->updateOrderStocks($order->getId(), false);
+        $this->stockService->updateOrderStocks($orderId, false);
     }
 }

@@ -265,7 +265,7 @@ class Config implements ConfigInterface
     {
         $valueStr = $this->get('auto_reset_stock', 'no');
 
-        return $this->dataTypes->getBoolValue($valueStr);
+        return $this->dataTypes->getBoolValue($valueStr) && !$this->reduceStockOnPayment();
     }
 
     /**
@@ -355,6 +355,16 @@ class Config implements ConfigInterface
     public function cancelFailedOrders()
     {
         $valueStr = $this->get('auto_cancel_failed_orders', 'yes');
+
+        return $this->dataTypes->getBoolValue($valueStr);
+    }
+
+    /**
+     * @return bool
+     */
+    public function reduceStockOnPayment()
+    {
+        $valueStr = $this->get('reduce_stock_on_paid', 'no');
 
         return $this->dataTypes->getBoolValue($valueStr);
     }
