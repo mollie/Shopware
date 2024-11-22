@@ -205,7 +205,7 @@
             <argument type="service" id="mollie_shopware.order_service"/>
             <argument type="service" id="mollie_shopware.config"/>
             <argument type="service" id="db"/>
-            <argument type="service" id="mollie_shopware.logger"/>
+            <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
     </services>
