@@ -57,12 +57,6 @@ class StockService
         }
         $order = $this->orderService->getOrderById($orderId);
 
-
-        if ($order->getPaymentStatus()->getId() === Status::PAYMENT_STATE_COMPLETELY_PAID) {
-            $this->logger->info('Order is already paid, stock updates not needed', ['orderId' => $orderId]);
-            return;
-        }
-
         $this->logger->debug('Start to reset the stocks for order', ['orderId' => $orderId]);
 
         foreach ($order->getDetails() as $orderDetail) {
