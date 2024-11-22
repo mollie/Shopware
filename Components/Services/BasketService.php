@@ -257,7 +257,7 @@ class BasketService
         }
 
         // perform update
-        $this->db->update('s_order_basket_attributes', $update, 'id = ' . $id);
+        $this->db->update('s_order_basket_attributes', $update, 'basketID = ' . $id);
     }
 
     /**
@@ -289,7 +289,7 @@ class BasketService
     private function getOrderDetailsAttributes($id)
     {
         $orderDetailAttributesResult = $this->db->fetchAll(
-            'SELECT * FROM s_order_details_attributes WHERE id = ?;',
+            'SELECT * FROM s_order_details_attributes WHERE detailID = ?;',
             [$id]
         );
 
