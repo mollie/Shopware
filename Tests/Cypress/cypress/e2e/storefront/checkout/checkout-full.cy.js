@@ -63,11 +63,7 @@ const payments = [
     {caseId: 'C24791', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: false, createOrderBeforePayment: false},
     {caseId: 'C24793', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: true, createOrderBeforePayment: true},
     {caseId: 'C24792', key: 'klarnasliceit', name: 'Slice it', paymentsAPI: true, createOrderBeforePayment: false},
-
-    {caseId: 'C4248', key: 'sofort', name: 'SOFORT', paymentsAPI: true, createOrderBeforePayment: true},
-    {caseId: 'C24796', key: 'sofort', name: 'SOFORT', paymentsAPI: true, createOrderBeforePayment: false},
-    {caseId: 'C24788', key: 'sofort', name: 'SOFORT', paymentsAPI: false, createOrderBeforePayment: true},
-    {caseId: 'C24797', key: 'sofort', name: 'SOFORT', paymentsAPI: false, createOrderBeforePayment: false},
+    
 
     {caseId: 'C4249', key: 'mistercash', name: 'Bancontact', paymentsAPI: true, createOrderBeforePayment: true},
     {caseId: 'C24798', key: 'mistercash', name: 'Bancontact', paymentsAPI: true, createOrderBeforePayment: false},
