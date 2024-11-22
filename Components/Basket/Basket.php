@@ -124,8 +124,11 @@ class Basket implements BasketInterface
 
         /** @var Detail $article */
         $article = $articles[0];
-
-        if (!method_exists($article->getAttribute(), 'getMollieVoucherType')) {
+        $attribute = $article->getAttribute();
+        if ($attribute === null) {
+            return '';
+        }
+        if (!method_exists($attribute, 'getMollieVoucherType')) {
             $this->logger->warning('Method getMollieVoucherType is not existing in Article Attributes. Please clear your cache!');
             return VoucherType::NONE;
         }

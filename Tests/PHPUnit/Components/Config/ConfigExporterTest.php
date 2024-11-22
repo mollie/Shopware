@@ -41,6 +41,7 @@ class ConfigExporterTest extends TestCase
     const TEST_VALUE_TEST_API_KEY_VALIDATION = 'Invalid';
 
     const TEST_VALUE_STATUS_NAME = 'Status';
+    const TEST_VALUE_REDUCE_STOCK_ON_PAYMENT = false;
 
     /**
      * @var EntityManagerInterface
@@ -74,6 +75,7 @@ class ConfigExporterTest extends TestCase
             'updateOrderStatus' => self::TEST_VALUE_UPDATE_ORDER_STATUS,
             'getOrdersShipOnStatus' => self::TEST_VALUE_ORDERS_SHIP_ON_STATUS,
             'cancelFailedOrders' => self::TEST_VALUE_CANCEL_FAILED_ORDERS,
+            'reduceStockOnPayment' => self::TEST_VALUE_REDUCE_STOCK_ON_PAYMENT,
             'resetInvoiceAndShipping' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING,
             'autoResetStock' => self::TEST_VALUE_AUTO_RESET_STOCK,
             'getShippedStatus' => self::TEST_VALUE_SHIPPED_STATUS,
@@ -234,6 +236,7 @@ class ConfigExporterTest extends TestCase
             'updateOrderStatus' => self::TEST_VALUE_UPDATE_ORDER_STATUS,
             'ordersShipOnStatus' => self::TEST_VALUE_ORDERS_SHIP_ON_STATUS,
             'cancelFailedOrders' => self::TEST_VALUE_CANCEL_FAILED_ORDERS,
+            'reduceStockOnPayment' => self::TEST_VALUE_REDUCE_STOCK_ON_PAYMENT,
             'resetInvoiceAndShipping' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING,
             'autoResetStock' => self::TEST_VALUE_AUTO_RESET_STOCK,
             'shippedStatus' => self::TEST_VALUE_SHIPPED_STATUS,
@@ -263,6 +266,7 @@ class ConfigExporterTest extends TestCase
             'Update Order Status Automatically Enabled' => self::TEST_VALUE_UPDATE_ORDER_STATUS ? 'Yes' : 'No',
             'Automatic Shipping Status' => self::TEST_VALUE_STATUS_NAME,
             'Cancel Failed Orders Enabled' => self::TEST_VALUE_CANCEL_FAILED_ORDERS ? 'Yes' : 'No',
+            'Reduce stock after successful payment' => self::TEST_VALUE_REDUCE_STOCK_ON_PAYMENT ? 'Yes' : 'No',
             'Cancellation Of All Amounts Enabled' => self::TEST_VALUE_RESET_INVOICE_AND_SHIPPING ? 'Yes' : 'No',
             'Reset Stock On Failed Payment Enabled' => self::TEST_VALUE_AUTO_RESET_STOCK ? 'Yes' : 'No',
             'Order Status For Shipped Orders' => self::TEST_VALUE_STATUS_NAME,
