@@ -4,13 +4,15 @@ namespace MollieShopware\Components\Services;
 
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use MollieShopware\Components\Config;
-use MollieShopware\MollieShopware;
 use Psr\Log\LoggerInterface;
-use Shopware\Bundle\CartBundle\CartPositionsMode;
-use Shopware\Models\Order\Status;
 
 class StockService
 {
+    /**
+     * cannot use Shopware\Bundle\CartBundle\CartPositionsMode constants, they dont exists in 5.7.3 and below
+     */
+    const PRODUCT = 0;
+    const PREMIUM_PRODUCT = 1;
     /**
      * @var OrderService
      */
@@ -66,7 +68,7 @@ class StockService
                 $this->logger->debug('Price is lower than 0, this product was not updated in first place', ['orderId' => $orderId, 'articleNumber' => $articleNumber, 'priceNumeric' => $orderDetail->getPrice()]);
                 continue;
             }
-            if (! in_array($orderDetail->getMode(), [CartPositionsMode::PRODUCT, CartPositionsMode::PREMIUM_PRODUCT], true)) {
+            if (! in_array($orderDetail->getMode(), [self::PRODUCT, self::PREMIUM_PRODUCT], true)) {
                 $this->logger->debug('Order detail does not have a regular product', ['orderId' => $orderId, 'articleNumber' => $articleNumber, 'mode' => $orderDetail->getMode()]);
                 continue;
             }
