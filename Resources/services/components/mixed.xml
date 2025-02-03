@@ -208,5 +208,11 @@
             <argument type="service" id="mollie_shopware.components.logger"/>
         </service>
 
+        <service id="mollie_shopware.components.admin.admin_factory" class="MollieShopware\Components\Admin\AdminFactory" public="true">
+        </service>
+
+        <service id="mollie_shopware.components.basket.basket_factory" class="MollieShopware\Components\Basket\BasketFactory" public="true">
+        </service>
+
     </services>
 </container>
