@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use MollieShopware\Components\Config;
+use MollieShopware\Components\Constants\PaymentStatus;
 use MollieShopware\Components\StatusConverter\OrderStatusConverter;
 use MollieShopware\Components\StatusConverter\PaymentStatusConverter;
 use MollieShopware\Components\Validator\PaymentStatusMailValidator;
@@ -15,12 +16,15 @@ use MollieShopware\Exceptions\PaymentStatusNotFoundException;
 use Psr\Log\LoggerInterface;
 use Shopware\Components\ContainerAwareEventManager;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Detail;
+use Shopware\Models\Order\DetailStatus;
 use Shopware\Models\Order\History;
 use Shopware\Models\Order\Order;
 use sOrder;
 
 class OrderUpdater
 {
+    const ORDER_DETAIL_STATUS_CANCELLED = 2;
 
     /**
      * @var LoggerInterface
@@ -408,6 +412,23 @@ class OrderUpdater
             );
         }
 
+        if ($mollieStatus === PaymentStatus::MOLLIE_PAYMENT_CANCELED) {
+            $this->cancelOrderPositions($order);
+        }
+
         return true;
+    }
+
+    private function cancelOrderPositions(Order $order)
+    {
+        /** @var DetailStatus $cancelledStatus */
+        $cancelledStatus = $this->modelManager->find(DetailStatus::class, self::ORDER_DETAIL_STATUS_CANCELLED);
+
+        /** @var Detail $detail */
+        foreach ($order->getDetails() as $detail) {
+            $detail->setStatus($cancelledStatus);
+        }
+
+        $this->modelManager->flush();
     }
 }
