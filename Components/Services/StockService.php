@@ -43,15 +43,11 @@ class StockService
      * @param OrderService $orderService
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param LoggerInterface $logger
-     * @param mixed $config
+     * @param Config $config
+     * @param IsMolliePaymentValidator $isMolliePaymentValidator
      */
-    public function __construct(
-        OrderService $orderService,
-        Config $config,
-        Enlight_Components_Db_Adapter_Pdo_Mysql $db,
-        LoggerInterface $logger,
-        IsMolliePaymentValidator $isMolliePaymentValidator,
-    ) {
+    public function __construct($orderService, $config, $db, $logger, $isMolliePaymentValidator)
+    {
         $this->orderService = $orderService;
         $this->db = $db;
         $this->logger = $logger;

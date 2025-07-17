@@ -10,7 +10,10 @@ use Shopware\Models\Plugin\Plugin;
 
 class IsMolliePaymentValidatorTest extends TestCase
 {
-    private IsMolliePaymentValidator $isMolliePaymentValidator;
+    /**
+     * @var IsMolliePaymentValidator
+     */
+    private $isMolliePaymentValidator;
 
     protected function setUp(): void
     {
