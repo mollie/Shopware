@@ -4,7 +4,10 @@ namespace MollieShopware\Components\Services;
 
 use Enlight_Components_Db_Adapter_Pdo_Mysql;
 use MollieShopware\Components\Config;
+use MollieShopware\Services\IsMolliePaymentValidator;
 use Psr\Log\LoggerInterface;
+use Shopware\Models\Payment\Payment;
+use function sprintf;
 
 class StockService
 {
@@ -32,17 +35,24 @@ class StockService
     private $config;
 
     /**
+     * @var IsMolliePaymentValidator
+     */
+    private $isMolliePaymentValidator;
+
+    /**
      * @param OrderService $orderService
      * @param Enlight_Components_Db_Adapter_Pdo_Mysql $db
      * @param LoggerInterface $logger
-     * @param mixed $config
+     * @param Config $config
+     * @param IsMolliePaymentValidator $isMolliePaymentValidator
      */
-    public function __construct($orderService, $config, $db, $logger)
+    public function __construct($orderService, $config, $db, $logger, $isMolliePaymentValidator)
     {
         $this->orderService = $orderService;
         $this->db = $db;
         $this->logger = $logger;
         $this->config = $config;
+        $this->isMolliePaymentValidator = $isMolliePaymentValidator;
     }
 
 
@@ -58,6 +68,14 @@ class StockService
             return;
         }
         $order = $this->orderService->getOrderById($orderId);
+
+        /** @var Payment $payment */
+        $payment = $order->getPayment();
+        if (!$this->isMolliePaymentValidator->validate($payment)) {
+            $this->logger->debug(sprintf('payment "%s" is not a mollie payment', $payment->getName()));
+
+            return;
+        }
 
         $this->logger->debug('Start to reset the stocks for order', ['orderId' => $orderId]);
 

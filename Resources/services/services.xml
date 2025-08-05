@@ -16,6 +16,10 @@
 
         <service class="MollieShopware\Services\Mollie\Payments\Extractor\ApiExceptionDetailsExtractor" id="mollie_shopware.services.payments.extractor.api_exception_details_extractor" public="true"/>
 
+        <service class="MollieShopware\Services\IsMolliePaymentValidator"
+                 id="mollie_shopware.services.is_mollie_payment_validator">
+            <argument>%mollie_shopware.plugin_name%</argument>
+        </service>
     </services>
 
 </container>

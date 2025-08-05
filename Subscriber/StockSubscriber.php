@@ -4,7 +4,7 @@ namespace MollieShopware\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
 use Enlight_Event_EventArgs;
-use Enlight_Hook_HookArgs;
+use function in_array;
 use MollieShopware\Components\Services\StockService;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Order\Order;
@@ -12,6 +12,11 @@ use Shopware\Models\Order\Status;
 
 class StockSubscriber implements SubscriberInterface
 {
+    const PAYMENT_STATE_FOR_STOCK_INCREASE = [
+        Status::PAYMENT_STATE_COMPLETELY_PAID,
+        Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED,
+    ];
+
     /**
      * @var StockService
      */
@@ -42,7 +47,7 @@ class StockSubscriber implements SubscriberInterface
         $orderId = (int)$eventArgs->get('orderId');
         $paymentStatusId = (int)$eventArgs->get('paymentStatusId');
 
-        if ($paymentStatusId !== Status::PAYMENT_STATE_COMPLETELY_PAID) {
+        if (!in_array($paymentStatusId, self::PAYMENT_STATE_FOR_STOCK_INCREASE, true)) {
             return;
         }
 
@@ -74,7 +79,13 @@ class StockSubscriber implements SubscriberInterface
         if ($oldId === $newId) {
             return;
         }
-        if ($newId !== Status::PAYMENT_STATE_COMPLETELY_PAID) {
+
+        if ($oldId === Status::PAYMENT_STATE_THE_PAYMENT_HAS_BEEN_ORDERED) {
+            // stock was already updated so we may not update it again
+            return;
+        }
+
+        if (!in_array($newId, self::PAYMENT_STATE_FOR_STOCK_INCREASE, true)) {
             return;
         }
 
