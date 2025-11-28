@@ -308,7 +308,11 @@ class CheckoutSessionFacade
      */
     private function buildTransaction($basketSignature, $currency)
     {
-        $currentCustomerClass = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
+        $currentCustomerClass = new CurrentCustomer(
+            Shopware()->Session(),
+            Shopware()->Models(),
+            Shopware()->Container()->get('mollie_shopware.components.logger')
+        );
         $customer = $currentCustomerClass->getCurrent();
 
         $locale = $this->localeFinder->getPaymentLocale(Shopware()->Shop()->getLocale()->getLocale());

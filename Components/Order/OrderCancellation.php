@@ -103,7 +103,11 @@ class OrderCancellation
 
         # it's important to restore the order before the placed order is cancelled
         # otherwise the original quantity of the line items can't be restored
-        $currentCustomer = new CurrentCustomer(Shopware()->Session(), Shopware()->Models());
+        $currentCustomer = new CurrentCustomer(
+            Shopware()->Session(),
+            Shopware()->Models(),
+            Shopware()->Container()->get('mollie_shopware.components.logger')
+        );
         if ((int)$currentCustomer->getCurrentId() === (int)$swOrder->getCustomer()->getId()) {
             $this->restoreCartFromOrder($swOrder);
         }
