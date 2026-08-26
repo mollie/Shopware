@@ -31,9 +31,11 @@ class PaymentMethodType
             PaymentMethod::KLARNA_PAY_LATER,
             PaymentMethod::KLARNA_PAY_NOW,
             PaymentMethod::KLARNA_SLICE_IT,
+            PaymentMethod::KLARNA_ONE,
             $prefix . PaymentMethod::KLARNA_PAY_LATER,
             $prefix . PaymentMethod::KLARNA_PAY_NOW,
             $prefix . PaymentMethod::KLARNA_SLICE_IT,
+            $prefix . PaymentMethod::KLARNA_ONE,
             # ----------------------------------------------------------
             PaymentMethod::VOUCHERS,
             $prefix . PaymentMethod::VOUCHERS,
